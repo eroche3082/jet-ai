@@ -1,13 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Slider } from '@/components/ui/slider';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Copy, Check, MessageSquare } from 'lucide-react';
-import { useTheme } from '@/components/ThemeProvider';
+import React, { useState, useEffect, useRef } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { MessageCircle, X, SendHorizontal, ChevronUp } from "lucide-react";
+import { useTheme } from "@/components/ThemeProvider";
 
+// Widget configuration interface
 interface WidgetConfig {
   primaryColor: string;
   position: 'left' | 'right';
@@ -18,185 +15,164 @@ interface WidgetConfig {
 
 export default function EmbedWidgetDemo() {
   const { theme } = useTheme();
-  const [config, setConfig] = useState<WidgetConfig>({
-    primaryColor: theme.colors.primary,
+  const [isOpen, setIsOpen] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState<{ text: string; isUser: boolean }[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Demo configuration
+  const config: WidgetConfig = {
+    primaryColor: theme.primaryColor || '#3182CE',
     position: 'right',
-    greeting: 'Hi there! I\'m your AI travel assistant from JetAI. How can I help with your travel plans?',
-    placeholder: 'Ask me about travel destinations...',
-    brandText: `Powered by ${theme.name}`,
-  });
-  
-  const [copied, setCopied] = useState(false);
-  const [selectedTab, setSelectedTab] = useState('preview');
-  
-  const referralCode = 'PARTNER123'; // This would come from the partner's account
-
-  // Generate embed code
-  const generateEmbedCode = () => {
-    return `<!-- JetAI Embeddable Assistant -->
-<script>
-  window.jetAIConfig = {
-    primaryColor: "${config.primaryColor}",
-    position: "${config.position}",
-    greeting: "${config.greeting}",
-    placeHolder: "${config.placeholder}",
-    brandText: "${config.brandText}"
-  };
-</script>
-<script src="https://jetai.app/embed.js?ref=${referralCode}"></script>
-<div id="jetai-assistant"></div>`;
+    greeting: "Hi there! I'm your JetAI Travel Assistant. How can I help you plan your next trip?",
+    placeholder: "Ask me about destinations, itineraries...",
+    brandText: "Powered by JetAI"
   };
   
-  const copyEmbedCode = () => {
-    navigator.clipboard.writeText(generateEmbedCode());
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  // Sample responses for demo
+  const sampleResponses = [
+    "I'd be happy to help you plan a trip to Bali! It's a beautiful destination known for its stunning beaches, lush rice terraces, and vibrant culture. When are you thinking of traveling?",
+    "Paris is a wonderful choice! The best time to visit is during spring (April to June) or fall (September to November) when the weather is pleasant and crowds are smaller. Would you like recommendations for top attractions?",
+    "For a 7-day Japan itinerary, I'd recommend spending 3 days in Tokyo, 2 days in Kyoto, and 2 days in Osaka. This gives you a good mix of modern city experiences and traditional Japanese culture. Would you like me to create a detailed day-by-day plan?",
+    "Costa Rica is perfect for adventure travel! You can go zip-lining through cloud forests, hike to waterfalls, surf on beautiful beaches, and see incredible wildlife. The best areas to visit would be Arenal for the volcano, Monteverde for cloud forests, and Manuel Antonio for beaches and wildlife."
+  ];
+  
+  // Auto-scroll to bottom of messages
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+  
+  // Add welcome message on initial open
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      setMessages([{ text: config.greeting, isUser: false }]);
+    }
+  }, [isOpen, messages.length, config.greeting]);
+  
+  // Handle message send
+  const handleSendMessage = () => {
+    if (!message.trim()) return;
+    
+    // Add user message
+    setMessages(prev => [...prev, { text: message, isUser: true }]);
+    
+    // Clear input
+    setMessage('');
+    
+    // Simulate response after delay
+    setTimeout(() => {
+      const responseIndex = Math.floor(Math.random() * sampleResponses.length);
+      setMessages(prev => [...prev, { text: sampleResponses[responseIndex], isUser: false }]);
+    }, 1000);
   };
   
-  // Preview component for the chat widget
-  const WidgetPreview = () => (
-    <div className="relative h-[400px] border rounded-lg overflow-hidden">
-      <div className="absolute inset-0 bg-gray-50 flex items-center justify-center">
-        <div className="text-center text-gray-500">
-          <p className="mb-2">Website content will appear here</p>
-          <p className="text-sm">The widget will float in the corner</p>
+  // Handle enter key press
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+  
+  return (
+    <div className="relative h-full">
+      {/* Chat toggle button */}
+      {!isOpen && (
+        <div 
+          className={`absolute cursor-pointer ${config.position === 'right' ? 'right-4' : 'left-4'} bottom-4 w-14 h-14 rounded-full shadow-lg flex items-center justify-center z-10`}
+          style={{ backgroundColor: config.primaryColor }}
+          onClick={() => setIsOpen(true)}
+        >
+          <MessageCircle className="text-white h-6 w-6" />
+        </div>
+      )}
+      
+      {/* Chat widget */}
+      <div 
+        className={`absolute ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'} transition-opacity ${config.position === 'right' ? 'right-4' : 'left-4'} bottom-4 w-80 sm:w-96 h-[480px] bg-background rounded-md shadow-xl flex flex-col overflow-hidden border z-10`}
+      >
+        {/* Header */}
+        <div 
+          className="px-4 py-3 flex justify-between items-center"
+          style={{ backgroundColor: config.primaryColor }}
+        >
+          <div className="text-white font-medium">Travel Assistant</div>
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 rounded-full hover:bg-white/20 text-white"
+              onClick={() => setIsOpen(false)}
+            >
+              <ChevronUp className="h-5 w-5" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 rounded-full hover:bg-white/20 text-white"
+              onClick={() => {
+                setIsOpen(false);
+                setMessages([]);
+              }}
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Messages area */}
+        <div className="flex-1 p-4 overflow-y-auto bg-muted/20">
+          {messages.map((msg, index) => (
+            <div 
+              key={index} 
+              className={`mb-3 max-w-[85%] ${msg.isUser ? 'ml-auto' : 'mr-auto'}`}
+            >
+              <div 
+                className={`p-3 rounded-lg ${
+                  msg.isUser 
+                    ? 'bg-primary text-primary-foreground rounded-tr-none' 
+                    : 'bg-muted rounded-tl-none'
+                }`}
+              >
+                {msg.text}
+              </div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+        
+        {/* Input area */}
+        <div className="p-3 border-t">
+          <div className="flex items-center space-x-2">
+            <Input
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder={config.placeholder}
+              className="flex-1"
+            />
+            <Button 
+              onClick={handleSendMessage}
+              disabled={!message.trim()}
+              size="icon"
+              style={{ backgroundColor: config.primaryColor }}
+            >
+              <SendHorizontal className="h-5 w-5" />
+            </Button>
+          </div>
+          <div className="text-center mt-2 text-xs text-muted-foreground">
+            {config.brandText}
+          </div>
         </div>
       </div>
       
-      {/* Chat bubble */}
-      <div className={`absolute bottom-4 ${config.position === 'right' ? 'right-4' : 'left-4'}`}>
-        <div 
-          className="w-12 h-12 rounded-full shadow-lg flex items-center justify-center cursor-pointer"
-          style={{ backgroundColor: config.primaryColor }}
-        >
-          <MessageSquare className="w-5 h-5 text-white" />
-        </div>
-      </div>
+      {/* Background dimming overlay */}
+      <div 
+        className={`absolute inset-0 bg-black/10 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'} transition-opacity z-0`}
+        onClick={() => setIsOpen(false)}
+      />
     </div>
-  );
-  
-  return (
-    <Card className="shadow-md">
-      <CardHeader>
-        <CardTitle>Embeddable Chat Widget</CardTitle>
-        <CardDescription>
-          Add JetAI's travel assistant to your website with one line of code
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="preview" value={selectedTab} onValueChange={setSelectedTab}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="preview">Preview</TabsTrigger>
-            <TabsTrigger value="customize">Customize</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="preview" className="space-y-4">
-            <WidgetPreview />
-            
-            <div className="mt-4">
-              <Label className="text-sm font-medium">Embed Code</Label>
-              <div className="mt-1 relative">
-                <pre className="bg-muted p-4 rounded-md text-xs overflow-x-auto whitespace-pre-wrap">
-                  {generateEmbedCode()}
-                </pre>
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  className="absolute top-2 right-2"
-                  onClick={copyEmbedCode}
-                >
-                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="customize" className="space-y-6">
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="primaryColor">Primary Color</Label>
-                <div className="flex gap-2 mt-1">
-                  <div 
-                    className="w-10 h-10 rounded-md cursor-pointer border"
-                    style={{ backgroundColor: config.primaryColor }}
-                    onClick={() => document.getElementById('primaryColor')?.click()}
-                  />
-                  <Input
-                    id="primaryColor"
-                    type="color"
-                    value={config.primaryColor}
-                    onChange={(e) => setConfig({...config, primaryColor: e.target.value})}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <Label>Position</Label>
-                <div className="flex gap-4 mt-1">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      id="right"
-                      checked={config.position === 'right'}
-                      onChange={() => setConfig({...config, position: 'right'})}
-                    />
-                    <Label htmlFor="right">Right</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      id="left"
-                      checked={config.position === 'left'}
-                      onChange={() => setConfig({...config, position: 'left'})}
-                    />
-                    <Label htmlFor="left">Left</Label>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <Label htmlFor="greeting">Greeting Message</Label>
-                <Input
-                  id="greeting"
-                  value={config.greeting}
-                  onChange={(e) => setConfig({...config, greeting: e.target.value})}
-                  className="mt-1"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="placeholder">Input Placeholder</Label>
-                <Input
-                  id="placeholder"
-                  value={config.placeholder}
-                  onChange={(e) => setConfig({...config, placeholder: e.target.value})}
-                  className="mt-1"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="brandText">Branding Text</Label>
-                <Input
-                  id="brandText"
-                  value={config.brandText}
-                  onChange={(e) => setConfig({...config, brandText: e.target.value})}
-                  className="mt-1"
-                />
-              </div>
-            </div>
-            
-            <Button onClick={() => setSelectedTab('preview')} className="w-full">
-              Update Preview
-            </Button>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-      <CardFooter className="border-t pt-6">
-        <div className="text-sm text-muted-foreground">
-          <p>Add this widget to your website to earn commissions on travel bookings made through your referral link.</p>
-        </div>
-      </CardFooter>
-    </Card>
   );
 }

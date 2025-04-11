@@ -1,0 +1,88 @@
+Let's upgrade the JetAI Assistant from a basic chat into a fully interactive AI-powered control panel, known as **ChatOS**. This system will provide travel planning, booking, rewards, dashboards, and immersive interaction—all from the chat itself.
+
+Here’s the full spec for this phase:
+
+---
+
+### 1. 🧠 Conversational Flow Upgrade
+- Convert current chat logic to **one question at a time**.
+- Add logic for follow-up prompts using Gemini AI memory:
+  - Store answers temporarily (destination, budget, duration, etc.)
+  - Allow corrections mid-flow (“Change destination to Greece”)
+- Include **multiple selection inputs** (e.g. checkboxes for interests).
+- Format responses in markdown with emoji, buttons, and embedded actions (e.g. "Search Flights").
+
+---
+
+### 2. **Audio & Multimodal Features**
+- Add audio input and output capabilities:
+  - User can **speak** to JetAI (Speech-to-Text)
+  - JetAI can respond with voice (Text-to-Speech)
+  - Display speaker icon + mute/unmute option
+- Allow image capture and photo replies (integrate WebCam or upload flow)
+- Future prep for **video calls or avatar view** (optional for later)
+
+---
+
+### 3. **Bookings & Smart Actions inside Chat**
+- Allow the user to:
+  - Book hotels, flights, cruises, excursions—all inside the chat
+  - See real-time availability and pricing via API (mock or real)
+  - Choose dates, passengers, payment options
+- Enable **Stripe Checkout inside chat flow**
+- Display confirmation with itinerary summary
+- All actions tied to logged-in user profile
+
+---
+
+### 4. **Rewards & Loyalty Integration**
+- Connect JetAI with external reward systems:
+  - Airline miles (e.g. SkyMiles, AAdvantage)
+  - Hotel points (e.g. Hilton Honors, Marriott Bonvoy)
+  - Cruise loyalty programs (e.g. Crown & Anchor)
+- Show reward status, points, redemption offers
+- Allow points to be used as partial payment
+- Implement **VidaRewards** as the internal points system
+
+---
+
+### 5. **Group Travel Features**
+- Allow group planning inside the chat:
+  - “Plan a trip with friends”
+  - Invite others via link or email
+  - AI will collect everyone's preferences and generate a group itinerary
+- Group voting: restaurants, hotels, activities
+- Smart split payment and budget management
+- Live sync across users
+
+---
+
+### 6. **Dynamic Theming for JetAI Versions**
+- Prepare the system to load different JetAI experiences:
+  - `jetai.app/luxury`, `jetai.app/espanol`, `jetai.app/digitalnomads`
+- Each experience has:
+  - Different color scheme / fonts
+  - Different assistant personality (tone, icon, welcome message)
+  - Different feature availability (e.g. Luxury has concierge chat)
+- Allow dynamic loading of `theme.json` or use `?theme=luxury` param
+- Optional: DALL·E logo generator per brand
+
+---
+
+### 7. **Dashboard Sync**
+- Allow the assistant to access:
+  - User dashboard (bookings, credits, preferences)
+  - Past itineraries and chat memory
+  - Membership status (basic/premium)
+- Example: “Can you show me my next trip?” → opens itinerary view inside chat
+- Provide shortcut buttons like:
+  - “My Dashboard”  
+  - “Check My Points”  
+  - “Edit My Preferences”  
+
+---
+
+Once these features are implemented, we can move to Phase 7:  
+**Creator Mode + Avatar View + AI-Powered Travel Video Generator**.
+
+Let me know when this implementation is complete.

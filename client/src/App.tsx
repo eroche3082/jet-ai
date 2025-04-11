@@ -8,13 +8,16 @@ import SignIn from "@/pages/SignIn";
 import Dashboard from "@/pages/Dashboard";
 import Checkout from "@/pages/Checkout";
 import Membership from "@/pages/Membership";
+import PricingPlans from "@/pages/PricingPlans";
 import NotFound from "@/pages/not-found";
 import Layout from "@/components/Layout";
 import { useState, useEffect } from 'react';
 import ChatBubble from "@/components/ChatBubble";
 import AIChat from "@/components/AIChat";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { generateSessionId } from "@/lib/utils";
+import { getAffiliateId } from "@/lib/utils";
+import PartnerDashboard from "@/pages/partner/Dashboard";
+import PartnerSignup from "@/pages/partner/Signup";
 
 function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -28,7 +31,7 @@ function App() {
   useEffect(() => {
     // Create or retrieve session ID for tracking
     const existingSessionId = localStorage.getItem('jetai_session_id');
-    const newSessionId = existingSessionId || generateSessionId();
+    const newSessionId = existingSessionId || crypto.randomUUID();
     
     if (!existingSessionId) {
       localStorage.setItem('jetai_session_id', newSessionId);
@@ -36,9 +39,15 @@ function App() {
     
     setSessionId(newSessionId);
     
-    // Track page visit
+    // Track page visit and affiliate
     const referrer = document.referrer;
+    const affiliateId = getAffiliateId();
+    
     console.log(`Session ${newSessionId} started. Referrer: ${referrer || 'direct'}`);
+    if (affiliateId) {
+      console.log(`Affiliate tracking: ${affiliateId}`);
+      // In a real app, we would make an API call to record this
+    }
     
     // Close chat on route change
     const handleRouteChange = () => {
@@ -61,17 +70,33 @@ function App() {
             {(params) => <ItineraryView params={params} />}
           </Route>
           <Route path="/membership" component={Membership} />
+          <Route path="/pricing" component={PricingPlans} />
           <Route path="/about" component={About} />
           <Route path="/signin" component={SignIn} />
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/checkout" component={Checkout} />
           
-          {/* Partner/Affiliate dashboard routes - To be implemented */}
+          {/* Partner/Affiliate routes */}
+          <Route path="/partner/dashboard" component={PartnerDashboard} />
+          <Route path="/partner/signup" component={PartnerSignup} />
+          <Route path="/partner/settings">
+            {() => <PartnerDashboard />}
+          </Route>
+          
+          {/* Partner route redirect */}
           <Route path="/partner">
-            <div className="p-8">
-              <h2 className="text-2xl font-bold mb-4">Partner Dashboard</h2>
-              <p className="text-gray-600">Coming soon</p>
-            </div>
+            {() => {
+              // Check if user is logged in and is a partner
+              const isPartner = localStorage.getItem('partnerCode');
+              
+              if (isPartner) {
+                window.location.href = '/partner/dashboard';
+                return null;
+              } else {
+                window.location.href = '/partner/signup';
+                return null;
+              }
+            }}
           </Route>
           
           {/* Fallback route */}

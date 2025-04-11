@@ -443,36 +443,355 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Stripe payment routes
-  app.post("/api/create-payment-intent", async (req, res) => {
+  // Membership data route
+  app.get("/api/user/membership", ensureAuthenticated, async (req, res) => {
     try {
-      const { amount, items } = req.body;
-      const paymentIntent = await createPaymentIntent(amount, items);
-      res.json({ clientSecret: paymentIntent.client_secret });
+      const user = req.user as any;
+      res.json({
+        id: user.id,
+        membershipTier: user.membershipTier || 'basic',
+        aiCreditsRemaining: user.aiCreditsRemaining || 0,
+        monthlySearches: user.monthlySearches || 0,
+        maxMonthlySearches: user.maxMonthlySearches || 10,
+        isSubscribed: user.stripeSubscriptionId ? true : false,
+        subscriptionEndsAt: user.subscriptionEndDate || null
+      });
     } catch (error) {
-      console.error("Error creating payment intent:", error);
-      res.status(500).json({ message: "Error creating payment intent" });
+      console.error("Error fetching membership data:", error);
+      res.status(500).json({ message: "Error fetching membership data" });
     }
   });
 
-  app.post("/api/get-or-create-subscription", ensureAuthenticated, async (req, res) => {
+  // Credit pack purchase endpoint
+  app.post("/api/purchase-credits", ensureAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
-      const { planId, interval } = req.body;
+      const { packId, paymentIntentId } = req.body;
       
-      const subscription = await createSubscription(user.id, {
-        email: user.email || 'user@example.com', // Default for demo
-        planId,
-        interval
-      });
+      // Credit packs data - would be moved to a database in production
+      const CREDIT_PACKS = {
+        'credit_10': { credits: 10, price: 4.99 },
+        'credit_50': { credits: 50, price: 19.99 },
+        'credit_100': { credits: 100, price: 34.99 }
+      };
+      
+      // Validate the pack exists
+      const pack = CREDIT_PACKS[packId as keyof typeof CREDIT_PACKS];
+      if (!pack) {
+        return res.status(400).json({ message: "Invalid pack ID" });
+      }
+      
+      // In a real app, we would verify the payment was successful
+      // For demo purposes, we'll assume the payment was successful
+      
+      // Add credits to the user
+      await storage.rechargePremiumBenefits(user.id, pack.credits);
       
       res.json({
-        subscriptionId: subscription.id,
-        clientSecret: subscription.clientSecret
+        success: true,
+        creditsAdded: pack.credits,
+        newTotal: (user.aiCreditsRemaining || 0) + pack.credits
       });
     } catch (error) {
-      console.error("Error with subscription:", error);
-      res.status(500).json({ message: "Error processing subscription" });
+      console.error("Error purchasing credits:", error);
+      res.status(500).json({ message: "Error purchasing credits" });
+    }
+  });
+
+  // White-label subdomain configuration
+  app.get("/api/subdomain/config", async (req, res) => {
+    try {
+      const { subdomain } = req.query;
+      
+      if (!subdomain || typeof subdomain !== 'string') {
+        return res.status(400).json({ message: "Invalid subdomain" });
+      }
+      
+      // In a real app, we would fetch from database
+      // For demo purposes, we'll use a simple mapping
+      const whiteLabels: Record<string, any> = {
+        'luxurytravel': {
+          name: 'Luxury Travel Concierge',
+          primaryColor: '#A67C52',
+          borderRadius: '0.25rem',
+          fontFamily: 'Playfair Display, serif',
+          logo: '/assets/luxury-logo.svg'
+        },
+        'backpackers': {
+          name: 'Backpackers Guide',
+          primaryColor: '#2D7E5E',
+          borderRadius: '0.75rem',
+          fontFamily: 'Montserrat, sans-serif',
+          logo: '/assets/backpack-logo.svg'
+        },
+        'familytrips': {
+          name: 'Family Trips Planner',
+          primaryColor: '#F59E0B',
+          borderRadius: '1rem',
+          fontFamily: 'Nunito, sans-serif',
+          logo: '/assets/family-logo.svg'
+        }
+      };
+      
+      // Check if we have a config for this subdomain
+      if (whiteLabels[subdomain]) {
+        return res.json({ 
+          config: whiteLabels[subdomain],
+          isCustom: true
+        });
+      }
+      
+      // Return default config
+      return res.json({ 
+        config: {
+          name: 'JetAI',
+          primaryColor: '#3182CE',
+          borderRadius: '0.5rem',
+          fontFamily: 'Inter, system-ui, sans-serif',
+          logo: '/assets/logo.svg'
+        },
+        isCustom: false
+      });
+    } catch (error) {
+      console.error("Error fetching subdomain config:", error);
+      res.status(500).json({ message: "Error fetching subdomain config" });
+    }
+  });
+
+  // Partner program routes
+  app.post("/api/partners/register", async (req, res) => {
+    try {
+      const { name, email, websiteUrl, businessType, subdomain, plan } = req.body;
+      
+      // Validate required fields
+      if (!name || !email || !websiteUrl || !subdomain || !plan) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      // In a real app, we would store this in a database
+      // Generate a unique referral code
+      const referralCode = `${subdomain}_${Math.floor(Math.random() * 10000)}`;
+      
+      // Return success with referral code
+      res.json({
+        success: true,
+        partnerName: name,
+        referralCode,
+        subdomain,
+        commissionRate: plan === 'standard' ? 10 : (plan === 'professional' ? 15 : 20),
+        dashboardUrl: `/partner/dashboard`
+      });
+    } catch (error) {
+      console.error("Error registering partner:", error);
+      res.status(500).json({ message: "Error registering partner" });
+    }
+  });
+
+  // Partner dashboard data
+  app.get("/api/partners/stats", ensureAuthenticated, async (req, res) => {
+    try {
+      // In a real app, we would fetch this from a database
+      // For demo purposes, we'll return mock data
+      res.json({
+        visits: {
+          count: 247,
+          change: 12.5,
+          data: [15, 22, 18, 25, 30, 35, 42, 55, 60, 45, 40, 35, 42]
+        },
+        signups: {
+          count: 36,
+          change: 8.2,
+          data: [2, 3, 1, 4, 3, 5, 2, 6, 4, 3, 2, 1, 0]
+        },
+        bookings: {
+          count: 18,
+          change: 15.3,
+          data: [1, 0, 2, 1, 3, 2, 0, 1, 2, 3, 1, 2, 0]
+        },
+        earnings: {
+          total: 1247.89,
+          change: 22.7,
+          data: [75, 120, 85, 95, 140, 180, 95, 110, 145, 165, 90, 105, 75]
+        },
+        conversionRate: {
+          value: 14.6,
+          change: 2.3
+        },
+        recentBookings: [
+          {
+            id: 1,
+            customer: 'Sarah Johnson',
+            date: '2025-04-08',
+            amount: 349.99,
+            commission: 35.00,
+            destination: 'Bali'
+          },
+          {
+            id: 2,
+            customer: 'Michael Chen',
+            date: '2025-04-07',
+            amount: 529.99,
+            commission: 53.00,
+            destination: 'Paris'
+          },
+          {
+            id: 3,
+            customer: 'Emma Williams',
+            date: '2025-04-05',
+            amount: 249.99,
+            commission: 25.00,
+            destination: 'Barcelona'
+          },
+          {
+            id: 4,
+            customer: 'James Smith',
+            date: '2025-04-03',
+            amount: 419.99,
+            commission: 42.00,
+            destination: 'New York'
+          }
+        ]
+      });
+    } catch (error) {
+      console.error("Error fetching partner stats:", error);
+      res.status(500).json({ message: "Error fetching partner stats" });
+    }
+  });
+
+  // Stripe payment routes
+  app.post("/api/create-payment-intent", async (req, res) => {
+    try {
+      const { packId, promoCode } = req.body;
+      const affiliateId = req.query.ref || req.session?.affiliateId;
+      
+      // Credit packs configuration
+      const CREDIT_PACKS = {
+        credit_10: {
+          id: 'credit_10',
+          credits: 10,
+          price: 4.99,
+          name: '10 AI Credits'
+        },
+        credit_50: {
+          id: 'credit_50',
+          credits: 50,
+          price: 19.99,
+          name: '50 AI Credits'
+        },
+        credit_100: {
+          id: 'credit_100',
+          credits: 100,
+          price: 34.99,
+          name: '100 AI Credits'
+        }
+      };
+      
+      // Get the credit pack details
+      const pack = CREDIT_PACKS[packId as keyof typeof CREDIT_PACKS];
+      if (!pack) {
+        return res.status(400).json({ message: "Invalid pack ID" });
+      }
+      
+      // Apply promo code discount if provided (this would be validated against a database in production)
+      let amount = pack.price;
+      if (promoCode) {
+        // Example discount logic - would be replaced with actual promo code validation
+        amount = amount * 0.9; // 10% discount for example
+      }
+      
+      // Create payment intent
+      const paymentIntent = await createPaymentIntent(amount, [
+        { id: packId, name: pack.name, quantity: 1 }
+      ]);
+      
+      // Store metadata with the payment intent if possible
+      const metadata = {
+        packId,
+        credits: pack.credits.toString(),
+        type: 'credit_pack',
+        affiliateId: affiliateId?.toString() || '',
+        promoCode: promoCode || ''
+      };
+      
+      // In a production app, we would update the payment intent metadata
+      
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        amount,
+        packDetails: {
+          id: pack.id,
+          name: pack.name,
+          credits: pack.credits
+        }
+      });
+    } catch (error: any) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ message: "Error creating payment intent: " + error.message });
+    }
+  });
+
+  app.post("/api/create-subscription", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { planId, billingCycle, promoCode } = req.body;
+      const affiliateId = req.query.ref || req.session?.affiliateId;
+      
+      // Subscription plans configuration (these would map to Stripe products/prices)
+      const SUBSCRIPTION_PLANS = {
+        plan_basic: {
+          id: 'plan_basic',
+          name: 'Basic Plan',
+          monthlyPriceId: 'price_basic_monthly',
+          yearlyPriceId: 'price_basic_yearly',
+          credits: 5,
+          tier: 'basic'
+        },
+        plan_freemium: {
+          id: 'plan_freemium',
+          name: 'Freemium Plan',
+          monthlyPriceId: 'price_freemium_monthly',
+          yearlyPriceId: 'price_freemium_yearly',
+          credits: 20,
+          tier: 'freemium'
+        },
+        plan_premium: {
+          id: 'plan_premium',
+          name: 'Premium Plan',
+          monthlyPriceId: 'price_premium_monthly',
+          yearlyPriceId: 'price_premium_yearly',
+          tier: 'premium',
+          unlimited: true
+        }
+      };
+      
+      // Get plan details
+      const plan = SUBSCRIPTION_PLANS[planId as keyof typeof SUBSCRIPTION_PLANS];
+      if (!plan) {
+        return res.status(400).json({ message: "Invalid plan ID" });
+      }
+      
+      // Create subscription using the existing service
+      const subscription = await createSubscription(user.id, {
+        email: user.email,
+        planId: plan.id,
+        interval: billingCycle === 'yearly' ? 'year' : 'month',
+        metadata: {
+          planTier: plan.tier,
+          affiliateId: affiliateId?.toString() || '',
+          promoCode: promoCode || '',
+          billingCycle
+        }
+      });
+      
+      // Return checkout info
+      res.json({
+        subscriptionId: subscription.id,
+        clientSecret: subscription.clientSecret,
+        sessionId: subscription.sessionId // If using checkout sessions
+      });
+    } catch (error: any) {
+      console.error("Error creating subscription:", error);
+      return res.status(400).json({ message: error.message });
     }
   });
 
@@ -484,6 +803,153 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching subscription plans:", error);
       res.status(500).json({ message: "Error fetching subscription plans" });
     }
+  });
+  
+  // Cancel subscription
+  app.post("/api/cancel-subscription", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      if (!user.stripeSubscriptionId) {
+        return res.status(400).json({ message: "No active subscription" });
+      }
+      
+      // In a real app, this would call Stripe to cancel the subscription
+      // For demo, we'll just simulate it
+      
+      res.json({
+        canceled: true,
+        message: "Subscription will be canceled at the end of the current billing period"
+      });
+    } catch (error: any) {
+      console.error("Error cancelling subscription:", error);
+      return res.status(400).json({ message: error.message });
+    }
+  });
+  
+  // Subdomain/white-label detection
+  app.get("/api/subdomain/config", (req, res) => {
+    try {
+      const host = req.headers.host || '';
+      const parts = host.split('.');
+      
+      // Extract subdomain
+      let subdomain = 'app';
+      if (parts.length > 2) {
+        subdomain = parts[0];
+      }
+      
+      // In development, allow query parameter override
+      if (req.query.subdomain) {
+        subdomain = req.query.subdomain as string;
+      }
+      
+      // Return the brand configuration based on subdomain
+      // In production, this would fetch from a database
+      const brandConfig = {
+        app: {
+          name: 'JetAI',
+          theme: 'default',
+          logo: '/assets/logo.svg'
+        },
+        luxury: {
+          name: 'Luxury Journeys AI',
+          theme: 'luxury',
+          logo: '/assets/partners/luxury-logo.svg'
+        },
+        backpackers: {
+          name: 'Backpacker\'s Buddy',
+          theme: 'backpackers',
+          logo: '/assets/partners/backpacker-logo.svg'
+        },
+        miami: {
+          name: 'Miami Explorer AI',
+          theme: 'miami',
+          logo: '/assets/partners/miami-logo.svg'
+        }
+      };
+      
+      const config = brandConfig[subdomain as keyof typeof brandConfig] || brandConfig.app;
+      
+      res.json({
+        subdomain,
+        config,
+      });
+    } catch (error: any) {
+      console.error("Error processing subdomain config:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Partner/affiliate program endpoints
+  app.post("/api/partners/register", async (req, res) => {
+    try {
+      // In a real app, this would create a partner account in the database
+      const { name, email, websiteUrl, businessType, subdomain } = req.body;
+      
+      // Validate subdomain is available - in production this would check a database
+      if (subdomain === 'app' || subdomain === 'www' || subdomain === 'api') {
+        return res.status(400).json({ message: "This subdomain is not available" });
+      }
+      
+      // Mock partner creation
+      res.json({
+        success: true,
+        partnerId: `partner_${Date.now()}`,
+        referralCode: subdomain.toUpperCase(),
+        referralUrl: `https://jetai.app/?ref=${subdomain.toUpperCase()}`
+      });
+    } catch (error: any) {
+      console.error("Error registering partner:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Partner analytics endpoint
+  app.get("/api/partners/analytics", ensureAuthenticated, (req, res) => {
+    // In a real app, this would fetch real analytics from a database
+    // Mock analytics data for UI demonstration
+    res.json({
+      visits: {
+        total: 1482,
+        thisMonth: 328,
+        change: 12.5
+      },
+      signups: {
+        total: 241,
+        thisMonth: 42,
+        change: 8.3
+      },
+      bookings: {
+        total: 112,
+        thisMonth: 18,
+        change: -3.2
+      },
+      earnings: {
+        total: 1245.67,
+        thisMonth: 215.34,
+        change: 5.8
+      },
+      conversionRate: 7.6,
+      recentBookings: [
+        {
+          id: 'b_78912',
+          destination: 'Paris, France',
+          amount: 425.00,
+          commission: 42.50,
+          date: '2023-11-28',
+          status: 'completed'
+        },
+        {
+          id: 'b_78911',
+          destination: 'Bali, Indonesia',
+          amount: 850.00,
+          commission: 85.00,
+          date: '2023-11-25',
+          status: 'completed'
+        }
+      ]
+    });
   });
   
   // Membership management routes

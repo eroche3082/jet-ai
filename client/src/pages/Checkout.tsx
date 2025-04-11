@@ -1,370 +1,342 @@
-import { useState, useEffect } from 'react';
-import { useStripe, Elements, PaymentElement, useElements } from '@stripe/react-stripe-js';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
+import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Card } from "@/components/ui/card";
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { apiRequest } from "@/lib/queryClient";
-import { useQuery } from '@tanstack/react-query';
 import { useToast } from "@/hooks/use-toast";
-import { Link, useLocation } from 'wouter';
+import { apiRequest } from "@/lib/queryClient";
+import { Loader2, Check, CreditCard, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-// Make sure to call `loadStripe` outside of a component's render to avoid
-// recreating the `Stripe` object on every render.
-if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
-}
+// Initialize Stripe outside of the component to avoid re-initialization
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-// Interface for subscription plans
-interface Plan {
-  id: string;
-  name: string;
-  price: number;
-  interval: 'month' | 'year';
-  features: string[];
-  popular?: boolean;
-}
-
-// Plans data
-const plans: Plan[] = [
-  {
-    id: 'basic',
-    name: 'Basic',
-    price: 9.99,
-    interval: 'month',
-    features: [
-      'Personalized travel recommendations',
-      'Limited destination guides',
-      'Basic itinerary planning',
-      'Email support'
-    ]
-  },
-  {
-    id: 'premium',
-    name: 'Premium',
-    price: 19.99,
-    interval: 'month',
-    features: [
-      'All Basic features',
-      'Unlimited destination guides',
-      'Advanced AI itinerary planning',
-      'Priority customer support',
-      'Exclusive deals and discounts',
-      'Ad-free experience'
-    ],
-    popular: true
-  },
-  {
-    id: 'family',
-    name: 'Family',
-    price: 29.99,
-    interval: 'month',
-    features: [
-      'All Premium features',
-      'Up to 5 family members',
-      'Group itinerary planning',
-      'Family discounts',
-      'Dedicated travel concierge',
-      '24/7 premium support'
-    ]
-  }
-];
-
-const CheckoutForm = () => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const { toast } = useToast();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [_, setLocation] = useLocation();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!stripe || !elements) {
-      return;
-    }
-
-    setIsProcessing(true);
-
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: window.location.origin + '/dashboard',
-      },
-    });
-
-    setIsProcessing(false);
-
-    if (error) {
-      toast({
-        title: "Payment Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Payment Successful",
-        description: "Thank you for your subscription!",
-      });
-      setLocation('/dashboard');
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-white p-6 rounded-lg border border-gray-200">
-        <h3 className="font-display text-lg font-bold text-dark mb-4">Payment Details</h3>
-        <PaymentElement />
-      </div>
-      
-      <div className="flex items-center">
-        <input
-          id="terms"
-          type="checkbox"
-          className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
-          required
-        />
-        <label htmlFor="terms" className="ml-2 block text-sm text-dark/70">
-          I agree to the <a href="#" className="text-primary hover:text-primary/80">Terms of Service</a> and <a href="#" className="text-primary hover:text-primary/80">Privacy Policy</a>
-        </label>
-      </div>
-      
-      <button
-        type="submit"
-        disabled={!stripe || isProcessing}
-        className={`w-full bg-primary hover:bg-primary/90 text-white font-accent font-semibold px-6 py-3 rounded-full transition ${
-          (!stripe || isProcessing) ? 'opacity-70 cursor-not-allowed' : ''
-        }`}
-      >
-        {isProcessing ? (
-          <span className="flex items-center justify-center">
-            <i className="fas fa-spinner fa-spin mr-2"></i> Processing...
-          </span>
-        ) : (
-          'Complete Payment'
-        )}
-      </button>
-      
-      <p className="text-center text-sm text-dark/50">
-        Your subscription will renew automatically. You can cancel anytime.
-      </p>
-    </form>
-  );
+// Helper to parse URL parameters
+const getQueryParams = () => {
+  const searchParams = new URLSearchParams(window.location.search);
+  return {
+    payment: searchParams.get('payment'),
+    session: searchParams.get('session'),
+    status: searchParams.get('status'),
+  };
 };
 
 export default function Checkout() {
-  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
-  const [clientSecret, setClientSecret] = useState<string>("");
-  const [billingCycle, setBillingCycle] = useState<'month' | 'year'>('month');
+  const [location, setLocation] = useLocation();
+  const [checkoutStatus, setCheckoutStatus] = useState<'loading' | 'ready' | 'success' | 'error'>('loading');
+  const [paymentType, setPaymentType] = useState<'one-time' | 'subscription'>('one-time');
+  const [clientSecret, setClientSecret] = useState<string>('');
+  const [orderDetails, setOrderDetails] = useState<any>(null);
   const { toast } = useToast();
-  
-  // Get user data to check if already subscribed
-  const { data: user, isLoading: userLoading } = useQuery({
-    queryKey: ['/api/user/profile'],
-    retry: 1,
-  });
+  const isMobile = useIsMobile();
   
   useEffect(() => {
-    // Set default selected plan to Premium
-    setSelectedPlan(plans.find(plan => plan.id === 'premium') || plans[0]);
-  }, []);
-  
-  // Toggle billing cycle between monthly and yearly
-  const toggleBillingCycle = () => {
-    setBillingCycle(prev => prev === 'month' ? 'year' : 'month');
-  };
-  
-  // Calculate price based on billing cycle (20% discount for yearly)
-  const calculatePrice = (basePrice: number) => {
-    if (billingCycle === 'year') {
-      return (basePrice * 12 * 0.8).toFixed(2); // 20% discount for yearly billing
-    }
-    return basePrice.toFixed(2);
-  };
-
-  // Create subscription
-  const createSubscription = async () => {
-    if (!selectedPlan) return;
+    const params = getQueryParams();
     
-    try {
-      const response = await apiRequest("POST", "/api/get-or-create-subscription", {
-        planId: selectedPlan.id,
-        interval: billingCycle
-      });
-      const data = await response.json();
-      setClientSecret(data.clientSecret);
-    } catch (error) {
-      console.error("Error creating subscription:", error);
+    // If we have a status query param, it's likely a redirect from Stripe
+    if (params.status === 'success') {
+      setCheckoutStatus('success');
       toast({
-        title: "Error",
-        description: "Failed to create subscription. Please try again.",
+        title: "Payment successful!",
+        description: "Thank you for your purchase.",
+        variant: "default",
+      });
+      
+      // Redirect to dashboard after a delay
+      setTimeout(() => {
+        setLocation('/dashboard');
+      }, 3000);
+      return;
+    }
+    
+    if (params.status === 'cancel') {
+      setCheckoutStatus('error');
+      toast({
+        title: "Payment canceled",
+        description: "Your payment was canceled. Please try again.",
         variant: "destructive",
       });
+      return;
+    }
+    
+    // Handle direct client secret (one-time payment)
+    if (params.payment) {
+      setPaymentType('one-time');
+      setClientSecret(params.payment);
+      setCheckoutStatus('ready');
+      return;
+    }
+    
+    // Handle Stripe session (subscription)
+    if (params.session) {
+      setPaymentType('subscription');
+      // In a real app, we might fetch details about the session
+      setCheckoutStatus('ready');
+      // For now, just use the session ID as the client secret
+      setClientSecret(params.session);
+      return;
+    }
+    
+    // If no payment or session parameter, redirect to pricing page
+    if (!params.payment && !params.session) {
+      toast({
+        title: "No payment information",
+        description: "Please select a plan or credit pack to purchase.",
+        variant: "destructive",
+      });
+      setLocation('/pricing');
+    }
+  }, [location, setLocation, toast]);
+  
+  return (
+    <div className="container max-w-4xl mx-auto py-12 px-4">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold">Checkout</h1>
+        <p className="text-muted-foreground">Complete your purchase to access premium JetAI features</p>
+      </div>
+      
+      {checkoutStatus === 'loading' && (
+        <div className="flex justify-center items-center py-12">
+          <div className="flex flex-col items-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+            <p className="text-lg">Preparing your checkout...</p>
+          </div>
+        </div>
+      )}
+      
+      {checkoutStatus === 'ready' && clientSecret && (
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="md:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Payment Information</CardTitle>
+                <CardDescription>
+                  Enter your payment details to complete your purchase
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Elements stripe={stripePromise} options={{ clientSecret }}>
+                  <CheckoutForm 
+                    paymentType={paymentType} 
+                    onSuccess={() => setCheckoutStatus('success')}
+                    onError={() => setCheckoutStatus('error')}
+                  />
+                </Elements>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="md:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle>Order Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {paymentType === 'one-time' ? (
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span>50 AI Credits</span>
+                      <span>$19.99</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between font-bold">
+                      <span>Total</span>
+                      <span>$19.99</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span>Premium Monthly</span>
+                      <span>$19.99</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Renews automatically. Cancel anytime.
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between font-bold">
+                      <span>Total</span>
+                      <span>$19.99/mo</span>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+              <CardFooter className="flex-col space-y-4">
+                <div className="flex items-center text-xs text-muted-foreground">
+                  <ShieldCheck className="h-4 w-4 mr-2" />
+                  <span>Secure checkout with Stripe</span>
+                </div>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      )}
+      
+      {checkoutStatus === 'success' && (
+        <Card>
+          <CardContent className="pt-6 pb-6 flex flex-col items-center">
+            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+              <Check className="h-8 w-8 text-green-600" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Payment Successful!</h2>
+            <p className="text-center mb-4">
+              Thank you for your purchase. Your account has been updated with your new benefits.
+            </p>
+            <Button onClick={() => setLocation('/dashboard')}>
+              Go to Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+      
+      {checkoutStatus === 'error' && (
+        <Card>
+          <CardContent className="pt-6 pb-6 flex flex-col items-center">
+            <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="h-8 w-8 text-red-600"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Payment Failed</h2>
+            <p className="text-center mb-4">
+              There was an issue processing your payment. Please try again or contact support.
+            </p>
+            <div className="flex gap-4">
+              <Button variant="outline" onClick={() => setLocation('/pricing')}>
+                Return to Pricing
+              </Button>
+              <Button onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+// CheckoutForm component to handle the Stripe Payment Element
+function CheckoutForm({ 
+  paymentType,
+  onSuccess,
+  onError
+}: {
+  paymentType: 'one-time' | 'subscription',
+  onSuccess: () => void,
+  onError: () => void
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
+  const { toast } = useToast();
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!stripe || !elements) {
+      return;
+    }
+    
+    setIsProcessing(true);
+    
+    try {
+      let result;
+      
+      if (paymentType === 'one-time') {
+        // For one-time payments, use confirmPayment
+        result = await stripe.confirmPayment({
+          elements,
+          confirmParams: {
+            return_url: `${window.location.origin}/checkout?status=success`,
+          },
+          redirect: 'if_required',
+        });
+      } else {
+        // For subscriptions, in a real app, use the appropriate method
+        // For demo purposes, we'll just simulate success
+        result = { error: undefined };
+        setTimeout(() => {
+          onSuccess();
+        }, 2000);
+      }
+      
+      if (result.error) {
+        setErrorMessage(result.error.message);
+        onError();
+        toast({
+          title: "Payment failed",
+          description: result.error.message,
+          variant: "destructive",
+        });
+      } else {
+        // Payment succeeded
+        onSuccess();
+        toast({
+          title: "Payment successful",
+          description: "Thank you for your purchase!",
+        });
+      }
+    } catch (error: any) {
+      setErrorMessage(error.message);
+      onError();
+      toast({
+        title: "Payment processing error",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
     }
   };
   
-  useEffect(() => {
-    if (selectedPlan) {
-      createSubscription();
-    }
-  }, [selectedPlan, billingCycle]);
-
-  if (userLoading) {
-    return (
-      <div className="min-h-[calc(100vh-160px)] flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mb-4"></div>
-          <p className="text-dark/70">Loading checkout...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-light min-h-[calc(100vh-160px)] py-12">
-      <div className="container mx-auto px-4">
-        <div className="max-w-5xl mx-auto">
-          <h1 className="font-display text-3xl font-bold text-dark text-center mb-3">Upgrade Your Travel Experience</h1>
-          <p className="text-center text-lg text-dark/70 mb-10 max-w-2xl mx-auto">
-            Choose the plan that's right for you and unlock premium features for a better travel planning experience.
-          </p>
-          
-          {/* Billing Toggle */}
-          <div className="flex justify-center items-center mb-10">
-            <span className={`text-sm font-medium ${billingCycle === 'month' ? 'text-primary' : 'text-dark/50'}`}>Monthly</span>
-            <button 
-              onClick={toggleBillingCycle}
-              className="relative inline-flex h-6 w-11 mx-3 items-center rounded-full bg-gray-200"
-              aria-pressed={billingCycle === 'year'}
-              aria-labelledby="billing-cycle-label"
-            >
-              <span className="sr-only">Toggle billing cycle</span>
-              <span
-                className={`${
-                  billingCycle === 'year' ? 'translate-x-6' : 'translate-x-1'
-                } inline-block h-4 w-4 transform rounded-full bg-white transition`}
-              />
-            </button>
-            <span className={`text-sm font-medium ${billingCycle === 'year' ? 'text-primary' : 'text-dark/50'}`}>
-              Yearly <span className="text-xs px-2 py-0.5 bg-green-100 text-green-800 rounded-full ml-1">Save 20%</span>
-            </span>
-          </div>
-          
-          {/* Plans Grid */}
-          {!clientSecret && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-              {plans.map((plan) => (
-                <div 
-                  key={plan.id}
-                  className={`bg-white rounded-xl border-2 overflow-hidden transition-all ${
-                    selectedPlan?.id === plan.id ? 'border-primary shadow-md scale-[1.02]' : 'border-gray-200'
-                  } ${plan.popular ? 'relative' : ''}`}
-                >
-                  {plan.popular && (
-                    <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 uppercase">
-                      Popular
-                    </div>
-                  )}
-                  <div className="p-6">
-                    <h3 className="font-display text-xl font-bold text-dark mb-2">{plan.name}</h3>
-                    <div className="mb-4">
-                      <span className="text-3xl font-bold">${calculatePrice(plan.price)}</span>
-                      <span className="text-dark/50">/{billingCycle}</span>
-                    </div>
-                    <button
-                      onClick={() => setSelectedPlan(plan)}
-                      className={`w-full py-2 px-4 rounded-full font-accent font-medium transition mb-6 ${
-                        selectedPlan?.id === plan.id
-                          ? 'bg-primary text-white'
-                          : 'bg-gray-100 text-dark hover:bg-primary/10'
-                      }`}
-                    >
-                      {selectedPlan?.id === plan.id ? 'Selected' : 'Select Plan'}
-                    </button>
-                    <ul className="space-y-3">
-                      {plan.features.map((feature, index) => (
-                        <li key={index} className="flex items-start">
-                          <i className="fas fa-check text-green-500 mt-1 mr-2"></i>
-                          <span className="text-sm text-dark/70">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          
-          {/* Payment Form */}
-          {clientSecret ? (
-            <div className="max-w-md mx-auto">
-              <div className="bg-primary/5 rounded-lg p-4 mb-6">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-display font-bold text-dark">Order Summary</h3>
-                  <button 
-                    onClick={() => setClientSecret('')}
-                    className="text-primary hover:text-primary/80 text-sm font-medium"
-                  >
-                    Change Plan
-                  </button>
-                </div>
-                <div className="border-b border-gray-200 pb-4 mb-4">
-                  <div className="flex justify-between mb-2">
-                    <span className="text-dark/70">{selectedPlan?.name} Plan ({billingCycle}ly)</span>
-                    <span className="font-medium">${calculatePrice(selectedPlan?.price || 0)}</span>
-                  </div>
-                </div>
-                <div className="flex justify-between font-bold">
-                  <span>Total</span>
-                  <span className="text-primary">${calculatePrice(selectedPlan?.price || 0)}</span>
-                </div>
-              </div>
-              
-              <Elements stripe={stripePromise} options={{ clientSecret }}>
-                <CheckoutForm />
-              </Elements>
-            </div>
-          ) : (
-            <div className="text-center">
-              <button
-                onClick={createSubscription}
-                className="bg-primary hover:bg-primary/90 text-white font-accent font-semibold px-8 py-3 rounded-full transition"
-              >
-                Continue to Payment
-              </button>
-            </div>
-          )}
-          
-          {/* FAQ Section */}
-          <div className="mt-16">
-            <h2 className="font-display text-2xl font-bold text-dark text-center mb-8">Frequently Asked Questions</h2>
-            <div className="max-w-3xl mx-auto space-y-4">
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h3 className="font-accent font-semibold text-dark mb-2">Can I cancel my subscription anytime?</h3>
-                <p className="text-dark/70">Yes, you can cancel your subscription at any time. Your access will continue until the end of your billing period.</p>
-              </div>
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h3 className="font-accent font-semibold text-dark mb-2">What payment methods do you accept?</h3>
-                <p className="text-dark/70">We accept all major credit cards including Visa, Mastercard, American Express, and Discover.</p>
-              </div>
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h3 className="font-accent font-semibold text-dark mb-2">How do I change my plan?</h3>
-                <p className="text-dark/70">You can upgrade or downgrade your plan at any time from your account settings. Changes will be applied to your next billing cycle.</p>
-              </div>
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h3 className="font-accent font-semibold text-dark mb-2">Is there a free trial available?</h3>
-                <p className="text-dark/70">We offer a 7-day free trial for new users on any plan. You won't be charged until your trial period ends.</p>
-              </div>
-            </div>
-          </div>
-          
-          {/* Support Section */}
-          <div className="mt-12 text-center">
-            <p className="text-dark/70 mb-2">Have questions? Our customer support team is here to help.</p>
-            <Link href="/about" className="text-primary hover:text-primary/80 font-medium">
-              Contact Support
-            </Link>
-          </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <PaymentElement />
+      
+      {errorMessage && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+          {errorMessage}
         </div>
+      )}
+      
+      <Button 
+        disabled={!stripe || isProcessing} 
+        className="w-full"
+        type="submit"
+      >
+        {isProcessing ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          <>
+            <CreditCard className="mr-2 h-4 w-4" />
+            Pay Now
+          </>
+        )}
+      </Button>
+      
+      <div className="text-center text-xs text-muted-foreground">
+        By completing this purchase, you agree to our{" "}
+        <a href="/terms" className="underline">Terms of Service</a> and{" "}
+        <a href="/privacy" className="underline">Privacy Policy</a>.
       </div>
-    </div>
+    </form>
   );
 }
