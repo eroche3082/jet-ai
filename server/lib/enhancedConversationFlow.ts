@@ -771,10 +771,29 @@ function extractUserProfileFromHistory(history: any[]): BaseUserProfile {
   ];
   
   const datePatterns = [
+    // Patrones de fechas exactas (del X al Y) - español
     /(?:del|desde el)\s+(\d{1,2}\s+(?:de\s+)?[A-Za-zÀ-ÿ]+(?:\s+(?:de\s+)?\d{4})?)\s+(?:al|hasta el)\s+(\d{1,2}\s+(?:de\s+)?[A-Za-zÀ-ÿ]+(?:\s+(?:de\s+)?\d{4})?)/i,
-    /(?:en|para)\s+([A-Za-zÀ-ÿ]+)/i,
-    /(\d{1,2}\s+(?:de\s+)?[A-Za-zÀ-ÿ]+(?:\s+(?:de\s+)?\d{4})?)/i,
-    /(?:por|durante)\s+(\d+)\s*d[ií]as/i  // Patrón específico para capturar duración en días
+    
+    // Patrones de fechas exactas - italiano
+    /(?:dal|da)\s+(\d{1,2}\s+(?:di\s+)?[A-Za-zÀ-ÿ]+(?:\s+(?:di\s+)?\d{4})?)\s+(?:al|fino al)\s+(\d{1,2}\s+(?:di\s+)?[A-Za-zÀ-ÿ]+(?:\s+(?:di\s+)?\d{4})?)/i,
+    
+    // Patrones de fechas exactas - portugués
+    /(?:de|desde)\s+(\d{1,2}\s+(?:de\s+)?[A-Za-zÀ-ÿ]+(?:\s+(?:de\s+)?\d{4})?)\s+(?:a|até)\s+(\d{1,2}\s+(?:de\s+)?[A-Za-zÀ-ÿ]+(?:\s+(?:de\s+)?\d{4})?)/i,
+    
+    // Patrones de meses o temporadas generales
+    /(?:en|para|in|em|no|na)\s+([A-Za-zÀ-ÿ]+)/i,
+    
+    // Fechas sueltas (un día específico)
+    /(\d{1,2}\s+(?:de|di|de\s+)\s*[A-Za-zÀ-ÿ]+(?:\s+(?:de|di|de\s+)\s*\d{4})?)/i,
+    
+    // Duración en días - multilingüe (español, italiano, portugués, inglés)
+    /(?:por|durante|per|para|for|by)\s+(\d+)\s*(?:d[ií]as?|giorni|dias?|days?)/i,
+    
+    // Duración en semanas - multilingüe
+    /(?:por|durante|per|para|for|by)\s+(\d+)\s*(?:semanas?|settimane?|semanas?|weeks?)/i,
+    
+    // Duración en noches - multilingüe
+    /(?:por|durante|per|para|for|by)\s+(\d+)\s*(?:noches?|notti|noites?|nights?)/i
   ];
   
   const travelersPatterns = [
@@ -878,13 +897,39 @@ function extractUserProfileFromHistory(history: any[]): BaseUserProfile {
         ? `${cleanedDates[0]} a ${cleanedDates[cleanedDates.length - 1]}` 
         : cleanedDates[0];
     } else {
-      // Buscar directamente menciones de duración en el historial original
+      // Buscar directamente menciones de duración en el historial original usando patrones multilingües
       for (const entry of history) {
         if (entry.role === 'user') {
-          const durationMatch = entry.content.match(/(\d+)\s*d[ií]as/i);
-          if (durationMatch && durationMatch[1]) {
-            userProfile.dates = `${durationMatch[1]} días`;
-            break; // Usar la primera coincidencia
+          // Patrones para duración en varios idiomas
+          const durationPatterns = [
+            { pattern: /(\d+)\s*d[ií]as?/i, format: (num) => `${num} días` },
+            { pattern: /(\d+)\s*giorni/i, format: (num) => `${num} días` },
+            { pattern: /(\d+)\s*days?/i, format: (num) => `${num} días` },
+            { pattern: /(\d+)\s*semanas?/i, format: (num) => `${num} semanas` },
+            { pattern: /(\d+)\s*settimane?/i, format: (num) => `${num} semanas` },
+            { pattern: /(\d+)\s*weeks?/i, format: (num) => `${num} semanas` },
+            { pattern: /(\d+)\s*noches?/i, format: (num) => `${num} noches` },
+            { pattern: /(\d+)\s*notti/i, format: (num) => `${num} noches` },
+            { pattern: /(\d+)\s*nights?/i, format: (num) => `${num} noches` },
+            { pattern: /(\d+)\s*mese?/i, format: (num) => `${num} meses` },
+            { pattern: /(\d+)\s*mesi/i, format: (num) => `${num} meses` },
+            { pattern: /(\d+)\s*months?/i, format: (num) => `${num} meses` }
+          ];
+          
+          // Probar cada patrón
+          for (const { pattern, format } of durationPatterns) {
+            const match = entry.content.match(pattern);
+            if (match && match[1]) {
+              userProfile.dates = format(match[1]);
+              
+              // Si encontramos fecha, salimos del bucle
+              break;
+            }
+          }
+          
+          // Si ya encontramos una duración, no seguimos buscando
+          if (userProfile.dates) {
+            break;
           }
         }
       }

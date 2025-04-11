@@ -200,10 +200,51 @@ export async function generateItinerary(profile: ItineraryUserProfile): Promise<
         durationDays = 14;
       }
       
-      // Buscar números específicos de días
-      const daysMatch = datesLower.match(/(\d+)\s*(days?|días?|d)/);
-      if (daysMatch && daysMatch[1]) {
-        durationDays = parseInt(daysMatch[1], 10);
+      // Buscar números específicos de días en múltiples idiomas
+      const daysPatterns = [
+        // Español
+        /(\d+)\s*(días?|d[ií]as?|d\b)/i,
+        // Italiano
+        /(\d+)\s*(giorni|giorno)\b/i,
+        // Portugués
+        /(\d+)\s*(dias?)\b/i,
+        // Inglés
+        /(\d+)\s*(days?|d\b)/i,
+        // Español - semanas
+        /(\d+)\s*(semanas?)\b/i,
+        // Italiano - semanas
+        /(\d+)\s*(settimane?)\b/i,
+        // Portugués - semanas
+        /(\d+)\s*(semanas?)\b/i,
+        // Inglés - semanas
+        /(\d+)\s*(weeks?)\b/i,
+        // Español - noches
+        /(\d+)\s*(noches?)\b/i,
+        // Italiano - noches
+        /(\d+)\s*(notti?)\b/i,
+        // Portugués - noches
+        /(\d+)\s*(noites?)\b/i,
+        // Inglés - noches
+        /(\d+)\s*(nights?)\b/i
+      ];
+      
+      // Intentar cada patrón
+      for (const pattern of daysPatterns) {
+        const match = datesLower.match(pattern);
+        if (match && match[1]) {
+          let multiplier = 1; // Por defecto para días
+          
+          // Si son semanas, multiplicar por 7
+          if (match[2] && (
+              match[2].startsWith('semana') || 
+              match[2].startsWith('settiman') || 
+              match[2].startsWith('week'))) {
+            multiplier = 7;
+          }
+          
+          durationDays = parseInt(match[1], 10) * multiplier;
+          break; // Terminamos al encontrar el primer patrón que coincida
+        }
       }
     }
     
