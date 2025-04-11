@@ -40,8 +40,7 @@ export default function Header() {
   const navLinks = [
     { title: 'Home', path: '/' },
     { title: 'Destinations', path: '/destinations' },
-    { title: 'Itineraries', path: '/itineraries' },
-    { title: 'Vertex AI', path: '/vertex-ai' },
+    { title: 'Travel Memories', path: '/portfolio' },
     { title: 'About', path: '/about' }
   ];
   

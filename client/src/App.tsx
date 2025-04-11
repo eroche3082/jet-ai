@@ -22,6 +22,7 @@ import BookingsPage from "@/pages/BookingsPage";
 import ARPage from "@/pages/ARPage";
 import PortfolioPage from "@/pages/PortfolioPage";
 import SuggestionsPage from "@/pages/SuggestionsPage";
+import TravelMemoryPage from "@/pages/TravelMemoryPage";
 import Layout from "@/components/Layout";
 import MobileLayout from "@/components/MobileLayout";
 import { useState, useEffect } from 'react';
@@ -148,6 +149,7 @@ function App() {
       <Route path="/ar" component={ARPage} />
       <Route path="/portfolio" component={PortfolioPage} />
       <Route path="/suggestions" component={SuggestionsPage} />
+      <Route path="/memories" component={TravelMemoryPage} />
       
       {/* Partner/Affiliate routes */}
       <Route path="/partner/dashboard" component={PartnerDashboard} />
