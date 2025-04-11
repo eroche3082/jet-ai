@@ -60,49 +60,47 @@ function App() {
 
   return (
     <ThemeProvider>
-      <Layout>
-        <Switch>
-          {/* Main application routes */}
-          <Route path="/" component={Home} />
-          <Route path="/destinations" component={Destinations} />
-          <Route path="/itineraries" component={Itineraries} />
-          <Route path="/itineraries/:id">
-            {(params) => <ItineraryView params={params} />}
-          </Route>
-          <Route path="/membership" component={Membership} />
-          <Route path="/pricing" component={PricingPlans} />
-          <Route path="/about" component={About} />
-          <Route path="/signin" component={SignIn} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/checkout" component={Checkout} />
-          
-          {/* Partner/Affiliate routes */}
-          <Route path="/partner/dashboard" component={PartnerDashboard} />
-          <Route path="/partner/signup" component={PartnerSignup} />
-          <Route path="/partner/settings">
-            {() => <PartnerDashboard />}
-          </Route>
-          
-          {/* Partner route redirect */}
-          <Route path="/partner">
-            {() => {
-              // Check if user is logged in and is a partner
-              const isPartner = localStorage.getItem('partnerCode');
-              
-              if (isPartner) {
-                window.location.href = '/partner/dashboard';
-                return null;
-              } else {
-                window.location.href = '/partner/signup';
-                return null;
-              }
-            }}
-          </Route>
-          
-          {/* Fallback route */}
-          <Route component={NotFound} />
-        </Switch>
-      </Layout>
+      <Switch>
+        {/* Main application routes */}
+        <Route path="/" component={Home} />
+        <Route path="/destinations" component={Destinations} />
+        <Route path="/itineraries" component={Itineraries} />
+        <Route path="/itineraries/:id">
+          {(params) => <ItineraryView params={params} />}
+        </Route>
+        <Route path="/membership" component={Membership} />
+        <Route path="/pricing" component={PricingPlans} />
+        <Route path="/about" component={About} />
+        <Route path="/signin" component={SignIn} />
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/checkout" component={Checkout} />
+        
+        {/* Partner/Affiliate routes */}
+        <Route path="/partner/dashboard" component={PartnerDashboard} />
+        <Route path="/partner/signup" component={PartnerSignup} />
+        <Route path="/partner/settings">
+          {() => <PartnerDashboard />}
+        </Route>
+        
+        {/* Partner route redirect */}
+        <Route path="/partner">
+          {() => {
+            // Check if user is logged in and is a partner
+            const isPartner = localStorage.getItem('partnerCode');
+            
+            if (isPartner) {
+              window.location.href = '/partner/dashboard';
+              return null;
+            } else {
+              window.location.href = '/partner/signup';
+              return null;
+            }
+          }}
+        </Route>
+        
+        {/* Fallback route */}
+        <Route component={NotFound} />
+      </Switch>
 
       {/* Floating chat bubble */}
       <div className="fixed bottom-6 right-6 z-50">
