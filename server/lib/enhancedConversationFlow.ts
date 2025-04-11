@@ -10,6 +10,7 @@ import { processConversation } from './vertexAI';
 import { storage } from '../storage';
 import { generateUserItinerary } from './itineraryGenerator';
 import fetch from 'node-fetch';
+import { UserProfile as BaseUserProfile } from './conversationFlow';
 
 // Etapas de la conversación
 export enum ConversationStage {
@@ -737,6 +738,145 @@ function checkForAPIAlerts(): void {
   }
 }
 
+/**
+ * Extrae el perfil del usuario del historial de conversación
+ * para generar un itinerario personalizado
+ */
+function extractUserProfileFromHistory(history: any[]): BaseUserProfile {
+  // Crear un perfil básico
+  const userProfile: BaseUserProfile = {
+    currentStage: ConversationStage.ITINERARY_REQUEST as any
+  };
+
+  // Analizar conversación para extraer datos clave
+  if (!history || history.length === 0) {
+    return userProfile;
+  }
+
+  let destinationMentions: string[] = [];
+  let budgetMentions: string[] = [];
+  let dateMentions: string[] = [];
+  let travelersMentions: string[] = [];
+  let interestMentions: string[] = [];
+
+  // Patrones para extraer información
+  const destinationPatterns = [
+    /(?:voy|viaje|visitar|ir)\s+a\s+([A-Za-zÀ-ÿ\s]{2,30})/i,
+    /(?:conocer|viaje\s+a)\s+([A-Za-zÀ-ÿ\s]{2,30})/i
+  ];
+  
+  const budgetPatterns = [
+    /(?:presupuesto|gastar)\s+(?:de|es|:)?\s*(\d{1,5}(?:,\d{3})*(?:\.\d{1,2})?)\s*(?:€|euros|USD|dólares|\$)?/i,
+    /(\d{1,5}(?:,\d{3})*(?:\.\d{1,2})?)\s*(?:€|euros|USD|dólares|\$)/i
+  ];
+  
+  const datePatterns = [
+    /(?:del|desde el)\s+(\d{1,2}\s+(?:de\s+)?[A-Za-zÀ-ÿ]+(?:\s+(?:de\s+)?\d{4})?)\s+(?:al|hasta el)\s+(\d{1,2}\s+(?:de\s+)?[A-Za-zÀ-ÿ]+(?:\s+(?:de\s+)?\d{4})?)/i,
+    /(?:en|para)\s+([A-Za-zÀ-ÿ]+)/i,
+    /(\d{1,2}\s+(?:de\s+)?[A-Za-zÀ-ÿ]+(?:\s+(?:de\s+)?\d{4})?)/i
+  ];
+  
+  const travelersPatterns = [
+    /(?:somos|seremos|vamos)\s+(\d+)\s+personas?/i,
+    /(\d+)\s+personas?/i,
+    /(?:voy|viajo)\s+(?:solo|sola|con\s+mi\s+pareja|en\s+familia|con\s+amigos)/i
+  ];
+  
+  const interestsPatterns = [
+    /(?:interesa|gusta)\s+(?:la\s+)?([A-Za-zÀ-ÿ\s,]+)/i,
+    /(?:actividades|lugares)\s+(?:de|para)\s+([A-Za-zÀ-ÿ\s,]+)/i
+  ];
+
+  // Procesar cada mensaje de la conversación
+  for (const entry of history) {
+    if (entry.role === 'user') {
+      const message = entry.content.toLowerCase();
+      
+      // Extraer destino
+      for (const pattern of destinationPatterns) {
+        const match = message.match(pattern);
+        if (match && match[1]) {
+          destinationMentions.push(match[1].trim());
+        }
+      }
+      
+      // Extraer presupuesto
+      for (const pattern of budgetPatterns) {
+        const match = message.match(pattern);
+        if (match && match[1]) {
+          budgetMentions.push(match[1].trim());
+        }
+      }
+      
+      // Extraer fechas
+      for (const pattern of datePatterns) {
+        const match = message.match(pattern);
+        if (match && match[1]) {
+          dateMentions.push(match[1].trim());
+          if (match[2]) {
+            dateMentions.push(match[2].trim());
+          }
+        }
+      }
+      
+      // Extraer número/tipo de viajeros
+      for (const pattern of travelersPatterns) {
+        const match = message.match(pattern);
+        if (match && match[1]) {
+          travelersMentions.push(match[1].trim());
+        } else if (match) {
+          // Si no hay grupo de captura pero hay coincidencia (ej: "voy solo")
+          travelersMentions.push(match[0].trim());
+        }
+      }
+      
+      // Extraer intereses
+      for (const pattern of interestsPatterns) {
+        const match = message.match(pattern);
+        if (match && match[1]) {
+          interestMentions.push(match[1].trim());
+        }
+      }
+      
+      // Buscar palabras clave de intereses
+      const interestKeywords = [
+        'playa', 'montaña', 'cultural', 'historia', 'arte', 'museos',
+        'gastronomía', 'comida', 'aventura', 'naturaleza', 'relax',
+        'shopping', 'compras', 'fiesta', 'fotografía', 'arquitectura'
+      ];
+      
+      for (const keyword of interestKeywords) {
+        if (message.includes(keyword)) {
+          interestMentions.push(keyword);
+        }
+      }
+    }
+  }
+  
+  // Rellenar el perfil con la información extraída
+  if (destinationMentions.length > 0) {
+    userProfile.destination = destinationMentions[destinationMentions.length - 1]; // Usar la mención más reciente
+  }
+  
+  if (budgetMentions.length > 0) {
+    userProfile.budget = budgetMentions[budgetMentions.length - 1];
+  }
+  
+  if (dateMentions.length > 0) {
+    userProfile.dates = dateMentions.join(' a '); // Unir inicio y fin si hay ambos
+  }
+  
+  if (travelersMentions.length > 0) {
+    userProfile.travelers = travelersMentions[travelersMentions.length - 1];
+  }
+  
+  if (interestMentions.length > 0) {
+    userProfile.interests = interestMentions.join(', ');
+  }
+  
+  return userProfile;
+}
+
 // Exportar funciones y tipos para uso en otros módulos
 export {
   shouldGenerateItinerary,
@@ -751,5 +891,6 @@ export {
   formatWeatherInfo,
   formatRouteInfo,
   formatLocationInfo,
-  ApiUsageMetrics
+  ApiUsageMetrics,
+  extractUserProfileFromHistory
 };
