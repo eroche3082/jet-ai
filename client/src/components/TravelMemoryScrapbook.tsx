@@ -54,10 +54,16 @@ import {
   Plane,
   Hotel,
   Bus,
-  MapPinned
+  MapPinned,
+  Volume2,
+  Globe,
+  Sparkles,
+  Languages
 } from 'lucide-react';
 import { Link } from 'wouter';
 import { format } from 'date-fns';
+import SmartImageUploader, { SmartImageData } from './SmartImageUploader';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Type definitions
 interface MemoryItem {
@@ -232,6 +238,69 @@ export default function TravelMemoryScrapbook({
     savePage(updatedPage);
     setEditingItem(newItem);
     setIsEditDialogOpen(true);
+  };
+  
+  // Manejar adición de imágenes inteligentes con análisis AI
+  const handleSmartImageSelected = (imageData: SmartImageData) => {
+    const centerPosition = scrapbookRef.current 
+      ? {
+          x: scrapbookRef.current.clientWidth / 2 - 120,
+          y: scrapbookRef.current.clientHeight / 2 - 120,
+        }
+      : { x: 100, y: 100 };
+    
+    // Crear un nuevo item con los datos mejorados de la imagen
+    const newItem: MemoryItem = {
+      id: crypto.randomUUID(),
+      type: 'photo',
+      title: imageData.title,
+      content: imageData.description,
+      date: new Date(),
+      location: imageData.location,
+      tags: imageData.tags,
+      imageUrl: imageData.imageUrl,
+      position: {
+        x: centerPosition.x,
+        y: centerPosition.y,
+        width: 240,
+        height: 180,
+        rotation: 0,
+        zIndex: currentPage.items.length + 1,
+      },
+      arEnabled: false,
+    };
+    
+    // Si hay datos AR adicionales, habilitarlos
+    if (imageData.landmarks && imageData.landmarks.length > 0) {
+      const landmark = imageData.landmarks[0];
+      if (landmark.location) {
+        newItem.arEnabled = true;
+        newItem.arData = {
+          annotations: [{
+            text: landmark.description,
+            position: [0, 0, 0],
+          }]
+        };
+      }
+    }
+    
+    // Actualizar la página
+    const updatedPage = {
+      ...currentPage,
+      items: [...currentPage.items, newItem],
+    };
+    
+    // Si no hay una imagen de portada establecida, usar esta
+    if (!currentPage.coverImage && imageData.imageUrl) {
+      updatedPage.coverImage = imageData.imageUrl;
+    }
+    
+    savePage(updatedPage);
+    
+    toast({
+      title: 'Smart image added',
+      description: 'Your enhanced image has been added to the scrapbook',
+    });
   };
   
   // Delete an item from the current page
