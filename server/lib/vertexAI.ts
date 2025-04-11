@@ -479,38 +479,43 @@ export const processConversation = async (
         responseContent = response;
       } catch (geminiError) {
         console.error('Error con Gemini, intentando con Claude:', geminiError);
-        throw geminiError; // Fallar al respaldo
+        // No lanzar error aún, intentar con otro método
       }
     }
     
     // Si Gemini falla o no está disponible, usar Claude como respaldo
     if (!responseContent && anthropicClient) {
-      // Formato para Claude
-      // Transformar mensajes para el formato Claude
-      const claudeMessages = [];
-      
-      // Añadir mensajes del historial en el formato correcto para Claude
-      let currentMessages = [...history];
-      currentMessages.push({ role: 'user', content: userMessage });
-      
-      // Añadir el historial en el formato correcto para Claude
-      for (const msg of currentMessages) {
-        claudeMessages.push({
-          role: msg.role as "user" | "assistant",
-          content: msg.content
+      try {
+        // Formato para Claude
+        // Transformar mensajes para el formato Claude
+        const claudeMessages = [];
+        
+        // Añadir mensajes del historial en el formato correcto para Claude
+        let currentMessages = [...history];
+        currentMessages.push({ role: 'user', content: userMessage });
+        
+        // Añadir el historial en el formato correcto para Claude
+        for (const msg of currentMessages) {
+          claudeMessages.push({
+            role: msg.role as "user" | "assistant",
+            content: msg.content
+          });
+        }
+        
+        // Agregar mensaje de sistema
+        const response = await anthropicClient.messages.create({
+          model: CLAUDE_MODEL,
+          max_tokens: 1024,
+          messages: claudeMessages,
+          system: systemContent,
         });
-      }
-      
-      // Agregar mensaje de sistema
-      const response = await anthropicClient.messages.create({
-        model: CLAUDE_MODEL,
-        max_tokens: 1024,
-        messages: claudeMessages,
-        system: systemContent,
-      });
-      
-      if (response.content && response.content.length > 0 && 'text' in response.content[0]) {
-        responseContent = response.content[0].text;
+        
+        if (response.content && response.content.length > 0 && 'text' in response.content[0]) {
+          responseContent = response.content[0].text;
+        }
+      } catch (claudeError) {
+        console.error('Error con Claude:', claudeError);
+        // Si todo falla, se lanzará error más adelante
       }
     }
     
