@@ -16,6 +16,7 @@ import { verifyApiIntegrations, suggestNextApiConnections } from './lib/apiVerif
 import { createPaymentIntent, createSubscription, getSubscriptionPlans } from "./lib/stripe";
 import connectPgSimple from 'connect-pg-simple';
 import memorystore from 'memorystore';
+import { googleCloud } from './lib/googlecloud';
 
 // Configure session store
 const createSessionStore = () => {
@@ -1310,6 +1311,177 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error verifying API integrations:", error);
       res.status(500).json({ message: "Error verifying API integrations" });
+    }
+  });
+
+  // Google Cloud API routes
+  // Text-to-Speech API
+  app.post("/api/google/tts", async (req, res) => {
+    try {
+      const { text, language, voice, gender, pitch, speakingRate } = req.body;
+      
+      if (!text) {
+        return res.status(400).json({ message: "Text is required" });
+      }
+      
+      const result = await googleCloud.tts.synthesize(text, {
+        language,
+        voice,
+        gender,
+        pitch,
+        speakingRate
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error with Text-to-Speech API:", error);
+      res.status(500).json({ message: "Error converting text to speech" });
+    }
+  });
+  
+  app.get("/api/google/tts/voices", async (req, res) => {
+    try {
+      const { language } = req.query;
+      const result = await googleCloud.tts.getVoices(language as string);
+      res.json(result);
+    } catch (error) {
+      console.error("Error getting TTS voices:", error);
+      res.status(500).json({ message: "Error getting TTS voices" });
+    }
+  });
+  
+  // Natural Language API
+  app.post("/api/google/nl/sentiment", async (req, res) => {
+    try {
+      const { text } = req.body;
+      
+      if (!text) {
+        return res.status(400).json({ message: "Text is required" });
+      }
+      
+      const result = await googleCloud.naturalLanguage.analyzeSentiment(text);
+      res.json(result);
+    } catch (error) {
+      console.error("Error with sentiment analysis:", error);
+      res.status(500).json({ message: "Error analyzing sentiment" });
+    }
+  });
+  
+  app.post("/api/google/nl/entities", async (req, res) => {
+    try {
+      const { text } = req.body;
+      
+      if (!text) {
+        return res.status(400).json({ message: "Text is required" });
+      }
+      
+      const result = await googleCloud.naturalLanguage.analyzeEntities(text);
+      res.json(result);
+    } catch (error) {
+      console.error("Error analyzing entities:", error);
+      res.status(500).json({ message: "Error analyzing entities" });
+    }
+  });
+  
+  // Translate API
+  app.post("/api/google/translate", async (req, res) => {
+    try {
+      const { text, target, source } = req.body;
+      
+      if (!text || !target) {
+        return res.status(400).json({ message: "Text and target language are required" });
+      }
+      
+      const result = await googleCloud.translate.translateText(text, target, source);
+      res.json(result);
+    } catch (error) {
+      console.error("Error with translation:", error);
+      res.status(500).json({ message: "Error translating text" });
+    }
+  });
+  
+  app.post("/api/google/translate/detect", async (req, res) => {
+    try {
+      const { text } = req.body;
+      
+      if (!text) {
+        return res.status(400).json({ message: "Text is required" });
+      }
+      
+      const result = await googleCloud.translate.detectLanguage(text);
+      res.json(result);
+    } catch (error) {
+      console.error("Error detecting language:", error);
+      res.status(500).json({ message: "Error detecting language" });
+    }
+  });
+  
+  // Vision API
+  app.post("/api/google/vision/analyze", async (req, res) => {
+    try {
+      const { imageUrl } = req.body;
+      
+      if (!imageUrl) {
+        return res.status(400).json({ message: "Image URL is required" });
+      }
+      
+      const result = await googleCloud.vision.analyzeImage(imageUrl);
+      res.json(result);
+    } catch (error) {
+      console.error("Error analyzing image:", error);
+      res.status(500).json({ message: "Error analyzing image" });
+    }
+  });
+  
+  app.post("/api/google/vision/landmarks", async (req, res) => {
+    try {
+      const { imageUrl } = req.body;
+      
+      if (!imageUrl) {
+        return res.status(400).json({ message: "Image URL is required" });
+      }
+      
+      const result = await googleCloud.vision.detectLandmarks(imageUrl);
+      res.json(result);
+    } catch (error) {
+      console.error("Error detecting landmarks:", error);
+      res.status(500).json({ message: "Error detecting landmarks" });
+    }
+  });
+  
+  // Calendar API
+  app.post("/api/google/calendar/events", async (req, res) => {
+    try {
+      const calendarId = req.query.calendarId as string || 'primary';
+      const event = req.body;
+      
+      if (!event || !event.summary || !event.start || !event.end) {
+        return res.status(400).json({ message: "Event details are required" });
+      }
+      
+      const result = await googleCloud.calendar.addEvent(calendarId, event);
+      res.json(result);
+    } catch (error) {
+      console.error("Error adding calendar event:", error);
+      res.status(500).json({ message: "Error adding calendar event" });
+    }
+  });
+  
+  app.get("/api/google/calendar/events", async (req, res) => {
+    try {
+      const calendarId = req.query.calendarId as string || 'primary';
+      const timeMin = req.query.timeMin as string;
+      const timeMax = req.query.timeMax as string;
+      
+      if (!timeMin || !timeMax) {
+        return res.status(400).json({ message: "Time range is required" });
+      }
+      
+      const result = await googleCloud.calendar.getEvents(calendarId, timeMin, timeMax);
+      res.json(result);
+    } catch (error) {
+      console.error("Error getting calendar events:", error);
+      res.status(500).json({ message: "Error getting calendar events" });
     }
   });
 
