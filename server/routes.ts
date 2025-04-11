@@ -442,6 +442,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error searching experiences" });
     }
   });
+  
+  // Hotel search endpoints
+  app.get("/api/hotels/search", async (req, res) => {
+    try {
+      const { 
+        destination, 
+        checkIn, 
+        checkOut, 
+        adults, 
+        children, 
+        rooms,
+        priceMin,
+        priceMax,
+        starRating
+      } = req.query;
+      
+      // For now, handle via travel API mock service
+      // In production, this would call a real hotel API
+      const hotels = await travelSearchAccommodations({
+        location: destination as string,
+        checkIn: checkIn as string,
+        checkOut: checkOut as string,
+        guests: parseInt(adults as string) || 1,
+        priceMin: priceMin ? parseInt(priceMin as string) : undefined,
+        priceMax: priceMax ? parseInt(priceMax as string) : undefined,
+        starRating: starRating ? (starRating as string).split(',').map(Number) : undefined
+      });
+      
+      res.json({ hotels });
+    } catch (error) {
+      console.error("Error searching hotels:", error);
+      res.status(500).json({ message: "Error searching hotels" });
+    }
+  });
+  
+  app.get("/api/hotels/:id", async (req, res) => {
+    try {
+      const hotelId = req.params.id;
+      const provider = req.query.provider as string;
+      
+      if (!hotelId) {
+        return res.status(400).json({ message: "Hotel ID is required" });
+      }
+      
+      // For now, get a single accommodation from the mock API
+      // In production, this would call a specific hotel API endpoint
+      const hotels = await travelSearchAccommodations({
+        location: '',
+        specificId: hotelId
+      });
+      
+      const hotel = hotels.length > 0 ? hotels[0] : null;
+      
+      if (!hotel) {
+        return res.status(404).json({ message: "Hotel not found" });
+      }
+      
+      res.json({ hotel });
+    } catch (error) {
+      console.error("Error fetching hotel details:", error);
+      res.status(500).json({ message: "Error fetching hotel details" });
+    }
+  });
 
   // Membership data route
   app.get("/api/user/membership", ensureAuthenticated, async (req, res) => {

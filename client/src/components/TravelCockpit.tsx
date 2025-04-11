@@ -25,8 +25,13 @@ import {
   User,
   ChevronRight,
   X,
-  Image
+  Image,
+  Hotel,
+  Plane,
+  CalendarDays
 } from 'lucide-react';
+import HotelSearchResults from './HotelSearchResults';
+import { HotelResult } from '../lib/hotels';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -328,6 +333,12 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
   
   // Helper functions to extract specific information from user input
   const extractDestination = (input: string): string => {
+    // Just return the input directly for simple responses
+    // This will preserve the full destination name including commas
+    if (input.includes(',')) {
+      return input.trim();
+    }
+    
     // Remove common phrases that might precede the destination
     const cleanedInput = input
       .replace(/i want to go to/i, '')
@@ -341,17 +352,15 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
       .trim();
       
     // If it's just a destination name, return it
-    if (cleanedInput.length < 30 && !cleanedInput.includes(',')) {
+    if (cleanedInput.length < 30) {
       return cleanedInput.charAt(0).toUpperCase() + cleanedInput.slice(1);
     }
     
-    // Try to extract the first location name
-    // This is a simple extraction - in a real app, use NLP to better identify location names
-    const words = cleanedInput.split(' ');
-    for (let i = 0; i < words.length; i++) {
-      if (words[i].length > 3 && /^[A-Za-z]+$/.test(words[i])) {
-        return words[i].charAt(0).toUpperCase() + words[i].slice(1);
-      }
+    // Use a more robust approach for longer text
+    // This could be enhanced with a proper NLP service in production
+    const locationMatches = cleanedInput.match(/\b[A-Z][a-z]+(?:,\s+[A-Z][a-z]+)*\b/);
+    if (locationMatches && locationMatches[0]) {
+      return locationMatches[0];
     }
     
     // Fallback
