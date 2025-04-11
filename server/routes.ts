@@ -23,6 +23,7 @@ import {
 } from './lib/conversationFlow';
 import { generateUserItinerary } from './lib/itineraryGenerator';
 import { processConversation } from './lib/vertexAI';
+import memoryEnhancementService from './api/memoryEnhancementService';
 
 // Configure session store
 const createSessionStore = () => {
@@ -43,6 +44,9 @@ const createSessionStore = () => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Registramos el servicio de memoria mejorada
+  app.use('/api/memory-enhancement', memoryEnhancementService);
+  
   // Google Places API routes
   app.get('/api/places/autocomplete', async (req, res) => {
     try {
