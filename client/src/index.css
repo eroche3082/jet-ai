@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+  
+  h1, h2, h3 {
+    @apply font-display;
+  }
+  
+  .font-accent {
+    @apply font-['Montserrat',_sans-serif];
+  }
+  
+  .text-shadow {
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  .gradient-overlay {
+    background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7));
+  }
+  
+  .typing-animation::after {
+    content: "|";
+    animation: blink 1s step-end infinite;
+  }
+  
+  @keyframes blink {
+    from, to { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  
+  .chat-window {
+    max-height: 0;
+    transition: max-height 0.5s ease-out, opacity 0.3s ease-out, transform 0.3s ease-out;
+    opacity: 0;
+    transform: translateY(20px);
+    overflow: hidden;
+  }
+  
+  .chat-window.open {
+    max-height: 600px;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .destination-card:hover .destination-overlay {
+    opacity: 0.8;
+  }
+  
+  .destination-card:hover .destination-details {
+    transform: translateY(0);
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}
