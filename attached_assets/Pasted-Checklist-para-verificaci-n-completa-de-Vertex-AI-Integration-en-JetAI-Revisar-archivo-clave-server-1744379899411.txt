@@ -1,0 +1,74 @@
+Checklist para verificación completa de Vertex AI Integration en JetAI
+Revisar archivo clave: server/lib/vertexAI.ts
+
+Asegúrate de que tenga lo siguiente:
+
+ts
+Copiar
+Editar
+const model = new ChatModel({
+  project: 'erudite-creek-431302-q3',
+  location: 'us-central1',
+  model: 'gemini-1.5-flash',
+  apiVersion: 'v1beta1',
+});
+Y que esté usando esta lógica para enviar mensajes:
+
+ts
+Copiar
+Editar
+const result = await model.generateContent({
+  contents: [...history, { role: 'user', parts: [{ text: userMessage }] }],
+  tools: [toolsAvailable], // si activaste funciones
+  generationConfig: {
+    temperature: 0.7,
+    topK: 40,
+    topP: 1,
+    maxOutputTokens: 1024,
+  },
+});
+Validar que esté conectando bien (sin errores):
+
+Desde terminal en Replit:
+
+bash
+Copiar
+Editar
+curl -X POST http://localhost:5000/api/chat/vertex \
+-H "Content-Type: application/json" \
+-d '{"message":"Hi, can you help me plan a trip to Tokyo?", "history": []}'
+Debe responder con algo como:
+
+json
+Copiar
+Editar
+{
+  "response": "Sure! When are you planning to travel to Tokyo?",
+  "usage": { "inputTokens": 12, "outputTokens": 18 }
+}
+Verifica que los systemInstruction, context, o tools no estén interfiriendo
+→ Si aún hay errores, asegúrate de que no se esté enviando systemInstruction directamente, o que esté dentro de los history.
+
+🔁 Si todo está bien: Pasamos a modo 100% sincronizado
+Luego de validar esto, los pasos son:
+
+🔗 Conectar completamente la Vertex API al AIChat.tsx (ya estás en esto)
+
+🧠 Activar personalidad dinámica y memoria por usuario con assistantPersonality.ts
+
+🗺️ Activar funciones de tools para que Gemini pueda directamente llamar tools.* como getFlights, getHotels, generateQR, etc.
+
+🧠 ¿Quieres que ahora activemos el flujo completo de herramientas desde Gemini?
+Si dices que sí, implementamos:
+
+ts
+Copiar
+Editar
+tools: [
+  {
+    functionDeclarations: [
+      getFlights, getHotels, generateItinerary, showPortfolio, scanQR
+    ],
+  },
+],
+Y así, cuando el usuario diga “book a flight” o “show me hotels in Tokyo”, JetAI lo hace automáticamente ✈️

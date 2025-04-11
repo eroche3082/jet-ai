@@ -8,33 +8,49 @@ import { ChatResponse, ConversationMemory } from '../types/conversation';
 import Anthropic from '@anthropic-ai/sdk';
 
 // Configuración de los modelos
-const PROJECT_ID = 'jetai-travel';
+const PROJECT_ID = 'erudite-creek-431302-q3';  // Updated as per checklist
 const LOCATION = 'us-central1';
-const GEMINI_MODEL = 'gemini-1.5-flash-001';
+const GEMINI_MODEL = 'gemini-1.5-flash';       // Updated to match checklist
 const CLAUDE_MODEL = 'claude-3-7-sonnet-20250219'; // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
 
 // Instancias de los clientes de AI
 let vertexAI: VertexAI | null = null;
+let vertexModel: any = null;
 let generativeModel: any = null;
 let genAI: GoogleGenerativeAI | null = null;
 let anthropicClient: Anthropic | null = null;
 
 // Inicializar clientes
 const initializeAIClients = () => {
-  // Gemini (Google AI)
-  if (!genAI) {
-    try {
-      if (!process.env.GOOGLE_CLOUD_API_KEY) {
-        throw new Error('GOOGLE_CLOUD_API_KEY no está configurada');
+  // Vertex AI Gemini
+  try {
+    console.log('Initializing Google Gemini AI...');
+    // Create Vertex AI instance
+    vertexAI = new VertexAI({
+      project: PROJECT_ID,
+      location: LOCATION
+    });
+    
+    // Get the Vertex AI Gemini model using the vertex instance
+    vertexModel = vertexAI.getGenerativeModel({
+      model: GEMINI_MODEL,
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 1,
+        maxOutputTokens: 1024,
       }
-
-      console.log('Initializing Google Gemini AI...');
+    });
+    
+    // Also initialize with GenerativeAI API as a fallback
+    if (process.env.GOOGLE_CLOUD_API_KEY) {
       genAI = new GoogleGenerativeAI(process.env.GOOGLE_CLOUD_API_KEY);
-      generativeModel = genAI.getGenerativeModel({ model: GEMINI_MODEL });
-      console.log('Google Gemini AI initialized successfully!');
-    } catch (error) {
-      console.error('Error initializing Google Gemini AI:', error);
+      generativeModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-001' });
     }
+    
+    console.log('Google Gemini AI initialized successfully!');
+  } catch (error) {
+    console.error('Error initializing Google Gemini AI:', error);
   }
 
   // Claude (Anthropic)
@@ -334,10 +350,10 @@ export const processConversation = async (
   memory: ConversationMemory | null = null
 ): Promise<ChatResponse> => {
   // Verificar si tenemos inicializados los clientes
-  if (!genAI && !anthropicClient) {
+  if (!vertexModel && !anthropicClient) {
     initializeAIClients();
     
-    if (!genAI && !anthropicClient) {
+    if (!vertexModel && !anthropicClient) {
       throw new Error('No se han podido inicializar los modelos de AI');
     }
   }
@@ -363,8 +379,64 @@ export const processConversation = async (
     
     let responseContent = '';
     
-    // Intentar con Gemini primero
-    if (generativeModel) {
+    // Intentar primero con Vertex AI ChatModel (Gemini 1.5 Flash)
+    if (vertexModel) {
+      try {
+        // Formatear historial para Vertex AI
+        const formattedContents = [];
+        
+        // Agregar el mensaje de sistema
+        if (systemContent) {
+          formattedContents.push({
+            role: 'user',
+            parts: [{ text: systemContent }]
+          });
+          
+          // Si hay un mensaje de sistema, añadir una respuesta del asistente en blanco
+          formattedContents.push({
+            role: 'model',
+            parts: [{ text: 'Entendido. Estoy listo para ayudarte a planificar tu viaje.' }]
+          });
+        }
+        
+        // Agregar mensajes del historial
+        for (const msg of history) {
+          formattedContents.push({
+            role: msg.role === 'user' ? 'user' : 'model',
+            parts: [{ text: msg.content }]
+          });
+        }
+        
+        // Agregar el mensaje actual del usuario
+        formattedContents.push({
+          role: 'user',
+          parts: [{ text: userMessage }]
+        });
+        
+        // Realizar la llamada a Gemini 1.5 Flash según el formato recomendado
+        const result = await vertexModel.generateContent({
+          contents: formattedContents,
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 1,
+            maxOutputTokens: 1024,
+          },
+        });
+        
+        // Extraer respuesta
+        if (result.response && result.response.candidates && result.response.candidates.length > 0) {
+          const response = result.response.candidates[0].content.parts[0].text;
+          responseContent = response;
+        }
+      } catch (vertexError) {
+        console.error('Error con Vertex AI Gemini, intentando alternativas:', vertexError);
+        // No lanzar error aún, intentar con otro método
+      }
+    }
+    
+    // Si falló Vertex, intentar con GenerativeAI API
+    if (!responseContent && generativeModel) {
       try {
         const geminiChat = generativeModel.startChat({
           generationConfig: {
