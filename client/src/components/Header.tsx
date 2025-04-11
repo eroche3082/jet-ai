@@ -46,16 +46,16 @@ export default function Header() {
   ];
   
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-md">
-      <div className="container mx-auto px-4 py-3">
+    <header className="sticky top-0 z-50 bg-white shadow-sm py-3 px-4">
+      <div className="container mx-auto">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
             {/* Logo */}
             <Link href="/" className="flex items-center">
-              <span className="text-primary text-3xl mr-2">
+              <span className="text-primary text-2xl sm:text-3xl mr-2">
                 <i className="fas fa-paper-plane"></i>
               </span>
-              <span className="font-display font-bold text-2xl text-dark">
+              <span className="font-display font-bold text-xl sm:text-2xl text-dark">
                 Jet<span className="text-primary">AI</span>
               </span>
             </Link>
@@ -141,12 +141,15 @@ export default function Header() {
           
           {/* Mobile Menu Icon */}
           <div className="md:hidden">
-            <button 
+            <button
               onClick={toggleMobileMenu}
-              className="text-dark text-2xl"
-              aria-label="Toggle mobile menu"
+              className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100"
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             >
-              <i className={`fas ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
+              {isMobileMenuOpen ? 
+                <i className="fas fa-times text-lg"></i> : 
+                <i className="fas fa-bars text-lg"></i>
+              }
             </button>
           </div>
         </div>
