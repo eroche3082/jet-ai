@@ -1,122 +1,235 @@
 /**
- * Servicio de APIs para JetAI
- * Este archivo maneja la integración con diferentes APIs para proporcionar
- * información turística, hoteles, vuelos, etc.
+ * API Service para JetAI
+ * Este archivo contiene funciones para interactuar con diferentes APIs externas
+ * como análisis de sentimiento, búsqueda de destinos, etc.
  */
 
-import { FormData } from './itineraryGenerator';
-
-export type APICategory = 
-  | 'beachHotels'
-  | 'localExperiences'
-  | 'restaurantSuggestions'
-  | 'flightOptions'
-  | 'weatherForecast'
-  | 'currencyRates'
-  | 'localNews'
-  | 'safetyInfo';
-
-interface APIResponse {
-  success: boolean;
-  data?: any;
-  error?: string;
-}
-
-/**
- * Llama a una API externa basada en la categoría
- */
-export async function callAPI(category: APICategory, data?: FormData): Promise<APIResponse> {
+import Anthropic from '@anthropic-ai/sdk';
+import { UserProfile } from './conversationFlow';
+import { googleCloud } from './googlecloud';
+// Esta función será implementada o reemplazada según sea necesario
+async function analyzeText(prompt: string, type: string): Promise<string> {
   try {
-    console.log(`Calling API for category: ${category}`);
-    
-    // Implementación real: aquí se llamaría a las APIs correspondientes
-    // basadas en la categoría y los datos del formulario
-    
-    // Ejemplo de respuesta
-    return {
-      success: true,
-      data: {
-        category,
-        message: `API called successfully for ${category}`,
-        timestamp: new Date().toISOString()
-      }
-    };
-  } catch (error) {
-    console.error(`Error calling API for ${category}:`, error);
-    return {
-      success: false,
-      error: `Failed to call API for ${category}`
-    };
-  }
-}
-
-/**
- * Analiza el sentimiento de los datos proporcionados
- */
-export async function analyzeSentiment(data: FormData): Promise<{
-  score: number;
-  magnitude: number;
-  emotion?: 'happy' | 'sad' | 'angry' | 'neutral' | 'excited';
-}> {
-  try {
-    console.log('Analyzing sentiment of form data');
-    
-    // En una implementación real, aquí se llamaría a la API de Google Natural Language
-    // para analizar el sentimiento de los datos ingresados por el usuario
-    
-    // Por ahora, devolvemos un sentimiento neutral
-    return {
-      score: 0.1,
-      magnitude: 0.5,
-      emotion: 'neutral'
-    };
-  } catch (error) {
-    console.error('Error analyzing sentiment:', error);
-    // En caso de error, devolvemos un sentimiento neutral
-    return {
-      score: 0,
-      magnitude: 0,
-      emotion: 'neutral'
-    };
-  }
-}
-
-/**
- * Activa múltiples APIs basadas en los intereses del usuario
- */
-export async function triggerAPIs(data: FormData): Promise<APIResponse[]> {
-  const responses: APIResponse[] = [];
-  
-  try {
-    // Determinar qué APIs llamar basado en los intereses del usuario
-    if (data.interests) {
-      const interests = data.interests.toLowerCase();
-      
-      if (interests.includes('beach')) {
-        responses.push(await callAPI('beachHotels', data));
-      }
-      
-      if (interests.includes('culture') || interests.includes('history')) {
-        responses.push(await callAPI('localExperiences', data));
-      }
-      
-      if (interests.includes('food') || interests.includes('culinary')) {
-        responses.push(await callAPI('restaurantSuggestions', data));
-      }
-      
-      // Añadir más condiciones para diferentes intereses
+    // En una implementación real, esto se conectaría con una API de IA
+    // Por ahora, devolveremos respuestas genéricas para pruebas
+    if (type === 'ai') {
+      return `${prompt}\n\nThis is a placeholder response for AI text analysis.`;
+    } else if (type === 'weather') {
+      return `The weather is generally pleasant year-round. Pack for varying conditions.`;
+    } else if (type === 'itinerary') {
+      // Devolver un JSON simple para itinerario de prueba
+      return JSON.stringify({
+        days: [
+          {
+            day: 1,
+            activities: [
+              {
+                time: "9:00 AM",
+                activity: "City Tour",
+                description: "Explore the main attractions",
+                location: "City Center",
+                cost: "$30"
+              },
+              {
+                time: "1:00 PM",
+                activity: "Lunch",
+                description: "Enjoy local cuisine",
+                location: "Old Town Restaurant",
+                cost: "$15-25"
+              }
+            ]
+          }
+        ],
+        additionalInfo: {
+          weather: "Generally sunny, pack sunscreen",
+          localCurrency: "Local currency is accepted everywhere",
+          safetyTips: "The area is generally safe for tourists",
+          customTips: ["Learn a few local phrases", "Try the local specialty dishes"]
+        }
+      });
     }
     
-    // Estas APIs se llaman independientemente de los intereses
-    responses.push(await callAPI('weatherForecast', data));
-    responses.push(await callAPI('safetyInfo', data));
-    
-    return responses;
+    return "No specific analysis available for this query type.";
   } catch (error) {
-    console.error('Error triggering APIs:', error);
-    return [{
-      success: false,
-      error: 'Failed to trigger APIs'
-    }];
+    console.error('Error in analyzeText:', error);
+    return "Error processing text analysis request.";
   }
+};
+
+// Initialize Anthropic client if API key is available
+let anthropicClient: Anthropic | null = null;
+if (process.env.ANTHROPIC_API_KEY) {
+  anthropicClient = new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  });
+  console.log('Anthropic client initialized');
+} else {
+  console.log('ANTHROPIC_API_KEY not found, Anthropic features will be disabled');
+}
+
+/**
+ * Analiza el sentimiento del mensaje del usuario
+ */
+export async function analyzeSentiment(profile: UserProfile): Promise<{
+  emotion: 'happy' | 'sad' | 'angry' | 'neutral' | 'excited' | 'confused';
+  score: number;
+}> {
+  try {
+    // Si tenemos Anthropic configurado, usamos su API para un análisis más sofisticado
+    if (anthropicClient) {
+      // Extraer el último mensaje del usuario si hay historial
+      const lastUserMessage = profile.conversationHistory?.findLast(
+        (msg) => msg.role === 'user'
+      )?.content || '';
+
+      const response = await anthropicClient.messages.create({
+        model: 'claude-3-haiku-20240307',
+        max_tokens: 100,
+        system: "You are a sentiment analysis expert. Analyze the emotional tone of the user's message and categorize it as 'happy', 'sad', 'angry', 'confused', 'excited', or 'neutral'. Provide only a JSON object with 'emotion' and 'score' (0-1) keys.",
+        messages: [
+          { role: 'user', content: lastUserMessage || 'Hello' }
+        ],
+      });
+
+      // Intentar extraer JSON de la respuesta
+      const content = response.content[0].text;
+      try {
+        const result = JSON.parse(content);
+        return {
+          emotion: result.emotion || 'neutral',
+          score: result.score || 0.5
+        };
+      } catch (e) {
+        console.error('Could not parse sentiment JSON:', content);
+        return { emotion: 'neutral', score: 0.5 };
+      }
+    } else {
+      // Fallback a un análisis más simple con Google NLP si está disponible
+      try {
+        // Extraer el último mensaje del usuario si hay historial
+        const lastUserMessage = profile.conversationHistory?.findLast(
+          (msg) => msg.role === 'user'
+        )?.content || '';
+
+        if (process.env.GOOGLE_NATURAL_LANGUAGE_API_KEY) {
+          const result = await googleCloud.naturalLanguage.analyzeSentiment(lastUserMessage);
+          // Mapear el score a una emoción
+          let emotion: 'happy' | 'sad' | 'angry' | 'neutral' | 'excited' | 'confused' = 'neutral';
+          
+          if (result.score > 0.5) emotion = 'happy';
+          else if (result.score > 0.8) emotion = 'excited';
+          else if (result.score < -0.5) emotion = 'sad';
+          else if (result.score < -0.8) emotion = 'angry';
+          
+          return {
+            emotion,
+            score: (result.score + 1) / 2 // Normalizar de [-1,1] a [0,1]
+          };
+        }
+      } catch (error) {
+        console.error('Error using Google NLP for sentiment:', error);
+      }
+      
+      // Fallback a un análisis basado en reglas simples
+      const text = profile.conversationHistory?.findLast(
+        (msg) => msg.role === 'user'
+      )?.content?.toLowerCase() || '';
+      
+      // Patrones emocionales simples
+      const happyPatterns = ['happy', 'glad', 'great', 'good', 'excellent', 'fantastic', 'wonderful'];
+      const sadPatterns = ['sad', 'unhappy', 'disappointed', 'sorry', 'unfortunately'];
+      const angryPatterns = ['angry', 'annoyed', 'frustrated', 'terrible', 'worst', 'bad', 'hate'];
+      const excitedPatterns = ['excited', 'amazing', 'wow', 'awesome', 'incredible', 'love', 'can\'t wait'];
+      const confusedPatterns = ['confused', 'unsure', 'not sure', 'don\'t understand', 'what do you mean'];
+      
+      // Verificar patrones
+      if (happyPatterns.some(pattern => text.includes(pattern))) {
+        return { emotion: 'happy', score: 0.8 };
+      }
+      
+      if (sadPatterns.some(pattern => text.includes(pattern))) {
+        return { emotion: 'sad', score: 0.3 };
+      }
+      
+      if (angryPatterns.some(pattern => text.includes(pattern))) {
+        return { emotion: 'angry', score: 0.2 };
+      }
+      
+      if (excitedPatterns.some(pattern => text.includes(pattern))) {
+        return { emotion: 'excited', score: 0.9 };
+      }
+      
+      if (confusedPatterns.some(pattern => text.includes(pattern))) {
+        return { emotion: 'confused', score: 0.4 };
+      }
+      
+      // Signos de exclamación para entusiasmo
+      if (text.includes('!') && !text.includes('?')) {
+        return { emotion: 'excited', score: 0.7 };
+      }
+      
+      // Por defecto, neutral
+      return { emotion: 'neutral', score: 0.5 };
+    }
+  } catch (error) {
+    console.error('Error analyzing sentiment:', error);
+    return { emotion: 'neutral', score: 0.5 };
+  }
+}
+
+/**
+ * Activa las APIs relevantes según el perfil del usuario
+ */
+export async function triggerAPIs(profile: UserProfile): Promise<any[]> {
+  const results = [];
+  
+  // Si el perfil tiene destino, podemos buscar información sobre ese destino
+  if (profile.destination) {
+    try {
+      // Buscar información general sobre el destino
+      const destinationInfo = await analyzeText(
+        `Provide a brief overview of ${profile.destination} as a travel destination, including climate, culture, and top attractions.`,
+        'ai'
+      );
+      
+      results.push({
+        type: 'destination_info',
+        success: true,
+        data: destinationInfo
+      });
+    } catch (error) {
+      console.error(`Error fetching destination info for ${profile.destination}:`, error);
+      results.push({
+        type: 'destination_info',
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+  
+  // Si el perfil tiene fechas, podemos buscar información de clima
+  if (profile.destination && profile.dates) {
+    try {
+      // Podríamos integrar una API de clima real aquí
+      const weatherInfo = await analyzeText(
+        `What's the typical weather in ${profile.destination} during ${profile.dates}?`,
+        'weather'
+      );
+      
+      results.push({
+        type: 'weather_info',
+        success: true,
+        data: weatherInfo
+      });
+    } catch (error) {
+      console.error(`Error fetching weather info for ${profile.destination}:`, error);
+      results.push({
+        type: 'weather_info',
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+  
+  return results;
 }

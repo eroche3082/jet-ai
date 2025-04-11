@@ -1562,6 +1562,158 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Routes for the conversation flow system
+  app.post("/api/conversation/process", async (req, res) => {
+    try {
+      const { message, profile } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ message: "Message is required" });
+      }
+      
+      if (!profile || typeof profile !== 'object') {
+        return res.status(400).json({ message: "Valid profile object is required" });
+      }
+      
+      // Set the initial conversation stage if not present
+      if (profile.currentStage === undefined) {
+        profile.currentStage = ConversationStage.GREETING;
+      }
+      
+      // Process the message and get the response
+      const { response, updatedProfile, emotion } = await processUserMessage(message, profile);
+      
+      // Store chat message in history if user is authenticated
+      if (req.user) {
+        const userId = (req.user as any).id;
+        await storage.saveChatMessage(userId, message, 'user');
+        await storage.saveChatMessage(userId, response, 'assistant');
+      }
+      
+      res.json({
+        response,
+        updatedProfile,
+        emotion
+      });
+    } catch (error) {
+      console.error("Error processing conversation:", error);
+      res.status(500).json({ message: "Error processing conversation" });
+    }
+  });
+  
+  // Route to generate a complete itinerary
+  app.post("/api/itinerary/generate-from-profile", async (req, res) => {
+    try {
+      const { profile } = req.body;
+      
+      if (!profile || !profile.destination) {
+        return res.status(400).json({ message: "Valid profile with destination is required" });
+      }
+      
+      // Generate the itinerary
+      const itineraryText = await generateUserItinerary(profile);
+      
+      // Store itinerary if user is authenticated
+      if (req.user) {
+        const userId = (req.user as any).id;
+        
+        // Create a basic itinerary record
+        await storage.createItinerary({
+          title: `Trip to ${profile.destination}`,
+          description: `Itinerary for ${profile.destination}`,
+          destination: profile.destination,
+          content: itineraryText,
+          userId: userId,
+          startDate: new Date(),
+          endDate: new Date(),
+          isPublic: false,
+          isBookmarked: false,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+      }
+      
+      res.json({
+        itinerary: itineraryText
+      });
+    } catch (error) {
+      console.error("Error generating itinerary from profile:", error);
+      res.status(500).json({ message: "Error generating itinerary" });
+    }
+  });
+
+  // Route for Text-to-Speech synthesis using Google TTS
+  app.post("/api/tts/synthesize", async (req, res) => {
+    try {
+      const { text, voice = "elegant-female-concierge" } = req.body;
+      
+      if (!text) {
+        return res.status(400).json({ message: "Text is required" });
+      }
+      
+      // Check if Google Cloud API key is available
+      if (!process.env.GOOGLE_TTS_API_KEY) {
+        return res.status(503).json({ 
+          message: "Text-to-speech is currently unavailable. API configuration required."
+        });
+      }
+      
+      // Map voice style to Google TTS voices
+      const voiceMap: Record<string, string> = {
+        "elegant-female-concierge": "en-US-Studio-O",
+        "adventurous-guide": "en-US-Neural2-D",
+        "knowledgeable-cultural-expert": "en-US-Neural2-F",
+        "friendly-latino-companion": "es-US-Neural2-A",
+        "luxury-specialist": "en-GB-Neural2-B"
+      };
+      
+      const selectedVoice = voiceMap[voice] || 'en-US-Neural2-F';
+      
+      try {
+        // Use Google TTS API to synthesize speech
+        const speechResponse = await googleCloud.synthesizeSpeech(text, selectedVoice);
+        
+        // Return audio URL (in a real implementation, this would be stored and served)
+        res.json({
+          audioUrl: speechResponse.audioUrl
+        });
+      } catch (error: any) {
+        console.error("TTS API error:", error);
+        res.status(500).json({ message: "Error in text-to-speech synthesis" });
+      }
+    } catch (error) {
+      console.error("Error in TTS endpoint:", error);
+      res.status(500).json({ message: "Error processing TTS request" });
+    }
+  });
+
+  // Route for getting the system configuration
+  app.get("/api/system/config", (req, res) => {
+    // System configurations - these could be loaded from a database in a real implementation
+    const systemConfig = {
+      assistant: {
+        personalityOptions: ["concierge", "explorer", "cultural", "exclusivo", "amigo", "gourmet", "vecino"],
+        defaultPersonality: "concierge",
+        supportedLanguages: ["en-US", "es-ES", "fr-FR", "de-DE", "it-IT", "pt-BR", "ja-JP", "ko-KR", "zh-CN"],
+        defaultLanguage: "en-US",
+        voiceOptions: [
+          { id: "elegant-female-concierge", name: "Elegant Female Concierge", language: "en-US" },
+          { id: "adventurous-guide", name: "Adventurous Guide", language: "en-US" },
+          { id: "knowledgeable-cultural-expert", name: "Cultural Expert", language: "en-US" },
+          { id: "friendly-latino-companion", name: "Latino Companion", language: "es-US" },
+          { id: "luxury-specialist", name: "Luxury Specialist", language: "en-GB" }
+        ]
+      },
+      interface: {
+        colorThemes: ["light", "dark", "system"],
+        defaultTheme: "system",
+        supportedViews: ["chat", "dashboard", "explore", "itinerary", "flights", "hotels"]
+      }
+    };
+    
+    res.json(systemConfig);
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
