@@ -183,11 +183,27 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     const loadVoices = async () => {
       try {
         const voicesData = await googleCloud.tts.getVoices();
-        if (voicesData && typeof voicesData === 'object') {
-          const voices = Array.isArray(voicesData) ? voicesData : 
-                       (voicesData.voices && Array.isArray(voicesData.voices)) ? voicesData.voices : [];
-          setAvailableVoices(voices);
+        // Manejo seguro de datos de voces según la estructura devuelta por la API
+        let voicesArray: any[] = [];
+        
+        if (voicesData) {
+          if (Array.isArray(voicesData)) {
+            voicesArray = voicesData;
+          } else if (typeof voicesData === 'object') {
+            // Si no es un array pero tiene una propiedad 'voices' que es un array, úsalo
+            if ('voices' in voicesData && Array.isArray(voicesData.voices)) {
+              voicesArray = voicesData.voices;
+            } else {
+              // Si es un objeto pero no tiene la estructura esperada, intentamos extraer valores
+              const possibleVoices = Object.values(voicesData).find(v => Array.isArray(v));
+              if (possibleVoices) {
+                voicesArray = possibleVoices;
+              }
+            }
+          }
         }
+        
+        setAvailableVoices(voicesArray);
       } catch (error) {
         console.error("Error loading TTS voices:", error);
       }
@@ -797,8 +813,13 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
             });
             
             if (travelLabels.length > 0) {
+              // Extraer y formatear las etiquetas principales
               const topLabels = travelLabels.slice(0, 3)
-                .map(l => typeof l.description === 'string' ? l.description : 'destination')
+                .map(l => {
+                  if (!l) return 'travel destination';
+                  if (typeof l === 'string') return l;
+                  return typeof l.description === 'string' ? l.description : 'destination';
+                })
                 .join(', ');
               analysisMessage = `I see that you've shared a travel image featuring ${topLabels}! This looks like a beautiful destination. \n\nWould you like me to suggest similar places to visit or help you plan a trip to a place like this?`;
             } else {
