@@ -206,6 +206,77 @@ export default function PartnerDashboard() {
           
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
+            {/* Date Range Filter */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                  <div className="flex items-center space-x-4">
+                    <div>
+                      <Label htmlFor="dateRange">Date Range</Label>
+                      <Select defaultValue="last30days">
+                        <SelectTrigger id="dateRange" className="w-[180px]">
+                          <SelectValue placeholder="Select period" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="last7days">Last 7 days</SelectItem>
+                          <SelectItem value="last30days">Last 30 days</SelectItem>
+                          <SelectItem value="last90days">Last 90 days</SelectItem>
+                          <SelectItem value="thisYear">This year</SelectItem>
+                          <SelectItem value="custom">Custom range</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-[180px] pl-3 text-left font-normal"
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {format(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), "PPP")}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)}
+                            onSelect={() => {}}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <span>to</span>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-[180px] pl-3 text-left font-normal"
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {format(new Date(), "PPP")}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={new Date()}
+                            onSelect={() => {}}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
+                  
+                  <Button>
+                    Apply Filter
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard 
                 title="Total Visits" 
