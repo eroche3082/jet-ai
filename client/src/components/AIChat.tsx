@@ -1054,6 +1054,30 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
         </div>
       )}
 
+      {/* Tools Bar */}
+      <div className="p-2 border-t border-gray-200 flex justify-center">
+        <div className="flex space-x-2 overflow-x-auto hide-scrollbar">
+          <Link href="/memories">
+            <Button variant="ghost" size="sm" className="rounded-full flex items-center text-xs">
+              <BookOpen className="h-4 w-4 mr-1" />
+              <span>Travel Memories</span>
+            </Button>
+          </Link>
+          <Link href="/camera">
+            <Button variant="ghost" size="sm" className="rounded-full flex items-center text-xs">
+              <Camera className="h-4 w-4 mr-1" />
+              <span>Camera</span>
+            </Button>
+          </Link>
+          <Link href="/hotels">
+            <Button variant="ghost" size="sm" className="rounded-full flex items-center text-xs">
+              <Globe className="h-4 w-4 mr-1" />
+              <span>Explore</span>
+            </Button>
+          </Link>
+        </div>
+      </div>
+
       {/* Chat Input */}
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center">
