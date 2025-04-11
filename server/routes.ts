@@ -19,9 +19,9 @@ import memorystore from 'memorystore';
 import { googleCloud } from './lib/googlecloud';
 import { 
   processUserMessage, 
-  generateUserItinerary,
   ConversationStage 
 } from './lib/conversationFlow';
+import { generateUserItinerary } from './lib/itineraryGenerator';
 
 // Configure session store
 const createSessionStore = () => {
@@ -1671,7 +1671,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       try {
         // Use Google TTS API to synthesize speech
-        const speechResponse = await googleCloud.synthesizeSpeech(text, selectedVoice);
+        const speechResponse = await googleCloud.tts.synthesize(text, {
+          voice: selectedVoice
+        });
         
         // Return audio URL (in a real implementation, this would be stored and served)
         res.json({

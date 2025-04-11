@@ -4,67 +4,81 @@
  * como análisis de sentimiento, búsqueda de destinos, etc.
  */
 
-import Anthropic from '@anthropic-ai/sdk';
+import { Anthropic } from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { UserProfile } from './conversationFlow';
-import { googleCloud } from './googlecloud';
-// Esta función será implementada o reemplazada según sea necesario
+
+// Inicializar clientes de APIs
+let anthropicClient: Anthropic | null = null;
+let geminiClient: GoogleGenerativeAI | null = null;
+
+try {
+  // Inicializar Anthropic si API_KEY está disponible
+  if (process.env.ANTHROPIC_API_KEY) {
+    anthropicClient = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    });
+    console.log("Anthropic client initialized");
+  }
+
+  // Inicializar Gemini si API_KEY está disponible
+  if (process.env.GEMINI_API_KEY) {
+    geminiClient = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  }
+} catch (error) {
+  console.error("Error initializing AI clients:", error);
+}
+
+/**
+ * Analiza texto con IA. Intenta usar Anthropic primero, luego Gemini como fallback.
+ */
 async function analyzeText(prompt: string, type: string): Promise<string> {
   try {
-    // En una implementación real, esto se conectaría con una API de IA
-    // Por ahora, devolveremos respuestas genéricas para pruebas
-    if (type === 'ai') {
-      return `${prompt}\n\nThis is a placeholder response for AI text analysis.`;
-    } else if (type === 'weather') {
-      return `The weather is generally pleasant year-round. Pack for varying conditions.`;
-    } else if (type === 'itinerary') {
-      // Devolver un JSON simple para itinerario de prueba
-      return JSON.stringify({
-        days: [
-          {
-            day: 1,
-            activities: [
-              {
-                time: "9:00 AM",
-                activity: "City Tour",
-                description: "Explore the main attractions",
-                location: "City Center",
-                cost: "$30"
-              },
-              {
-                time: "1:00 PM",
-                activity: "Lunch",
-                description: "Enjoy local cuisine",
-                location: "Old Town Restaurant",
-                cost: "$15-25"
-              }
-            ]
-          }
-        ],
-        additionalInfo: {
-          weather: "Generally sunny, pack sunscreen",
-          localCurrency: "Local currency is accepted everywhere",
-          safetyTips: "The area is generally safe for tourists",
-          customTips: ["Learn a few local phrases", "Try the local specialty dishes"]
-        }
-      });
+    // Intentar usar Anthropic Claude
+    if (anthropicClient) {
+      try {
+        const message = await anthropicClient.messages.create({
+          model: "claude-3-opus-20240229",
+          max_tokens: 1500,
+          system: `You are an AI assistant for JetAI, a luxury travel platform. You are analyzing user input to help with ${type}.`,
+          messages: [{ role: "user", content: prompt }]
+        });
+        
+        // Extraer el texto de la respuesta
+        return message.content[0].text;
+      } catch (error) {
+        console.error("Anthropic analysis error:", error);
+        // Continuar con Gemini como fallback
+      }
     }
     
-    return "No specific analysis available for this query type.";
+    // Intentar usar Gemini como fallback
+    if (geminiClient) {
+      try {
+        const model = geminiClient.getGenerativeModel({ model: "gemini-1.5-flash" });
+        
+        const result = await model.generateContent({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.2,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 1500,
+          }
+        });
+        
+        return result.response.text();
+      } catch (error) {
+        console.error("Gemini analysis error:", error);
+      }
+    }
+    
+    // Si todo falla, devolver un mensaje genérico
+    return "No fue posible analizar el texto en este momento. Por favor, intenta nuevamente más tarde.";
   } catch (error) {
-    console.error('Error in analyzeText:', error);
-    return "Error processing text analysis request.";
+    console.error("Error analyzing text:", error);
+    return "Error en el análisis de texto.";
   }
-};
-
-// Initialize Anthropic client if API key is available
-let anthropicClient: Anthropic | null = null;
-if (process.env.ANTHROPIC_API_KEY) {
-  anthropicClient = new Anthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-  });
-  console.log('Anthropic client initialized');
-} else {
-  console.log('ANTHROPIC_API_KEY not found, Anthropic features will be disabled');
 }
 
 /**
@@ -72,108 +86,66 @@ if (process.env.ANTHROPIC_API_KEY) {
  */
 export async function analyzeSentiment(profile: UserProfile): Promise<{
   emotion: 'happy' | 'sad' | 'angry' | 'neutral' | 'excited' | 'confused';
-  score: number;
+  confidence: number;
 }> {
   try {
-    // Si tenemos Anthropic configurado, usamos su API para un análisis más sofisticado
-    if (anthropicClient) {
-      // Extraer el último mensaje del usuario si hay historial
-      const lastUserMessage = profile.conversationHistory?.findLast(
-        (msg) => msg.role === 'user'
-      )?.content || '';
-
-      const response = await anthropicClient.messages.create({
-        model: 'claude-3-haiku-20240307',
-        max_tokens: 100,
-        system: "You are a sentiment analysis expert. Analyze the emotional tone of the user's message and categorize it as 'happy', 'sad', 'angry', 'confused', 'excited', or 'neutral'. Provide only a JSON object with 'emotion' and 'score' (0-1) keys.",
-        messages: [
-          { role: 'user', content: lastUserMessage || 'Hello' }
-        ],
-      });
-
-      // Intentar extraer JSON de la respuesta
-      const content = response.content[0].text;
-      try {
-        const result = JSON.parse(content);
-        return {
-          emotion: result.emotion || 'neutral',
-          score: result.score || 0.5
-        };
-      } catch (e) {
-        console.error('Could not parse sentiment JSON:', content);
-        return { emotion: 'neutral', score: 0.5 };
-      }
-    } else {
-      // Fallback a un análisis más simple con Google NLP si está disponible
-      try {
-        // Extraer el último mensaje del usuario si hay historial
-        const lastUserMessage = profile.conversationHistory?.findLast(
-          (msg) => msg.role === 'user'
-        )?.content || '';
-
-        if (process.env.GOOGLE_NATURAL_LANGUAGE_API_KEY) {
-          const result = await googleCloud.naturalLanguage.analyzeSentiment(lastUserMessage);
-          // Mapear el score a una emoción
-          let emotion: 'happy' | 'sad' | 'angry' | 'neutral' | 'excited' | 'confused' = 'neutral';
-          
-          if (result.score > 0.5) emotion = 'happy';
-          else if (result.score > 0.8) emotion = 'excited';
-          else if (result.score < -0.5) emotion = 'sad';
-          else if (result.score < -0.8) emotion = 'angry';
-          
-          return {
-            emotion,
-            score: (result.score + 1) / 2 // Normalizar de [-1,1] a [0,1]
-          };
-        }
-      } catch (error) {
-        console.error('Error using Google NLP for sentiment:', error);
+    // Si no hay historial de conversación, devolver neutral
+    if (!profile.conversationHistory || profile.conversationHistory.length === 0) {
+      return { emotion: 'neutral', confidence: 1.0 };
+    }
+    
+    // Obtener el último mensaje del usuario
+    const lastUserMessage = [...profile.conversationHistory]
+      .reverse()
+      .find(msg => msg.role === 'user')?.content;
+    
+    if (!lastUserMessage) {
+      return { emotion: 'neutral', confidence: 1.0 };
+    }
+    
+    // Analizar el sentimiento con IA
+    const prompt = `
+      Analyze the sentiment in this message: "${lastUserMessage}"
+      
+      Respond with a JSON object containing:
+      1. emotion: One of ["happy", "sad", "angry", "neutral", "excited", "confused"]
+      2. confidence: A number between 0 and 1 indicating confidence
+      
+      JSON only, no explanation.
+    `;
+    
+    const response = await analyzeText(prompt, "sentiment analysis");
+    
+    try {
+      // Intentar extraer el JSON de la respuesta
+      const jsonMatch = response.match(/({[\s\S]*})/);
+      let result: { emotion: any, confidence: number };
+      
+      if (jsonMatch) {
+        result = JSON.parse(jsonMatch[1]);
+      } else {
+        // Si no podemos extraer el JSON, intentar analizar toda la respuesta
+        result = JSON.parse(response);
       }
       
-      // Fallback a un análisis basado en reglas simples
-      const text = profile.conversationHistory?.findLast(
-        (msg) => msg.role === 'user'
-      )?.content?.toLowerCase() || '';
+      // Validar y asegurar que emotion es uno de los valores permitidos
+      const validEmotions = ['happy', 'sad', 'angry', 'neutral', 'excited', 'confused'];
+      const emotion = validEmotions.includes(result.emotion) ? 
+        result.emotion as 'happy' | 'sad' | 'angry' | 'neutral' | 'excited' | 'confused' : 
+        'neutral';
       
-      // Patrones emocionales simples
-      const happyPatterns = ['happy', 'glad', 'great', 'good', 'excellent', 'fantastic', 'wonderful'];
-      const sadPatterns = ['sad', 'unhappy', 'disappointed', 'sorry', 'unfortunately'];
-      const angryPatterns = ['angry', 'annoyed', 'frustrated', 'terrible', 'worst', 'bad', 'hate'];
-      const excitedPatterns = ['excited', 'amazing', 'wow', 'awesome', 'incredible', 'love', 'can\'t wait'];
-      const confusedPatterns = ['confused', 'unsure', 'not sure', 'don\'t understand', 'what do you mean'];
+      // Asegurar que confidence es un número entre 0 y 1
+      const confidence = Math.max(0, Math.min(1, result.confidence || 0.5));
       
-      // Verificar patrones
-      if (happyPatterns.some(pattern => text.includes(pattern))) {
-        return { emotion: 'happy', score: 0.8 };
-      }
-      
-      if (sadPatterns.some(pattern => text.includes(pattern))) {
-        return { emotion: 'sad', score: 0.3 };
-      }
-      
-      if (angryPatterns.some(pattern => text.includes(pattern))) {
-        return { emotion: 'angry', score: 0.2 };
-      }
-      
-      if (excitedPatterns.some(pattern => text.includes(pattern))) {
-        return { emotion: 'excited', score: 0.9 };
-      }
-      
-      if (confusedPatterns.some(pattern => text.includes(pattern))) {
-        return { emotion: 'confused', score: 0.4 };
-      }
-      
-      // Signos de exclamación para entusiasmo
-      if (text.includes('!') && !text.includes('?')) {
-        return { emotion: 'excited', score: 0.7 };
-      }
-      
-      // Por defecto, neutral
-      return { emotion: 'neutral', score: 0.5 };
+      return { emotion, confidence };
+    } catch (error) {
+      console.error("Error parsing sentiment response:", error);
+      console.log("Raw sentiment response:", response);
+      return { emotion: 'neutral', confidence: 0.5 };
     }
   } catch (error) {
-    console.error('Error analyzing sentiment:', error);
-    return { emotion: 'neutral', score: 0.5 };
+    console.error("Error analyzing sentiment:", error);
+    return { emotion: 'neutral', confidence: 0.5 };
   }
 }
 
@@ -183,53 +155,49 @@ export async function analyzeSentiment(profile: UserProfile): Promise<{
 export async function triggerAPIs(profile: UserProfile): Promise<any[]> {
   const results = [];
   
-  // Si el perfil tiene destino, podemos buscar información sobre ese destino
-  if (profile.destination) {
-    try {
-      // Buscar información general sobre el destino
-      const destinationInfo = await analyzeText(
-        `Provide a brief overview of ${profile.destination} as a travel destination, including climate, culture, and top attractions.`,
-        'ai'
-      );
-      
-      results.push({
-        type: 'destination_info',
-        success: true,
-        data: destinationInfo
-      });
-    } catch (error) {
-      console.error(`Error fetching destination info for ${profile.destination}:`, error);
-      results.push({
-        type: 'destination_info',
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
+  try {
+    // Si tenemos un destino, buscar información sobre él
+    if (profile.destination) {
+      try {
+        const destinationPrompt = `
+          Provide brief but comprehensive travel information about ${profile.destination}.
+          Include:
+          - Best time to visit
+          - Local currency
+          - Language spoken
+          - 2-3 must-see attractions
+          - Weather details for different seasons
+          - Local transportation options
+          Format as concise markdown with headings.
+        `;
+        
+        const destinationInfo = await analyzeText(destinationPrompt, "destination research");
+        
+        results.push({
+          type: 'destination_info',
+          success: true,
+          data: destinationInfo
+        });
+      } catch (error) {
+        console.error("Error fetching destination info:", error);
+        results.push({
+          type: 'destination_info',
+          success: false,
+          error: "No se pudo obtener información del destino"
+        });
+      }
     }
+    
+    // Aquí podrías agregar más llamadas a APIs:
+    // - Clima
+    // - Moneda local y tasas de cambio
+    // - Atracciones turísticas
+    // - Vuelos disponibles
+    // - Alojamientos recomendados
+    
+    return results;
+  } catch (error) {
+    console.error("Error triggering APIs:", error);
+    return results;
   }
-  
-  // Si el perfil tiene fechas, podemos buscar información de clima
-  if (profile.destination && profile.dates) {
-    try {
-      // Podríamos integrar una API de clima real aquí
-      const weatherInfo = await analyzeText(
-        `What's the typical weather in ${profile.destination} during ${profile.dates}?`,
-        'weather'
-      );
-      
-      results.push({
-        type: 'weather_info',
-        success: true,
-        data: weatherInfo
-      });
-    } catch (error) {
-      console.error(`Error fetching weather info for ${profile.destination}:`, error);
-      results.push({
-        type: 'weather_info',
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-  
-  return results;
 }
