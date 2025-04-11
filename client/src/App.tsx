@@ -15,6 +15,7 @@ import MobileLayout from "@/components/MobileLayout";
 import { useState, useEffect } from 'react';
 import ChatBubble from "@/components/ChatBubble";
 import AIChat from "@/components/AIChat";
+import TravelCockpit from "@/components/TravelCockpit";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { getAffiliateId } from "@/lib/utils";
 import PartnerDashboard from "@/pages/partner/Dashboard";
