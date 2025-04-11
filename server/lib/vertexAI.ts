@@ -376,20 +376,26 @@ export const processConversation = async (
           systemInstruction: systemContent,
         });
         
-        // Preparar historial para Gemini
-        const geminiHistory = history.map(msg => ({
-          role: msg.role === 'user' ? 'user' : 'model',
-          parts: [{ text: msg.content }]
-        }));
+        // Gemini 1.5 utiliza un formato diferente para los mensajes
+        // Convertir el historial al formato correcto para Gemini
+        let formattedHistory = [];
+        
+        // Agregar mensajes del historial
+        for (const msg of history) {
+          formattedHistory.push({
+            role: msg.role === 'user' ? 'user' : 'model',
+            parts: [{ text: msg.content }]
+          });
+        }
+        
+        // Agregar el mensaje actual del usuario
+        formattedHistory.push({
+          role: 'user',
+          parts: [{ text: userMessage }]
+        });
         
         // Realizar la llamada a Gemini
-        const result = await geminiChat.sendMessageStream([
-          ...geminiHistory,
-          {
-            role: 'user',
-            parts: [{ text: userMessage }]
-          }
-        ]);
+        const result = await geminiChat.sendMessageStream(formattedHistory);
         
         // Extraer respuesta
         let response = '';
