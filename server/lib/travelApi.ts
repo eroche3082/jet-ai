@@ -3,6 +3,75 @@
  * Handles external API calls to travel services
  */
 
+import axios from 'axios';
+
+// Flight API integration
+/**
+ * Search for flights based on criteria
+ */
+export async function searchFlights(params: {
+  origin: string;
+  destination: string;
+  departureDate: string;
+  returnDate?: string;
+  adults?: number;
+  children?: number;
+  infants?: number;
+  cabinClass?: string;
+  direct?: boolean;
+}) {
+  try {
+    // Check if Skyscanner API key is available
+    if (process.env.SKYSCANNER_API_KEY) {
+      // Here we would make the actual API call to Skyscanner
+      const response = await axios.get('https://partners.api.skyscanner.net/apiservices/v3/flights/live/search/create', {
+        headers: {
+          'x-api-key': process.env.SKYSCANNER_API_KEY
+        },
+        params: {
+          origin: params.origin,
+          destination: params.destination,
+          departureDate: params.departureDate,
+          returnDate: params.returnDate,
+          adults: params.adults || 1,
+          cabinClass: params.cabinClass || 'economy'
+        }
+      });
+      
+      return response.data;
+    } else {
+      // Return error indicating missing API key
+      throw new Error('SKYSCANNER_API_KEY is not configured. Please set up Skyscanner API integration.');
+    }
+  } catch (error) {
+    console.error("Error searching flights:", error);
+    throw error;
+  }
+}
+
+/**
+ * Get detailed information about a specific flight
+ */
+export async function getFlightById(flightId: string) {
+  try {
+    if (process.env.SKYSCANNER_API_KEY) {
+      // Here we would make the actual API call to Skyscanner
+      const response = await axios.get(`https://partners.api.skyscanner.net/apiservices/v3/flights/${flightId}`, {
+        headers: {
+          'x-api-key': process.env.SKYSCANNER_API_KEY
+        }
+      });
+      
+      return response.data;
+    } else {
+      throw new Error('SKYSCANNER_API_KEY is not configured. Please set up Skyscanner API integration.');
+    }
+  } catch (error) {
+    console.error("Error getting flight details:", error);
+    throw error;
+  }
+}
+
 // Destination data
 const destinations = [
   {

@@ -241,6 +241,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error recommending destinations" });
     }
   });
+  
+  // Flight search endpoints
+  app.get("/api/flights/search", async (req, res) => {
+    try {
+      const { 
+        origin, 
+        destination, 
+        departureDate, 
+        returnDate, 
+        adults, 
+        children,
+        infants,
+        cabinClass,
+        direct
+      } = req.query;
+      
+      if (!origin || !destination || !departureDate) {
+        return res.status(400).json({ 
+          message: "Origin, destination and departure date are required" 
+        });
+      }
+      
+      try {
+        // Call the flight search function
+        const flights = await searchFlights({
+          origin: origin as string,
+          destination: destination as string,
+          departureDate: departureDate as string,
+          returnDate: returnDate as string,
+          adults: adults ? parseInt(adults as string) : 1,
+          children: children ? parseInt(children as string) : 0,
+          infants: infants ? parseInt(infants as string) : 0,
+          cabinClass: cabinClass as string,
+          direct: direct === 'true'
+        });
+        
+        res.json({ flights });
+      } catch (error: any) {
+        // Check if this is a missing API key error
+        if (error.message && error.message.includes('API_KEY')) {
+          res.status(503).json({ 
+            message: "Flight search is currently unavailable. API configuration required."
+          });
+        } else {
+          res.status(500).json({ 
+            message: "Error searching flights"
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error searching flights:", error);
+      res.status(500).json({ message: "Error searching flights" });
+    }
+  });
+  
+  app.get("/api/flights/:id", async (req, res) => {
+    try {
+      const flightId = req.params.id;
+      
+      try {
+        const flight = await getFlightById(flightId);
+        res.json(flight);
+      } catch (error: any) {
+        // Check if this is a missing API key error
+        if (error.message && error.message.includes('API_KEY')) {
+          res.status(503).json({ 
+            message: "Flight details are currently unavailable. API configuration required."
+          });
+        } else {
+          res.status(500).json({ 
+            message: "Error retrieving flight details"
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error getting flight details:", error);
+      res.status(500).json({ message: "Error getting flight details" });
+    }
+  });
 
   app.post("/api/itinerary/generate", async (req, res) => {
     try {
