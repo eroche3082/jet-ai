@@ -26,6 +26,9 @@ interface ApiStatus {
   api: string;
   keyPresent: boolean;
   notes: string;
+  category: 'Travel' | 'Accommodation' | 'Experience' | 'Transport' | 'Location' | 
+            'Weather' | 'Payment' | 'Voice' | 'Calendar' | 'Document' | 'Loyalty' | 
+            'Auth' | 'Communication' | 'Language' | 'Search' | 'AI' | 'Vision' | 'Wearable';
 }
 
 interface ApiVerificationResponse {
@@ -117,6 +120,57 @@ export default function ApiIntegrationsPanel() {
     (connectedApis.length / data.apiStatuses.length) * 100
   );
 
+  // Group APIs by category
+  const groupApisByCategory = (apis: ApiStatus[]) => {
+    const grouped: Record<string, ApiStatus[]> = {};
+    
+    apis.forEach(api => {
+      if (!grouped[api.category]) {
+        grouped[api.category] = [];
+      }
+      grouped[api.category].push(api);
+    });
+    
+    return grouped;
+  };
+
+  const connectedByCategory = groupApisByCategory(connectedApis);
+  const missingByCategory = groupApisByCategory(missingApis);
+  
+  // Categories in a specific order of importance
+  const categoryOrder = [
+    'Travel', 'Accommodation', 'Experience', 'Transport', 'Location', 
+    'Weather', 'Payment', 'AI', 'Language', 'Voice', 'Vision',
+    'Calendar', 'Document', 'Loyalty', 'Auth', 'Communication', 
+    'Search', 'Wearable'
+  ];
+  
+  // Function to get a color for each category
+  const getCategoryColor = (category: string) => {
+    const colors: Record<string, string> = {
+      'Travel': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+      'Accommodation': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+      'Experience': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+      'Transport': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+      'Location': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
+      'Weather': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200',
+      'Payment': 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
+      'Voice': 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200',
+      'Calendar': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+      'Document': 'bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-200',
+      'Loyalty': 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+      'Auth': 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200',
+      'Communication': 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
+      'Language': 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200',
+      'Search': 'bg-lime-100 text-lime-800 dark:bg-lime-900 dark:text-lime-200',
+      'AI': 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900 dark:text-fuchsia-200',
+      'Vision': 'bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-200',
+      'Wearable': 'bg-stone-100 text-stone-800 dark:bg-stone-900 dark:text-stone-200'
+    };
+    
+    return colors[category] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -158,73 +212,106 @@ export default function ApiIntegrationsPanel() {
           </AlertDescription>
         </Alert>
 
-        <h3 className="text-lg font-semibold mb-2">Connected Services</h3>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[180px]">API</TableHead>
-              <TableHead>Purpose</TableHead>
-              <TableHead className="w-[100px] text-right">Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {connectedApis.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={3} className="text-center py-6 text-muted-foreground">
-                  No connected services found
-                </TableCell>
-              </TableRow>
-            ) : (
-              connectedApis.map((api) => (
-                <TableRow key={api.api}>
-                  <TableCell className="font-medium">{api.api}</TableCell>
-                  <TableCell>{api.notes}</TableCell>
-                  <TableCell className="text-right">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                      <Check size={12} className="mr-1" />
-                      Active
-                    </span>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+        {/* API Category Legend */}
+        <div className="mb-4">
+          <h3 className="text-sm font-medium mb-2">API Categories</h3>
+          <div className="flex flex-wrap gap-2">
+            {categoryOrder.map((category) => (
+              <span 
+                key={category}
+                className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getCategoryColor(category)}`}
+              >
+                {category}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <h3 className="text-lg font-semibold mb-4">Connected Services ({connectedApis.length})</h3>
+        
+        {Object.keys(connectedByCategory).length === 0 ? (
+          <div className="text-center py-6 text-muted-foreground">
+            No connected services found
+          </div>
+        ) : (
+          categoryOrder
+            .filter(category => connectedByCategory[category]?.length > 0)
+            .map(category => (
+              <div key={category} className="mb-6">
+                <h4 className="text-md font-medium mb-2 flex items-center">
+                  <span className={`w-3 h-3 rounded-full mr-2 ${getCategoryColor(category)}`}></span>
+                  {category} ({connectedByCategory[category].length})
+                </h4>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[180px]">API</TableHead>
+                      <TableHead>Purpose</TableHead>
+                      <TableHead className="w-[100px] text-right">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {connectedByCategory[category].map((api) => (
+                      <TableRow key={api.api}>
+                        <TableCell className="font-medium">{api.api}</TableCell>
+                        <TableCell>{api.notes}</TableCell>
+                        <TableCell className="text-right">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                            <Check size={12} className="mr-1" />
+                            Active
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ))
+        )}
 
         <Separator className="my-6" />
         
-        <h3 className="text-lg font-semibold mb-2">Missing Integrations</h3>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[180px]">API</TableHead>
-              <TableHead>Purpose</TableHead>
-              <TableHead className="w-[100px] text-right">Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {missingApis.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={3} className="text-center py-6 text-muted-foreground">
-                  All services are connected
-                </TableCell>
-              </TableRow>
-            ) : (
-              missingApis.map((api) => (
-                <TableRow key={api.api}>
-                  <TableCell className="font-medium">{api.api}</TableCell>
-                  <TableCell>{api.notes}</TableCell>
-                  <TableCell className="text-right">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                      <X size={12} className="mr-1" />
-                      Missing
-                    </span>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+        <h3 className="text-lg font-semibold mb-4">Missing Integrations ({missingApis.length})</h3>
+        
+        {Object.keys(missingByCategory).length === 0 ? (
+          <div className="text-center py-6 text-muted-foreground">
+            All services are connected
+          </div>
+        ) : (
+          categoryOrder
+            .filter(category => missingByCategory[category]?.length > 0)
+            .map(category => (
+              <div key={category} className="mb-6">
+                <h4 className="text-md font-medium mb-2 flex items-center">
+                  <span className={`w-3 h-3 rounded-full mr-2 ${getCategoryColor(category)}`}></span>
+                  {category} ({missingByCategory[category].length})
+                </h4>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[180px]">API</TableHead>
+                      <TableHead>Purpose</TableHead>
+                      <TableHead className="w-[100px] text-right">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {missingByCategory[category].map((api) => (
+                      <TableRow key={api.api}>
+                        <TableCell className="font-medium">{api.api}</TableCell>
+                        <TableCell>{api.notes}</TableCell>
+                        <TableCell className="text-right">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                            <X size={12} className="mr-1" />
+                            Missing
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ))
+        )}
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button onClick={handleRefresh} variant="outline">
