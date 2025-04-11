@@ -136,7 +136,7 @@ export default function MobileLayout({
         {children}
       </main>
       
-      {/* AI Travel Cockpit */}
+      {/* AI Travel Cockpit - Commented out to prevent duplication with App.tsx
       <TravelCockpit 
         isOpen={isChatOpen} 
         onClose={() => {
@@ -146,7 +146,7 @@ export default function MobileLayout({
             setInternalChatOpen(false);
           }
         }} 
-      />
+      /> */}
       
       {/* Floating Chat Button (only in non-PWA mode) */}
       {!isPWA && !isChatOpen && (
