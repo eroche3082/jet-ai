@@ -8,7 +8,7 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased bg-background text-foreground overscroll-none;
   }
   
   h1, h2, h3 {
@@ -155,5 +155,103 @@
   
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #555;
+  }
+  
+  /* Mobile and PWA Specific Styles */
+  @media (max-width: 768px) {
+    html, body {
+      @apply touch-manipulation;
+    }
+    
+    /* Enhance tap targets for mobile */
+    button, a {
+      @apply min-h-[44px] min-w-[44px];
+    }
+    
+    /* Fix iOS 100vh issue */
+    .h-screen {
+      height: 100vh;
+      height: -webkit-fill-available;
+    }
+    
+    .min-h-screen {
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+    }
+  }
+  
+  /* PWA install banner styles */
+  .pwa-install-banner {
+    @apply fixed bottom-0 left-0 right-0 bg-white shadow-lg z-50 p-4 flex items-center justify-between;
+    transform: translateY(100%);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .pwa-install-banner.show {
+    transform: translateY(0);
+  }
+  
+  /* Offline mode styling */
+  .offline-mode .online-only {
+    @apply opacity-50 pointer-events-none;
+  }
+  
+  .offline-indicator {
+    @apply fixed top-0 inset-x-0 bg-yellow-500 text-white text-center text-xs py-1 z-50;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .offline-mode .offline-indicator {
+    transform: translateY(0);
+  }
+  
+  /* Pull to refresh animation */
+  .pull-to-refresh {
+    @apply pointer-events-none fixed top-0 inset-x-0 h-16 flex items-center justify-center;
+    transform: translateY(-100%);
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .pull-to-refresh.active {
+    transform: translateY(0);
+  }
+  
+  .pull-to-refresh .spinner {
+    @apply w-6 h-6 border-2 border-t-transparent border-primary rounded-full;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Bottom Sheet Component for Mobile */
+  .bottom-sheet {
+    @apply fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-xl shadow-lg;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: calc(100vh - 56px);
+  }
+  
+  .bottom-sheet.open {
+    transform: translateY(0);
+  }
+  
+  .bottom-sheet-overlay {
+    @apply fixed inset-0 bg-black z-40;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    pointer-events: none;
+  }
+  
+  .bottom-sheet-overlay.open {
+    opacity: 0.5;
+    pointer-events: auto;
+  }
+  
+  .bottom-sheet-handle {
+    @apply w-12 h-1 rounded-full bg-gray-300 mx-auto my-2;
   }
 }
