@@ -138,7 +138,13 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
         console.error('Error loading saved preferences:', e);
       }
     }
-  }, [isOpen, messages]);
+    
+    // Handle text-to-speech for new AI responses
+    if (messages.length > 0 && messages[messages.length - 1].role === 'assistant' && audioEnabled) {
+      const lastMessage = messages[messages.length - 1];
+      speakMessage(lastMessage.content);
+    }
+  }, [isOpen, messages, audioEnabled]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -347,8 +353,16 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     if (!isListening && (window.SpeechRecognition || window.webkitSpeechRecognition)) {
       try {
         // Browser compatibility
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        recognitionRef.current = new SpeechRecognition();
+        const SpeechRecognitionAPI: typeof SpeechRecognition = window.SpeechRecognition || 
+          window.webkitSpeechRecognition || 
+          null as unknown as typeof SpeechRecognition;
+          
+        if (!SpeechRecognitionAPI) {
+          console.error('Speech recognition not supported in this browser');
+          return;
+        }
+        
+        recognitionRef.current = new SpeechRecognitionAPI();
         
         recognitionRef.current.continuous = false;
         recognitionRef.current.interimResults = false;
