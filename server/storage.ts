@@ -66,6 +66,7 @@ export class MemStorage implements IStorage {
     this.savedItems = new Map();
     this.destinations = new Map();
     this.chatHistory = new Map();
+    this.itineraries = new Map();
     this.currentId = 1;
     
     // Initialize with a demo user
@@ -77,14 +78,31 @@ export class MemStorage implements IStorage {
       fullName: 'Demo User',
       avatarUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
       memberSince: new Date('2023-05-15'),
+      googleId: null,
+      lastLoginAt: new Date(),
+      membershipTier: 'premium',
       stripeCustomerId: 'cus_demo',
       stripeSubscriptionId: 'sub_demo',
       isSubscribed: true,
       subscriptionPlan: 'Premium',
       subscriptionEndDate: new Date('2025-05-15'),
+      aiCreditsRemaining: 999,
+      monthlySearches: 0,
+      maxMonthlySearches: 999,
+      preferences: {
+        'preferredCurrency': 'USD',
+        'preferredLanguage': 'en',
+        'travelStyle': 'adventure'
+      },
+      travelStyle: {
+        'adventure': 8,
+        'luxury': 5,
+        'budget': 3,
+        'cultural': 9
+      },
       createdAt: new Date(),
       updatedAt: new Date()
-    });
+    } as User);
     
     // Initialize with a demo profile
     this.userProfiles.set(1, {
@@ -180,6 +198,230 @@ export class MemStorage implements IStorage {
         createdAt: new Date()
       }
     ] as any);
+    
+    // Initialize with a demo itinerary
+    this.itineraries.set(1, {
+      id: 1,
+      userId: 1,
+      title: 'Adventure in Kyoto',
+      destination: 'Kyoto, Japan',
+      startDate: new Date('2025-04-10'),
+      endDate: new Date('2025-04-14'),
+      totalDays: 5,
+      budget: 2500,
+      currency: 'USD',
+      travelStyle: 'cultural',
+      statusComplete: true,
+      content: {
+        days: [
+          {
+            day: 1,
+            date: '2025-04-10',
+            activities: [
+              {
+                time: '09:00',
+                title: 'Fushimi Inari Shrine',
+                description: 'Visit the iconic shrine with thousands of vermilion torii gates.',
+                location: 'Fushimi Inari-taisha',
+                coordinates: { lat: 34.9671, lng: 135.7727 },
+                duration: 180,
+                cost: 0,
+                transportMode: 'train',
+                travelTime: 30
+              },
+              {
+                time: '13:00',
+                title: 'Lunch at Nishiki Market',
+                description: 'Sample local food at the famous food market.',
+                location: 'Nishiki Market',
+                coordinates: { lat: 35.0042, lng: 135.7646 },
+                duration: 120,
+                cost: 25,
+                transportMode: 'walk',
+                travelTime: 15
+              },
+              {
+                time: '16:00',
+                title: 'Tea Ceremony',
+                description: 'Authentic tea ceremony experience.',
+                location: 'Traditional Tea House',
+                coordinates: { lat: 35.0116, lng: 135.7681 },
+                duration: 90,
+                cost: 50,
+                transportMode: 'taxi',
+                travelTime: 20
+              }
+            ]
+          },
+          {
+            day: 2,
+            date: '2025-04-11',
+            activities: [
+              {
+                time: '08:00',
+                title: 'Arashiyama Bamboo Grove',
+                description: 'Walk through the stunning bamboo forest.',
+                location: 'Arashiyama',
+                coordinates: { lat: 35.0094, lng: 135.6738 },
+                duration: 120,
+                cost: 0,
+                transportMode: 'train',
+                travelTime: 40
+              },
+              {
+                time: '11:30',
+                title: 'Tenryu-ji Temple',
+                description: 'Visit this UNESCO World Heritage Site with beautiful gardens.',
+                location: 'Tenryu-ji',
+                coordinates: { lat: 35.0169, lng: 135.6745 },
+                duration: 150,
+                cost: 15,
+                transportMode: 'walk',
+                travelTime: 10
+              },
+              {
+                time: '15:00',
+                title: 'Monkey Park Iwatayama',
+                description: 'See Japanese macaques in their natural habitat.',
+                location: 'Iwatayama Monkey Park',
+                coordinates: { lat: 35.0106, lng: 135.6773 },
+                duration: 120,
+                cost: 10,
+                transportMode: 'walk',
+                travelTime: 20
+              }
+            ]
+          },
+          {
+            day: 3,
+            date: '2025-04-12',
+            activities: [
+              {
+                time: '09:30',
+                title: 'Kinkaku-ji (Golden Pavilion)',
+                description: 'Visit the famous gold-leaf covered temple.',
+                location: 'Kinkaku-ji',
+                coordinates: { lat: 35.0394, lng: 135.7291 },
+                duration: 120,
+                cost: 15,
+                transportMode: 'bus',
+                travelTime: 35
+              },
+              {
+                time: '13:00',
+                title: 'Lunch at Traditional Restaurant',
+                description: 'Enjoy a kaiseki meal (traditional multi-course Japanese dinner).',
+                location: 'Kyoto Kaiseki Restaurant',
+                coordinates: { lat: 35.0116, lng: 135.7654 },
+                duration: 120,
+                cost: 80,
+                transportMode: 'taxi',
+                travelTime: 25
+              },
+              {
+                time: '16:00',
+                title: 'Gion District Exploration',
+                description: 'Walk through the historic geisha district and possibly spot geishas.',
+                location: 'Gion',
+                coordinates: { lat: 35.0035, lng: 135.7766 },
+                duration: 180,
+                cost: 0,
+                transportMode: 'taxi',
+                travelTime: 20
+              }
+            ]
+          },
+          {
+            day: 4,
+            date: '2025-04-13',
+            activities: [
+              {
+                time: '09:00',
+                title: 'Kiyomizu-dera Temple',
+                description: 'Visit this historic Buddhist temple with panoramic views of Kyoto.',
+                location: 'Kiyomizu-dera',
+                coordinates: { lat: 34.9949, lng: 135.7851 },
+                duration: 180,
+                cost: 5,
+                transportMode: 'bus',
+                travelTime: 30
+              },
+              {
+                time: '13:30',
+                title: 'Sanjusangendo Hall',
+                description: 'See the hall with 1001 statues of the goddess of mercy.',
+                location: 'Sanjusangendo',
+                coordinates: { lat: 34.9875, lng: 135.7754 },
+                duration: 120,
+                cost: 10,
+                transportMode: 'walk',
+                travelTime: 25
+              },
+              {
+                time: '16:30',
+                title: 'Philosopher\'s Path',
+                description: 'Stroll along the peaceful canal lined with cherry trees.',
+                location: 'Philosopher\'s Path',
+                coordinates: { lat: 35.0225, lng: 135.7906 },
+                duration: 120,
+                cost: 0,
+                transportMode: 'bus',
+                travelTime: 25
+              }
+            ]
+          },
+          {
+            day: 5,
+            date: '2025-04-14',
+            activities: [
+              {
+                time: '08:30',
+                title: 'Ryoanji Temple',
+                description: 'See the famous rock garden, one of the most celebrated in Japan.',
+                location: 'Ryoanji',
+                coordinates: { lat: 35.0347, lng: 135.7182 },
+                duration: 120,
+                cost: 5,
+                transportMode: 'bus',
+                travelTime: 40
+              },
+              {
+                time: '12:00',
+                title: 'Shopping in Downtown Kyoto',
+                description: 'Last-minute souvenir shopping in the city center.',
+                location: 'Downtown Kyoto',
+                coordinates: { lat: 35.0031, lng: 135.7655 },
+                duration: 180,
+                cost: 100,
+                transportMode: 'train',
+                travelTime: 30
+              },
+              {
+                time: '16:00',
+                title: 'Farewell Dinner',
+                description: 'Enjoy a final evening meal in Kyoto.',
+                location: 'Pontocho Alley',
+                coordinates: { lat: 35.0043, lng: 135.7708 },
+                duration: 180,
+                cost: 60,
+                transportMode: 'walk',
+                travelTime: 20
+              }
+            ]
+          }
+        ],
+        notes: 'Weather in April should be pleasant. Cherry blossoms might still be visible early in the month.',
+        totalCost: 2200,
+        recommendedAccommodations: [
+          { id: 5, name: 'Traditional Ryokan in Gion' },
+          { id: 12, name: 'Modern Hotel near Kyoto Station' }
+        ]
+      },
+      isPublic: true,
+      isBookmarked: true,
+      createdAt: new Date('2025-01-15'),
+      updatedAt: new Date('2025-01-20')
+    } as Itinerary);
   }
 
   // User management methods
@@ -200,7 +442,18 @@ export class MemStorage implements IStorage {
       ...insertUser, 
       id,
       memberSince: now,
+      googleId: null,
+      lastLoginAt: now,
+      membershipTier: 'basic', // Default to basic tier
       isSubscribed: false,
+      aiCreditsRemaining: 5, // Basic users start with 5 credits
+      monthlySearches: 0,
+      maxMonthlySearches: 10, // Basic users can do 10 searches per month
+      preferences: {
+        'preferredCurrency': 'USD',
+        'preferredLanguage': 'en'
+      },
+      travelStyle: {},
       createdAt: now,
       updatedAt: now
     } as User;
@@ -214,6 +467,8 @@ export class MemStorage implements IStorage {
       fullName: user.fullName,
       avatarUrl: user.avatarUrl,
       memberSince: now.toISOString(),
+      membershipTier: 'basic',
+      aiCreditsRemaining: 5,
       isSubscribed: false
     });
     
@@ -255,8 +510,58 @@ export class MemStorage implements IStorage {
       stripeCustomerId: info.customerId,
       stripeSubscriptionId: info.subscriptionId,
       isSubscribed: true,
+      membershipTier: 'premium',
       subscriptionPlan: 'Premium', // Default to Premium plan
+      subscriptionEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      aiCreditsRemaining: 999, // Premium users get unlimited credits (using a high number to represent this)
+      maxMonthlySearches: 999, // Premium users get unlimited searches
+    });
+  }
+  
+  // Membership management methods
+  async upgradeToFreemium(userId: number): Promise<User | undefined> {
+    return this.updateUser(userId, {
+      membershipTier: 'freemium',
+      aiCreditsRemaining: 20,
+      maxMonthlySearches: 30
+    });
+  }
+  
+  async upgradeToPremium(userId: number): Promise<User | undefined> {
+    return this.updateUser(userId, {
+      membershipTier: 'premium',
+      isSubscribed: true,
+      subscriptionPlan: 'Premium',
+      aiCreditsRemaining: 999, // Unlimited represented as high number
+      maxMonthlySearches: 999, // Unlimited represented as high number
       subscriptionEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+    });
+  }
+  
+  async decrementAICredits(userId: number, count = 1): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+    
+    // Premium users have unlimited credits
+    if (user.membershipTier === 'premium') return user;
+    
+    const currentCredits = user.aiCreditsRemaining || 0;
+    const newCredits = Math.max(0, currentCredits - count);
+    
+    return this.updateUser(userId, { aiCreditsRemaining: newCredits });
+  }
+  
+  async rechargePremiumBenefits(userId: number): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+    
+    // Only recharge premium users
+    if (user.membershipTier !== 'premium') return user;
+    
+    return this.updateUser(userId, {
+      aiCreditsRemaining: 999,
+      monthlySearches: 0,
+      subscriptionEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Extend by 30 days
     });
   }
 
@@ -368,6 +673,60 @@ export class MemStorage implements IStorage {
   async getChatHistory(userId: number, limit = 50): Promise<any[]> {
     const history = this.chatHistory.get(userId) || [];
     return history.slice(-limit);
+  }
+
+  // Itinerary methods
+  async getUserItineraries(userId: number): Promise<Itinerary[]> {
+    return Array.from(this.itineraries.values())
+      .filter(itinerary => itinerary.userId === userId);
+  }
+  
+  async createItinerary(itinerary: InsertItinerary): Promise<Itinerary> {
+    const id = this.currentId++;
+    const now = new Date();
+    
+    const newItinerary: Itinerary = {
+      ...itinerary,
+      id,
+      statusComplete: false,
+      isPublic: false,
+      isBookmarked: false,
+      createdAt: now,
+      updatedAt: now
+    } as Itinerary;
+    
+    this.itineraries.set(id, newItinerary);
+    return newItinerary;
+  }
+  
+  async getItineraryById(id: number): Promise<Itinerary | undefined> {
+    return this.itineraries.get(id);
+  }
+  
+  async updateItinerary(id: number, data: Partial<Itinerary>): Promise<Itinerary | undefined> {
+    const itinerary = this.itineraries.get(id);
+    if (!itinerary) return undefined;
+    
+    const updatedItinerary = { 
+      ...itinerary, 
+      ...data, 
+      updatedAt: new Date() 
+    };
+    
+    this.itineraries.set(id, updatedItinerary);
+    return updatedItinerary;
+  }
+  
+  async deleteItinerary(id: number): Promise<boolean> {
+    return this.itineraries.delete(id);
+  }
+  
+  async shareItinerary(id: number, isPublic: boolean): Promise<Itinerary | undefined> {
+    return this.updateItinerary(id, { isPublic });
+  }
+  
+  async bookmarkItinerary(id: number, isBookmarked: boolean): Promise<Itinerary | undefined> {
+    return this.updateItinerary(id, { isBookmarked });
   }
 }
 

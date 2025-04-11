@@ -174,6 +174,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error fetching saved items" });
     }
   });
+  
+  app.get("/api/user/itineraries", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const itineraries = await storage.getUserItineraries(user.id);
+      res.json(itineraries);
+    } catch (error) {
+      console.error("Error fetching itineraries:", error);
+      res.status(500).json({ message: "Error fetching itineraries" });
+    }
+  });
+  
+  app.get("/api/itineraries/:id", async (req, res) => {
+    try {
+      const itineraryId = parseInt(req.params.id);
+      if (isNaN(itineraryId)) {
+        return res.status(400).json({ message: "Invalid itinerary ID" });
+      }
+      
+      const itinerary = await storage.getItineraryById(itineraryId);
+      if (!itinerary) {
+        return res.status(404).json({ message: "Itinerary not found" });
+      }
+      
+      // If itinerary is not public, check if the user is authenticated and is the owner
+      if (!itinerary.isPublic) {
+        const user = req.user as any;
+        if (!user || user.id !== itinerary.userId) {
+          return res.status(403).json({ message: "Access denied" });
+        }
+      }
+      
+      res.json(itinerary);
+    } catch (error) {
+      console.error("Error fetching itinerary:", error);
+      res.status(500).json({ message: "Error fetching itinerary" });
+    }
+  });
 
   // AI Chat routes
   app.post("/api/chat", async (req, res) => {
@@ -212,15 +250,165 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const userId = req.user ? (req.user as any).id : null;
+      const user = userId ? await storage.getUser(userId) : null;
+      
+      // Check if user has enough credits if not premium
+      if (user && user.membershipTier !== 'premium' && (user.aiCreditsRemaining || 0) <= 0) {
+        return res.status(402).json({ 
+          message: "Not enough AI credits. Please upgrade your membership or purchase more credits."
+        });
+      }
+      
       const itinerary = await chatHandler(
         `Generate a ${days}-day itinerary for ${destination} with these preferences: ${JSON.stringify(preferences)}`,
         [],
         userId
       );
+      
+      // Decrement credits for non-premium users
+      if (user && user.membershipTier !== 'premium') {
+        await storage.decrementAICredits(userId);
+      }
+      
       res.json(itinerary);
     } catch (error) {
       console.error("Error generating itinerary:", error);
       res.status(500).json({ message: "Error generating itinerary" });
+    }
+  });
+  
+  // Itinerary CRUD routes
+  app.post("/api/itineraries", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const itineraryData = {
+        ...req.body,
+        userId: user.id
+      };
+      
+      const newItinerary = await storage.createItinerary(itineraryData);
+      res.status(201).json(newItinerary);
+    } catch (error) {
+      console.error("Error creating itinerary:", error);
+      res.status(500).json({ message: "Error creating itinerary" });
+    }
+  });
+  
+  app.put("/api/itineraries/:id", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const itineraryId = parseInt(req.params.id);
+      
+      if (isNaN(itineraryId)) {
+        return res.status(400).json({ message: "Invalid itinerary ID" });
+      }
+      
+      // Find the itinerary
+      const itinerary = await storage.getItineraryById(itineraryId);
+      if (!itinerary) {
+        return res.status(404).json({ message: "Itinerary not found" });
+      }
+      
+      // Check if user owns the itinerary
+      if (itinerary.userId !== user.id) {
+        return res.status(403).json({ message: "Not authorized to update this itinerary" });
+      }
+      
+      const updatedItinerary = await storage.updateItinerary(itineraryId, req.body);
+      res.json(updatedItinerary);
+    } catch (error) {
+      console.error("Error updating itinerary:", error);
+      res.status(500).json({ message: "Error updating itinerary" });
+    }
+  });
+  
+  app.delete("/api/itineraries/:id", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const itineraryId = parseInt(req.params.id);
+      
+      if (isNaN(itineraryId)) {
+        return res.status(400).json({ message: "Invalid itinerary ID" });
+      }
+      
+      // Find the itinerary
+      const itinerary = await storage.getItineraryById(itineraryId);
+      if (!itinerary) {
+        return res.status(404).json({ message: "Itinerary not found" });
+      }
+      
+      // Check if user owns the itinerary
+      if (itinerary.userId !== user.id) {
+        return res.status(403).json({ message: "Not authorized to delete this itinerary" });
+      }
+      
+      const deleted = await storage.deleteItinerary(itineraryId);
+      if (deleted) {
+        res.status(200).json({ message: "Itinerary deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Itinerary not found or already deleted" });
+      }
+    } catch (error) {
+      console.error("Error deleting itinerary:", error);
+      res.status(500).json({ message: "Error deleting itinerary" });
+    }
+  });
+  
+  app.patch("/api/itineraries/:id/share", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const itineraryId = parseInt(req.params.id);
+      const { isPublic } = req.body;
+      
+      if (isNaN(itineraryId) || typeof isPublic !== 'boolean') {
+        return res.status(400).json({ message: "Invalid parameters" });
+      }
+      
+      // Find the itinerary
+      const itinerary = await storage.getItineraryById(itineraryId);
+      if (!itinerary) {
+        return res.status(404).json({ message: "Itinerary not found" });
+      }
+      
+      // Check if user owns the itinerary
+      if (itinerary.userId !== user.id) {
+        return res.status(403).json({ message: "Not authorized to share this itinerary" });
+      }
+      
+      const updatedItinerary = await storage.shareItinerary(itineraryId, isPublic);
+      res.json(updatedItinerary);
+    } catch (error) {
+      console.error("Error sharing itinerary:", error);
+      res.status(500).json({ message: "Error sharing itinerary" });
+    }
+  });
+  
+  app.patch("/api/itineraries/:id/bookmark", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const itineraryId = parseInt(req.params.id);
+      const { isBookmarked } = req.body;
+      
+      if (isNaN(itineraryId) || typeof isBookmarked !== 'boolean') {
+        return res.status(400).json({ message: "Invalid parameters" });
+      }
+      
+      // Find the itinerary
+      const itinerary = await storage.getItineraryById(itineraryId);
+      if (!itinerary) {
+        return res.status(404).json({ message: "Itinerary not found" });
+      }
+      
+      // Only allow bookmarking if itinerary is public or owned by the user
+      if (!itinerary.isPublic && itinerary.userId !== user.id) {
+        return res.status(403).json({ message: "Not authorized to bookmark this itinerary" });
+      }
+      
+      const updatedItinerary = await storage.bookmarkItinerary(itineraryId, isBookmarked);
+      res.json(updatedItinerary);
+    } catch (error) {
+      console.error("Error bookmarking itinerary:", error);
+      res.status(500).json({ message: "Error bookmarking itinerary" });
     }
   });
 
@@ -295,6 +483,151 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching subscription plans:", error);
       res.status(500).json({ message: "Error fetching subscription plans" });
+    }
+  });
+  
+  // Membership management routes
+  app.get("/api/user/membership", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const membership = {
+        id: user.id,
+        membershipTier: user.membershipTier || 'basic',
+        isSubscribed: user.isSubscribed || false,
+        subscriptionPlan: user.subscriptionPlan,
+        subscriptionEndDate: user.subscriptionEndDate,
+        aiCreditsRemaining: user.aiCreditsRemaining || 0,
+        monthlySearches: user.monthlySearches || 0,
+        maxMonthlySearches: user.maxMonthlySearches || 10
+      };
+      
+      res.json(membership);
+    } catch (error) {
+      console.error("Error fetching membership details:", error);
+      res.status(500).json({ message: "Error fetching membership details" });
+    }
+  });
+  
+  app.post("/api/user/membership/freemium", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      // Check if already at freemium or higher tier
+      if (user.membershipTier === 'freemium' || user.membershipTier === 'premium') {
+        return res.status(400).json({ 
+          message: "You are already at or above the freemium tier"
+        });
+      }
+      
+      const updatedUser = await storage.upgradeToFreemium(user.id);
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({
+        message: "Successfully upgraded to Freemium",
+        membershipTier: updatedUser.membershipTier,
+        aiCreditsRemaining: updatedUser.aiCreditsRemaining,
+        maxMonthlySearches: updatedUser.maxMonthlySearches
+      });
+    } catch (error) {
+      console.error("Error upgrading to freemium:", error);
+      res.status(500).json({ message: "Error upgrading membership" });
+    }
+  });
+  
+  app.post("/api/user/membership/premium", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      // Check if already at premium tier
+      if (user.membershipTier === 'premium') {
+        return res.status(400).json({ 
+          message: "You are already at the premium tier"
+        });
+      }
+      
+      const updatedUser = await storage.upgradeToPremium(user.id);
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({
+        message: "Successfully upgraded to Premium",
+        membershipTier: updatedUser.membershipTier,
+        isSubscribed: updatedUser.isSubscribed,
+        subscriptionPlan: updatedUser.subscriptionPlan,
+        aiCreditsRemaining: updatedUser.aiCreditsRemaining,
+        maxMonthlySearches: updatedUser.maxMonthlySearches
+      });
+    } catch (error) {
+      console.error("Error upgrading to premium:", error);
+      res.status(500).json({ message: "Error upgrading membership" });
+    }
+  });
+  
+  app.post("/api/user/membership/recharge", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      // Only premium subscribers can recharge
+      if (user.membershipTier !== 'premium') {
+        return res.status(403).json({ 
+          message: "This feature is only available for premium subscribers"
+        });
+      }
+      
+      const updatedUser = await storage.rechargePremiumBenefits(user.id);
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({
+        message: "Successfully recharged premium benefits",
+        aiCreditsRemaining: updatedUser.aiCreditsRemaining,
+        monthlySearches: updatedUser.monthlySearches,
+        subscriptionEndDate: updatedUser.subscriptionEndDate
+      });
+    } catch (error) {
+      console.error("Error recharging premium benefits:", error);
+      res.status(500).json({ message: "Error recharging benefits" });
+    }
+  });
+  
+  app.post("/api/user/membership/purchase-credits", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { credits } = req.body;
+      
+      if (!credits || credits <= 0) {
+        return res.status(400).json({ message: "Invalid credit amount" });
+      }
+      
+      // Premium users don't need to purchase credits
+      if (user.membershipTier === 'premium') {
+        return res.status(400).json({ 
+          message: "Premium users already have unlimited credits"
+        });
+      }
+      
+      // For demonstration purposes, we'll just add the credits
+      // In a real app, this would be handled after payment confirmation
+      const currentCredits = user.aiCreditsRemaining || 0;
+      const updatedUser = await storage.updateUser(user.id, {
+        aiCreditsRemaining: currentCredits + credits
+      });
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({
+        message: `Successfully purchased ${credits} AI credits`,
+        aiCreditsRemaining: updatedUser.aiCreditsRemaining
+      });
+    } catch (error) {
+      console.error("Error purchasing credits:", error);
+      res.status(500).json({ message: "Error purchasing credits" });
     }
   });
 
