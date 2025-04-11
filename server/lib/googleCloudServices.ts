@@ -21,10 +21,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { Client } from '@googlemaps/google-maps-services-js';
 
 // Inicializar clientes de Google Cloud
-// Verificar si se configuró correctamente la variable de entorno GOOGLE_APPLICATION_CREDENTIALS
-if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-  console.warn('La variable de entorno GOOGLE_APPLICATION_CREDENTIALS no está configurada.');
-  console.warn('Si quieres utilizar los servicios de Google Cloud, debes configurar esta variable.');
+// Establecer explícitamente la ruta del archivo de credenciales
+const credentialsPath = path.resolve(process.cwd(), 'google-credentials-global.json');
+if (fs.existsSync(credentialsPath)) {
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath;
+  console.log('Archivo de credenciales de Google Cloud configurado correctamente:', credentialsPath);
+} else {
+  console.warn('Archivo de credenciales de Google Cloud no encontrado en:', credentialsPath);
+  console.warn('Si quieres utilizar los servicios de Google Cloud, debes proporcionar este archivo.');
 }
 
 // Opciones de autenticación
