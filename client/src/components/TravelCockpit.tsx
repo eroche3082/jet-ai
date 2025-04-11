@@ -848,6 +848,7 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
     switch (tabName) {
       case 'explore': return <Globe className="w-5 h-5" />;
       case 'hotels': return <Hotel className="w-5 h-5" />;
+      case 'flights': return <Plane className="w-5 h-5" />;
       case 'itineraries': return <Map className="w-5 h-5" />;
       case 'planner': return <Briefcase className="w-5 h-5" />;
       case 'audio': return <Headphones className="w-5 h-5" />;
@@ -865,6 +866,7 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
   const tabTitles: Record<string, string> = {
     explore: 'Explore',
     hotels: 'Hotels',
+    flights: 'Flights',
     itineraries: 'Itineraries',
     planner: 'Planner',
     audio: 'Audio',

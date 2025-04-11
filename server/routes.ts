@@ -5,7 +5,13 @@ import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { chatHandler } from "./lib/ai";
-import { travelSearchDestinations, travelSearchExperiences, travelSearchAccommodations } from "./lib/travelApi";
+import { 
+  travelSearchDestinations, 
+  travelSearchExperiences, 
+  travelSearchAccommodations,
+  searchFlights,
+  getFlightById
+} from "./lib/travelApi";
 import { createPaymentIntent, createSubscription, getSubscriptionPlans } from "./lib/stripe";
 import connectPgSimple from 'connect-pg-simple';
 import memorystore from 'memorystore';
