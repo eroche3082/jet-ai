@@ -31,7 +31,9 @@ import {
   CalendarDays
 } from 'lucide-react';
 import HotelSearchResults from './HotelSearchResults';
+import FlightSearchResults from './FlightSearchResults';
 import { HotelResult } from '../lib/hotels';
+import { FlightResult } from '../lib/flights';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -1215,6 +1217,30 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
                   </div>
                 )}
               </div>
+            </div>
+          )}
+          
+          {activeTab === 'flights' && (
+            <div className="h-full flex flex-col p-4">
+              <FlightSearchResults 
+                origin={travelMemory.origin || null}
+                destination={travelMemory.destination}
+                departureDate={travelMemory.dates?.checkIn || null}
+                returnDate={travelMemory.dates?.checkOut || null}
+                travelers={travelMemory.travelers}
+                cabinClass={travelMemory.preferences?.flightClass || "economy"}
+                onBookFlight={(flight) => {
+                  console.log('Selected flight:', flight);
+                  // Add booking logic here
+                  setMessages(prev => [
+                    ...prev,
+                    {
+                      role: 'assistant',
+                      content: `I've selected this flight for you:\n\n**${flight.airline}** (${flight.flightNumber})\n${flight.origin} → ${flight.destination}\nDeparture: ${flight.departureTime}\nArrival: ${flight.arrivalTime}\nPrice: $${flight.price}`
+                    }
+                  ]);
+                }}
+              />
             </div>
           )}
           
