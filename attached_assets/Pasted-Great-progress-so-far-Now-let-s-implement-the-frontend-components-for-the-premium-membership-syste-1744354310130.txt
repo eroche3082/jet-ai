@@ -1,0 +1,71 @@
+Great progress so far. Now, let’s implement the frontend components for the premium membership system and itinerary engine using the new API routes.
+
+Here are the tasks for Phase 4:
+
+---
+
+### 1. 💼 Membership Dashboard UI
+- Create a **"My Membership"** page (or dashboard section) that shows:
+  - Current membership tier (Basic / Freemium / Premium)
+  - Number of remaining AI credits and searches
+  - Upgrade options with pricing and benefits comparison
+  - “Buy More Credits” button (connect to Stripe if enabled)
+- Display user tier visually (e.g., color-coded badge)
+
+---
+
+### 2. ✈️ Itinerary Manager UI
+- Create a new page called **"My Itineraries"**:
+  - Show a list of saved itineraries (title, date, destination)
+  - Allow clicking each to view, update, or delete
+  - If itinerary is public, provide a shareable link
+- Add a button to create a new itinerary from scratch
+- Enable bookmarking functionality for favorites
+
+---
+
+### 3. 💬 Chat UI Enhancements (AI Credit Aware)
+- Display remaining credits inside the chat interface (e.g., “You have 3 AI responses left this month”).
+- If the user runs out of credits:
+  - Display an upsell prompt inside the chat (“Upgrade to Premium for unlimited responses”).
+  - Prevent further messages until upgraded or credits purchased.
+- If user is Premium, display “Unlimited” in a green badge inside the chat header.
+
+---
+
+### 4. 🔐 User Profile & Authentication
+- Show a logged-in user dropdown with:
+  - Account settings
+  - “My Membership”
+  - “My Itineraries”
+  - Log out
+- If not logged in, prompt user to sign up or sign in to access AI features.
+
+---
+
+### 5. 🧪 Smart Testing Mode
+- Add an admin toggle (or query param like `?dev=true`) that:
+  - Shows backend debug info (credits, API logs, usage stats)
+  - Lets the dev simulate different user tiers for testing
+
+---
+
+### 6. 📦 Visual Polish & Component Refactoring
+- Organize all new features into reusable components:
+  - `<MembershipCard />`
+  - `<ItineraryCard />`
+  - `<CreditTracker />`
+  - `<UpgradeModal />`
+- Use Tailwind, if enabled, to keep style consistent with the current layout
+- Add light animations/transitions to enhance interactivity
+
+---
+
+Once all of this is implemented, we’ll move to **Phase 5**, which includes:
+
+- 📍 Location-aware AI suggestions (based on IP or location input)
+- 🌐 JetAI Franchising Mode (subdomains, white label support)
+- 💸 Affiliate engine for travel influencers and creators
+- 📱 Mobile PWA version for on-the-go travel planning
+
+Let me know once Phase 4 is ready and tested!

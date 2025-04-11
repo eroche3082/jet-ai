@@ -1,6 +1,13 @@
 import { useState, useEffect, useRef, MouseEvent } from 'react';
 import { ChatMessage, sendChatMessage, ChatResponse } from '@/lib/ai';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { Link } from 'wouter';
 import ReactMarkdown from 'react-markdown';
+import { Infinity, AlertCircle, CreditCard } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 // Extended ChatMessage type to include system messages
 interface ExtendedChatMessage extends Omit<ChatMessage, 'role'> {
@@ -12,10 +19,17 @@ interface AIChatProps {
   onClose: () => void;
 }
 
+interface MembershipData {
+  id: number;
+  membershipTier: 'basic' | 'freemium' | 'premium';
+  aiCreditsRemaining: number;
+}
+
 // Enhanced welcome message with emoji and formatting
 const WELCOME_MESSAGE = "👋 Hi there! I'm your **JetAI** travel assistant.\n\nI can help you:\n* Plan personalized trips\n* Recommend amazing destinations\n* Create detailed itineraries\n* Find accommodations and activities\n\nWhat kind of travel experience are you looking for today?";
 
 export default function AIChat({ isOpen, onClose }: AIChatProps) {
+  const queryClient = useQueryClient();
   const [inputMessage, setInputMessage] = useState('');
   const [messages, setMessages] = useState<ExtendedChatMessage[]>([
     {
@@ -29,6 +43,32 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [userPreferences, setUserPreferences] = useState<Record<string, string>>({});
+  
+  // Fetch membership data for credit information
+  const { data: membership, isLoading: isMembershipLoading } = useQuery({
+    queryKey: ['/api/user/membership'],
+    retry: false,
+    // Don't show error if not logged in
+    onError: () => {},
+  });
+  
+  // Mutation for decrementing credits after successful AI response
+  const decrementCredit = useMutation({
+    mutationFn: async () => {
+      // This is handled on the server side in the chat API
+      // This is just for refreshing membership data after a chat
+      return null;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/user/membership'] });
+    }
+  });
+  
+  // Get membership information
+  const membershipData = membership as MembershipData | undefined;
+  const isPremium = membershipData?.membershipTier === 'premium';
+  const creditsRemaining = membershipData?.aiCreditsRemaining || 0;
+  const hasCredits = isPremium || creditsRemaining > 0;
 
   // Enhanced quick actions with emojis
   const quickActions = [
