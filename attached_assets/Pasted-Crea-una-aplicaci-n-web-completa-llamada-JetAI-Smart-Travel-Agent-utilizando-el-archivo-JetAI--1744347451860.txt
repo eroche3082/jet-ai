@@ -1,0 +1,39 @@
+Crea una aplicación web completa llamada "JetAI – Smart Travel Agent", utilizando el archivo `JetAI.zip` como base del código. Usa el tema visual y el diseño del tema WordPress llamado "Vagabonds" como estilo de referencia (ya está adjunto), especialmente para tipografía, bloques de contenido, y estructura visual tipo travel blog moderno.
+
+Incluye lo siguiente:
+
+1. **Front-end:**
+   - Integra los estilos del tema Vagabonds en todo el diseño visual.
+   - Mantén el layout original de JetAI.zip para navegación, contenido y bloques visuales.
+   - Agrega un botón flotante en la parte inferior derecha en todas las páginas, que abre el **chatbot inteligente** cuando se hace clic. Usa el estilo discreto y elegante, como una burbuja de chat moderna.
+   - El chatbot debe mantener estilo tipo AI assistant, con ícono redondo y animación al abrir.
+
+2. **Chatbot de Viajes (AI Travel Assistant):**
+   - Usa los archivos ya integrados en el ZIP para activar el chatbot.
+   - El chatbot debe poder:
+     - Recomendar destinos según preferencias.
+     - Crear itinerarios personalizados.
+     - Conectar con APIs como OpenAI o Gemini para responder en lenguaje natural.
+     - Usar APIs externas como Google Maps, Skyscanner o Airbnb (si están ya en el zip o agregar placeholders).
+     - Mostrar respuestas con botones interactivos y bloques visuales (tipo cards).
+
+3. **Estructura interna:**
+   - Mantén la organización de carpetas del proyecto como en JetAI.zip (client, server, etc.).
+   - Conecta las rutas de API y los handlers necesarios para el chatbot.
+   - Usa archivos `.env` para las keys: OpenAI, Gemini, Stripe, Google, etc.
+   - Asegúrate de incluir autenticación básica si está ya en el ZIP.
+
+4. **Configuración técnica:**
+   - Instala automáticamente las dependencias necesarias (React, Vite, Tailwind si aplica, Express, dotenv, etc.).
+   - Usa Vite para el frontend y Node.js para el backend.
+   - Incluye sistema de deploy automático en Replit con `replit.nix` y `run.sh` si aplica.
+   - Habilita hot reload y logging para debug desde el panel.
+
+5. **Extras (si están en el ZIP):**
+   - Sistema de pagos (Stripe).
+   - Sistema de suscripciones o membresías.
+   - Dashboard para el usuario.
+   - Conexión a Firebase para login y base de datos (si ya está implementado).
+
+Crea la app completamente funcional. Al finalizar, empaqueta el proyecto nuevamente como JetAI.zip actualizado y muéstralo en la preview del navegador de Replit.
+
