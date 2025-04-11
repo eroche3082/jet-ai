@@ -773,7 +773,8 @@ function extractUserProfileFromHistory(history: any[]): BaseUserProfile {
   const datePatterns = [
     /(?:del|desde el)\s+(\d{1,2}\s+(?:de\s+)?[A-Za-zÀ-ÿ]+(?:\s+(?:de\s+)?\d{4})?)\s+(?:al|hasta el)\s+(\d{1,2}\s+(?:de\s+)?[A-Za-zÀ-ÿ]+(?:\s+(?:de\s+)?\d{4})?)/i,
     /(?:en|para)\s+([A-Za-zÀ-ÿ]+)/i,
-    /(\d{1,2}\s+(?:de\s+)?[A-Za-zÀ-ÿ]+(?:\s+(?:de\s+)?\d{4})?)/i
+    /(\d{1,2}\s+(?:de\s+)?[A-Za-zÀ-ÿ]+(?:\s+(?:de\s+)?\d{4})?)/i,
+    /(?:por|durante)\s+(\d+)\s*d[ií]as/i  // Patrón específico para capturar duración en días
   ];
   
   const travelersPatterns = [
@@ -863,7 +864,31 @@ function extractUserProfileFromHistory(history: any[]): BaseUserProfile {
   }
   
   if (dateMentions.length > 0) {
-    userProfile.dates = dateMentions.join(' a '); // Unir inicio y fin si hay ambos
+    // Filtrar fechas para eliminar duplicados o menciones incorrectas
+    const cleanedDates = dateMentions.filter(date => 
+      date.length < 30 && // Solo fechas cortas (evitar concatenaciones erróneas)
+      !date.includes('personas') && // Evitar contaminación de otros campos
+      !date.includes('euros') && 
+      !date.includes('€')
+    );
+    
+    // Si tenemos fechas limpias, las usamos; de lo contrario, tratamos de extraer solo la duración
+    if (cleanedDates.length > 0) {
+      userProfile.dates = cleanedDates.length > 1 
+        ? `${cleanedDates[0]} a ${cleanedDates[cleanedDates.length - 1]}` 
+        : cleanedDates[0];
+    } else {
+      // Buscar directamente menciones de duración en el historial original
+      for (const entry of history) {
+        if (entry.role === 'user') {
+          const durationMatch = entry.content.match(/(\d+)\s*d[ií]as/i);
+          if (durationMatch && durationMatch[1]) {
+            userProfile.dates = `${durationMatch[1]} días`;
+            break; // Usar la primera coincidencia
+          }
+        }
+      }
+    }
   }
   
   if (travelersMentions.length > 0) {

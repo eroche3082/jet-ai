@@ -4,8 +4,8 @@
  */
 
 // Importar las funciones necesarias
-import { extractUserProfileFromHistory } from './enhancedConversationFlow.js';
-import { generateUserItinerary } from './itineraryGenerator.js';
+import { extractUserProfileFromHistory } from './enhancedConversationFlow.ts';
+import { generateUserItinerary } from './itineraryGenerator.ts';
 
 // Crear un historial de conversación de prueba
 const testHistory = [

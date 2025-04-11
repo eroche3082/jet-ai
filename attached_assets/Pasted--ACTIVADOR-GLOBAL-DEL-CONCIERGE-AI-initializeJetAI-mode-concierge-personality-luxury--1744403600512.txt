@@ -1,0 +1,77 @@
+// ACTIVADOR GLOBAL DEL CONCIERGE AI
+
+initializeJetAI({
+  mode: "concierge",
+  personality: "luxury_travel_expert",
+  languages: ["en", "es"],
+  startWith: "Hi, I'm your personal travel concierge. Let's start by personalizing your dream adventure. What is your name and email?",
+  
+  conversationFlow: loadFrom("client/src/lib/conversationFlow.ts"),
+  assistantPersonality: loadFrom("client/src/lib/assistantPersonality.ts"),
+
+  features: {
+    voice: {
+      recognition: useHook("client/src/hooks/useSpeechRecognition.ts"),
+      synthesis: useHook("client/src/hooks/useTextToSpeech.ts"),
+      autoSpeakResponses: true
+    },
+    fallback: {
+      weather: ["GoogleWeatherAPI", "OpenMeteo"],
+      geocoding: ["GoogleGeocoding", "Nominatim"],
+      routing: ["GoogleRoutesAPI", "OSRM"],
+      places: ["GooglePlaces", "YelpAPI"]
+    },
+    itinerary: {
+      generator: use("server/lib/itineraryGenerator.ts"),
+      autoGenerateAfterProfile: true
+    },
+    apiStatus: monitor("server/routes.ts:/api/system/status"),
+    profileExtraction: {
+      extractor: use("server/lib/enhancedConversationFlow.ts:extractUserProfileFromHistory"),
+      memory: true,
+    },
+    ai: {
+      provider: "VertexAI",
+      model: "gemini-1.5-flash",
+      chatEndpoint: "/api/chat/vertex",
+      stream: true,
+      emotionalTone: true,
+      sentimentAnalysis: true,
+    }
+  },
+
+  interface: {
+    avatar: {
+      enabled: true,
+      panel: "left",
+      style: "Concierge AI",
+      memoryDisplay: true
+    },
+    chat: {
+      layout: "2-column",
+      suggestionButtons: true,
+      delayPerStage: 300,
+      colorTheme: "luxury"
+    },
+    floatingBubble: {
+      enabled: true,
+      triggersFullScreen: true
+    }
+  },
+
+  validations: {
+    GOOGLE_APPLICATION_CREDENTIALS: "REQUIRED",
+    fallbackServicesWorking: true,
+    chatFlowConnected: true,
+    voiceModulesLoaded: true,
+    GeminiAPIResponding: true
+  },
+
+  testAfterInit: [
+    "GET /api/system/status",
+    "POST /api/chat/vertex { message: 'What’s the weather like in Paris today?' }",
+    "POST /api/chat/vertex { message: 'Can you plan a relaxing trip to Bali for me?' }"
+  ],
+
+  finalStep: "Unlock itinerary, flights, hotels, and experience panels after profile is complete."
+});
