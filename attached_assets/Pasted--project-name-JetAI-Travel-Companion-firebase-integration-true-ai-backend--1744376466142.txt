@@ -1,0 +1,71 @@
+{
+  "project_name": "JetAI Travel Companion",
+  "firebase_integration": true,
+  "ai_backend": {
+    "framework": "Genkit",
+    "model_provider": "Vertex AI",
+    "model_name": "gemini-1.5-flash",
+    "modality": "text, vision, audio",
+    "streaming": true,
+    "fallback_model": "OpenAI GPT-4",
+    "languages": ["English", "Spanish", "French", "Portuguese"]
+  },
+  "core_features": [
+    "Conversational AI chat module (one question at a time)",
+    "Streaming text-to-speech + voice-to-text support",
+    "Google Maps API integration (explore + directions)",
+    "Flight search (Amadeus/Skyscanner)",
+    "Weather integration with fallback",
+    "AI Passport (user preferences, bucket list, style)",
+    "Budget tracker (currency conversion + forecasts)",
+    "Itinerary builder with AI planning",
+    "Local experiences + event recommendations",
+    "Travel Wallet (document storage + reminders)",
+    "Group trip coordination system"
+  ],
+  "ui_components": {
+    "chat_widget": {
+      "position": "bottom-right",
+      "open_on_click": true,
+      "avatar_visible": true,
+      "avatar_source": "Ready Player Me / Firebase Upload",
+      "input_modes": ["text", "voice", "QR", "AR"],
+      "language_switcher": true,
+      "portfolio_access": true
+    }
+  },
+  "admin_panel": {
+    "dashboard": true,
+    "user_insights": true,
+    "API_key_management": true,
+    "model_selector": ["Gemini", "OpenAI", "Claude"],
+    "prompt_logs": true,
+    "multi-agent control": true
+  },
+  "firebase_features": {
+    "Hosting": true,
+    "Firestore Database": true,
+    "Cloud Functions": true,
+    "Firebase Auth": true,
+    "Storage (for documents, avatars, voice)": true,
+    "App Check": true,
+    "Cloud Messaging (notifications)": true
+  },
+  "deployment_targets": [
+    "Web App (Responsive)",
+    "Mobile (iOS + Android via WebView)",
+    "Firebase Hosting"
+  ],
+  "design": {
+    "style": "Neuros + Social Brands",
+    "color_mode": "Dark",
+    "animations": true,
+    "multimodal_support": true
+  },
+  "goals": [
+    "System fully structured for real-time data (no mocks)",
+    "Modular design for easy cloning to other avatars (CryptoBot, Aurora, Sofia, etc.)",
+    "All APIs verified and running in production mode before full migration",
+    "Zero dependency on Replit after deployment"
+  ]
+}
