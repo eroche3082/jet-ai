@@ -760,6 +760,40 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
             <i className="fas fa-times"></i>
           </button>
         </div>
+        
+        {/* Personality Selector */}
+        {!isLoadingPersonalities && personalities?.length > 0 && (
+          <div className="mt-2 pt-2 border-t border-white/20">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className="bg-white/10 hover:bg-white/20 text-white text-xs py-1 h-auto w-full justify-between"
+                >
+                  <div className="flex items-center">
+                    <UserCheck className="w-4 h-4 mr-2" />
+                    {personalities.find(p => p.id === selectedPersonality)?.name || 'Assistant Personality'}
+                  </div>
+                  <i className="fas fa-chevron-down text-xs"></i>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                {personalities.map((personality) => (
+                  <DropdownMenuItem 
+                    key={personality.id}
+                    onClick={() => setSelectedPersonality(personality.id)}
+                    className="cursor-pointer"
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-semibold">{personality.name}</span>
+                      <span className="text-xs text-gray-500">{personality.description}</span>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
       </div>
       
       {/* Chat Messages */}
