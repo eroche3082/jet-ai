@@ -13,29 +13,30 @@ if (process.env.OPENAI_API_KEY || process.env.OPENAI_KEY) {
 // Initialize Google Gemini client
 let geminiClient: any = null;
 
-// Load credentials from the Google credentials JSON file
+// Initialize Google Gemini client
 try {
-  const credentialsPath = path.resolve(process.cwd(), 'google-credentials-global.json');
-  if (fs.existsSync(credentialsPath)) {
-    console.log("Found Google credentials file, initializing Gemini...");
+  console.log("Initializing Google Gemini AI...");
+  
+  // Use the Google Generative AI SDK with a generic API key
+  import('@google/generative-ai').then(({ GoogleGenerativeAI }) => {
+    // For Replit environment
+    const genAI = new GoogleGenerativeAI("AIzaSyDMp6BuDPpT7WHb0IgugW9xq_xGiSAQeTY");
     
-    // Use the Google Generative AI SDK
-    import('@google/generative-ai').then(({ GoogleGenerativeAI }) => {
-      // Get project ID from credentials
-      const credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
-      
-      // Use the Vertex AI API with service account credentials
-      const genAI = new GoogleGenerativeAI();
-      geminiClient = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      console.log("Google Gemini AI initialized successfully!");
-    }).catch(err => {
-      console.error("Error initializing Google Generative AI:", err);
+    // Using Gemini Pro model
+    geminiClient = genAI.getGenerativeModel({ 
+      model: "gemini-pro",
+      generationConfig: {
+        temperature: 0.7,
+        topP: 0.9,
+        maxOutputTokens: 1024,
+      }
     });
-  } else {
-    console.warn("Google credentials file not found at:", credentialsPath);
-  }
+    console.log("Google Gemini AI initialized successfully!");
+  }).catch(err => {
+    console.error("Error initializing Google Generative AI:", err);
+  });
 } catch (error) {
-  console.error("Error loading Google credentials:", error);
+  console.error("Error initializing Google Generative AI:", error);
 }
 
 // Export chat message interface
@@ -191,6 +192,10 @@ async function handleWithOpenAI(
   ];
 
   // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+  if (!openai) {
+    throw new Error("OpenAI client is not initialized");
+  }
+  
   const completion = await openai.chat.completions.create({
     model: "gpt-4o",
     messages: messages as any,
