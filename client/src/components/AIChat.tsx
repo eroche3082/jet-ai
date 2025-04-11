@@ -307,7 +307,7 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     localStorage.setItem('userTravelPreferences', JSON.stringify(updatedPreferences));
   };
 
-  // Enhanced message sending with error handling and retry logic
+  // Enhanced message sending with guided conversation flow
   const handleSendMessage = async (event?: React.MouseEvent, retry = false) => {
     if ((!inputMessage.trim() && !retry) || isLoading) return;
     
@@ -324,45 +324,70 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     setIsLoading(true);
     
     try {
-      // Add user preferences to context if available
-      const contextEnhancedMessages: ChatMessage[] = [...messages];
-      if (Object.keys(userPreferences).length > 0 && contextEnhancedMessages.length <= 3) {
-        // Only inject preferences early in the conversation to help with personalization
-        const preferencesMessage: ChatMessage = {
-          role: 'system',
-          content: `User preferences: ${JSON.stringify(userPreferences)}`
-        };
-        // Add as first message without mutating original messages array
-        const enhancedMessages = [preferencesMessage, ...messages.filter(m => m.role !== 'system')];
-        
-        const response = await sendChatMessage(
-          retry ? 'Can you try again? I didn\'t understand your last response.' : inputMessage,
-          enhancedMessages,
-          selectedPersonality
-        );
-        
-        // Reset error count on successful response
-        setErrorCount(0);
-        
-        // Set suggestions from response
-        if (response.suggestions && response.suggestions.length > 0) {
-          setSuggestions(response.suggestions);
-        }
-        
-        // Format the response by adding emojis based on content
-        const enhancedResponse = enhanceResponseWithEmojis(response.message);
-        
+      // Handle the conversation flow logic
+      const userInput = inputMessage.trim();
+      
+      // Check if user is greeting (like "hola", "hi")
+      if (isGreeting(userInput) && currentStage !== ConversationStage.GREETING) {
+        // Reset to greeting stage if user is just saying hello
+        setCurrentStage(ConversationStage.GREETING);
         setMessages(prev => [...prev, { 
           role: 'assistant', 
-          content: enhancedResponse 
+          content: enhanceResponseWithEmojis(STAGE_QUESTIONS[ConversationStage.GREETING])
         }]);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Update travel profile based on current stage and user input
+      const updatedProfile = updateTravelProfile(
+        currentStage, 
+        userInput,
+        travelProfile
+      );
+      
+      // Set the updated profile
+      setTravelProfile(updatedProfile);
+      
+      // Determine the next stage in the conversation
+      const nextStage = determineNextStage(currentStage, userInput, updatedProfile);
+      setCurrentStage(nextStage);
+      
+      // Get the appropriate question for the next stage
+      const nextQuestion = STAGE_QUESTIONS[nextStage];
+      
+      // Build context for AI based on the updated profile
+      let contextMessage = '';
+      
+      // Only show profile summary after collecting some information
+      if (
+        updatedProfile.destination || 
+        updatedProfile.budget || 
+        updatedProfile.dates || 
+        updatedProfile.travelers
+      ) {
+        contextMessage = getTravelProfileSummary(updatedProfile) + '\n\n';
+      }
+      
+      // If this is general conversation after collecting basic info, use AI
+      if (nextStage === ConversationStage.GENERAL || nextStage === ConversationStage.ITINERARY_REQUEST) {
+        // Add user preferences to context if available
+        const contextEnhancedMessages: ChatMessage[] = [...messages];
         
-        // Extract and save any preferences mentioned in the user's message
-        extractPreferences(inputMessage);
-      } else {
-        // Normal flow without preferences
+        // Add travel profile as system message if we have data
+        if (Object.keys(updatedProfile).some(key => updatedProfile[key as keyof TravelProfile])) {
+          const profileMessage: ChatMessage = {
+            role: 'system',
+            content: `User travel profile: ${JSON.stringify(updatedProfile)}`
+          };
+          
+          // Add profile as first message without mutating original messages array
+          contextEnhancedMessages.unshift(profileMessage);
+        }
+        
+        // Call AI with context
         const response = await sendChatMessage(
-          retry ? 'Can you try again? I didn\'t understand your last response.' : inputMessage,
+          retry ? 'Can you try again? I didn\'t understand your last response.' : userInput,
           contextEnhancedMessages,
           selectedPersonality
         );
@@ -380,11 +405,17 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
         
         setMessages(prev => [...prev, { 
           role: 'assistant', 
-          content: enhancedResponse 
+          content: contextMessage + enhancedResponse 
         }]);
         
         // Extract and save any preferences mentioned in the user's message
-        extractPreferences(inputMessage);
+        extractPreferences(userInput);
+      } else {
+        // For guided conversation, use pre-defined questions based on the stage
+        setMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: contextMessage + enhanceResponseWithEmojis(nextQuestion)
+        }]);
       }
     } catch (error) {
       console.error('Error sending message:', error);
