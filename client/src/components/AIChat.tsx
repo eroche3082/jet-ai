@@ -102,7 +102,11 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [userPreferences, setUserPreferences] = useState<Record<string, string>>({});
   
-  // Conversation flow states
+  // Conversation flow states using server-defined flow
+  const [conversationStep, setConversationStep] = useState(0);
+  const [formData, setFormData] = useState<Record<string, string>>({});
+  const { speak, stop: stopSpeaking } = useTextToSpeech();
+  const { transcript, startListening: startListeningHook, stopListening: stopListeningHook } = useSpeechRecognition();
   const [currentStage, setCurrentStage] = useState<ConversationStage>(ConversationStage.GREETING);
   const [travelProfile, setTravelProfile] = useState<TravelProfile>({
     destination: null,

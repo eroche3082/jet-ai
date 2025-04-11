@@ -1,0 +1,143 @@
+✅ server/lib/conversationFlow.ts (estructura base del flujo conversacional)
+ts
+Copiar
+Editar
+export const conversationFlow = [
+  {
+    key: 'name',
+    prompt: "👋 Welcome aboard JetAI! I'm your personal travel concierge. First, may I know your name?",
+    required: true,
+  },
+  {
+    key: 'email',
+    prompt: "📧 Thank you! Can I also get your email address so I can save your preferences and itinerary?",
+    required: true,
+  },
+  {
+    key: 'destination',
+    prompt: "🌍 Great! Where are you dreaming of going? (City, country, or region)",
+    required: true,
+  },
+  {
+    key: 'budget',
+    prompt: "💰 What's your travel budget? (Luxury, Mid-range, Budget-friendly)",
+    required: true,
+  },
+  {
+    key: 'dates',
+    prompt: "📅 When are you planning to travel? (Month, season, or specific dates)",
+    required: true,
+  },
+  {
+    key: 'travelers',
+    prompt: "👥 Who are you traveling with? (Solo, partner, family, friends)",
+    required: true,
+  },
+  {
+    key: 'interests',
+    prompt: "🎯 What are your travel interests? (Beach, food, culture, nightlife, adventure, relaxation, nature, etc.)",
+    required: true,
+  },
+  {
+    key: 'confirmation',
+    prompt: "✅ Would you like me to generate your personalized itinerary now, or modify any detail?",
+    required: false,
+  },
+];
+✅ client/src/components/AIChat.tsx (adaptación del flujo y activación de funciones)
+Asegúrate de tener estas funcionalidades activas:
+
+tsx
+Copiar
+Editar
+// Activar SpeechRecognition y SpeechSynthesis
+import useSpeechRecognition from '../hooks/useSpeechRecognition';
+import useTextToSpeech from '../hooks/useTextToSpeech';
+import { conversationFlow } from '../../server/lib/conversationFlow';
+Dentro del componente:
+
+tsx
+Copiar
+Editar
+const [conversationStep, setConversationStep] = useState(0);
+const [formData, setFormData] = useState({});
+const { speak } = useTextToSpeech();
+const { transcript, startListening } = useSpeechRecognition();
+tsx
+Copiar
+Editar
+useEffect(() => {
+  if (conversationStep < conversationFlow.length) {
+    const current = conversationFlow[conversationStep];
+    addMessage({
+      role: 'assistant',
+      content: current.prompt,
+    });
+    speak(current.prompt);
+  }
+}, [conversationStep]);
+Cuando el usuario responde:
+
+tsx
+Copiar
+Editar
+const handleUserResponse = (message: string) => {
+  const current = conversationFlow[conversationStep];
+  setFormData(prev => ({ ...prev, [current.key]: message }));
+
+  // Validar paso
+  if (conversationStep + 1 < conversationFlow.length) {
+    setConversationStep(conversationStep + 1);
+  } else {
+    // Cuando termina el flujo
+    triggerItineraryGeneration(formData); // Aquí se conecta a flights, hotels, planner
+    triggerAPIs(formData); // Llama APIs según intereses
+    setConversationStep(conversationFlow.length); // End
+  }
+};
+✅ Función triggerItineraryGeneration(formData)
+ts
+Copiar
+Editar
+const triggerItineraryGeneration = async (formData) => {
+  await fetch('/api/itinerary/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(formData),
+  });
+
+  addMessage({
+    role: 'assistant',
+    content: `✈️ Here's your custom plan to ${formData.destination}! Let's explore hotels, flights, and unforgettable experiences.`,
+  });
+
+  // Abre automáticamente el planner, flights, hotels, etc.
+  openTab('planner');
+  openTab('flights');
+  openTab('hotels');
+};
+✅ Activación de APIs & Sentiment
+ts
+Copiar
+Editar
+const triggerAPIs = async (data) => {
+  if (data.interests?.includes("beach")) callAPI("beachHotels");
+  if (data.interests?.includes("culture")) callAPI("localExperiences");
+  if (data.interests?.includes("food")) callAPI("restaurantSuggestions");
+
+  analyzeSentiment(data); // Google Natural Language API
+};
+✅ Integraciones necesarias (revisadas)
+Asegúrate de tener configuradas las siguientes claves en .env:
+
+env
+Copiar
+Editar
+GOOGLE_LANGUAGE_KEY_ID=
+GOOGLE_TTS_KEY_ID=
+GOOGLE_STT_KEY_ID=
+GOOGLE_CREDENTIALS=google-credentials-global.json
+GEMINI_API_KEY=
+STRIPE_SECRET_KEY=
+NEWS_API_KEY=
+FIREBASE_API_KEY=

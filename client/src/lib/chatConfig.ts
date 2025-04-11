@@ -1,167 +1,117 @@
 /**
  * Configuración del sistema de chat JetAI
- * Este archivo define el comportamiento, integraciones y opciones del asistente
  */
-
-export type AIModel = 'gemini-1.5-flash' | 'anthropic-claude-3' | 'openai-gpt4o';
-export type Language = 'English' | 'Español' | 'Français' | 'Português' | 'Italiano' | 'Deutsch';
-export type ConversationFlow = 'una-pregunta-a-la-vez' | 'open-ended';
-export type SpeechEngine = 'Google STT' | 'Browser STT';
-export type TextToSpeechEngine = 'Google TTS' | 'Browser TTS';
-export type VoiceProfile = 'elegant-female-concierge' | 'adventurous-guide' | 'knowledgeable-cultural-expert' | 'friendly-latino-companion' | 'luxury-specialist';
-export type Avatar = 'JetAI Concierge' | 'JetAI Explorer' | 'JetAI Cultural Guide' | 'JetAI Luxury Expert';
-export type DataStore = 'Firestore' | 'LocalStorage' | 'IndexedDB';
-
-export interface AudioConfig {
-  speechToText: SpeechEngine;
-  textToSpeech: TextToSpeechEngine;
-  voice: VoiceProfile;
-  languageDetection: boolean;
-}
-
-export interface VisualConfig {
-  avatar: Avatar;
-  videoReady: boolean;
-  ARSupport: boolean;
-  cameraIntegration: boolean;
-}
-
-export interface DataMemoryConfig {
-  store: DataStore;
-  session: DataStore;
-  userPreferences: boolean;
-  itineraryCache: boolean;
-}
-
-export interface ChatUXConfig {
-  fullScreenMode: boolean;
-  tabNavigationLinked: boolean;
-  iconColorOnClick: boolean;
-  markdownSupport: boolean;
-  emojiRendering: boolean;
-  cameraUpload: boolean;
-  documentDropZone: boolean;
-  liveButtonHints: string[];
-  interactiveCards: boolean;
-}
-
-export interface BehaviorConfig {
-  detectGreetings: boolean;
-  correctMisunderstoodInputs: boolean;
-  routeToTabsBasedOnContext: boolean;
-  voiceReplyIfVoiceEnabled: boolean;
-  fallbackToMockData: boolean;
-  timezoneAware: boolean;
-}
 
 export interface ChatConfig {
-  aiModel: AIModel;
-  languageSupport: Language[];
-  flow: ConversationFlow;
-  sentimentAnalysis: boolean;
-  audio: AudioConfig;
-  visual: VisualConfig;
-  dataMemory: DataMemoryConfig;
-  integratedServices: string[];
-  chatUX: ChatUXConfig;
-  behavior: BehaviorConfig;
+  system: {
+    name: string;
+    description: string;
+    version: string;
+    goal: string;
+  };
+  audio: {
+    textToSpeech: 'Browser API' | 'Google TTS';
+    voice: 'elegant-female-concierge' | 'adventurous-guide' | 'knowledgeable-cultural-expert' | 'friendly-latino-companion' | 'luxury-specialist';
+    volume: number;
+    autoplay: boolean;
+  };
+  intelligence: {
+    model: 'gemini-1.5-pro' | 'claude-3-sonnet' | 'gpt-4o';
+    personality: 'concierge' | 'explorer' | 'cultural' | 'exclusivo' | 'amigo' | 'gourmet' | 'vecino';
+    knowledgeCutoff: string;
+    context: number;
+  };
+  engagement: {
+    conversationFlow: 'guided' | 'natural' | 'hybrid';
+    responseStyle: 'concise' | 'detailed' | 'adaptive';
+    emojiUsage: 'none' | 'minimal' | 'moderate' | 'expressive';
+  };
+  languageSupport: string[];
+  appearance: {
+    theme: 'light' | 'dark' | 'system';
+    accentColor: string;
+    fontFamily: string;
+    messageStyle: 'bubble' | 'flat' | 'card';
+  };
 }
 
-/**
- * Configuración predeterminada del sistema de chat
- */
-export const defaultChatConfig: ChatConfig = {
-  aiModel: "gemini-1.5-flash",
-  languageSupport: ["English", "Español", "Français", "Português", "Italiano"],
-  flow: "una-pregunta-a-la-vez",
-  sentimentAnalysis: true,
+// Configuración predeterminada del chat
+const defaultChatConfig: ChatConfig = {
+  system: {
+    name: 'JetAI Travel Concierge',
+    description: 'AI-powered luxury travel assistant',
+    version: '2.0.0',
+    goal: 'Provide personalized travel recommendations and planning assistance through a step-by-step conversational flow'
+  },
   audio: {
-    speechToText: "Google STT",
-    textToSpeech: "Google TTS",
-    voice: "elegant-female-concierge",
-    languageDetection: true
+    textToSpeech: 'Google TTS',
+    voice: 'elegant-female-concierge',
+    volume: 0.8,
+    autoplay: true
   },
-  visual: {
-    avatar: "JetAI Concierge",
-    videoReady: true,
-    ARSupport: true,
-    cameraIntegration: true
+  intelligence: {
+    model: 'gemini-1.5-pro',
+    personality: 'concierge',
+    knowledgeCutoff: 'April 2025',
+    context: 8192
   },
-  dataMemory: {
-    store: "LocalStorage",
-    session: "IndexedDB",
-    userPreferences: true,
-    itineraryCache: true
+  engagement: {
+    conversationFlow: 'hybrid',
+    responseStyle: 'adaptive',
+    emojiUsage: 'moderate'
   },
-  integratedServices: [
-    "Google Translate",
-    "Google Cloud Vision",
-    "Google Natural Language",
-    "Google Calendar",
-    "Firebase Auth & Firestore",
-    "Stripe Payments"
+  languageSupport: [
+    'English',
+    'Español',
+    'Français',
+    'Deutsch',
+    'Italiano',
+    'Português'
   ],
-  chatUX: {
-    fullScreenMode: true,
-    tabNavigationLinked: true,
-    iconColorOnClick: true,
-    markdownSupport: true,
-    emojiRendering: true,
-    cameraUpload: true,
-    documentDropZone: true,
-    liveButtonHints: ["Book Now", "Generate QR", "Join Group", "Voice Search"],
-    interactiveCards: true
-  },
-  behavior: {
-    detectGreetings: true,
-    correctMisunderstoodInputs: true,
-    routeToTabsBasedOnContext: true,
-    voiceReplyIfVoiceEnabled: true,
-    fallbackToMockData: false, // Desactivado por defecto para cumplir política de datos
-    timezoneAware: true
+  appearance: {
+    theme: 'dark',
+    accentColor: '#6d28d9',
+    fontFamily: 'Inter, sans-serif',
+    messageStyle: 'bubble'
   }
 };
 
-/**
- * Inicializa y activa el flujo de chat con la configuración especificada
- * @param config Configuración personalizada
- * @returns El objeto de configuración activado
- */
-export function activateChatFlow(config: Partial<ChatConfig> = {}): ChatConfig {
-  // Combinar la configuración predeterminada con la personalizada
-  const activeConfig: ChatConfig = {
-    ...defaultChatConfig,
-    ...config,
-    audio: {
-      ...defaultChatConfig.audio,
-      ...(config.audio || {})
-    },
-    visual: {
-      ...defaultChatConfig.visual,
-      ...(config.visual || {})
-    },
-    dataMemory: {
-      ...defaultChatConfig.dataMemory,
-      ...(config.dataMemory || {})
-    },
-    chatUX: {
-      ...defaultChatConfig.chatUX,
-      ...(config.chatUX || {})
-    },
-    behavior: {
-      ...defaultChatConfig.behavior,
-      ...(config.behavior || {})
+// Obtener configuración personalizada o usar predeterminada
+function loadChatConfig(): ChatConfig {
+  try {
+    const savedConfig = localStorage.getItem('jetai-chat-config');
+    if (savedConfig) {
+      const parsedConfig = JSON.parse(savedConfig);
+      // Combinar con configuración predeterminada para asegurar estructura completa
+      return { ...defaultChatConfig, ...parsedConfig };
     }
-  };
-
-  // Comprobar que siempre está habilitada la detección de saludos si estamos en modo pregunta a la vez
-  if (activeConfig.flow === 'una-pregunta-a-la-vez') {
-    activeConfig.behavior.detectGreetings = true;
+  } catch (error) {
+    console.error('Error loading chat configuration:', error);
+    // Si hay un error, eliminar la configuración guardada
+    localStorage.removeItem('jetai-chat-config');
   }
-
-  console.log('JetAI ChatOS inicializado con configuración:', activeConfig);
-  return activeConfig;
+  
+  return defaultChatConfig;
 }
 
-// Exportar la configuración activa
-export const activeChatConfig = activateChatFlow();
+// Guardar configuración personalizada
+export function saveChatConfig(config: Partial<ChatConfig>): void {
+  try {
+    const currentConfig = loadChatConfig();
+    const updatedConfig = { ...currentConfig, ...config };
+    localStorage.setItem('jetai-chat-config', JSON.stringify(updatedConfig));
+    // Actualizar la configuración activa
+    Object.assign(activeChatConfig, updatedConfig);
+  } catch (error) {
+    console.error('Error saving chat configuration:', error);
+  }
+}
+
+// Configuración activa del chat
+export const activeChatConfig = loadChatConfig();
+
+// Reiniciar a configuración predeterminada
+export function resetChatConfig(): void {
+  localStorage.removeItem('jetai-chat-config');
+  Object.assign(activeChatConfig, defaultChatConfig);
+}
