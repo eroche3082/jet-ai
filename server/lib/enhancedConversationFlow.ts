@@ -434,12 +434,36 @@ function detectLocationQuery(message: string): boolean {
 
 // Extraer nombre de ubicación de un mensaje
 function extractLocationFromMessage(message: string): string | null {
-  // Enfoque simple: buscar después de palabras clave
+  // Enfoque mejorado: soporte multilingüe con más patrones
   const messageText = message.toLowerCase();
   
+  // Ampliar prefijos para incluir múltiples idiomas: español, inglés, italiano, portugués, francés, alemán
   const locationPrefixes = [
+    // Español
     'en ', 'a ', 'de ', 'sobre ', 'cerca de ', 'para ', 'el clima en ', 
-    'el tiempo en ', 'la temperatura en ', 'cómo está '
+    'el tiempo en ', 'la temperatura en ', 'cómo está ', 'visitar ', 'ir a ',
+    'viajar a ', 'conocer ', 'qué hacer en ', 'atracciones en ',
+    
+    // Inglés
+    'in ', 'to ', 'at ', 'near ', 'about ', 'the weather in ', 'temperature in ',
+    'how is the weather in ', 'visit ', 'traveling to ', 'what to do in ',
+    'attractions in ', 'places in ',
+    
+    // Italiano
+    'a ', 'in ', 'il tempo a ', 'temperatura a ', 'come è il tempo a ',
+    'visitare ', 'viaggiare a ', 'cosa fare a ', 'attrazioni a ',
+    
+    // Portugués
+    'em ', 'para ', 'o tempo em ', 'a temperatura em ', 'como está o tempo em ',
+    'visitar ', 'viajar para ', 'o que fazer em ', 'atrações em ',
+    
+    // Francés
+    'à ', 'en ', 'le temps à ', 'la température à ', 'comment est le temps à ',
+    'visiter ', 'voyager à ', 'que faire à ', 'attractions à ',
+    
+    // Alemán
+    'in ', 'nach ', 'das wetter in ', 'die temperatur in ', 'wie ist das wetter in ',
+    'besuchen ', 'reisen nach ', 'was kann man in ', 'attraktionen in '
   ];
   
   for (const prefix of locationPrefixes) {
@@ -447,8 +471,30 @@ function extractLocationFromMessage(message: string): string | null {
       const startIndex = messageText.indexOf(prefix) + prefix.length;
       let endIndex = messageText.length;
       
-      // Buscar fin de la ubicación (puntuación o palabras finales comunes)
-      const endMarkers = ['.', '?', ',', '!', ' y ', ' para ', ' el '];
+      // Buscar fin de la ubicación (puntuación o palabras finales comunes en múltiples idiomas)
+      const endMarkers = [
+        // Puntuación general
+        '.', '?', ',', '!', ';', ':', 
+        
+        // Español
+        ' y ', ' para ', ' el ', ' la ', ' los ', ' las ', ' con ', ' por ', ' que ',
+        
+        // Inglés
+        ' and ', ' with ', ' for ', ' the ', ' that ', ' when ',
+        
+        // Italiano
+        ' e ', ' con ', ' per ', ' il ', ' la ', ' che ',
+        
+        // Portugués
+        ' e ', ' com ', ' para ', ' o ', ' a ', ' os ', ' as ', ' que ',
+        
+        // Francés
+        ' et ', ' avec ', ' pour ', ' le ', ' la ', ' les ', ' que ',
+        
+        // Alemán
+        ' und ', ' mit ', ' für ', ' der ', ' die ', ' das ', ' wenn '
+      ];
+      
       for (const marker of endMarkers) {
         const markerIndex = messageText.indexOf(marker, startIndex);
         if (markerIndex !== -1 && markerIndex < endIndex) {
@@ -459,7 +505,15 @@ function extractLocationFromMessage(message: string): string | null {
       const location = messageText.substring(startIndex, endIndex).trim();
       
       // Evitar extraer frases muy largas o muy cortas
-      if (location.length > 2 && location.length < 50 && !location.includes(' como ')) {
+      // Verificar que no contenga palabras de exclusión en varios idiomas
+      const exclusionWords = [
+        'como', 'like', 'come', 'como', 'comme', 'wie', // "como" en varios idiomas
+        'por ejemplo', 'for example', 'per esempio', 'por exemplo', 'par exemple', 'zum beispiel'
+      ];
+      
+      const containsExclusion = exclusionWords.some(word => location.includes(word));
+      
+      if (location.length > 2 && location.length < 50 && !containsExclusion) {
         return location;
       }
     }
@@ -468,17 +522,64 @@ function extractLocationFromMessage(message: string): string | null {
   return null;
 }
 
-// Extraer información de ruta de un mensaje
+// Extraer información de ruta de un mensaje con soporte multilingüe
 function extractRouteFromMessage(message: string): { origin: string | null; destination: string | null } {
   const messageText = message.toLowerCase();
   
-  // Patrones comunes para rutas
+  // Patrones comunes para rutas en múltiples idiomas
   const routePatterns = [
+    // Español
     { startPattern: 'de ', separatorPattern: ' a ' },
     { startPattern: 'desde ', separatorPattern: ' hasta ' },
     { startPattern: 'ir de ', separatorPattern: ' a ' },
     { startPattern: 'viajar de ', separatorPattern: ' a ' },
     { startPattern: 'entre ', separatorPattern: ' y ' },
+    { startPattern: 'ruta de ', separatorPattern: ' a ' },
+    { startPattern: 'trayecto de ', separatorPattern: ' a ' },
+    { startPattern: 'camino de ', separatorPattern: ' a ' },
+    
+    // Inglés
+    { startPattern: 'from ', separatorPattern: ' to ' },
+    { startPattern: 'travel from ', separatorPattern: ' to ' },
+    { startPattern: 'route from ', separatorPattern: ' to ' },
+    { startPattern: 'directions from ', separatorPattern: ' to ' },
+    { startPattern: 'journey from ', separatorPattern: ' to ' },
+    { startPattern: 'going from ', separatorPattern: ' to ' },
+    { startPattern: 'driving from ', separatorPattern: ' to ' },
+    { startPattern: 'flying from ', separatorPattern: ' to ' },
+    { startPattern: 'between ', separatorPattern: ' and ' },
+    
+    // Italiano
+    { startPattern: 'da ', separatorPattern: ' a ' },
+    { startPattern: 'da ', separatorPattern: ' fino a ' },
+    { startPattern: 'viaggiare da ', separatorPattern: ' a ' },
+    { startPattern: 'percorso da ', separatorPattern: ' a ' },
+    { startPattern: 'rotta da ', separatorPattern: ' a ' },
+    { startPattern: 'tra ', separatorPattern: ' e ' },
+    
+    // Portugués
+    { startPattern: 'de ', separatorPattern: ' para ' },
+    { startPattern: 'de ', separatorPattern: ' até ' },
+    { startPattern: 'viajar de ', separatorPattern: ' para ' },
+    { startPattern: 'rota de ', separatorPattern: ' para ' },
+    { startPattern: 'trajeto de ', separatorPattern: ' para ' },
+    { startPattern: 'entre ', separatorPattern: ' e ' },
+    
+    // Francés
+    { startPattern: 'de ', separatorPattern: ' à ' },
+    { startPattern: 'de ', separatorPattern: ' jusqu\'à ' },
+    { startPattern: 'voyager de ', separatorPattern: ' à ' },
+    { startPattern: 'trajet de ', separatorPattern: ' à ' },
+    { startPattern: 'itinéraire de ', separatorPattern: ' à ' },
+    { startPattern: 'entre ', separatorPattern: ' et ' },
+    
+    // Alemán
+    { startPattern: 'von ', separatorPattern: ' nach ' },
+    { startPattern: 'von ', separatorPattern: ' zu ' },
+    { startPattern: 'reise von ', separatorPattern: ' nach ' },
+    { startPattern: 'route von ', separatorPattern: ' nach ' },
+    { startPattern: 'fahrt von ', separatorPattern: ' nach ' },
+    { startPattern: 'zwischen ', separatorPattern: ' und ' }
   ];
   
   for (const pattern of routePatterns) {
@@ -492,8 +593,30 @@ function extractRouteFromMessage(message: string): { origin: string | null; dest
         const destStartIndex = separatorIndex + pattern.separatorPattern.length;
         let destEndIndex = messageText.length;
         
-        // Buscar fin del destino (puntuación o palabras finales comunes)
-        const endMarkers = ['.', '?', ',', '!', ' y ', ' para ', ' el '];
+        // Buscar fin del destino (puntuación o palabras finales comunes en múltiples idiomas)
+        const endMarkers = [
+          // Puntuación general
+          '.', '?', ',', '!', ';', ':', 
+          
+          // Español
+          ' y ', ' para ', ' el ', ' la ', ' los ', ' las ', ' con ', ' por ', ' que ',
+          
+          // Inglés
+          ' and ', ' with ', ' for ', ' the ', ' that ', ' when ',
+          
+          // Italiano
+          ' e ', ' con ', ' per ', ' il ', ' la ', ' che ',
+          
+          // Portugués
+          ' e ', ' com ', ' para ', ' o ', ' a ', ' os ', ' as ', ' que ',
+          
+          // Francés
+          ' et ', ' avec ', ' pour ', ' le ', ' la ', ' les ', ' que ',
+          
+          // Alemán
+          ' und ', ' mit ', ' für ', ' der ', ' die ', ' das ', ' wenn '
+        ];
+        
         for (const marker of endMarkers) {
           const markerIndex = messageText.indexOf(marker, destStartIndex);
           if (markerIndex !== -1 && markerIndex < destEndIndex) {
