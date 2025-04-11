@@ -244,50 +244,194 @@ export const getRoutesHandler = async (req: Request, res: Response) => {
       return res.status(500).json({ error: 'No se ha configurado la clave API' });
     }
     
-    let url = `https://routes.googleapis.com/directions/v2:computeRoutes`;
-    
-    const requestBody = {
-      origin: {
-        address: origin as string
-      },
-      destination: {
-        address: destination as string
-      },
-      travelMode: (mode as string || 'DRIVE').toUpperCase(),
-      routingPreference: "TRAFFIC_AWARE",
-      computeAlternativeRoutes: true,
-      languageCode: "es-ES",
-      units: "METRIC"
-    };
-    
-    // Si hay waypoints, agregarlos a la solicitud
-    if (waypoints) {
-      Object.assign(requestBody, {
-        intermediates: (waypoints as string).split('|').map(wp => ({ address: wp }))
+    try {
+      // Intentar con Google Routes API
+      let url = `https://routes.googleapis.com/directions/v2:computeRoutes`;
+      
+      const requestBody = {
+        origin: {
+          address: origin as string
+        },
+        destination: {
+          address: destination as string
+        },
+        travelMode: (mode as string || 'DRIVE').toUpperCase(),
+        routingPreference: "TRAFFIC_AWARE",
+        computeAlternativeRoutes: true,
+        languageCode: "es-ES",
+        units: "METRIC"
+      };
+      
+      // Si hay waypoints, agregarlos a la solicitud
+      if (waypoints) {
+        Object.assign(requestBody, {
+          intermediates: (waypoints as string).split('|').map(wp => ({ address: wp }))
+        });
+      }
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': apiKey,
+          'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline'
+        },
+        body: JSON.stringify(requestBody)
       });
+      
+      if (!response.ok) {
+        throw new Error(`Error en Routes API: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      // Agregar fuente de datos para seguimiento
+      Object.assign(data, { _source: 'google_routes_api' });
+      
+      res.json(data);
+    } catch (primaryError) {
+      console.log('El servicio de Routes API no está disponible, usando fallback...');
+      
+      // FALLBACK: Usar OpenStreetMap Routing Machine (OSRM)
+      try {
+        // Primero convertir las direcciones en coordenadas usando nuestro servicio geocoding con fallback
+        const originCoords = await getCoordinatesFromAddress(origin as string);
+        const destinationCoords = await getCoordinatesFromAddress(destination as string);
+        
+        if (!originCoords || !destinationCoords) {
+          throw new Error('No se pudieron obtener las coordenadas de las direcciones');
+        }
+        
+        // Determinar el perfil (tipo de ruta) basado en el modo
+        let profile = 'driving';
+        if (mode) {
+          const modeStr = (mode as string).toLowerCase();
+          if (modeStr === 'walking' || modeStr === 'walk') profile = 'foot';
+          if (modeStr === 'bicycling' || modeStr === 'bicycle') profile = 'bike';
+        }
+        
+        // Construir URL para servicio OSRM público
+        let osrmUrl = `https://router.project-osrm.org/route/v1/${profile}/`;
+        osrmUrl += `${originCoords.lng},${originCoords.lat};${destinationCoords.lng},${destinationCoords.lat}`;
+        osrmUrl += '?overview=full&geometries=polyline&steps=true';
+        
+        // Agregar waypoints si existen
+        if (waypoints && waypoints.toString().trim() !== '') {
+          osrmUrl = await addWaypointsToOsrmUrl(osrmUrl, waypoints as string, profile);
+        }
+        
+        const fallbackResponse = await fetch(osrmUrl);
+        
+        if (!fallbackResponse.ok) {
+          throw new Error('Error en el servicio de rutas alternativo');
+        }
+        
+        const fallbackData = await fallbackResponse.json();
+        
+        if (fallbackData.code !== 'Ok' || !fallbackData.routes || fallbackData.routes.length === 0) {
+          throw new Error('No se encontraron rutas para el trayecto solicitado');
+        }
+        
+        // Transformar datos de fallback para coincidir con el formato de Google
+        const mainRoute = fallbackData.routes[0];
+        
+        const formattedData = {
+          routes: [{
+            duration: {
+              seconds: Math.round(mainRoute.duration)
+            },
+            distanceMeters: Math.round(mainRoute.distance),
+            polyline: {
+              encodedPolyline: mainRoute.geometry
+            },
+            legs: mainRoute.legs.map((leg: any, index: number) => ({
+              steps: leg.steps.map((step: any) => ({
+                distanceMeters: Math.round(step.distance),
+                duration: { seconds: Math.round(step.duration) },
+                navigationInstruction: { instructions: step.maneuver.instruction }
+              }))
+            }))
+          }],
+          _source: 'fallback_osrm',
+          _source_info: {
+            provider: 'OpenStreetMap Routing Machine',
+            profile: profile
+          }
+        };
+        
+        res.json(formattedData);
+      } catch (fallbackError: any) {
+        console.error('Error en el servicio de rutas alternativo:', fallbackError);
+        throw new Error('Todos los servicios de rutas están fallando: ' + fallbackError.message);
+      }
     }
-    
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Goog-Api-Key': apiKey,
-        'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline'
-      },
-      body: JSON.stringify(requestBody)
+  } catch (error: any) {
+    console.error('Error en el servicio de rutas:', error);
+    res.status(503).json({ 
+      error: error.message,
+      suggestion: 'Verifica que la API de Routes esté habilitada en tu cuenta de Google Cloud.'
     });
+  }
+};
+
+// Función auxiliar para obtener coordenadas a partir de una dirección
+async function getCoordinatesFromAddress(address: string): Promise<{lat: number, lng: number} | null> {
+  try {
+    // Intentar primero con nuestra API de geocodificación
+    const response = await fetch(`http://localhost:5000/api/geocode?address=${encodeURIComponent(address)}`);
     
     if (!response.ok) {
-      throw new Error(`Error en Routes API: ${response.statusText}`);
+      throw new Error('Error en el servicio de geocodificación');
     }
     
     const data = await response.json();
-    res.json(data);
-  } catch (error: any) {
-    console.error('Error en el servicio de rutas:', error);
-    res.status(500).json({ error: error.message });
+    
+    if (data.status === 'ZERO_RESULTS' || !data.results || data.results.length === 0) {
+      throw new Error('No se encontraron resultados para la dirección');
+    }
+    
+    const location = data.results[0].geometry.location;
+    return { lat: location.lat, lng: location.lng };
+  } catch (error) {
+    console.error('Error obteniendo coordenadas:', error);
+    return null;
   }
-};
+}
+
+// Función auxiliar para agregar waypoints a la URL de OSRM
+async function addWaypointsToOsrmUrl(baseUrl: string, waypointsStr: string, profile: string): Promise<string> {
+  try {
+    // Separar waypoints y convertirlos en coordenadas
+    const waypointList = waypointsStr.split('|');
+    let newUrl = baseUrl.split('?')[0]; // Quitar parámetros
+    
+    // Extraer coordenadas originales
+    const coordParts = newUrl.split(`/${profile}/`)[1].split(';');
+    const origin = coordParts[0];
+    const destination = coordParts[coordParts.length - 1];
+    
+    // Iniciar nueva cadena de coordenadas con origen
+    let coords = origin;
+    
+    // Agregar cada waypoint
+    for (const waypoint of waypointList) {
+      const waypointCoords = await getCoordinatesFromAddress(waypoint);
+      if (waypointCoords) {
+        coords += `;${waypointCoords.lng},${waypointCoords.lat}`;
+      }
+    }
+    
+    // Agregar destino
+    coords += `;${destination}`;
+    
+    // Reconstruir URL
+    newUrl = `https://router.project-osrm.org/route/v1/${profile}/${coords}?overview=full&geometries=polyline&steps=true`;
+    return newUrl;
+  } catch (error) {
+    console.error('Error agregando waypoints a OSRM:', error);
+    return baseUrl; // Devolver URL original en caso de error
+  }
+}
 
 // Ruta para obtener zona horaria
 export const getTimeZoneHandler = async (req: Request, res: Response) => {

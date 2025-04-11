@@ -315,8 +315,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Message is required" });
       }
       
-      // Procesar la conversación con Vertex AI
-      const response = await processConversation(message, history, memory);
+      // Determinar si usar el flujo de conversación mejorado o el básico
+      const useEnhancedFlow = true; // Siempre usar la versión mejorada
+      
+      let response;
+      if (useEnhancedFlow) {
+        // Procesar la conversación con flujo mejorado que incluye fallbacks
+        const { processUserMessage } = require('./lib/enhancedConversationFlow');
+        response = await processUserMessage(message, history);
+      } else {
+        // Procesar la conversación con Vertex AI directamente (fallback)
+        response = await processConversation(message, history, memory);
+      }
       
       // Registrar la conversación si el usuario está autenticado
       const userId = req.user ? (req.user as any).id : null;
