@@ -115,12 +115,9 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
   const { speak, stop: stopSpeaking } = useTextToSpeech();
   const { transcript, startListening: startListeningHook, stopListening: stopListeningHook } = useSpeechRecognition();
   const [currentStage, setCurrentStage] = useState<ConversationStage>(ConversationStage.GREETING);
-  const [travelProfile, setTravelProfile] = useState<TravelProfile>({
-    destination: null,
-    budget: null,
-    dates: null,
-    travelers: null,
-    interests: null
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    currentStage: ConversationStage.GREETING,
+    conversationHistory: []
   });
   
   // Personality selection state
@@ -320,13 +317,19 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     localStorage.setItem('userTravelPreferences', JSON.stringify(updatedPreferences));
   };
 
-  // Enhanced message sending with guided conversation flow
+  // Enhanced message sending with server-side guided conversation flow
   const handleSendMessage = async (event?: React.MouseEvent, retry = false) => {
     if ((!inputMessage.trim() && !retry) || isLoading) return;
     
+    const userInput = inputMessage.trim();
+    
+    // Create user message
+    const userMessageObj = createUserMessage(userInput);
+    
+    // Add to UI messages
     const userMessage: ExtendedChatMessage = { 
       role: 'user', 
-      content: inputMessage 
+      content: userInput 
     };
     
     if (!retry) {
@@ -337,99 +340,111 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     setIsLoading(true);
     
     try {
-      // Handle the conversation flow logic
-      const userInput = inputMessage.trim();
-      
-      // Check if user is greeting (like "hola", "hi")
-      if (isGreeting(userInput) && currentStage !== ConversationStage.GREETING) {
-        // Reset to greeting stage if user is just saying hello
-        setCurrentStage(ConversationStage.GREETING);
+      // Check for command (e.g. /help, /restart)
+      const commandData = extractCommand(userInput);
+      if (commandData) {
+        const commandResponse = executeCommand(commandData.command, commandData.args);
         setMessages(prev => [...prev, { 
           role: 'assistant', 
-          content: enhanceResponseWithEmojis(STAGE_QUESTIONS[ConversationStage.GREETING])
+          content: enhanceResponseWithEmojis(commandResponse)
         }]);
         setIsLoading(false);
         return;
       }
       
-      // Update travel profile based on current stage and user input
-      const updatedProfile = updateTravelProfile(
-        currentStage, 
-        userInput,
-        travelProfile
-      );
-      
-      // Set the updated profile
-      setTravelProfile(updatedProfile);
-      
-      // Determine the next stage in the conversation
-      const nextStage = determineNextStage(currentStage, userInput, updatedProfile);
-      setCurrentStage(nextStage);
-      
-      // Get the appropriate question for the next stage
-      const nextQuestion = STAGE_QUESTIONS[nextStage];
-      
-      // Build context for AI based on the updated profile
-      let contextMessage = '';
-      
-      // Only show profile summary after collecting some information
-      if (
-        updatedProfile.destination || 
-        updatedProfile.budget || 
-        updatedProfile.dates || 
-        updatedProfile.travelers
-      ) {
-        contextMessage = getTravelProfileSummary(updatedProfile) + '\n\n';
+      // Check if user is greeting (like "hola", "hi")
+      if (isGreeting(userInput) && userProfile.currentStage !== ConversationStage.GREETING) {
+        // Reset profile to greeting stage
+        const resetProfile: UserProfile = {
+          ...userProfile,
+          currentStage: ConversationStage.GREETING
+        };
+        
+        setUserProfile(resetProfile);
+        setCurrentStage(ConversationStage.GREETING);
+        
+        // Show greeting message
+        setMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: enhanceResponseWithEmojis(STAGE_QUESTIONS[ConversationStage.GREETING])
+        }]);
+        
+        setIsLoading(false);
+        return;
       }
       
-      // If this is general conversation after collecting basic info, use AI
-      if (nextStage === ConversationStage.GENERAL || nextStage === ConversationStage.ITINERARY_REQUEST) {
-        // Add user preferences to context if available
-        const contextEnhancedMessages: ChatMessage[] = [...messages];
+      // Process message through server-side conversation flow
+      try {
+        const result = await processMessage(userInput, userProfile);
         
-        // Add travel profile as system message if we have data
-        if (Object.keys(updatedProfile).some(key => updatedProfile[key as keyof TravelProfile])) {
-          const profileMessage: ChatMessage = {
-            role: 'system',
-            content: `User travel profile: ${JSON.stringify(updatedProfile)}`
-          };
+        if (result.updatedProfile) {
+          // Update profile state with server response
+          setUserProfile(result.updatedProfile);
+          setCurrentStage(result.updatedProfile.currentStage);
           
-          // Add profile as first message without mutating original messages array
-          contextEnhancedMessages.unshift(profileMessage);
+          // Update language if detected
+          if (result.updatedProfile.language) {
+            setCurrentLanguage(result.updatedProfile.language);
+          }
+          
+          // Update emotion if detected
+          if (result.updatedProfile.emotion) {
+            setDetectedEmotions(prev => ({ 
+              ...prev, 
+              emotion: result.updatedProfile.emotion || 'neutral' 
+            }));
+          }
         }
-        
-        // Call AI with context
-        const response = await sendChatMessage(
-          retry ? 'Can you try again? I didn\'t understand your last response.' : userInput,
-          contextEnhancedMessages,
-          selectedPersonality
-        );
         
         // Reset error count on successful response
         setErrorCount(0);
-        
-        // Set suggestions from response
-        if (response.suggestions && response.suggestions.length > 0) {
-          setSuggestions(response.suggestions);
-        }
-        
+
         // Format the response by adding emojis based on content
-        const enhancedResponse = enhanceResponseWithEmojis(response.message);
+        const enhancedResponse = enhanceResponseWithEmojis(result.response);
         
+        // Add assistant message to UI
         setMessages(prev => [...prev, { 
           role: 'assistant', 
-          content: contextMessage + enhancedResponse 
+          content: enhancedResponse 
         }]);
+        
+        // If in itinerary request stage and we have required info, 
+        // generate itinerary
+        if (result.updatedProfile.currentStage === ConversationStage.ITINERARY_REQUEST &&
+            result.updatedProfile.destination && 
+            result.updatedProfile.dates) {
+          
+          // Let the user know we're generating an itinerary
+          setMessages(prev => [...prev, { 
+            role: 'assistant', 
+            content: "⏳ I'm generating your personalized itinerary, this may take a moment..."
+          }]);
+          
+          try {
+            const itinerary = await requestItinerary(result.updatedProfile);
+            
+            // Add the itinerary to messages
+            setMessages(prev => [...prev, { 
+              role: 'assistant', 
+              content: itinerary
+            }]);
+          } catch (error) {
+            console.error("Error generating itinerary:", error);
+            setMessages(prev => [...prev, { 
+              role: 'assistant', 
+              content: "I apologize, but I'm having trouble generating your itinerary right now. Let's continue our conversation and try again later."
+            }]);
+          }
+        }
         
         // Extract and save any preferences mentioned in the user's message
         extractPreferences(userInput);
-      } else {
-        // For guided conversation, use pre-defined questions based on the stage
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: contextMessage + enhanceResponseWithEmojis(nextQuestion)
-        }]);
+        
+      } catch (error) {
+        console.error("Process message error:", error);
+        throw error;
       }
+      
     } catch (error) {
       console.error('Error sending message:', error);
       setErrorCount(prev => prev + 1);
@@ -457,6 +472,11 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
       
     } finally {
       setIsLoading(false);
+      
+      // Scroll to the bottom after updating messages
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
     }
   };
 
