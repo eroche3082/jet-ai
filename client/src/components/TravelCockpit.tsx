@@ -18,6 +18,7 @@ import {
   QrCode,
   Glasses,
   Briefcase as Portfolio,
+  BookOpen,
   Brain,
   Sun,
   Moon,
@@ -990,6 +991,7 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
       case 'ar': return <Glasses className="w-5 h-5" />;
       case 'portfolio': return <Portfolio className="w-5 h-5" />;
       case 'suggestions': return <Brain className="w-5 h-5" />;
+      case 'memories': return <BookOpen className="w-5 h-5" />;
       default: return <Globe className="w-5 h-5" />;
     }
   };
