@@ -10,7 +10,7 @@ import Anthropic from '@anthropic-ai/sdk';
 // Configuración de los modelos
 const PROJECT_ID = 'erudite-creek-431302-q3';  // Updated as per checklist
 const LOCATION = 'us-central1';
-const GEMINI_MODEL = 'gemini-1.5-flash';       // Updated to match checklist
+const GEMINI_MODEL = 'gemini-1.5-flash-latest';  // Updated to match checklist for most recent version
 const CLAUDE_MODEL = 'claude-3-7-sonnet-20250219'; // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
 
 // Instancias de los clientes de AI
