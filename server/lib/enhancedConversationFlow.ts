@@ -151,7 +151,9 @@ export async function processUserMessage(
       case ConversationStage.PLANNING:
         // Si está en etapa de planificación, generar itinerario
         if (shouldGenerateItinerary(message, history)) {
-          const itinerary = await generateUserItinerary(message, history);
+          // Extraer el perfil del usuario del historial de conversación
+          const userProfile = extractUserProfileFromHistory(history);
+          const itinerary = await generateUserItinerary(userProfile);
           response = {
             message: `¡He creado un itinerario para ti! ¿Qué te parece?`,
             itinerary,
@@ -737,8 +739,6 @@ function checkForAPIAlerts(): void {
 
 // Exportar funciones y tipos para uso en otros módulos
 export {
-  ConversationStage,
-  processUserMessage,
   shouldGenerateItinerary,
   detectWeatherQuery,
   detectRouteQuery,

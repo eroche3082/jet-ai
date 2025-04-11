@@ -50,4 +50,9 @@ export interface ChatResponse {
       }[];
     }[];
   };
+  enhancedData?: {
+    weather?: any;
+    route?: any;
+    location?: any;
+  };
 }
