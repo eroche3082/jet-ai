@@ -18,6 +18,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import googleCloud from '@/lib/googlecloud';
+import { 
+  ConversationStage, 
+  STAGE_QUESTIONS, 
+  determineNextStage, 
+  updateTravelProfile, 
+  getTravelProfileSummary,
+  isGreeting,
+  TravelProfile
+} from '@/lib/conversationFlow';
 
 // SpeechRecognition types for TypeScript
 interface SpeechRecognitionEvent extends Event {
@@ -90,6 +99,16 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [userPreferences, setUserPreferences] = useState<Record<string, string>>({});
+  
+  // Conversation flow states
+  const [currentStage, setCurrentStage] = useState<ConversationStage>(ConversationStage.GREETING);
+  const [travelProfile, setTravelProfile] = useState<TravelProfile>({
+    destination: null,
+    budget: null,
+    dates: null,
+    travelers: null,
+    interests: null
+  });
   
   // Personality selection state
   const [selectedPersonality, setSelectedPersonality] = useState<string>('concierge');
