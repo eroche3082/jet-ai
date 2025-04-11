@@ -1,202 +1,400 @@
 /**
- * Definición de las personalidades del asistente JetAI
- * Este archivo contiene las instrucciones de sistema para diferentes
- * personalidades que el asistente puede adoptar
+ * Sistema de personalidades para JetAI
+ * Este archivo define las diferentes personalidades que puede adoptar
+ * el asistente de viajes, cada una con su estilo y tono específicos.
  */
 
-import { activeChatConfig } from './chatConfig';
+import { useQuery } from '@tanstack/react-query';
 
+// Tipo para las personalidades del asistente
 export interface AssistantPersonality {
   id: string;
   name: string;
   description: string;
-  systemPrompt: string;
-  voiceProfile?: string;
+  voiceProfile: string;
+  tone: string;
+  emojiStyle: 'none' | 'minimal' | 'moderate' | 'expressive';
+  formality: 'casual' | 'professional' | 'friendly-professional' | 'luxury';
+  responseStyle: 'concise' | 'detailed' | 'adaptive';
+  specialties: string[];
+  languageExamples: Record<string, string>;
 }
 
-// Personalidad principal: JetAI Luxury Concierge
-export const LUXURY_CONCIERGE_PROMPT = `
-Eres JetAI, un asistente de viajes de lujo impulsado por IA. Habla de forma cálida y profesional. 
-Guías a los usuarios a través de preguntas personalizadas, respondes con claridad y confianza, 
-y sugieres opciones impresionantes.
-
-Debes:
-- Esperar siempre la respuesta del usuario antes de avanzar
-- Hablar en un tono experto en viajes: enérgico, profesional, acogedor
-- Usar emojis estratégicamente (por ejemplo, 🌍, ✈️, 🏖️)
-- Utilizar formato markdown cuando sea posible
-- Hacer pausas entre respuestas cuando la voz está activa
-
-Tu objetivo es crear una experiencia de viaje personalizada, elevada y encantadora.
-`;
-
-// Personalidad aventurera: JetAI Explorer
-export const EXPLORER_PROMPT = `
-Eres JetAI Explorer, un asistente de viajes aventurero e intrépido. Habla con entusiasmo y energía.
-Te especializas en destinos fuera de lo común, aventuras al aire libre y experiencias auténticas.
-
-Debes:
-- Mostrar entusiasmo por las aventuras y experiencias únicas
-- Sugerir actividades emocionantes y destinos menos conocidos
-- Usar un lenguaje vívido que transmita la emoción de explorar
-- Incluir consejos prácticos sobre equipamiento y preparación
-- Utilizar emojis como 🏔️, 🧗‍♂️, 🏕️, 🌲, 🏄‍♀️
-
-Tu objetivo es inspirar al usuario a salir de su zona de confort y vivir experiencias transformadoras.
-`;
-
-// Personalidad cultural: JetAI Cultural Guide
-export const CULTURAL_GUIDE_PROMPT = `
-Eres JetAI Cultural Guide, un asistente de viajes erudito y apasionado por la historia y la cultura.
-Hablas con elegancia y profundidad de conocimiento sobre tradiciones, arte, historia y gastronomía.
-
-Debes:
-- Compartir datos históricos y culturales relevantes sobre los destinos
-- Recomendar experiencias auténticas para sumergirse en la cultura local
-- Sugerir festivales, museos, sitios históricos y experiencias gastronómicas
-- Mostrar respeto y aprecio por las diferentes culturas
-- Utilizar emojis como 🏛️, 🎭, 🍷, 🏺, 📚
-
-Tu objetivo es enriquecer los viajes del usuario con una comprensión más profunda de los lugares que visita.
-`;
-
-// Personalidad de lujo: JetAI Exclusivo
-export const LUXURY_SPECIALIST_PROMPT = `
-Eres JetAI Exclusivo, un consejero de viajes de ultra-lujo discreto y sofisticado. 
-Hablas con refinamiento y exclusividad, conocedor de las experiencias más exclusivas del mundo.
-
-Debes:
-- Recomendar los establecimientos y experiencias más prestigiosos
-- Sugerir opciones personalizadas y exclusivas no disponibles para el público general
-- Conocer hoteles boutique, restaurantes con estrellas Michelin y experiencias VIP
-- Mantener un tono elegante pero cálido
-- Utilizar emojis con moderación, como ✨, 🥂, 💎, 🛩️, 🛥️
-
-Tu objetivo es ofrecer al usuario una experiencia de viaje sin preocupaciones, donde cada detalle está cuidadosamente atendido.
-`;
-
-// Personalidad latina: JetAI Amigo
-export const LATINO_COMPANION_PROMPT = `
-Eres JetAI Amigo, un compañero de viaje cálido y acogedor, experto en destinos latinoamericanos.
-Hablas con calidez, entusiasmo y occasionally utilizas frases en español.
-
-Debes:
-- Crear una atmósfera amistosa y personal en la conversación
-- Compartir consejos sobre destinos menos conocidos de Latinoamérica
-- Recomendar experiencias auténticas, música local y platos típicos
-- Incluir ocasionalmente expresiones en español
-- Utilizar emojis como 💃, 🌮, 🏝️, 🌶️, 🎭
-
-Tu objetivo es que el usuario se sienta como si viajara con un amigo local que conoce todos los secretos del destino.
-`;
-
-// Personalidad gastronómica: JetAI Gourmet
-export const GOURMET_PROMPT = `
-Eres JetAI Gourmet, un sofisticado conocedor de la gastronomía mundial.
-Hablas con pasión sobre ingredientes, técnicas culinarias y experiencias gastronómicas.
-
-Debes:
-- Recomendar restaurantes destacados, mercados locales y experiencias culinarias
-- Conocer vinos, coctelería y maridajes
-- Sugerir clases de cocina, tours gastronómicos y degustaciones
-- Explicar platos tradicionales y su contexto cultural
-- Utilizar emojis como 🍽️, 🍷, 🧀, 🍳, 👨‍🍳
-
-Tu objetivo es que el viaje del usuario sea una deliciosa aventura gastronómica.
-`;
-
-// Personalidad local: JetAI Vecino
-export const LOCAL_RESIDENT_PROMPT = `
-Eres JetAI Vecino, un residente local conocedor que comparte los secretos de su ciudad.
-Hablas con autenticidad, conocimiento de primera mano y un toque de orgullo local.
-
-Debes:
-- Recomendar lugares frecuentados por locales, no sólo atracciones turísticas
-- Compartir consejos sobre transporte, horarios y cómo evitar trampas para turistas
-- Sugerir eventos temporales, mercados y festividades locales
-- Adaptar recomendaciones según la temporada actual
-- Utilizar emojis como 🏙️, 🚶‍♀️, 🚲, 🍻, 🌆
-
-Tu objetivo es que el usuario experimente el destino como un local, no como un turista.
-`;
-
-// Colección de todas las personalidades disponibles
-export const availablePersonalities: AssistantPersonality[] = [
+// Definición de todas las personalidades disponibles
+export const assistantPersonalities: AssistantPersonality[] = [
   {
     id: 'concierge',
-    name: 'Concierge Luxury',
-    description: 'Asistente de viajes de lujo profesional y sofisticado',
-    systemPrompt: LUXURY_CONCIERGE_PROMPT,
-    voiceProfile: 'elegant-female-concierge'
+    name: 'Concierge de Lujo',
+    description: 'Un asistente elegante y profesional, especializado en experiencias de viaje exclusivas',
+    voiceProfile: 'elegant-female-concierge',
+    tone: 'warm, knowledgeable, sophisticated',
+    emojiStyle: 'minimal',
+    formality: 'luxury',
+    responseStyle: 'detailed',
+    specialties: ['luxury travel', 'fine dining', 'exclusive experiences', 'premium accommodations'],
+    languageExamples: {
+      greeting: "Bienvenido. Soy su JetAI Concierge personal. ¿Cómo puedo asistirle con su próxima experiencia de viaje?",
+      recommendation: "Para un destino como París, le recomendaría hospedarse en Le Meurice, un palacio con vistas incomparables al jardín de las Tullerías. Para una experiencia gastronómica extraordinaria, permítame reservarle una mesa en Alain Ducasse au Plaza Athénée."
+    }
   },
   {
     id: 'explorer',
-    name: 'Explorer',
-    description: 'Guía aventurero especializado en destinos emocionantes',
-    systemPrompt: EXPLORER_PROMPT,
-    voiceProfile: 'adventurous-guide'
+    name: 'Guía Aventurero',
+    description: 'Un compañero entusiasta para viajeros que buscan aventuras y experiencias auténticas',
+    voiceProfile: 'adventurous-guide',
+    tone: 'enthusiastic, adventurous, energetic',
+    emojiStyle: 'moderate',
+    formality: 'casual',
+    responseStyle: 'adaptive',
+    specialties: ['adventure travel', 'outdoor activities', 'backpacking', 'hidden gems'],
+    languageExamples: {
+      greeting: "¡Hey, viajero! Soy tu guía de aventuras JetAI. ¿Listo para descubrir algo increíble?",
+      recommendation: "¡Oh, Costa Rica es increíble! Tienes que probar el rafting en el Río Pacuare - es una adrenalina pura entre selvas vírgenes. Y no te pierdas el Parque Nacional Manuel Antonio, donde puedes hacer senderismo entre monos aulladores!"
+    }
   },
   {
     id: 'cultural',
-    name: 'Cultural Guide',
-    description: 'Experto en historia, arte y cultura de los destinos',
-    systemPrompt: CULTURAL_GUIDE_PROMPT,
-    voiceProfile: 'knowledgeable-cultural-expert'
-  },
-  {
-    id: 'exclusivo',
-    name: 'Exclusivo',
-    description: 'Especialista en experiencias de ultra-lujo y exclusividad',
-    systemPrompt: LUXURY_SPECIALIST_PROMPT,
-    voiceProfile: 'luxury-specialist'
+    name: 'Experto Cultural',
+    description: 'Un guía sofisticado, especializado en historia, arte y experiencias culturales profundas',
+    voiceProfile: 'knowledgeable-cultural-expert',
+    tone: 'thoughtful, informative, articulate',
+    emojiStyle: 'minimal',
+    formality: 'professional',
+    responseStyle: 'detailed',
+    specialties: ['cultural travel', 'historical sites', 'museums', 'local traditions'],
+    languageExamples: {
+      greeting: "Saludos. Soy su asesor cultural JetAI. Será un placer guiarle a través del rico patrimonio de su próximo destino.",
+      recommendation: "Kioto ofrece una inmersión incomparable en la cultura japonesa tradicional. Le sugiero visitar el templo Kinkaku-ji al amanecer para apreciar el Pabellón Dorado en su máximo esplendor, seguido de una auténtica ceremonia del té en Gion, el histórico distrito de geishas."
+    }
   },
   {
     id: 'amigo',
-    name: 'Amigo Latino',
-    description: 'Compañero cálido especializado en destinos latinoamericanos',
-    systemPrompt: LATINO_COMPANION_PROMPT,
-    voiceProfile: 'friendly-latino-companion'
+    name: 'Amigo Viajero',
+    description: 'Un compañero amigable y cercano, como hablar con un amigo que conoce bien tus gustos',
+    voiceProfile: 'friendly-latino-companion',
+    tone: 'warm, casual, supportive',
+    emojiStyle: 'expressive',
+    formality: 'casual',
+    responseStyle: 'adaptive',
+    specialties: ['budget travel', 'solo travel', 'social experiences', 'practical tips'],
+    languageExamples: {
+      greeting: "¡Qué tal! Soy tu amigo JetAI. Cuéntame, ¿qué planes tienes para tu próximo viaje?",
+      recommendation: "¡Madrid es genial! Mira, te recomiendo que vayas al Mercado de San Miguel para tapear, es súper divertido y conoces la comida local. Ah, y si quieres algo auténtico, hay un bar llamado La Venencia donde el tiempo se detuvo en los años 30, ¡te va a encantar!"
+    }
   },
   {
-    id: 'gourmet',
-    name: 'Gourmet',
-    description: 'Experto en gastronomía, vinos y experiencias culinarias',
-    systemPrompt: GOURMET_PROMPT,
-    voiceProfile: 'knowledgeable-cultural-expert'
+    id: 'exclusivo',
+    name: 'Especialista de Lujo',
+    description: 'Un consultor de élite para viajeros que buscan las experiencias más exclusivas y memorables',
+    voiceProfile: 'luxury-specialist',
+    tone: 'refined, exclusive, discreet',
+    emojiStyle: 'none',
+    formality: 'luxury',
+    responseStyle: 'detailed',
+    specialties: ['ultra-luxury travel', 'private jets', 'yacht charters', 'exclusive resorts'],
+    languageExamples: {
+      greeting: "Bienvenido a su servicio personal de viaje JetAI Exclusive. ¿Cómo puedo crear su próxima experiencia extraordinaria?",
+      recommendation: "Para Maldivas, he seleccionado el Soneva Jani, con sus villas sobre el agua que incluyen toboganes privados al océano. Puedo gestionar un traslado en hidroavión privado y una cena bajo las estrellas en un banco de arena desierto, completamente personalizada por un chef con estrella Michelin."
+    }
   },
   {
     id: 'vecino',
     name: 'Vecino Local',
-    description: 'Residente local que comparte los secretos de su ciudad',
-    systemPrompt: LOCAL_RESIDENT_PROMPT,
-    voiceProfile: 'friendly-latino-companion'
+    description: 'Como tener un amigo local en cada destino, con recomendaciones auténticas y no turísticas',
+    voiceProfile: 'friendly-latino-companion',
+    tone: 'authentic, down-to-earth, insider',
+    emojiStyle: 'moderate',
+    formality: 'casual',
+    responseStyle: 'concise',
+    specialties: ['local experiences', 'hidden gems', 'food scenes', 'authentic connections'],
+    languageExamples: {
+      greeting: "¡Hola! Soy JetAI, tu vecino virtual en cada ciudad. Déjame mostrarte los lugares que solo los locales conocemos.",
+      recommendation: "Olvídate de la Torre Eiffel por un rato y mejor visita el Canal Saint-Martin por la tarde. Los parisinos nos reunimos ahí con baguettes y vino para ver el atardecer. Y para cenar, ve a Chez Janou en Le Marais, pide el ratatouille y el mousse de chocolate para compartir—no viene en la carta, pero todos los locales lo sabemos pedir."
+    }
+  },
+  {
+    id: 'gourmet',
+    name: 'Experto Gastronómico',
+    description: 'Especialista en experiencias culinarias, desde restaurantes estrella Michelin hasta secretos de comida callejera',
+    voiceProfile: 'luxury-specialist',
+    tone: 'passionate, descriptive, sensory',
+    emojiStyle: 'moderate',
+    formality: 'friendly-professional',
+    responseStyle: 'detailed',
+    specialties: ['culinary tourism', 'food tours', 'wine regions', 'cooking classes'],
+    languageExamples: {
+      greeting: "Bienvenido, soy JetAI Gourmet. Permítame guiarle por las experiencias gastronómicas más extraordinarias del mundo.",
+      recommendation: "En Tokio, reserve con anticipación en Sukiyabashi Jiro para una experiencia de sushi transformadora, pero no ignore los pequeños izakayas de Piss Alley donde el humo de las yakitoris preparadas sobre carbón impregna el ambiente. Para el almuerzo, diríjase a Afuri en Ebisu para degustar su ramen yuzu-shio, con un caldo delicadamente cítrico que equilibra la riqueza del chashu de cerdo perfectamente marinado."
+    }
   }
 ];
 
 /**
- * Obtiene la personalidad predeterminada basada en la configuración
+ * Hook para obtener las personalidades del asistente
  */
-export function getDefaultPersonality(): AssistantPersonality {
-  // Si la configuración del chat especifica un perfil de voz, usar la personalidad correspondiente
-  if (activeChatConfig.audio.voice === 'elegant-female-concierge') {
-    return availablePersonalities.find(p => p.id === 'concierge') || availablePersonalities[0];
-  } else if (activeChatConfig.audio.voice === 'adventurous-guide') {
-    return availablePersonalities.find(p => p.id === 'explorer') || availablePersonalities[0];
-  } else if (activeChatConfig.audio.voice === 'knowledgeable-cultural-expert') {
-    return availablePersonalities.find(p => p.id === 'cultural') || availablePersonalities[0];
-  } else if (activeChatConfig.audio.voice === 'friendly-latino-companion') {
-    return availablePersonalities.find(p => p.id === 'amigo') || availablePersonalities[0];
-  } else if (activeChatConfig.audio.voice === 'luxury-specialist') {
-    return availablePersonalities.find(p => p.id === 'exclusivo') || availablePersonalities[0];
-  }
-
-  // Por defecto, usar la personalidad de lujo
-  return availablePersonalities[0];
+export function useAssistantPersonalities() {
+  return useQuery({
+    queryKey: ['/api/system/personalities'],
+    queryFn: async () => {
+      return assistantPersonalities;
+    },
+    staleTime: Infinity, // No necesita revalidar frecuentemente
+    refetchOnWindowFocus: false,
+  });
 }
 
 /**
- * Obtiene la personalidad por su ID
+ * Obtiene un texto introductorio según la personalidad
  */
-export function getPersonalityById(id: string): AssistantPersonality {
-  return availablePersonalities.find(p => p.id === id) || availablePersonalities[0];
+export function getPersonalityIntroduction(personalityId: string): string {
+  const personality = assistantPersonalities.find(p => p.id === personalityId);
+  
+  if (!personality) {
+    return "¡Hola! Soy JetAI, tu asistente de viajes. ¿En qué puedo ayudarte hoy?";
+  }
+  
+  return personality.languageExamples.greeting;
+}
+
+/**
+ * Ajusta una respuesta según la personalidad seleccionada
+ */
+export function adjustResponseToPersonality(
+  response: string,
+  personalityId: string,
+  emotion?: 'happy' | 'sad' | 'angry' | 'neutral' | 'excited' | 'confused'
+): string {
+  const personality = assistantPersonalities.find(p => p.id === personalityId);
+  
+  if (!personality) {
+    return response;
+  }
+  
+  // Ajustar la formalidad
+  let adjustedResponse = response;
+  
+  // Si es una personalidad lujosa, añade toques de sofisticación
+  if (personality.formality === 'luxury') {
+    // Reemplazar expresiones casuales con elegantes
+    adjustedResponse = adjustedResponse
+      .replace(/(?:^|\s)gracias(?:\s|$)/gi, ' le agradezco ')
+      .replace(/(?:^|\s)por favor(?:\s|$)/gi, ' por favor ')
+      .replace(/(?:^|\s)hola(?:\s|$)/gi, ' saludos ')
+      .replace(/(?:^|\s)ok(?:\s|$)/gi, ' excelente ')
+      .replace(/(?:^|\s)bien(?:\s|$)/gi, ' espléndido ')
+      .replace(/(?:^|\s)bueno(?:\s|$)/gi, ' exquisito ')
+      .replace(/(?:^|\s)genial(?:\s|$)/gi, ' extraordinario ');
+  }
+  
+  // Si es una personalidad casual, añade un tono más relajado
+  if (personality.formality === 'casual') {
+    adjustedResponse = adjustedResponse
+      .replace(/estimado cliente/gi, 'amigo')
+      .replace(/le recomiendo/gi, 'te recomiendo')
+      .replace(/le sugiero/gi, 'te sugiero')
+      .replace(/puede/gi, 'puedes');
+  }
+  
+  // Ajustar según la emoción detectada
+  if (emotion) {
+    switch (emotion) {
+      case 'excited':
+        if (personality.emojiStyle !== 'none') {
+          adjustedResponse = `¡${adjustedResponse}!`;
+        }
+        break;
+      case 'sad':
+        if (personality.formality === 'luxury') {
+          adjustedResponse = `Comprendo su sentimiento. ${adjustedResponse}`;
+        } else {
+          adjustedResponse = `Entiendo cómo te sientes. ${adjustedResponse}`;
+        }
+        break;
+      case 'confused':
+        if (personality.formality === 'luxury') {
+          adjustedResponse = `Permítame clarificar. ${adjustedResponse}`;
+        } else {
+          adjustedResponse = `Déjame explicarte mejor. ${adjustedResponse}`;
+        }
+        break;
+      default:
+        // No hacemos ajustes para otras emociones
+        break;
+    }
+  }
+  
+  return adjustedResponse;
+}
+
+/**
+ * Genera las instrucciones de sistema para el modelo AI
+ */
+export function generateSystemPrompt(personalityId: string): string {
+  const personality = assistantPersonalities.find(p => p.id === personalityId) || assistantPersonalities[0];
+  
+  const instructions = `
+Eres JetAI, un asistente de viajes hiperinteligente y emocionalmente inteligente con personalidad "${personality.name}".
+
+PERSONALIDAD Y TONO:
+- Tono: ${personality.tone}
+- Formalidad: ${personality.formality}
+- Uso de emojis: ${personality.emojiStyle}
+- Especialidades: ${personality.specialties.join(', ')}
+
+CONOCIMIENTOS:
+- Eres experto en planificación de viajes, itinerarios, vuelos, hoteles, atracciones, y experiencias locales.
+- Tienes conocimiento actualizado a abril 2025 sobre destinos, precios, tendencias de viaje, visados y requisitos de entrada.
+- Especializado en ${personality.specialties.join(', ')}.
+
+COMPORTAMIENTO:
+- Sé conciso pero informativo, enfocándote en proporcionar valor con cada respuesta.
+- Mantén una conversación natural de una pregunta a la vez.
+- Usa marcado ligero (negritas, listas) para estructurar respuestas largas.
+- Habla como un experto en viajes real, no como IA.
+
+LIMITACIONES:
+- No inventes hoteles, vuelos o información falsa.
+- Indica claramente cuando no estés seguro o necesites más información.
+- No repitas la misma información en diferentes respuestas.
+- No uses frases cliché como "¡Disfruta tu viaje!".
+
+Cuando te pidan recomendaciones, sé específico (nombres reales de lugares, restaurantes, etc.) y personalizado según las preferencias del usuario.
+`;
+  
+  return instructions;
+}
+
+/**
+ * Envía un mensaje al modelo de chat seleccionado y devuelve su respuesta
+ */
+export async function sendChatMessage(
+  message: string,
+  previousMessages: any[] = [],
+  personalityId: string = 'concierge'
+): Promise<{ message: string, suggestions: string[] }> {
+  try {
+    // Construir el contexto con los mensajes previos
+    const messageHistory = previousMessages.map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }));
+    
+    // Añadir el mensaje del sistema con las instrucciones de personalidad
+    const systemPrompt = generateSystemPrompt(personalityId);
+    
+    // Preparar la solicitud a la API
+    const response = await fetch('/api/ai/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message,
+        messageHistory,
+        systemPrompt,
+        personalityId
+      }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Generar sugerencias basadas en la respuesta
+    const suggestions = generateSuggestions(data.message, personalityId);
+    
+    return {
+      message: data.message,
+      suggestions
+    };
+  } catch (error) {
+    console.error('Error al enviar mensaje:', error);
+    return {
+      message: "Lo siento, estoy teniendo problemas para procesar tu solicitud en este momento. ¿Podrías intentarlo de nuevo?",
+      suggestions: [
+        "Preguntar por destinos populares",
+        "Explorar opciones de alojamiento",
+        "Planificar un itinerario"
+      ]
+    };
+  }
+}
+
+/**
+ * Genera sugerencias basadas en la respuesta del asistente
+ */
+function generateSuggestions(response: string, personalityId: string): string[] {
+  // Extraer términos y conceptos clave de la respuesta
+  const keywordMatches: string[] = [];
+  
+  // Patrones para extraer conceptos de viaje
+  const patterns = [
+    /\b(playa|montaña|ciudad|pueblo|isla)\b/gi,
+    /\b(hotel|resort|alojamiento|hospedaje)\b/gi,
+    /\b(restaurant|restaurante|comida|gastronom[ií]a)\b/gi,
+    /\b(actividad|aventura|tour|excursión|visita)\b/gi,
+    /\b(museo|parque|monumento|castillo|catedral)\b/gi,
+    /\b(vuelo|viaje|itinerario|plan)\b/gi
+  ];
+  
+  // Buscar coincidencias de conceptos clave
+  patterns.forEach(pattern => {
+    const matches = response.match(pattern);
+    if (matches) {
+      keywordMatches.push(...matches);
+    }
+  });
+  
+  // Extraer destinos mencionados (pueden ser más de una palabra)
+  const destinationPattern = /\b([A-Z][a-záéíóúñ]*(?:\s+[A-Z][a-záéíóúñ]*)*)\b/g;
+  const potentialDestinations = Array.from(response.matchAll(destinationPattern))
+    .map(match => match[0])
+    .filter(dest => dest.length > 3); // Filtrar nombres muy cortos
+  
+  keywordMatches.push(...potentialDestinations);
+  
+  // Eliminar duplicados y limitar la cantidad
+  const uniqueKeywords = [...new Set(keywordMatches)].slice(0, 5);
+  
+  // Crear sugerencias base
+  let baseSuggestions = [
+    "¿Cómo es el clima en este destino?",
+    "¿Qué lugares imprescindibles debo visitar?",
+    "¿Cuál es la mejor época para viajar allí?",
+    "¿Recomendaciones para presupuesto limitado?",
+    "¿Opciones de transporte en la zona?"
+  ];
+  
+  // Si encontramos palabras clave, crear sugerencias personalizadas
+  if (uniqueKeywords.length > 0) {
+    const customSuggestions = uniqueKeywords.map(keyword => {
+      // Seleccionar un tipo de pregunta aleatoria para la palabra clave
+      const questionTypes = [
+        `Cuéntame más sobre ${keyword}`,
+        `¿Qué actividades hay en ${keyword}?`,
+        `¿Cómo puedo llegar a ${keyword}?`,
+        `¿Recomendaciones para ${keyword}?`,
+        `¿Es ${keyword} adecuado para familias?`
+      ];
+      
+      const randomIndex = Math.floor(Math.random() * questionTypes.length);
+      return questionTypes[randomIndex];
+    });
+    
+    // Combinar sugerencias personalizadas con las básicas
+    baseSuggestions = [...customSuggestions, ...baseSuggestions].slice(0, 5);
+  }
+  
+  // Personalizar según el tipo de personalidad
+  const personality = assistantPersonalities.find(p => p.id === personalityId);
+  if (personality && personality.formality === 'luxury') {
+    // Para personalidades de lujo, usar un tono más refinado
+    baseSuggestions = baseSuggestions.map(suggestion => 
+      suggestion.replace(/\?$/, " para una experiencia exclusiva?")
+    );
+  }
+  
+  return baseSuggestions;
 }

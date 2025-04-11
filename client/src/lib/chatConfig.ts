@@ -2,6 +2,7 @@
  * Configuración del sistema de chat JetAI
  */
 
+// Interfaz para la configuración del chat
 export interface ChatConfig {
   system: {
     name: string;
@@ -42,90 +43,83 @@ export interface ChatConfig {
   };
 }
 
-// Configuración predeterminada del chat
+// Configuración por defecto
 const defaultChatConfig: ChatConfig = {
   system: {
-    name: 'JetAI Travel Concierge',
-    description: 'AI-powered luxury travel assistant',
-    version: '2.0.0',
-    goal: 'Provide personalized travel recommendations and planning assistance through a step-by-step conversational flow'
+    name: "JetAI Smart Travel Assistant",
+    description: "Asistente de viaje avanzado con inteligencia artificial",
+    version: "1.5.0",
+    goal: "Proporcionar asistencia personalizada para planificación de viajes"
   },
   audio: {
-    textToSpeech: 'Google TTS',
-    voice: 'elegant-female-concierge',
+    textToSpeech: "Browser API",
+    voice: "elegant-female-concierge",
     volume: 0.8,
-    autoplay: true
+    autoplay: false,
   },
   intelligence: {
-    model: 'gemini-1.5-pro',
-    personality: 'concierge',
-    knowledgeCutoff: 'April 2025',
-    context: 8192
+    model: "gemini-1.5-pro",
+    personality: "concierge",
+    knowledgeCutoff: "Abril 2025",
+    context: 10,
   },
   engagement: {
-    conversationFlow: 'hybrid',
-    responseStyle: 'adaptive',
-    emojiUsage: 'moderate'
+    conversationFlow: "guided",
+    responseStyle: "adaptive",
+    emojiUsage: "minimal",
   },
   behavior: {
     voiceReplyIfVoiceEnabled: true,
     continueConversationAfterItinerary: true,
     autoSuggestNearbyAttractions: true,
     rememberUserPreferences: true,
-    detectGreetings: true
+    detectGreetings: true,
   },
   languageSupport: [
-    'English',
-    'Español',
-    'Français',
-    'Deutsch',
-    'Italiano',
-    'Português'
+    "es-ES", "en-US", "fr-FR", "de-DE", "it-IT", "pt-BR", "ja-JP", "ko-KR", "zh-CN"
   ],
   appearance: {
-    theme: 'dark',
-    accentColor: '#6d28d9',
-    fontFamily: 'Inter, sans-serif',
-    messageStyle: 'bubble'
+    theme: "system",
+    accentColor: "#4F46E5",
+    fontFamily: "Inter, sans-serif",
+    messageStyle: "bubble",
   }
 };
 
-// Obtener configuración personalizada o usar predeterminada
+// Cargar la configuración desde localStorage o usar la configuración por defecto
 function loadChatConfig(): ChatConfig {
   try {
-    const savedConfig = localStorage.getItem('jetai-chat-config');
+    const savedConfig = localStorage.getItem('jetai_chat_config');
     if (savedConfig) {
-      const parsedConfig = JSON.parse(savedConfig);
-      // Combinar con configuración predeterminada para asegurar estructura completa
-      return { ...defaultChatConfig, ...parsedConfig };
+      // Combinar la configuración guardada con la predeterminada para asegurar 
+      // que todas las propiedades existan incluso si se añaden nuevas en futuras versiones
+      return { ...defaultChatConfig, ...JSON.parse(savedConfig) };
     }
   } catch (error) {
-    console.error('Error loading chat configuration:', error);
-    // Si hay un error, eliminar la configuración guardada
-    localStorage.removeItem('jetai-chat-config');
+    console.error('Error cargando la configuración del chat:', error);
   }
   
   return defaultChatConfig;
 }
 
-// Guardar configuración personalizada
+// Guardar la configuración actual en localStorage
 export function saveChatConfig(config: Partial<ChatConfig>): void {
   try {
-    const currentConfig = loadChatConfig();
-    const updatedConfig = { ...currentConfig, ...config };
-    localStorage.setItem('jetai-chat-config', JSON.stringify(updatedConfig));
     // Actualizar la configuración activa
-    Object.assign(activeChatConfig, updatedConfig);
+    Object.assign(activeChatConfig, config);
+    
+    // Guardar en localStorage
+    localStorage.setItem('jetai_chat_config', JSON.stringify(activeChatConfig));
   } catch (error) {
-    console.error('Error saving chat configuration:', error);
+    console.error('Error guardando la configuración del chat:', error);
   }
 }
 
-// Configuración activa del chat
+// Exportar la configuración activa
 export const activeChatConfig = loadChatConfig();
 
-// Reiniciar a configuración predeterminada
+// Resetear a la configuración por defecto
 export function resetChatConfig(): void {
-  localStorage.removeItem('jetai-chat-config');
+  localStorage.removeItem('jetai_chat_config');
   Object.assign(activeChatConfig, defaultChatConfig);
 }

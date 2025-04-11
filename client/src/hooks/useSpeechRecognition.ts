@@ -1,13 +1,30 @@
-import { useState, useRef, useEffect } from 'react';
+/**
+ * Hook para manejar el reconocimiento de voz
+ * Proporciona funciones para convertir voz a texto usando Web Speech API
+ */
+
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { activeChatConfig } from '@/lib/chatConfig';
+
+type UseSpeechRecognitionReturn = {
+  transcript: string;
+  isListening: boolean;
+  startListening: () => void;
+  stopListening: () => void;
+  hasPermission: boolean;
+  error: string | null;
+};
+
+// Definir tipos para SpeechRecognition
+interface SpeechRecognitionResult {
+  transcript: string;
+  confidence: number;
+}
 
 interface SpeechRecognitionEvent extends Event {
   results: {
     [index: number]: {
-      [index: number]: {
-        transcript: string;
-        confidence: number;
-      };
+      [index: number]: SpeechRecognitionResult;
     };
     item(index: number): any;
     length: number;
@@ -29,7 +46,7 @@ interface SpeechRecognition extends EventTarget {
   abort(): void;
 }
 
-// Extend Window interface
+// Extender interface de Window
 declare global {
   interface Window {
     SpeechRecognition?: new () => SpeechRecognition;
@@ -37,106 +54,129 @@ declare global {
   }
 }
 
-type UseSpeechRecognitionReturn = {
-  transcript: string;
-  isListening: boolean;
-  startListening: () => void;
-  stopListening: () => void;
-  hasSupport: boolean;
-};
-
 /**
  * Hook para manejar el reconocimiento de voz
  */
 export default function useSpeechRecognition(): UseSpeechRecognitionReturn {
   const [transcript, setTranscript] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [hasPermission, setHasPermission] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const [hasSupport, setHasSupport] = useState(false);
-  
-  // Verificar soporte de reconocimiento de voz
+
+  // Verificar disponibilidad de la API al cargar
   useEffect(() => {
-    const hasSpeechRecognition = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
-    setHasSupport(hasSpeechRecognition);
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!SpeechRecognitionAPI) {
+      setError('El reconocimiento de voz no está soportado en este navegador.');
+      setHasPermission(false);
+    }
   }, []);
-  
+
+  // Reiniciar reconocimiento si se detiene inesperadamente
+  const handleRecognitionEnd = useCallback(() => {
+    setIsListening(false);
+  }, []);
+
+  // Manejar errores de reconocimiento
+  const handleRecognitionError = useCallback((event: any) => {
+    if (event.error === 'not-allowed') {
+      setHasPermission(false);
+      setError('El acceso al micrófono fue denegado.');
+    } else if (event.error === 'no-speech') {
+      setError('No se detectó ninguna voz.');
+    } else {
+      setError(`Error de reconocimiento: ${event.error}`);
+    }
+    setIsListening(false);
+  }, []);
+
+  // Manejar resultados del reconocimiento
+  const handleRecognitionResult = useCallback((event: SpeechRecognitionEvent) => {
+    const current = event.results[event.results.length - 1];
+    const transcriptResult = current[0].transcript;
+    
+    setTranscript(transcriptResult);
+  }, []);
+
   // Iniciar reconocimiento de voz
-  const startListening = () => {
-    if (!hasSupport || isListening) return;
+  const startListening = useCallback(() => {
+    setError(null);
+    
+    if (!hasPermission) {
+      setError('El acceso al micrófono fue denegado. Verifica los permisos.');
+      return;
+    }
+    
+    // Detener cualquier reconocimiento en curso
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
     
     try {
-      // Browser compatibility
-      const SpeechRecognitionAPI = window.SpeechRecognition || 
-        window.webkitSpeechRecognition;
-        
+      const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+      
       if (!SpeechRecognitionAPI) {
-        console.error('Speech recognition not supported in this browser');
+        setError('El reconocimiento de voz no está soportado en este navegador.');
         return;
       }
       
       recognitionRef.current = new SpeechRecognitionAPI();
       
-      // Use configuration from chatConfig
+      // Configurar opciones
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = false;
       
-      // Determinar idioma basado en la configuración o usar inglés por defecto
-      const defaultLanguage = 'en-US';
-      let recognitionLanguage = defaultLanguage;
+      // Determinar el idioma basado en la configuración
+      let recognitionLang = 'es-ES'; // Español por defecto
       
-      // Si la configuración especifica un idioma, usarlo
-      if (activeChatConfig.languageSupport.includes('Español')) {
-        recognitionLanguage = 'es-ES';
-      } else if (activeChatConfig.languageSupport.includes('Français')) {
-        recognitionLanguage = 'fr-FR';
-      } else if (activeChatConfig.languageSupport.includes('Português')) {
-        recognitionLanguage = 'pt-BR';
-      } else if (activeChatConfig.languageSupport.includes('Italiano')) {
-        recognitionLanguage = 'it-IT';
-      } else if (activeChatConfig.languageSupport.includes('Deutsch')) {
-        recognitionLanguage = 'de-DE';
-      }
+      // Cuando se implemente una selección de idioma, usaríamos eso:
+      // const userLanguage = activeChatConfig.language || 'es-ES';
+      // recognitionRef.current.lang = userLanguage;
+      recognitionRef.current.lang = recognitionLang;
       
-      recognitionRef.current.lang = recognitionLanguage;
+      // Configurar eventos
+      recognitionRef.current.onstart = () => setIsListening(true);
+      recognitionRef.current.onend = handleRecognitionEnd;
+      recognitionRef.current.onerror = handleRecognitionError;
+      recognitionRef.current.onresult = handleRecognitionResult as any;
       
-      recognitionRef.current.onstart = () => {
-        setIsListening(true);
-      };
+      // Limpiar transcripción anterior
+      setTranscript('');
       
-      recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
-        const transcript = event.results[0][0].transcript;
-        setTranscript(transcript);
-      };
-      
-      recognitionRef.current.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
-        setIsListening(false);
-      };
-      
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
-      
+      // Iniciar reconocimiento
       recognitionRef.current.start();
-    } catch (error) {
-      console.error('Speech recognition setup failed:', error);
+    } catch (err) {
+      console.error('Error iniciando reconocimiento de voz:', err);
+      setError('Error iniciando reconocimiento de voz.');
       setIsListening(false);
     }
-  };
-  
+  }, [hasPermission, handleRecognitionEnd, handleRecognitionError, handleRecognitionResult]);
+
   // Detener reconocimiento de voz
-  const stopListening = () => {
+  const stopListening = useCallback(() => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
-      setIsListening(false);
     }
-  };
-  
+    setIsListening(false);
+  }, []);
+
+  // Limpiar al desmontar
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
   return {
     transcript,
     isListening,
     startListening,
     stopListening,
-    hasSupport
+    hasPermission,
+    error
   };
 }
