@@ -1,16 +1,22 @@
 import { useState, useEffect, useRef, MouseEvent } from 'react';
-import { ChatMessage, sendChatMessage, ChatResponse } from '@/lib/ai';
+import { ChatMessage, sendChatMessage, ChatResponse, useAssistantPersonalities, AssistantPersonality } from '@/lib/ai';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Link } from 'wouter';
 import ReactMarkdown from 'react-markdown';
 import { 
   Infinity, AlertCircle, CreditCard, Mic, Volume2, Volume, VolumeX, 
-  Globe, Lightbulb, Image, Calendar, Coffee
+  Globe, Lightbulb, Image, Calendar, Coffee, User, UserCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import googleCloud from '@/lib/googlecloud';
 
 // SpeechRecognition types for TypeScript

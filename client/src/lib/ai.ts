@@ -1,4 +1,5 @@
 import { apiRequest } from "./queryClient";
+import { useQuery } from "@tanstack/react-query";
 
 export interface ChatMessage {
   role: "user" | "assistant" | "system";
@@ -38,17 +39,41 @@ export interface ItineraryActivity {
   location?: string;
 }
 
-export async function sendChatMessage(message: string, history: ChatMessage[]): Promise<ChatResponse> {
+export interface AssistantPersonality {
+  id: string;
+  name: string;
+  description: string;
+  voiceStyle: string;
+  exampleResponse: string;
+}
+
+export async function sendChatMessage(
+  message: string, 
+  history: ChatMessage[],
+  personality: string = 'concierge'
+): Promise<ChatResponse> {
   try {
     const response = await apiRequest("POST", "/api/chat", {
       message,
-      history
+      history,
+      personality
     });
     return await response.json();
   } catch (error) {
     console.error("Error sending chat message:", error);
     throw error;
   }
+}
+
+export function useAssistantPersonalities() {
+  return useQuery({
+    queryKey: ['/api/chat/personalities'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/chat/personalities');
+      const data = await response.json();
+      return data.personalities as AssistantPersonality[];
+    }
+  });
 }
 
 export async function getDestinationRecommendations(

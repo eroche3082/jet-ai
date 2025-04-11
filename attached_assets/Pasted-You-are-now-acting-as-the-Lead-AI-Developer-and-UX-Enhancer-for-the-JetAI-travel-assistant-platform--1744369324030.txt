@@ -1,0 +1,132 @@
+You are now acting as the Lead AI Developer and UX Enhancer for the JetAI travel assistant platform. Your mission is to enhance the app without breaking the current structure. Focus on the following tasks by module:
+
+1. Destinations Page Enhancement
+Ensure that when a destination (e.g., "Paris, France") is clicked, the app:
+
+Loads a dedicated dynamic subpage with:
+
+Overview (with image, description, tags)
+
+Best dates to travel
+
+Top attractions with Google Maps pins
+
+Suggested hotels (use placeholder if not integrated)
+
+Flight deals placeholder
+
+Each destination page should have an embedded AI Assistant summary that describes the vibe and hidden gems of the location.
+
+Auto-complete search bar: Connect the destination search bar to use the Google Places API or a mock autocomplete dataset for now.
+
+2. Itineraries Dashboard (Replace Static Page)
+Remove the current “Itineraries” static placeholder.
+
+Build a full Itinerary Dashboard with:
+
+Tabs: “All”, “Bookmarked”, “Saved Plans”, “Public”, “Private”
+
+Section that shows all answers the user received from the AI chat when planning trips (e.g., flight suggestions, dates, preferences)
+
+Button: “+ New Plan” opens a modal or redirects to a page to build a new itinerary.
+
+Connect with previous answers from Gemini and allow saving as part of the itinerary.
+
+Include filters by country, date, travel style (adventure, luxury, budget, etc.)
+
+3. About Page Revision
+Replace current story with the correct brand backstory.
+
+Replace “David Chen” with Edgar Roché as the founder.
+
+Upload and replace the placeholder image with a professional or branded one.
+
+Rewrite text to reflect JetAI’s origin as a visionary platform by Edgar Roché focused on merging AI with seamless travel planning.
+
+4. Chatbot Upgrade
+Enable full functionality of the chatbot using all available Google Cloud APIs:
+
+Vertex AI with Gemini-1.5-pro for intelligence.
+
+Speech-to-Text and Text-to-Speech for voice interaction.
+
+Sentiment Analysis for emotional detection.
+
+Translation API for multilingual support.
+
+Vision API (future use) to process travel photos.
+
+Integrate tools panel in the chatbot:
+
+Audio
+
+Camera (for photo-based recommendations)
+
+QR scanner (for boarding passes, etc.)
+
+AR Mode (simulate travel via image overlays)
+
+Add Quick Prompt buttons:
+
+“What’s trending?”
+
+“Plan my next trip”
+
+“Weekend getaways”
+
+Personality Layer: The chatbot should introduce itself as JetAI Companion, with friendly tone, personalized memory, and an evolving recommendation engine.
+
+5. Login + Dashboard Preparation
+Prepare a minimal Login System:
+
+Use Firebase or simple session mock.
+
+Once logged in, redirect user to “My Dashboard”.
+
+Dashboard will include:
+
+Saved itineraries
+
+Chat history with JetAI
+
+Recommended destinations
+
+Membership info (plan, renewal date)
+
+Note: If this is too much for now, create a simple /admin login route and placeholder dashboard as a base.
+
+6. UI Enhancements
+Add emoji-style floating chat icon (styled like a paper plane or travel emoji).
+
+Make sure mobile responsiveness is preserved for all views.
+
+Ensure language is consistent across the site in English, with option to switch to Spanish or French from footer or settings.
+
+7. Newsletter Integration
+The newsletter component at the bottom should be functional.
+
+Store emails in Firebase or local DB.
+
+After subscription, show a success message.
+
+8. Developer Mode: Debug Checklist
+Add a hidden /debug route with:
+
+API Key Status (e.g., CoinGecko, Google Cloud, NewsAPI)
+
+Database connection test
+
+UI component load test
+
+Current user session status
+
+Instructions:
+
+Do not break current working components.
+
+Add enhancements progressively using feature flags or comments.
+
+Use mock data or backup data when API fails.
+
+Maintain consistency in design and tone.
+
