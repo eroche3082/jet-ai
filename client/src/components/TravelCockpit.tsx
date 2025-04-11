@@ -579,18 +579,35 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
     setIsLoading(true);
     
     try {
-      // Check if the message is just a greeting and conversation has already started
+      // Check if the message is just a greeting
       const lowercaseInput = inputMessage.trim().toLowerCase();
       const greetings = ['hola', 'hello', 'hi', 'hey', 'buenos días', 'buenas', 'saludos'];
-      const isOnlyGreeting = lowercaseInput.split(/\s+/).length <= 2 && 
-                              greetings.some(greeting => lowercaseInput.includes(greeting));
-                              
-      if (isOnlyGreeting && travelMemory.conversationStarted && messages.length > 1) {
-        // Para saludos simples cuando la conversación ya comenzó, responder con un saludo amigable
-        let greetingResponse = `¡Hola de nuevo! Seguimos trabajando en tu viaje`;
+      
+      // Verificación estricta: es EXACTAMENTE un saludo o un saludo con puntuación
+      const exactGreeting = greetings.some(greeting => 
+        lowercaseInput === greeting || 
+        lowercaseInput === `${greeting}!` || 
+        lowercaseInput === `${greeting}.` ||
+        lowercaseInput === `${greeting}?`);
+      
+      // Verificación más flexible: incluye un saludo pero es corto (2 palabras máximo)
+      const hasGreeting = lowercaseInput.split(/\s+/).length <= 2 && 
+                          greetings.some(greeting => lowercaseInput.includes(greeting));
+      
+      console.log("Verificando saludo:", {inputMessage, exactGreeting, hasGreeting});
+                          
+      // Si es un saludo exacto o contiene un saludo, y ya comenzó la conversación
+      if ((exactGreeting || hasGreeting) && messages.length > 1) {
+        console.log("Detectado saludo en mensaje:", inputMessage);
         
-        if (travelMemory.destination) {
-          greetingResponse += ` a ${travelMemory.destination}`;
+        // Para saludos simples cuando la conversación ya comenzó, responder con un saludo amigable
+        let greetingResponse = `¡Hola de nuevo!`;
+        
+        if (travelMemory.destination && travelMemory.destination !== "") {
+          greetingResponse += ` Seguimos trabajando en tu viaje a ${travelMemory.destination}`;
+        } else {
+          // Si no hay destino aún, mantener el flujo original
+          greetingResponse = "¡Hola! Para comenzar tu aventura, necesito saber - ¿a dónde te gustaría viajar?";
         }
         
         greetingResponse += `. ¿En qué puedo ayudarte?`;
