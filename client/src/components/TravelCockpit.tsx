@@ -22,11 +22,11 @@ import {
   Sun,
   Moon,
   Settings,
+  Building as Hotel,
   User,
   ChevronRight,
   X,
   Image,
-  Hotel,
   Plane,
   CalendarDays
 } from 'lucide-react';
@@ -147,6 +147,10 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
     membershipTier: 'freemium',
     aiCreditsRemaining: 10
   });
+  
+  // Hotel search state
+  const [isHotelSearchVisible, setIsHotelSearchVisible] = useState(false);
+  const [selectedHotel, setSelectedHotel] = useState<HotelResult | null>(null);
 
   // Computed values
   const isPremium = membershipData?.membershipTier === 'premium';
@@ -843,6 +847,7 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
   const getTabIcon = (tabName: string) => {
     switch (tabName) {
       case 'explore': return <Globe className="w-5 h-5" />;
+      case 'hotels': return <Hotel className="w-5 h-5" />;
       case 'itineraries': return <Map className="w-5 h-5" />;
       case 'planner': return <Briefcase className="w-5 h-5" />;
       case 'audio': return <Headphones className="w-5 h-5" />;
@@ -859,6 +864,7 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
   // Tab title mapping
   const tabTitles: Record<string, string> = {
     explore: 'Explore',
+    hotels: 'Hotels',
     itineraries: 'Itineraries',
     planner: 'Planner',
     audio: 'Audio',
