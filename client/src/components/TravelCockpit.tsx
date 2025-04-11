@@ -1288,6 +1288,33 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
             </div>
           )}
           
+          {activeTab === 'hotels' && (
+            <div className="h-full flex flex-col p-4">
+              <HotelSearchResults 
+                destination={travelMemory.destination}
+                dates={travelMemory.dates}
+                travelers={travelMemory.travelers}
+                budget={travelMemory.budget}
+                onBookHotel={(hotel) => {
+                  setSelectedHotel(hotel);
+                  // Add booking logic here
+                  setMessages(prev => [
+                    ...prev,
+                    { 
+                      role: 'user', 
+                      content: `I'd like to book ${hotel.name} in ${hotel.city}` 
+                    },
+                    { 
+                      role: 'assistant', 
+                      content: `I've added ${hotel.name} to your booking list. Would you like to see more hotels or continue with the booking process?` 
+                    }
+                  ]);
+                  setActiveTab('explore');
+                }}
+              />
+            </div>
+          )}
+          
           {(activeTab === 'audio' || activeTab === 'camera' || activeTab === 'qr' || activeTab === 'ar' || activeTab === 'portfolio' || activeTab === 'suggestions') && (
             <div className="p-4 flex flex-col items-center justify-center h-full">
               <div className="text-center">
