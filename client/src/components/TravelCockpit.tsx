@@ -239,6 +239,16 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
       'new vacation', 'plan another'
     ];
     
+    // Detectar saludos comunes para NO reiniciar cuando son solo saludos
+    const greetings = ['hola', 'hello', 'hi', 'hey', 'buenos días', 'buenas', 'saludos'];
+    const isOnlyGreeting = input.trim().split(/\s+/).length <= 2 && 
+                       greetings.some(greeting => input.toLowerCase().includes(greeting));
+    
+    // Si es SOLO un saludo, no reiniciamos la conversación
+    if (isOnlyGreeting) {
+      return false;
+    }
+    
     const inputLower = input.toLowerCase();
     return restartPhrases.some(phrase => inputLower.includes(phrase));
   };
