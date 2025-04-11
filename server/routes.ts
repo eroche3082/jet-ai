@@ -50,6 +50,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Registramos las rutas del servicio de mejora de memorias
   configureMemoryRoutes(app);
   
+  // Registramos las rutas de las APIs de Google
+  configureGoogleApiRoutes(app);
+  
+  // Configuramos la clave API para Google Cloud
+  configureApiKey(process.env.GOOGLE_CLOUD_API_KEY || 'AIzaSyBUYoJ-RndERrcY9qkjD-2YGGY5m3Mzc0U');
+  
   // Google Places API routes
   app.get('/api/places/autocomplete', async (req, res) => {
     try {

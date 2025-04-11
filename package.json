@@ -12,10 +12,12 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.37.0",
+    "@google-cloud/secret-manager": "^6.0.1",
     "@google-cloud/storage": "^7.16.0",
     "@google-cloud/text-to-speech": "^6.0.1",
     "@google-cloud/translate": "^9.0.1",
     "@google-cloud/vertexai": "^1.9.3",
+    "@google-cloud/video-intelligence": "^6.0.1",
     "@google-cloud/vision": "^5.1.0",
     "@google/generative-ai": "^0.24.0",
     "@googlemaps/google-maps-services-js": "^3.4.1",
