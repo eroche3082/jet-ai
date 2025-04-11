@@ -246,11 +246,18 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
     
     // Si es SOLO un saludo, no reiniciamos la conversación
     if (isOnlyGreeting) {
+      console.log("Detectado saludo simple, manteniendo contexto de conversación");
       return false;
     }
     
     const inputLower = input.toLowerCase();
-    return restartPhrases.some(phrase => inputLower.includes(phrase));
+    const shouldRestart = restartPhrases.some(phrase => inputLower.includes(phrase));
+    
+    if (shouldRestart) {
+      console.log("Detectada frase de reinicio, reseteando conversación");
+    }
+    
+    return shouldRestart;
   };
   
   // Reset the conversation flow to start a new trip
@@ -544,7 +551,33 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
     setIsLoading(true);
     
     try {
-      // Process the user response in the memory system
+      // Check if the message is just a greeting and conversation has already started
+      const lowercaseInput = inputMessage.trim().toLowerCase();
+      const greetings = ['hola', 'hello', 'hi', 'hey', 'buenos días', 'buenas', 'saludos'];
+      const isOnlyGreeting = lowercaseInput.split(/\s+/).length <= 2 && 
+                              greetings.some(greeting => lowercaseInput.includes(greeting));
+                              
+      if (isOnlyGreeting && travelMemory.conversationStarted && messages.length > 1) {
+        // Para saludos simples cuando la conversación ya comenzó, responder con un saludo amigable
+        let greetingResponse = `¡Hola de nuevo! Seguimos trabajando en tu viaje`;
+        
+        if (travelMemory.destination) {
+          greetingResponse += ` a ${travelMemory.destination}`;
+        }
+        
+        greetingResponse += `. ¿En qué puedo ayudarte?`;
+        
+        // No procesamos el mensaje como parte del flujo, solo respondemos al saludo
+        setMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: greetingResponse
+        }]);
+        
+        setIsLoading(false);
+        return;
+      }
+      
+      // Process the user response in the memory system (para mensajes que no son solo saludos)
       processUserResponse(inputMessage);
       
       // Generate the next AI response based on the conversational state
