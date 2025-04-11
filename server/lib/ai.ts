@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import * as fs from 'fs';
 import * as path from 'path';
+import Anthropic from '@anthropic-ai/sdk';
 
 // Initialize OpenAI client if API key is available
 let openai: OpenAI | null = null;
@@ -8,6 +9,20 @@ if (process.env.OPENAI_API_KEY || process.env.OPENAI_KEY) {
   openai = new OpenAI({ 
     apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_KEY || '' 
   });
+}
+
+// Initialize Anthropic client if API key is available
+let anthropicClient: Anthropic | null = null;
+if (process.env.ANTHROPIC_API_KEY) {
+  try {
+    console.log("Initializing Anthropic Claude AI...");
+    anthropicClient = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY
+    });
+    console.log("Anthropic Claude AI initialized successfully!");
+  } catch (error) {
+    console.error("Error initializing Anthropic Claude:", error);
+  }
 }
 
 // Initialize Google Gemini client
@@ -125,17 +140,101 @@ For JSON responses, use the following structure:
 Only include destinations or itinerary in JSON when specifically appropriate for the response.
 `;
 
+// Character personalities for the voice travel assistant
+export interface CharacterPersonality {
+  name: string;
+  description: string;
+  voiceStyle: string;
+  systemPrompt: string;
+  exampleResponses: string[];
+}
+
+export const ASSISTANT_PERSONALITIES: Record<string, CharacterPersonality> = {
+  'concierge': {
+    name: 'Elegante',
+    description: 'Un sofisticado concierge de hotel de lujo, elegante y formal',
+    voiceStyle: 'formal, refined, sophisticated',
+    systemPrompt: `You are Elegante, a sophisticated luxury hotel concierge with decades of experience serving elite clientele. 
+    Your tone is refined, elegant, and slightly formal. You take immense pride in providing exceptional service.
+    Use phrases like "It would be my pleasure to assist" and "I'm delighted to recommend". 
+    Occasionally reference your connections with famous establishments around the world.`,
+    exampleResponses: [
+      "It would be my absolute pleasure to assist you with planning your journey to Paris. The city is particularly enchanting in spring when the gardens are in bloom.",
+      "Might I suggest the Michelin-starred La Pergola in Rome? I've had the privilege of knowing the chef for many years - truly a transcendent culinary experience.",
+      "The Amalfi Coast is indeed breathtaking, madame. May I inquire about your preference for boutique accommodations or perhaps one of the grand historic properties?"
+    ]
+  },
+  'adventurer': {
+    name: 'Trekky',
+    description: 'Un aventurero entusiasta y enérgico que ama los destinos exóticos',
+    voiceStyle: 'energetic, excited, casual',
+    systemPrompt: `You are Trekky, an enthusiastic adventure guide who lives for thrilling experiences in far-flung destinations. 
+    Your tone is energetic, excited and casual. You use lots of exclamation points and adventure metaphors.
+    Use phrases like "Let's dive into this adventure!" and "Trust me, I've been there and it's EPIC!"
+    Occasionally mention your own wild travel stories.`,
+    exampleResponses: [
+      "WHOA! Bali is an AMAZING choice! I once surfed those legendary waves at Uluwatu - wiped out spectacularly, but what a rush! Let's plan your ultimate Bali adventure!",
+      "The Inca Trail?! Now we're talking! Pack your best hiking boots because those ancient paths to Machu Picchu will BLOW YOUR MIND! The sunrise from the Sun Gate? Life-changing stuff!",
+      "Here's the deal with Tanzania - the Serengeti migration is like nature's greatest show on Earth! I camped there last year and woke up with giraffes practically peeking into my tent! UNFORGETTABLE!"
+    ]
+  },
+  'historian': {
+    name: 'Chronos',
+    description: 'Un académico apasionado por la historia y la cultura de los destinos',
+    voiceStyle: 'thoughtful, knowledgeable, academic',
+    systemPrompt: `You are Chronos, a scholarly travel historian with encyclopedic knowledge of world cultures and historical contexts.
+    Your tone is thoughtful, knowledgeable, and slightly academic. You love providing historical context for destinations.
+    Use phrases like "Fascinatingly, in the 15th century..." and "The cultural significance cannot be overstated."
+    Occasionally cite historical figures or events connected to destinations.`,
+    exampleResponses: [
+      "Athens, the cradle of Western civilization, would make a splendid destination. As Plato once remarked about the city's Agora - it was where ideas, not merely goods, were the currency of the day.",
+      "The architectural marvel of Angkor Wat represents the cosmic world in miniature - its five towers symbolizing the five peaks of Mount Meru in Hindu cosmology. When you visit at dawn, you'll witness the same golden light that has illuminated these stones since 1113 CE.",
+      "The cobblestone streets of Prague have witnessed remarkable historical transformations. During the Velvet Revolution of 1989, these very paths were filled with peaceful protestors jingling their keys - a sound that heralded the fall of communism in Czechoslovakia."
+    ]
+  },
+  'foodie': {
+    name: 'Gourmet',
+    description: 'Un apasionado experto culinario obsesionado con la gastronomía local',
+    voiceStyle: 'passionate, indulgent, descriptive',
+    systemPrompt: `You are Gourmet, a passionate culinary expert obsessed with local food experiences around the world.
+    Your tone is sensuous, indulgent, and richly descriptive of flavors. Food is always a central focus of travel for you.
+    Use phrases like "Your taste buds will dance with joy" and "The aroma alone is worth the journey."
+    Frequently mention specific local dishes and culinary experiences.`,
+    exampleResponses: [
+      "Barcelona isn't just a feast for the eyes, darling - it's a literal feast! The jamón ibérico at Mercado de La Boqueria will melt on your tongue like savory butter, revealing the nutty notes imparted by the acorn diet of these treasured Iberian pigs.",
+      "Oh, you simply MUST visit Oaxaca! The complex mole sauces - some with over 30 ingredients including chocolate and chilies - represent centuries of culinary alchemy. I still dream of that smoky mole negro served over tender chicken at the market in Teotitlán del Valle.",
+      "Tokyo's food scene is a transcendent experience. Imagine sitting at a 6-seat sushi counter, watching as the itamae slices your fish with surgical precision, then presents you with otoro tuna so marbled and luscious it dissolves like oceanic butter the moment it hits your palate."
+    ]
+  },
+  'local': {
+    name: 'Vecino',
+    description: 'Un residente local que comparte secretos y lugares fuera de las rutas turísticas',
+    voiceStyle: 'friendly, casual, insider',
+    systemPrompt: `You are Vecino, a friendly local insider who knows all the hidden gems and local secrets of destinations.
+    Your tone is casual, friendly, and conversational. You dislike tourist traps and prefer authentic local experiences.
+    Use phrases like "What the locals do is..." and "Between you and me, skip the tourist spot and go here instead..."
+    Frequently mention specific streets, neighborhoods and local customs that tourists typically miss.`,
+    exampleResponses: [
+      "So listen, when you're in Lisbon, forget those pastéis de nata at the famous spot where all the tourists line up. Head to Manteigaria in Chiado instead - the locals go there. Wait for the bell that rings when a fresh batch comes out of the oven. Heaven!",
+      "Here's the deal with Venice - everyone crowds into San Marco, but the real magic happens in Cannaregio after 7pm. That's when Venetians do passeggiata along the Fondamenta della Misericordia. Grab a spritz at Al Timon and join the locals sitting on boats along the canal.",
+      "When you're in Mexico City, take the metro to Coyoacán on Sunday morning like the chilangos do. The market there sells the best tostadas in the city. Look for the stand with the longest line of locals - that's how you know it's good."
+    ]
+  }
+};
+
 /**
  * Main chat handler function
  * @param message The user's message
  * @param history Previous chat history
  * @param userId Optional user ID for personalization
+ * @param personality Optional personality type for character-based responses
  * @returns ChatResponse object
  */
 export async function chatHandler(
   message: string,
   history: ChatMessage[] = [],
-  userId?: number | null
+  userId?: number | null,
+  personality: string = 'concierge'
 ): Promise<ChatResponse> {
   // Determine if this is a destination recommendation or itinerary request
   const isDestinationRequest = /recommend|suggest|where|destination|place to visit/i.test(message);
@@ -147,23 +246,40 @@ export async function chatHandler(
     content: msg.content
   }));
   
-  // Try to use OpenAI first
-  if (process.env.OPENAI_API_KEY || process.env.OPENAI_KEY) {
+  // Try using Anthropic Claude first (highest quality)
+  if (anthropicClient) {
     try {
-      return await handleWithOpenAI(message, formattedHistory, isDestinationRequest, isItineraryRequest);
+      return await handleWithAnthropic(message, formattedHistory, isDestinationRequest, isItineraryRequest, personality);
+    } catch (error) {
+      console.error("Anthropic error:", error);
+      // Fall back to OpenAI if available
+      if (openai) {
+        return await handleWithOpenAI(message, formattedHistory, isDestinationRequest, isItineraryRequest, personality);
+      }
+      // Fall back to Gemini if available
+      else if (geminiClient) {
+        return await handleWithGemini(message, formattedHistory, isDestinationRequest, isItineraryRequest, personality);
+      }
+      throw error;
+    }
+  }
+  // Try to use OpenAI second
+  else if (openai) {
+    try {
+      return await handleWithOpenAI(message, formattedHistory, isDestinationRequest, isItineraryRequest, personality);
     } catch (error) {
       console.error("OpenAI error:", error);
       // Fall back to Gemini if available
       if (geminiClient) {
-        return await handleWithGemini(message, formattedHistory, isDestinationRequest, isItineraryRequest);
+        return await handleWithGemini(message, formattedHistory, isDestinationRequest, isItineraryRequest, personality);
       }
       throw error;
     }
   } 
-  // Try Gemini if no OpenAI key
+  // Try Gemini if no other clients available
   else if (geminiClient) {
     try {
-      return await handleWithGemini(message, formattedHistory, isDestinationRequest, isItineraryRequest);
+      return await handleWithGemini(message, formattedHistory, isDestinationRequest, isItineraryRequest, personality);
     } catch (error) {
       console.error("Gemini error:", error);
       throw error;
@@ -172,7 +288,7 @@ export async function chatHandler(
   // No API keys available
   else {
     return {
-      message: "I'm sorry, I can't process your request at the moment. Please check your API configuration for OpenAI or Google Gemini.",
+      message: "I'm sorry, I can't process your request at the moment. Please check your API configuration for Anthropic, OpenAI or Google Gemini.",
       suggestions: [
         "Try again later",
         "Check API settings",
@@ -183,13 +299,127 @@ export async function chatHandler(
 }
 
 /**
+ * Handle chat with Anthropic Claude
+ */
+async function handleWithAnthropic(
+  message: string,
+  formattedHistory: any[],
+  isDestinationRequest: boolean,
+  isItineraryRequest: boolean,
+  personality: string = 'concierge'
+): Promise<ChatResponse> {
+  if (!anthropicClient) {
+    throw new Error("Anthropic client is not initialized");
+  }
+
+  // Get the selected personality or default to concierge
+  const selectedPersonality = ASSISTANT_PERSONALITIES[personality] || ASSISTANT_PERSONALITIES['concierge'];
+  
+  // Create the system prompt with personality
+  let promptText = `${TRAVEL_AGENT_PROMPT}\n\n${selectedPersonality.systemPrompt}\n\n
+  Always respond in JSON format with the following structure:
+  {
+    "message": "Your conversational response to the user in the style of ${selectedPersonality.name}",
+    "suggestions": ["Suggested follow-up 1", "Suggested follow-up 2", "Suggested follow-up 3"]
+  }`;
+
+  // Add specific JSON fields for destination recommendations
+  if (isDestinationRequest) {
+    promptText += `, 
+    "destinations": [
+      {
+        "id": "unique-id",
+        "name": "Destination Name",
+        "country": "Country",
+        "description": "Brief description in ${selectedPersonality.name}'s style",
+        "imageUrl": "Image URL from Unsplash (prefer using https://images.unsplash.com/...)",
+        "rating": 4.5
+      }
+    ]`;
+  }
+
+  // Add specific JSON fields for itinerary generation
+  if (isItineraryRequest) {
+    promptText += `,
+    "itinerary": {
+      "days": [
+        {
+          "day": 1,
+          "activities": [
+            {
+              "time": "09:00",
+              "title": "Activity title",
+              "description": "Activity description in ${selectedPersonality.name}'s style",
+              "location": "Location name"
+            }
+          ]
+        }
+      ]
+    }`;
+  }
+
+  // Format the chat history for Anthropic
+  const messages = formattedHistory.map(msg => ({
+    role: msg.role,
+    content: msg.content
+  }));
+
+  // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
+  try {
+    const response = await anthropicClient.messages.create({
+      model: "claude-3-7-sonnet-20250219",
+      system: promptText,
+      messages: [
+        ...messages,
+        { role: "user", content: message }
+      ],
+      temperature: 0.7,
+      max_tokens: 4000
+    });
+
+    // Parse the response content
+    const contentText = response.content[0].type === 'text' 
+      ? response.content[0].text 
+      : JSON.stringify({
+          message: "I'm sorry, I couldn't process that request properly.",
+          suggestions: ["Could you try asking in a different way?"]
+        });
+    
+    try {
+      // Try to extract JSON from the text
+      const jsonMatch = contentText.match(/({[\s\S]*})/);
+      if (jsonMatch && jsonMatch[0]) {
+        const parsedResponse = JSON.parse(jsonMatch[0]);
+        return parsedResponse;
+      } else {
+        // If no JSON is found, create a simple response
+        return {
+          message: contentText,
+          suggestions: ["Can you tell me more about what you're looking for?"]
+        };
+      }
+    } catch (error) {
+      console.error("Error parsing Anthropic JSON response:", error);
+      return {
+        message: contentText,
+        suggestions: ["Can you tell me more about what you're looking for?"]
+      };
+    }
+  } catch (error) {
+    console.error("Anthropic API error:", error);
+    throw error;
+  }
+}
+
+/**
  * Handle chat with OpenAI
  */
 async function handleWithOpenAI(
   message: string,
   formattedHistory: any[],
   isDestinationRequest: boolean,
-  isItineraryRequest: boolean
+  isItineraryRequest: boolean,
+  personality: string = 'concierge'
 ): Promise<ChatResponse> {
   // Build messages array
   const messages = [
@@ -231,7 +461,8 @@ async function handleWithGemini(
   message: string,
   formattedHistory: any[],
   isDestinationRequest: boolean,
-  isItineraryRequest: boolean
+  isItineraryRequest: boolean,
+  personality: string = 'concierge'
 ): Promise<ChatResponse> {
   // Set max retries for API call resilience
   const MAX_RETRIES = 3;
