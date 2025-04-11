@@ -31,6 +31,7 @@ export interface ChatConfig {
     continueConversationAfterItinerary: boolean;
     autoSuggestNearbyAttractions: boolean;
     rememberUserPreferences: boolean;
+    detectGreetings: boolean;
   };
   languageSupport: string[];
   appearance: {
@@ -70,7 +71,8 @@ const defaultChatConfig: ChatConfig = {
     voiceReplyIfVoiceEnabled: true,
     continueConversationAfterItinerary: true,
     autoSuggestNearbyAttractions: true,
-    rememberUserPreferences: true
+    rememberUserPreferences: true,
+    detectGreetings: true
   },
   languageSupport: [
     'English',

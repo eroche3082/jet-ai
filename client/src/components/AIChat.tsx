@@ -560,9 +560,7 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
         recognitionRef.current.interimResults = false;
         
         // Use detected language or default to currentLanguage
-        recognitionRef.current.lang = activeChatConfig.behavior.detectGreetings 
-          ? currentLanguage 
-          : 'en-US';
+        recognitionRef.current.lang = currentLanguage;
         
         recognitionRef.current.onstart = () => {
           setIsListening(true);
@@ -691,7 +689,7 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     }
   };
   
-  const stopSpeaking = () => {
+  const cancelSpeech = () => {
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
@@ -699,7 +697,7 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
   
   const toggleAudioEnabled = () => {
     if (audioEnabled) {
-      stopSpeaking();
+      cancelSpeech();
     }
     setAudioEnabled(!audioEnabled);
   };
