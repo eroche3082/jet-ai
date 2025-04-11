@@ -91,6 +91,10 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [userPreferences, setUserPreferences] = useState<Record<string, string>>({});
   
+  // Personality selection state
+  const [selectedPersonality, setSelectedPersonality] = useState<string>('concierge');
+  const { data: personalities, isLoading: isLoadingPersonalities } = useAssistantPersonalities();
+  
   // Speech and audio related states
   const [isListening, setIsListening] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(false);
@@ -314,7 +318,8 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
         
         const response = await sendChatMessage(
           retry ? 'Can you try again? I didn\'t understand your last response.' : inputMessage,
-          enhancedMessages
+          enhancedMessages,
+          selectedPersonality
         );
         
         // Reset error count on successful response
@@ -339,7 +344,8 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
         // Normal flow without preferences
         const response = await sendChatMessage(
           retry ? 'Can you try again? I didn\'t understand your last response.' : inputMessage,
-          contextEnhancedMessages
+          contextEnhancedMessages,
+          selectedPersonality
         );
         
         // Reset error count on successful response
