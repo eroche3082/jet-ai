@@ -335,8 +335,18 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
       // Normal flow: process current question and determine next question
       switch (currentQuestion) {
         case 'destination':
-          updatedMemory.destination = extractDestination(input);
-          nextQuestion = 'budget';
+          const extractedDestination = extractDestination(input);
+          
+          // Si el extractDestination devuelve vacío, podría ser un saludo
+          // No cambiamos la pregunta, seguimos en 'destination'
+          if (!extractedDestination || extractedDestination === '') {
+            console.log("Detectado posible saludo en lugar de destino, manteniendo en 'destination'");
+            nextQuestion = 'destination';
+          } else {
+            // Solo si tenemos un destino válido, avanzamos a la siguiente pregunta
+            updatedMemory.destination = extractedDestination;
+            nextQuestion = 'budget';
+          }
           break;
         case 'budget':
           updatedMemory.budget = extractBudget(input);
@@ -370,6 +380,18 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
   
   // Helper functions to extract specific information from user input
   const extractDestination = (input: string): string => {
+    // Primero, verificar si es un saludo común que NO debería ser interpretado como destino
+    const commonGreetings = ['hi', 'hello', 'hey', 'hola', 'buenos días', 'buenas', 'saludos'];
+    const lowercaseInput = input.trim().toLowerCase();
+    
+    // Si es solo un saludo común, no lo tratamos como destino
+    if (commonGreetings.some(greeting => lowercaseInput === greeting || 
+                                       lowercaseInput === `${greeting}!` || 
+                                       lowercaseInput === `${greeting}.`)) {
+      console.log("Detectado saludo que no debe ser interpretado como destino:", input);
+      return ""; // Devolver cadena vacía para indicar que no es un destino válido
+    }
+    
     // Just return the input directly for simple responses
     // This will preserve the full destination name including commas
     if (input.includes(',')) {
@@ -387,6 +409,12 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
       .replace(/i'm going to/i, '')
       .replace(/i would like to go to/i, '')
       .trim();
+      
+    // Si el input es solo un saludo como "hey", no debemos tratarlo como destino
+    if (cleanedInput.length < 5 && commonGreetings.some(greeting => cleanedInput.toLowerCase().includes(greeting))) {
+      console.log("Detectado posible saludo corto como destino:", cleanedInput);
+      return ""; // Indicar que no es un destino real
+    }
       
     // If it's just a destination name, return it
     if (cleanedInput.length < 30) {
