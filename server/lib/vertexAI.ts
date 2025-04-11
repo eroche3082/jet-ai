@@ -373,7 +373,8 @@ export const processConversation = async (
             topK: 40,
             maxOutputTokens: 1024,
           },
-          systemInstruction: systemContent,
+          // systemInstruction is causing an issue with Gemini 1.5
+          // Removing for now and using the first message instead
         });
         
         // Gemini 1.5 utiliza un formato diferente para los mensajes

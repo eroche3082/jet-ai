@@ -25,6 +25,7 @@ import {
   Building as Hotel,
   User,
   ChevronRight,
+  ChevronLeft,
   X,
   Image,
   Plane,
@@ -123,6 +124,7 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
   const [aiModel, setAiModel] = useState('flash'); // 'flash' or 'pro'
   const [language, setLanguage] = useState('en'); // 'en', 'es', 'fr'
   const [personality, setPersonality] = useState('concierge'); // 'concierge', 'guide', 'adventurer'
+  const [avatarVisible, setAvatarVisible] = useState(true); // Controls visibility of the avatar panel
   
   // Travel memory system - stores user's trip preferences
   const [travelMemory, setTravelMemory] = useState<{
@@ -458,27 +460,46 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
     return 'Mid-range';
   };
   
-  const extractDates = (input: string): string => {
+  const extractDates = (input: string): { checkIn: string | null; checkOut: string | null; } | null => {
     // Try to identify month names
     const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+    
+    // Parse the input for dates
+    let dateInfo = null;
+    
     for (const month of months) {
-      if (input.includes(month)) {
-        return month.charAt(0).toUpperCase() + month.slice(1);
+      if (input.toLowerCase().includes(month)) {
+        const formattedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+        return { 
+          checkIn: formattedMonth, 
+          checkOut: null 
+        };
       }
     }
     
     // Try to identify seasons
-    if (input.includes('summer')) return 'Summer';
-    if (input.includes('fall') || input.includes('autumn')) return 'Fall';
-    if (input.includes('winter')) return 'Winter';
-    if (input.includes('spring')) return 'Spring';
+    if (input.toLowerCase().includes('summer')) 
+      return { checkIn: 'Summer', checkOut: null };
+    if (input.toLowerCase().includes('fall') || input.toLowerCase().includes('autumn')) 
+      return { checkIn: 'Fall', checkOut: null };
+    if (input.toLowerCase().includes('winter')) 
+      return { checkIn: 'Winter', checkOut: null };
+    if (input.toLowerCase().includes('spring')) 
+      return { checkIn: 'Spring', checkOut: null };
     
     // Try to identify relative timeframes
-    if (input.includes('next week')) return 'Next week';
-    if (input.includes('next month')) return 'Next month';
-    if (input.includes('next year')) return 'Next year';
+    if (input.toLowerCase().includes('next week')) 
+      return { checkIn: 'Next week', checkOut: null };
+    if (input.toLowerCase().includes('next month')) 
+      return { checkIn: 'Next month', checkOut: null };
+    if (input.toLowerCase().includes('next year')) 
+      return { checkIn: 'Next year', checkOut: null };
     
-    return input; // Return the whole input if we can't parse it
+    // Return a default structure if we can't parse any specific dates
+    return { 
+      checkIn: input, // Store the raw input as checkIn
+      checkOut: null 
+    };
   };
   
   const extractTravelers = (input: string): string => {
@@ -553,7 +574,14 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
         return `Thank you for all the details! Here's what I have for your trip:\n\n` +
                `🌍 Destination: ${travelMemory.destination}\n` +
                `💰 Budget: ${travelMemory.budget}\n` +
-               `📅 Dates: ${travelMemory.dates}\n` +
+               `📅 Dates: ${travelMemory.dates ? 
+                  (typeof travelMemory.dates === 'string' ? 
+                    travelMemory.dates : 
+                    travelMemory.dates.checkIn ?
+                      travelMemory.dates.checkIn + 
+                      (travelMemory.dates.checkOut ? ` - ${travelMemory.dates.checkOut}` : '') :
+                      'Not specified'
+                  ) : 'Not specified'}\n` +
                `👥 Travelers: ${travelMemory.travelers}\n` +
                `🎯 Interests: ${travelMemory.interests.join(', ')}\n\n` +
                `Would you like me to create a personalized itinerary based on this information, or is there anything you'd like to adjust?`;
@@ -997,9 +1025,11 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
 
   return (
     <div className={getContainerClasses()}>
-      {/* Left side panel with tabs */}
-      <div className={`${isMobile ? 'w-full h-12 flex justify-between px-2' : 'w-16 h-full flex flex-col'} bg-gray-100 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700`}>
-        {isMobile ? (
+      {/* Left side panel with tabs/avatar */}
+      <div className={`${isMobile ? 'w-full h-12 flex justify-between px-2' : 'flex flex-col'} ${
+        avatarVisible ? 'w-1/4 lg:w-1/5' : 'w-16'
+      } bg-gray-100 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300`}>
+        {isMobile && (
           // Mobile top navigation
           <div className="flex items-center space-x-2 overflow-x-auto hide-scrollbar py-2">
             {Object.keys(tabTitles).map(tab => (
@@ -1013,9 +1043,131 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
               </button>
             ))}
           </div>
-        ) : (
+        )}
+        
+        {!isMobile && avatarVisible && (
+          // Avatar Panel
+          <div className="flex flex-col h-full">
+            {/* Avatar Image */}
+            <div className="flex justify-center my-6">
+              <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center overflow-hidden border-2 border-primary/20">
+                <svg viewBox="0 0 200 200" className="w-24 h-24 text-primary">
+                  <circle cx="100" cy="70" r="40" fill="currentColor" opacity="0.7" />
+                  <circle cx="100" cy="230" r="100" fill="currentColor" opacity="0.5" />
+                </svg>
+                <div className="absolute bottom-0 left-0 right-0 h-2 bg-primary/30 animate-pulse"></div>
+              </div>
+            </div>
+            
+            {/* AI Assistant Name & Status */}
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">JetAI Assistant</h3>
+              <div className="flex items-center justify-center mt-1">
+                <div className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></div>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {isListening ? 'Listening...' : isLoading ? 'Processing...' : 'Ready'}
+                </span>
+              </div>
+            </div>
+            
+            {/* Assistant Personality */}
+            <div className="px-4 mb-8">
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Current Personality</h4>
+              <div className="p-3 rounded-lg bg-gray-200/70 dark:bg-gray-700/60">
+                <div className="flex items-center mb-2">
+                  <span className="text-sm font-medium capitalize">{personality}</span>
+                  <span className="ml-auto text-xs text-primary">Active</span>
+                </div>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  {personality === 'concierge' ? (
+                    'A luxury travel expert with sophisticated recommendations and an elegant tone.'
+                  ) : personality === 'guide' ? (
+                    'A friendly local with insider knowledge and authentic travel tips.'
+                  ) : (
+                    'An enthusiastic adventurer focused on exciting and off-the-beaten-path experiences.'
+                  )}
+                </p>
+              </div>
+            </div>
+            
+            {/* Conversation Memory */}
+            <div className="px-4 flex-1 overflow-y-auto hide-scrollbar">
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Trip Memory</h4>
+              <div className="space-y-3">
+                {travelMemory.destination && (
+                  <div className="p-2 rounded-md bg-gray-100 dark:bg-gray-800/50">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Destination</span>
+                    <p className="text-sm font-medium">{travelMemory.destination}</p>
+                  </div>
+                )}
+                
+                {travelMemory.budget && (
+                  <div className="p-2 rounded-md bg-gray-100 dark:bg-gray-800/50">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Budget</span>
+                    <p className="text-sm font-medium">{travelMemory.budget}</p>
+                  </div>
+                )}
+                
+                {travelMemory.dates && (
+                  <div className="p-2 rounded-md bg-gray-100 dark:bg-gray-800/50">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Travel Dates</span>
+                    <p className="text-sm font-medium">
+                      {typeof travelMemory.dates === 'string' ? 
+                        travelMemory.dates : 
+                        travelMemory.dates.checkIn && travelMemory.dates.checkOut ? 
+                          `${travelMemory.dates.checkIn} - ${travelMemory.dates.checkOut}` : 
+                          'Dates not specified'}
+                    </p>
+                  </div>
+                )}
+                
+                {travelMemory.travelers && (
+                  <div className="p-2 rounded-md bg-gray-100 dark:bg-gray-800/50">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Travelers</span>
+                    <p className="text-sm font-medium">{travelMemory.travelers}</p>
+                  </div>
+                )}
+                
+                {travelMemory.interests.length > 0 && (
+                  <div className="p-2 rounded-md bg-gray-100 dark:bg-gray-800/50">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Interests</span>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {travelMemory.interests.map((interest, i) => (
+                        <span key={i} className="text-xs py-1 px-2 bg-primary/10 rounded-full">
+                          {interest}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Hide Avatar button */}
+            <div className="mt-auto mb-4 px-4">
+              <button
+                onClick={() => setAvatarVisible(false)}
+                className="w-full py-2 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-sm"
+              >
+                <ChevronLeft className="w-4 h-4 mr-2" />
+                <span>Hide Avatar</span>
+              </button>
+            </div>
+          </div>
+        )}
+        
+        {!isMobile && !avatarVisible && (
           // Desktop side navigation
           <div className="flex flex-col items-center space-y-6 pt-6">
+            {/* Show Avatar Panel Button */}
+            <button
+              onClick={() => setAvatarVisible(true)}
+              className="p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+              title="Show Avatar Panel"
+            >
+              <User className="w-5 h-5" />
+            </button>
+          
             {Object.keys(tabTitles).map(tab => (
               <button
                 key={tab}
