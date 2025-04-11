@@ -1,0 +1,62 @@
+Amazing work so far. Now let’s move to Phase 5: Franchising, White-Label, and Monetization Model.
+
+This phase is focused on scaling JetAI as a global platform that can be licensed, embedded, or rebranded by travel creators, agencies, and influencers.
+
+---
+
+### 1. 🌐 Subdomain & White-Label Architecture
+- Prepare the platform to support multiple branded versions:
+  - Example: `miami.jetai.app`, `luxury.jetai.app`, `backpackers.jetai.app`
+  - Use subdomain-based routing or query-based brand switching
+- Enable theme switching based on subdomain/partner config (colors, logo, tone)
+- Load partner data (like affiliate ID, contact info) dynamically
+
+---
+
+### 2. 💼 Affiliate Program & Licensing System
+- Add a dashboard for partners with:
+  - Signup form (partner name, logo, audience)
+  - Referral link generator (e.g., `?ref=travelwithkat`)
+  - Dashboard with metrics: visits, signups, bookings, earnings
+- Track commissions for bookings and premium upgrades
+- Add Stripe Connect support for partner payouts
+
+---
+
+### 3. 🧩 Embeddable Widget
+- Create a simplified **JetAI Chat Widget** that can be embedded in other sites:
+  - Lightweight version of the current floating chat
+  - Embed via `<script>` tag and `div#jetai-assistant`
+  - Allow partners to customize: colors, greeting, API key
+
+---
+
+### 4. 📲 Mobile Optimization & PWA
+- Optimize the app for mobile use:
+  - Floating chat bubble fixed to mobile bottom bar
+  - Sticky booking CTA
+  - Responsive itinerary cards and destination filters
+- Enable PWA (Progressive Web App) support:
+  - Add manifest.json and service worker
+  - Installable from browser on mobile
+
+---
+
+### 5. 💳 Monetization Modes
+- Add the following monetization flows:
+  - **Monthly subscriptions** (Basic, Freemium, Premium)
+  - **Pay-per-use credit packs** (10, 50, 100 AI replies)
+  - **Affiliate revenue sharing** (per trip booked via partner)
+- Display pricing table with comparison and Stripe checkout
+
+---
+
+### 6. 📂 Export & SaaS Readiness
+- Prepare environment configs (`.env`, `firebase.json`, `stripe.env`) for duplication
+- Allow dynamic Firebase/Stripe keys per partner
+- Enable export of the platform as a cloneable template
+
+---
+
+Let me know once these features are in place so we can begin Phase 6: AI-Generated Travel Newsletters, Dynamic Video Creators, and Creator-Mode for travel influencers.
+
