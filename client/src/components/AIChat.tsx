@@ -4,10 +4,47 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Link } from 'wouter';
 import ReactMarkdown from 'react-markdown';
-import { Infinity, AlertCircle, CreditCard } from 'lucide-react';
+import { Infinity, AlertCircle, CreditCard, Mic, Volume2, Volume, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+// SpeechRecognition types for TypeScript
+interface SpeechRecognitionEvent extends Event {
+  results: {
+    [index: number]: {
+      [index: number]: {
+        transcript: string;
+        confidence: number;
+      };
+    };
+    item(index: number): any;
+    length: number;
+  };
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  maxAlternatives: number;
+  onnomatch: (event: Event) => void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: Event) => void;
+  onstart: (event: Event) => void;
+  onend: (event: Event) => void;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+
+// Extend Window interface
+declare global {
+  interface Window {
+    SpeechRecognition?: new () => SpeechRecognition;
+    webkitSpeechRecognition?: new () => SpeechRecognition;
+  }
+}
 
 // Extended ChatMessage type to include system messages
 interface ExtendedChatMessage extends Omit<ChatMessage, 'role'> {
@@ -43,6 +80,13 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [userPreferences, setUserPreferences] = useState<Record<string, string>>({});
+  
+  // Speech and audio related states
+  const [isListening, setIsListening] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [audioVolume, setAudioVolume] = useState(0.7);
+  const [speechSynthesis, setSpeechSynthesis] = useState<SpeechSynthesisUtterance | null>(null);
+  const recognitionRef = useRef<any>(null);
   
   // Fetch membership data for credit information
   const { data: membership, isLoading: isMembershipLoading } = useQuery({
@@ -297,6 +341,115 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     setInputMessage(suggestion);
     handleSendMessage();
   };
+  
+  // Speech recognition implementation
+  const startListening = () => {
+    if (!isListening && (window.SpeechRecognition || window.webkitSpeechRecognition)) {
+      try {
+        // Browser compatibility
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognitionRef.current = new SpeechRecognition();
+        
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = false;
+        recognitionRef.current.lang = 'en-US';
+        
+        recognitionRef.current.onstart = () => {
+          setIsListening(true);
+        };
+        
+        recognitionRef.current.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          setInputMessage(transcript);
+          // Auto-send after speech recognition completes
+          setTimeout(() => {
+            handleSendMessage();
+          }, 500);
+        };
+        
+        recognitionRef.current.onerror = (event: any) => {
+          console.error('Speech recognition error:', event.error);
+          setIsListening(false);
+        };
+        
+        recognitionRef.current.onend = () => {
+          setIsListening(false);
+        };
+        
+        recognitionRef.current.start();
+      } catch (error) {
+        console.error('Speech recognition not supported:', error);
+        setIsListening(false);
+      }
+    }
+  };
+  
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+  };
+  
+  // Text-to-speech functionality
+  const speakMessage = (message: string) => {
+    if (!audioEnabled) {
+      setAudioEnabled(true);
+    }
+    
+    // Stop any current speech
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      
+      // Clean the message content (remove markdown, emojis, etc.)
+      const cleanMessage = message
+        .replace(/[*_#~`]/g, '')         // Remove markdown
+        .replace(/!\[.*?\]\(.*?\)/g, '') // Remove image links
+        .replace(/\[.*?\]\(.*?\)/g, '$1') // Replace links with just the text
+        .trim();
+      
+      const utterance = new SpeechSynthesisUtterance(cleanMessage);
+      utterance.volume = audioVolume;
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.lang = 'en-US';
+      
+      // Try to find a more natural voice if available
+      const voices = window.speechSynthesis.getVoices();
+      const preferredVoice = voices.find(voice => 
+        voice.name.includes('Samantha') || 
+        voice.name.includes('Female') || 
+        voice.name.includes('Google')
+      );
+      
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+      }
+      
+      setSpeechSynthesis(utterance);
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+  
+  const stopSpeaking = () => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+  };
+  
+  const toggleAudioEnabled = () => {
+    if (audioEnabled) {
+      stopSpeaking();
+    }
+    setAudioEnabled(!audioEnabled);
+  };
+  
+  const adjustVolume = (newVolume: number) => {
+    setAudioVolume(newVolume);
+    if (speechSynthesis && window.speechSynthesis) {
+      speechSynthesis.volume = newVolume;
+    }
+  };
 
   return (
     <div 
@@ -460,26 +613,85 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
             onKeyPress={handleKeyPress}
             placeholder="Type your travel question..." 
             className="flex-1 bg-gray-100 rounded-full py-2 px-4 text-sm focus:outline-none"
-            disabled={membershipData && !hasCredits}
+            disabled={membershipData && !hasCredits || isListening}
           />
+          
+          {/* Voice input button */}
+          <button
+            onClick={isListening ? stopListening : startListening}
+            disabled={(membershipData && !hasCredits) || isLoading}
+            className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center ${
+              isListening 
+                ? 'bg-red-500 hover:bg-red-600 text-white' 
+                : (membershipData && !hasCredits) || isLoading 
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                  : 'bg-gray-200 hover:bg-gray-300 text-primary'
+            }`}
+            title={isListening ? "Stop recording" : "Speak your question"}
+            aria-label={isListening ? "Stop recording" : "Speak your question"}
+          >
+            <Mic className={`w-5 h-5 ${isListening ? 'animate-pulse' : ''}`} />
+          </button>
+          
+          {/* Audio toggle button */}
+          <button
+            onClick={toggleAudioEnabled}
+            className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center ${
+              audioEnabled 
+                ? 'bg-gray-200 hover:bg-gray-300 text-primary' 
+                : 'bg-gray-200 hover:bg-gray-300 text-gray-500'
+            }`}
+            title={audioEnabled ? "Disable voice responses" : "Enable voice responses"}
+            aria-label={audioEnabled ? "Disable voice responses" : "Enable voice responses"}
+          >
+            {audioEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+          </button>
+          
+          {/* Send button */}
           <button 
             onClick={(e) => handleSendMessage(e)}
-            disabled={!inputMessage.trim() || isLoading || (membershipData && !hasCredits)}
+            disabled={!inputMessage.trim() || isLoading || (membershipData && !hasCredits) || isListening}
             className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center text-white transition ${
-              !inputMessage.trim() || isLoading || (membershipData && !hasCredits) 
+              !inputMessage.trim() || isLoading || (membershipData && !hasCredits) || isListening
                 ? 'bg-primary/50 cursor-not-allowed' 
                 : 'bg-primary hover:bg-primary/90'
             }`}
-            title={membershipData && !hasCredits ? "You're out of AI credits" : ""}
+            title={membershipData && !hasCredits ? "You're out of AI credits" : "Send message"}
           >
             <i className="fas fa-paper-plane"></i>
           </button>
         </div>
 
+        {/* Audio progress bar */}
+        {audioEnabled && (
+          <div className="mt-2 flex items-center justify-between">
+            <span className="text-xs text-gray-500">Voice volume:</span>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.1"
+              value={audioVolume}
+              onChange={(e) => adjustVolume(parseFloat(e.target.value))}
+              className="flex-1 mx-3 h-1.5 appearance-none bg-gray-200 rounded-lg"
+            />
+            <Volume className="w-4 h-4 text-gray-500" />
+          </div>
+        )}
+
         {membershipData && creditsRemaining <= 3 && creditsRemaining > 0 && (
           <div className="mt-2 text-xs text-amber-600 flex items-center">
             <AlertCircle className="w-3 h-3 mr-1" />
             <span>You're running low on AI credits. <Link href="/membership" className="underline">Upgrade your plan</Link></span>
+          </div>
+        )}
+        
+        {isListening && (
+          <div className="mt-2 text-xs text-blue-600 flex items-center">
+            <span className="flex items-center">
+              <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-1"></span>
+              Listening... Speak your travel question
+            </span>
           </div>
         )}
       </div>
