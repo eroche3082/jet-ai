@@ -1,195 +1,186 @@
-// Define los diferentes estados de la conversación y sus transiciones
+/**
+ * Sistema de flujo de conversación para JetAI
+ * Este archivo define el flujo "una-pregunta-a-la-vez" que guía al usuario a través
+ * de una secuencia de preguntas para obtener su perfil de viaje completo
+ */
+
+// Etapas de la conversación
 export enum ConversationStage {
-  GREETING = 'greeting',
-  DESTINATION = 'destination',
-  BUDGET = 'budget',
-  DATES = 'dates',
-  TRAVELERS = 'travelers',
-  INTERESTS = 'interests',
-  ITINERARY_REQUEST = 'itinerary_request',
-  SAVE_ITINERARY = 'save_itinerary',
-  GENERAL = 'general'
+  GREETING = 'greeting',           // Saludo inicial
+  DESTINATION = 'destination',     // Destino deseado
+  BUDGET = 'budget',               // Presupuesto del viaje
+  DATES = 'dates',                 // Fechas del viaje
+  TRAVELERS = 'travelers',         // Número y tipo de viajeros
+  INTERESTS = 'interests',         // Intereses/actividades
+  ITINERARY_REQUEST = 'itinerary', // Solicitud de itinerario
+  GENERAL = 'general'              // Conversación general (cuando ya se tienen los datos básicos)
 }
 
-// Define las preguntas para cada etapa de la conversación
+// Preguntas pre-definidas para cada etapa
 export const STAGE_QUESTIONS: Record<ConversationStage, string> = {
-  [ConversationStage.GREETING]: "Welcome aboard JetAI! I'm your personal travel concierge. To get started, where are you dreaming of going?",
-  [ConversationStage.DESTINATION]: "Where are you dreaming of going?",
-  [ConversationStage.BUDGET]: "Amazing choice! What's your approximate budget? (Luxury, Mid-range, Budget-friendly)",
-  [ConversationStage.DATES]: "Great! When are you planning to travel? (Specific dates, month, or season)",
-  [ConversationStage.TRAVELERS]: "Will you be traveling solo, with a partner, with friends, or with family?",
-  [ConversationStage.INTERESTS]: "What kind of activities do you enjoy on a trip? (Beach, nature, food, nightlife, adventure, relaxation)",
-  [ConversationStage.ITINERARY_REQUEST]: "Perfect! I'll now generate a tailored travel itinerary based on your answers. Would you like to include hotels, flights, or local experiences too?",
-  [ConversationStage.SAVE_ITINERARY]: "Would you like me to store this itinerary for easy access and future updates?",
-  [ConversationStage.GENERAL]: "How else can I help with your travel plans?"
+  [ConversationStage.GREETING]: "¡Hola! Soy JetAI, tu asistente de viajes personal. ¿A qué destino te gustaría viajar?",
+  [ConversationStage.DESTINATION]: "¡Excelente elección! ¿Cuál es tu presupuesto aproximado para este viaje?",
+  [ConversationStage.BUDGET]: "¿En qué fechas te gustaría viajar?",
+  [ConversationStage.DATES]: "¿Para cuántas personas estás planeando este viaje?",
+  [ConversationStage.TRAVELERS]: "¿Qué tipo de actividades o experiencias te interesan más en este viaje?",
+  [ConversationStage.INTERESTS]: "¡Perfecto! Tengo toda la información que necesito. ¿Te gustaría que te genere un itinerario personalizado o prefieres que te recomiende algo específico primero?",
+  [ConversationStage.ITINERARY_REQUEST]: "Estoy creando tu itinerario personalizado. ¿Hay algo específico que quieras incluir?",
+  [ConversationStage.GENERAL]: "¿En qué más puedo ayudarte con tu viaje?"
 };
 
-// Estructura para almacenar los datos de viaje del usuario
+// Modelo de datos para el perfil de viaje
 export interface TravelProfile {
   destination: string | null;
   budget: string | null;
   dates: string | null;
   travelers: string | null;
-  interests: string[] | null;
+  interests: string | null;
 }
 
-// Verifica si el mensaje es un saludo
-export function isGreeting(message: string): boolean {
+/**
+ * Determina si un texto es un saludo
+ */
+export function isGreeting(text: string): boolean {
+  // Lista de saludos comunes en varios idiomas
   const greetingPatterns = [
-    /^hi$/i,
-    /^hello$/i,
-    /^hey$/i,
-    /^hola$/i,
-    /^buenos dias$/i,
-    /^buenas tardes$/i,
-    /^buenas noches$/i,
-    /^bonjour$/i,
-    /^salut$/i,
-    /^ciao$/i,
-    /^hi there$/i,
-    /^hello there$/i,
+    /^(hi|hello|hey|howdy|greetings)/i,
+    /^(hola|buenos días|buenas tardes|buenas noches)/i,
+    /^(bonjour|salut)/i,
+    /^(ciao|buongiorno|buonasera)/i,
+    /^(olá|bom dia|boa tarde|boa noite)/i,
+    /^(hallo|guten tag|guten morgen)/i
   ];
   
-  return greetingPatterns.some(pattern => pattern.test(message.trim()));
+  // Devuelve true si el texto coincide con alguno de los patrones de saludo
+  return greetingPatterns.some(pattern => pattern.test(text.trim()));
 }
 
-// Determina la siguiente etapa de la conversación basada en el mensaje y el estado actual
-export function determineNextStage(
-  currentStage: ConversationStage,
-  message: string,
-  profile: TravelProfile
-): ConversationStage {
-  // Si el usuario está saludando, siempre responder con un saludo
-  if (isGreeting(message) && currentStage !== ConversationStage.GREETING) {
-    return ConversationStage.GREETING;
-  }
-  
-  // Lógica de transición de estado basada en la etapa actual
-  switch (currentStage) {
-    case ConversationStage.GREETING:
-      return ConversationStage.DESTINATION;
-      
-    case ConversationStage.DESTINATION:
-      // Si ya tenemos un destino, avanzar a presupuesto
-      return ConversationStage.BUDGET;
-      
-    case ConversationStage.BUDGET:
-      // Si ya tenemos un presupuesto, avanzar a fechas
-      return ConversationStage.DATES;
-      
-    case ConversationStage.DATES:
-      // Si ya tenemos fechas, avanzar a viajeros
-      return ConversationStage.TRAVELERS;
-      
-    case ConversationStage.TRAVELERS:
-      // Si ya tenemos información de viajeros, avanzar a intereses
-      return ConversationStage.INTERESTS;
-      
-    case ConversationStage.INTERESTS:
-      // Si ya tenemos intereses, preguntar si quiere un itinerario
-      return ConversationStage.ITINERARY_REQUEST;
-      
-    case ConversationStage.ITINERARY_REQUEST:
-      // Si ya pidió un itinerario, preguntar si quiere guardarlo
-      return ConversationStage.SAVE_ITINERARY;
-      
-    case ConversationStage.SAVE_ITINERARY:
-      // Después de guardar, pasar a conversación general
-      return ConversationStage.GENERAL;
-      
-    default:
-      return ConversationStage.GENERAL;
-  }
-}
-
-// Actualiza el perfil de viaje basado en el mensaje y la etapa actual
+/**
+ * Actualiza el perfil de viaje del usuario basado en la respuesta actual
+ */
 export function updateTravelProfile(
-  currentStage: ConversationStage,
-  message: string,
-  profile: TravelProfile
+  stage: ConversationStage,
+  userInput: string,
+  currentProfile: TravelProfile
 ): TravelProfile {
-  const updatedProfile = { ...profile };
+  // Crea una copia del perfil actual para actualizarlo
+  const updatedProfile = { ...currentProfile };
   
-  // No actualizar el perfil si es un saludo
-  if (isGreeting(message)) {
-    return updatedProfile;
-  }
-  
-  switch (currentStage) {
+  // Actualiza el campo correspondiente según la etapa actual
+  switch (stage) {
+    case ConversationStage.GREETING:
+      // No actualizamos nada en la etapa de saludo
+      break;
+      
     case ConversationStage.DESTINATION:
-      updatedProfile.destination = message.trim();
+      // Si el usuario está respondiendo sobre el destino
+      if (!isGreeting(userInput)) {
+        updatedProfile.destination = userInput;
+      }
       break;
       
     case ConversationStage.BUDGET:
-      updatedProfile.budget = message.trim();
+      updatedProfile.budget = userInput;
       break;
       
     case ConversationStage.DATES:
-      updatedProfile.dates = message.trim();
+      updatedProfile.dates = userInput;
       break;
       
     case ConversationStage.TRAVELERS:
-      updatedProfile.travelers = message.trim();
+      updatedProfile.travelers = userInput;
       break;
       
     case ConversationStage.INTERESTS:
-      // Convertir intereses en array
-      updatedProfile.interests = message
-        .split(/[,;&]/)
-        .map(item => item.trim())
-        .filter(item => item.length > 0);
+      updatedProfile.interests = userInput;
+      break;
+      
+    // En las etapas de conversación general no actualizamos el perfil
+    case ConversationStage.ITINERARY_REQUEST:
+    case ConversationStage.GENERAL:
       break;
   }
   
   return updatedProfile;
 }
 
-// Extrae un resumen del perfil de viaje para mostrar al usuario
-export function getTravelProfileSummary(profile: TravelProfile): string {
-  const items = [];
-  
-  if (profile.destination) items.push(`🌍 Destination: ${profile.destination}`);
-  if (profile.budget) items.push(`💰 Budget: ${profile.budget}`);
-  if (profile.dates) items.push(`📅 Dates: ${profile.dates}`);
-  if (profile.travelers) items.push(`👥 Travelers: ${profile.travelers}`);
-  if (profile.interests && profile.interests.length > 0) {
-    items.push(`🎯 Interests: ${profile.interests.join(', ')}`);
+/**
+ * Determina la siguiente etapa de la conversación basada en la etapa actual
+ * y el perfil de viaje actualizado
+ */
+export function determineNextStage(
+  currentStage: ConversationStage,
+  userInput: string,
+  profile: TravelProfile
+): ConversationStage {
+  // Si es un saludo y estamos en otra etapa, volvemos a la etapa de destino
+  if (isGreeting(userInput) && currentStage !== ConversationStage.GREETING) {
+    return ConversationStage.DESTINATION;
   }
   
-  return items.length > 0 
-    ? `**Here's what I know about your trip so far:**\n\n${items.join('\n')}`
-    : '';
+  // Progresión normal a través de las etapas en secuencia
+  switch (currentStage) {
+    case ConversationStage.GREETING:
+      return ConversationStage.DESTINATION;
+      
+    case ConversationStage.DESTINATION:
+      return ConversationStage.BUDGET;
+      
+    case ConversationStage.BUDGET:
+      return ConversationStage.DATES;
+      
+    case ConversationStage.DATES:
+      return ConversationStage.TRAVELERS;
+      
+    case ConversationStage.TRAVELERS:
+      return ConversationStage.INTERESTS;
+      
+    case ConversationStage.INTERESTS:
+      // Una vez completados los intereses, pasamos a solicitar un itinerario
+      return ConversationStage.ITINERARY_REQUEST;
+      
+    case ConversationStage.ITINERARY_REQUEST:
+      // Después de generar el itinerario, pasamos a conversación general
+      return ConversationStage.GENERAL;
+      
+    case ConversationStage.GENERAL:
+      // En la etapa general seguimos en la etapa general
+      return ConversationStage.GENERAL;
+      
+    default:
+      return ConversationStage.GREETING;
+  }
 }
 
-// Construye un prompt para el asistente basado en el perfil de viaje
-export function buildAssistantPrompt(profile: TravelProfile): string {
-  let prompt = "You are JetAI, a world-class travel concierge. ";
+/**
+ * Genera un resumen del perfil de viaje para mostrar al usuario
+ */
+export function getTravelProfileSummary(profile: TravelProfile): string {
+  const summaryParts = [];
   
   if (profile.destination) {
-    prompt += `The user wants to travel to ${profile.destination}. `;
+    summaryParts.push(`📍 **Destino**: ${profile.destination}`);
   }
   
   if (profile.budget) {
-    prompt += `Their budget is ${profile.budget}. `;
+    summaryParts.push(`💰 **Presupuesto**: ${profile.budget}`);
   }
   
   if (profile.dates) {
-    prompt += `They plan to travel ${profile.dates}. `;
+    summaryParts.push(`🗓️ **Fechas**: ${profile.dates}`);
   }
   
   if (profile.travelers) {
-    prompt += `They will be traveling with ${profile.travelers}. `;
+    summaryParts.push(`👥 **Viajeros**: ${profile.travelers}`);
   }
   
-  if (profile.interests && profile.interests.length > 0) {
-    prompt += `They're interested in ${profile.interests.join(', ')}. `;
+  if (profile.interests) {
+    summaryParts.push(`🎯 **Intereses**: ${profile.interests}`);
   }
   
-  return prompt;
-}
-
-// Determina si tenemos suficiente información para generar un itinerario
-export function canGenerateItinerary(profile: TravelProfile): boolean {
-  return !!profile.destination && 
-         (!!profile.budget || !!profile.dates || !!profile.interests);
+  if (summaryParts.length === 0) {
+    return '';
+  }
+  
+  return `**Tu perfil de viaje:**\n${summaryParts.join('\n')}`;
 }

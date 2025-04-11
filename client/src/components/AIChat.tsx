@@ -6,7 +6,8 @@ import { Link } from 'wouter';
 import ReactMarkdown from 'react-markdown';
 import { 
   Infinity, AlertCircle, CreditCard, Mic, Volume2, Volume, VolumeX, 
-  Globe, Lightbulb, Image, Calendar, Coffee, User, UserCheck
+  Globe, Lightbulb, Image, Calendar, Coffee, User, UserCheck,
+  Settings, Sparkles, Camera, PanelRightOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +28,7 @@ import {
   isGreeting,
   TravelProfile
 } from '@/lib/conversationFlow';
+import { activeChatConfig } from '@/lib/chatConfig';
 
 // SpeechRecognition types for TypeScript
 interface SpeechRecognitionEvent extends Event {
@@ -531,7 +533,7 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     handleSendMessage();
   };
   
-  // Speech recognition implementation
+  // Speech recognition implementation using chat config
   const startListening = () => {
     if (!isListening && (window.SpeechRecognition || window.webkitSpeechRecognition)) {
       try {
@@ -547,9 +549,14 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
         
         recognitionRef.current = new SpeechRecognitionAPI();
         
+        // Use configuration from chatConfig
         recognitionRef.current.continuous = false;
         recognitionRef.current.interimResults = false;
-        recognitionRef.current.lang = 'en-US';
+        
+        // Use detected language or default to currentLanguage
+        recognitionRef.current.lang = activeChatConfig.behavior.detectGreetings 
+          ? currentLanguage 
+          : 'en-US';
         
         recognitionRef.current.onstart = () => {
           setIsListening(true);
@@ -588,10 +595,15 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     }
   };
   
-  // Enhanced Text-to-speech using Google Cloud TTS
+  // Enhanced Text-to-speech using Chat Config settings
   const speakMessage = async (message: string) => {
+    // Only speak if audio is enabled or if we should enable voice based on config
     if (!audioEnabled) {
-      setAudioEnabled(true);
+      if (activeChatConfig.behavior.voiceReplyIfVoiceEnabled) {
+        setAudioEnabled(true);
+      } else {
+        return; // Skip if audio not enabled and config doesn't want auto-enable
+      }
     }
     
     try {
@@ -602,17 +614,26 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
         .replace(/\[.*?\]\(.*?\)/g, '$1') // Replace links with just the text
         .trim();
       
-      // First try Google Cloud TTS (premium quality)
+      // Use Google Cloud TTS if available (per chat config settings)
       const isPremiumUser = isPremium || membershipData?.membershipTier === 'freemium';
+      const useGoogleTTS = activeChatConfig.audio.textToSpeech === 'Google TTS' && isPremiumUser;
       
-      if (isPremiumUser) {
+      if (useGoogleTTS) {
         try {
+          // Map voice profile from config to actual voice
+          let voiceProfile = selectedVoice;
+          if (activeChatConfig.audio.voice === 'elegant-female-concierge') {
+            // Use a more elegant, professional female voice
+            const langPrefix = currentLanguage.split('-')[0];
+            voiceProfile = `${langPrefix === 'en' ? 'en-US' : currentLanguage}-Wavenet-F`;
+          }
+          
           // Use Google Cloud TTS for premium quality
           const audioUrl = await googleCloud.tts.synthesize(
             cleanMessage, 
             {
               language: currentLanguage,
-              voice: selectedVoice,
+              voice: voiceProfile,
               // Adjust pitch and rate based on emotion for more natural speech
               pitch: detectedEmotions.emotion === 'excited' ? 0.2 : 
                     detectedEmotions.emotion === 'sad' ? -0.2 : 0,

@@ -1,0 +1,106 @@
+Propósito del sistema: Este ChatOS funciona como un asistente de viaje hiperinteligente, emocional y predictivo para JetAI. Su personalidad es elegante, cálida, visionaria y profesional. Ayuda a los usuarios a planificar viajes, reservar hoteles, vuelos, actividades, experiencias y a descubrir contenido interactivo en tiempo real.
+
+ts
+Copiar
+Editar
+// Activar todo el flujo conversacional y módulos integrados del chat
+activateChatFlow({
+  aiModel: "gemini-1.5-flash", // con fallback a OpenAI o Anthropic si falla
+  languageSupport: ["English", "Español", "Français", "Português", "Italiano"],
+  flow: "una-pregunta-a-la-vez",
+  sentimentAnalysis: true,
+  audio: {
+    speechToText: "Google STT",
+    textToSpeech: "Google TTS",
+    voice: "elegant-female-concierge",
+    languageDetection: true
+  },
+  visual: {
+    avatar: "JetAI Concierge",
+    videoReady: true,
+    ARSupport: true,
+    cameraIntegration: true
+  },
+  dataMemory: {
+    store: "Firestore",
+    session: "indexedDB",
+    userPreferences: true,
+    itineraryCache: true
+  },
+  integratedServices: [
+    "FlightsAPI (Skyscanner, Amadeus)",
+    "HotelsAPI (Booking, Expedia)",
+    "ActivitiesAPI (Viator, GetYourGuide)",
+    "Google Translate",
+    "Google Cloud Vision",
+    "Google Natural Language",
+    "Google Calendar",
+    "Firebase Auth & Firestore",
+    "Stripe Payments",
+    "Pixabay / Unsplash Image Fetch",
+    "QR Code Generator",
+    "ElevenLabs (fallback voice)",
+    "Hubspot CRM",
+    "YouTube API (travel videos)"
+  ],
+  chatUX: {
+    fullScreenMode: true,
+    tabNavigationLinked: true,
+    iconColorOnClick: true,
+    markdownSupport: true,
+    emojiRendering: true,
+    cameraUpload: true,
+    documentDropZone: true,
+    liveButtonHints: ["Book Now", "Generate QR", "Join Group", "Voice Search"],
+    interactiveCards: true
+  },
+  behavior: {
+    detectGreetings: true,
+    correctMisunderstoodInputs: true,
+    routeToTabsBasedOnContext: true,
+    voiceReplyIfVoiceEnabled: true,
+    fallbackToMockData: true,
+    timezoneAware: true
+  }
+})
+20 Features / Integraciones Sugeridas que Faltan o Están Pendientes
+Itinerary Generator with Live Edit Mode
+
+Dashboard visual del usuario con historial y puntuación de viaje
+
+Módulo de recompensas y millas (VidaRewards Integration)
+
+Comparador de precios entre aerolíneas y hoteles
+
+AI Emotion Response: ajustar tono según el estado emocional detectado
+
+Mapa interactivo con geolocalización y tiempo real
+
+Vista de VR del destino (embed WebXR o Ready Player Me Scene)
+
+Sistema de referidos y código QR para compartir viajes
+
+Segmentación por tipo de viajero: luxury, nómada, mochila, aventura
+
+Audio Journal / Diario del viaje con voz
+
+Almacenamiento del portafolio del viajero
+
+API para vincular tu pasaporte digital / visado automático
+
+Chat grupal entre viajeros con itinerarios compartidos
+
+Sistema de notificaciones push y recordatorios de viaje
+
+Integración con Google Maps para rutas en destino
+
+Photo Memories Generator (álbum con AI + música)
+
+Flight Delay Notification por email/sms/WhatsApp
+
+Integración directa con agencias de turismo local
+
+Módulo de reservaciones en restaurante con OpenTable
+
+Conversaciones embebidas en cámara y Realidad Aumentada
+
