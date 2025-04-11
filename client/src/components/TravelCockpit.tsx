@@ -993,6 +993,26 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
       default: return <Globe className="w-5 h-5" />;
     }
   };
+  
+  // Handle tab click with special routing for tools
+  const handleTabClick = (tab: string) => {
+    if (tab === 'camera') {
+      // Close the Travel Cockpit
+      onClose();
+      // Navigate to camera page
+      window.location.href = '/camera';
+      return;
+    } else if (tab === 'qr') {
+      // Close the Travel Cockpit
+      onClose();
+      // Navigate to QR scanner page
+      window.location.href = '/qr-scanner';
+      return;
+    }
+    
+    // For other tabs, just update the active tab
+    setActiveTab(tab);
+  };
 
   // Tab title mapping
   const tabTitles: Record<string, string> = {
@@ -1035,7 +1055,7 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
             {Object.keys(tabTitles).map(tab => (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => handleTabClick(tab)}
                 className={`p-2 rounded-full ${activeTab === tab ? 'bg-primary text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
                 title={tabTitles[tab]}
               >
