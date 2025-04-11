@@ -2,7 +2,7 @@
   "name": "JetAI - Smart Travel Agent",
   "short_name": "JetAI",
   "description": "Your AI-powered travel assistant for planning trips and discovering destinations.",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#3182CE",
@@ -18,6 +18,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "apple-touch-icon"
     }
   ],
   "orientation": "portrait",
@@ -26,20 +32,40 @@
     {
       "src": "/screenshots/home.jpg",
       "sizes": "1280x720",
-      "type": "image/jpeg"
+      "type": "image/jpeg",
+      "platform": "wide"
     },
     {
       "src": "/screenshots/chat.jpg",
       "sizes": "1280x720",
-      "type": "image/jpeg"
+      "type": "image/jpeg",
+      "platform": "wide"
     },
     {
       "src": "/screenshots/itinerary.jpg",
       "sizes": "1280x720",
-      "type": "image/jpeg"
+      "type": "image/jpeg",
+      "platform": "wide"
+    },
+    {
+      "src": "/screenshots/mobile-home.jpg",
+      "sizes": "750x1334",
+      "type": "image/jpeg",
+      "platform": "narrow"
+    },
+    {
+      "src": "/screenshots/mobile-chat.jpg",
+      "sizes": "750x1334",
+      "type": "image/jpeg",
+      "platform": "narrow"
     }
   ],
-  "related_applications": [],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://jetai.app/manifest.json"
+    }
+  ],
   "prefer_related_applications": false,
   "shortcuts": [
     {
@@ -55,6 +81,41 @@
       "description": "View your saved itineraries",
       "url": "/itineraries",
       "icons": [{ "src": "/icons/itinerary-icon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Book Flight",
+      "short_name": "Flights",
+      "description": "Search and book flights",
+      "url": "/flights",
+      "icons": [{ "src": "/icons/flight-icon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Profile",
+      "short_name": "Profile",
+      "description": "View your profile and rewards",
+      "url": "/profile",
+      "icons": [{ "src": "/icons/profile-icon.png", "sizes": "96x96" }]
     }
-  ]
+  ],
+  "scope": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "display_override": ["standalone", "window-controls-overlay"],
+  "iarc_rating_id": "",
+  "share_target": {
+    "action": "/share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "photos",
+          "accept": ["image/jpeg", "image/png", "image/webp"]
+        }
+      ]
+    }
+  }
 }

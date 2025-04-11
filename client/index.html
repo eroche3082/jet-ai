@@ -2,12 +2,43 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, minimum-scale=1, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#3182CE" />
+    <meta name="apple-mobile-web-app-title" content="JetAI" />
+    <meta name="application-name" content="JetAI" />
+    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
+    
     <title>JetAI - Smart Travel Agent</title>
+    <meta name="description" content="AI-powered travel planning for unforgettable journeys tailored to your preferences." />
+    
+    <!-- Fonts and Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <meta name="description" content="AI-powered travel planning for unforgettable journeys tailored to your preferences.">
+    
+    <!-- PWA assets -->
+    <link rel="manifest" href="/manifest.json" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzNCODJGNiIgZD0iTTIxLjcxLDMuMjlhMSwxLDAsMCwwLTEuNDIsMEwxNiw3LjU4LDksNy43Miw0Ljc0LDMuNGExLDEsMCwwLDAtMS42Ny43NEE2LjgxLDYuODEsMCwwLDAsMywwVjEyYTEsMSwwLDAsMCwuNi41LDEsMSwwLDAsMCwxLjEsMEw4LDEwLjI4djRhMSwxLDAsMCwwLDEuODYuNWw0LTUuNUwxNiwxMnYxMGExLDEsMCwwLDAsLjU3LjkxLDEsMSwwLDAsMCwxLjA2LS4xOSwxLDEsMCwwLDAuMzUtLjgzTDE4LDUuNTJsMy43MS0zLjcxQTEsMSwwLDAsMCwyMS43MSwzLjI5Wk04LDguMjhsLTQsOVY1LjU3WiIvPjwvc3ZnPg==">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    
+    <!-- iOS Splash Screens -->
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-2048-2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-1668-2388.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-1536-2048.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-1125-2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-1242-2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-750-1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-640-1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    
+    <!-- Social Sharing -->
+    <meta property="og:title" content="JetAI - Smart Travel Agent" />
+    <meta property="og:description" content="AI-powered travel planning for unforgettable journeys tailored to your preferences." />
+    <meta property="og:image" content="/social-share.jpg" />
+    <meta property="og:url" content="https://jetai.app" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
     <div id="root"></div>
