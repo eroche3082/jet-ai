@@ -14,6 +14,14 @@ import NotFound from "@/pages/not-found";
 import VertexAIPage from "@/pages/VertexAIPage";
 import CameraPage from "@/pages/CameraPage";
 import QRScannerPage from "@/pages/QRScannerPage";
+import HotelsPage from "@/pages/HotelsPage";
+import FlightsPage from "@/pages/FlightsPage";
+import PlannerPage from "@/pages/PlannerPage";
+import AudioToolsPage from "@/pages/AudioToolsPage";
+import BookingsPage from "@/pages/BookingsPage";
+import ARPage from "@/pages/ARPage";
+import PortfolioPage from "@/pages/PortfolioPage";
+import SuggestionsPage from "@/pages/SuggestionsPage";
 import Layout from "@/components/Layout";
 import MobileLayout from "@/components/MobileLayout";
 import { useState, useEffect } from 'react';
@@ -130,6 +138,16 @@ function App() {
       {/* Tool routes */}
       <Route path="/camera" component={CameraPage} />
       <Route path="/qr-scanner" component={QRScannerPage} />
+
+      {/* Travel features routes */}
+      <Route path="/hotels" component={HotelsPage} />
+      <Route path="/flights" component={FlightsPage} />
+      <Route path="/planner" component={PlannerPage} />
+      <Route path="/audio" component={AudioToolsPage} />
+      <Route path="/bookings" component={BookingsPage} />
+      <Route path="/ar" component={ARPage} />
+      <Route path="/portfolio" component={PortfolioPage} />
+      <Route path="/suggestions" component={SuggestionsPage} />
       
       {/* Partner/Affiliate routes */}
       <Route path="/partner/dashboard" component={PartnerDashboard} />
