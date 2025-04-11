@@ -745,7 +745,7 @@ function checkForAPIAlerts(): void {
 function extractUserProfileFromHistory(history: any[]): BaseUserProfile {
   // Crear un perfil básico
   const userProfile: BaseUserProfile = {
-    currentStage: ConversationStage.ITINERARY_REQUEST as any
+    currentStage: null as any, // Lo asignaremos después correctamente
   };
 
   // Analizar conversación para extraer datos clave

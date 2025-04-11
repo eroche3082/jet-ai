@@ -96,8 +96,18 @@ export interface Itinerary {
 /**
  * Genera un itinerario completo basado en el perfil del usuario
  */
+// Define un tipo que acepte cualquier objeto con las propiedades necesarias del perfil
+type ItineraryUserProfile = {
+  destination?: string;
+  budget?: string;
+  dates?: string;
+  travelers?: string;
+  interests?: string | string[];
+  [key: string]: any;
+};
+
 // Función para convertir un itinerario en texto para el usuario
-export async function generateUserItinerary(profile: UserProfile): Promise<string> {
+export async function generateUserItinerary(profile: ItineraryUserProfile): Promise<string> {
   try {
     const itinerary = await generateItinerary(profile);
     
@@ -165,7 +175,7 @@ export async function generateUserItinerary(profile: UserProfile): Promise<strin
 /**
  * Genera un itinerario completo basado en el perfil del usuario
  */
-export async function generateItinerary(profile: UserProfile): Promise<Itinerary> {
+export async function generateItinerary(profile: ItineraryUserProfile): Promise<Itinerary> {
   try {
     // Primero verificamos si tenemos todos los datos necesarios
     if (!profile.destination) {
