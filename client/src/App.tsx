@@ -162,7 +162,7 @@ function App() {
           {/* Floating chat bubble (desktop only) */}
           <div className="fixed bottom-6 right-6 z-50">
             {isChatOpen ? (
-              <AIChat 
+              <TravelCockpit 
                 isOpen={isChatOpen} 
                 onClose={() => setIsChatOpen(false)}
               />

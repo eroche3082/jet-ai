@@ -3,7 +3,7 @@ import { useLocation, Link } from 'wouter';
 import { Home, Search, Map, User, Menu, X, MessageSquare, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ChatBubble from './ChatBubble';
-import AIChat from './AIChat';
+import TravelCockpit from './TravelCockpit';
 import Layout from './Layout';
 
 interface MobileLayoutProps {
@@ -136,8 +136,8 @@ export default function MobileLayout({
         {children}
       </main>
       
-      {/* AI Chat */}
-      <AIChat 
+      {/* AI Travel Cockpit */}
+      <TravelCockpit 
         isOpen={isChatOpen} 
         onClose={() => {
           if (onChatToggle) {
@@ -180,12 +180,12 @@ export default function MobileLayout({
             <button
               onClick={toggleChat}
               className="flex flex-col items-center justify-center space-y-1"
-              aria-label="Open AI Assistant"
+              aria-label="Open Travel Cockpit"
             >
               <div className="bg-primary rounded-full w-10 h-10 flex items-center justify-center text-white">
                 <MessageSquare className="h-5 w-5" />
               </div>
-              <span className="text-xs">Assistant</span>
+              <span className="text-xs">Travel Cockpit</span>
             </button>
           </div>
         </nav>
