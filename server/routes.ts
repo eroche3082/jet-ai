@@ -22,12 +22,7 @@ import {
   ConversationStage 
 } from './lib/conversationFlow';
 import { generateUserItinerary } from './lib/itineraryGenerator';
-import { 
-  sendMessageToGemini, 
-  processUserResponse,
-  generateNextQuestion,
-  analyzeUserIntent
-} from './lib/vertexAI';
+import { processConversation } from './lib/vertexAI';
 
 // Configure session store
 const createSessionStore = () => {
