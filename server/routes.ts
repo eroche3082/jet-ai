@@ -327,6 +327,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/flights/book", async (req, res) => {
+    try {
+      const { flightId, passengers } = req.body;
+      
+      if (!flightId) {
+        return res.status(400).json({ message: "Flight ID is required" });
+      }
+      
+      // Get flight details
+      const flight = await getFlightById(flightId);
+      
+      if (!flight) {
+        return res.status(404).json({ message: "Flight not found" });
+      }
+      
+      // Create booking record
+      const booking = await storage.createBooking({
+        type: "flight",
+        title: `${flight.airline} (${flight.flightNumber})`,
+        location: `${flight.origin} to ${flight.destination}`,
+        status: "confirmed",
+        userId: req.user?.id || 0,
+        itemId: parseInt(flightId.replace(/\D/g, '')) || 0,
+        startDate: new Date(flight.departureTime),
+        endDate: new Date(flight.arrivalTime),
+        totalAmount: flight.price,
+        imageUrl: flight.logoUrl,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+      
+      res.status(201).json({
+        message: "Flight booked successfully",
+        bookingId: booking.id,
+        booking
+      });
+    } catch (error) {
+      console.error("Error booking flight:", error);
+      res.status(500).json({ message: "Error booking flight" });
+    }
+  });
+
   app.post("/api/itinerary/generate", async (req, res) => {
     try {
       const { destination, days, preferences } = req.body;

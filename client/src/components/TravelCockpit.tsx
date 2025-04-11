@@ -127,18 +127,30 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
   // Travel memory system - stores user's trip preferences
   const [travelMemory, setTravelMemory] = useState<{
     destination: string | null;
+    origin: string | null;
     budget: string | null;
-    dates: string | null;
+    dates: {
+      checkIn: string | null;
+      checkOut: string | null;
+    } | null;
     travelers: string | null;
     interests: string[];
+    preferences: {
+      flightClass?: string;
+      hotelClass?: string;
+      mealPreferences?: string[];
+      activities?: string[];
+    } | null;
     currentQuestion: 'destination' | 'budget' | 'dates' | 'travelers' | 'interests' | 'summary';
     conversationStarted: boolean;
   }>({
     destination: null,
+    origin: null,
     budget: null,
     dates: null,
     travelers: null,
     interests: [],
+    preferences: null,
     currentQuestion: 'destination',
     conversationStarted: false
   });
@@ -235,10 +247,12 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
   const resetConversation = () => {
     setTravelMemory({
       destination: null,
+      origin: null,
       budget: null,
       dates: null,
       travelers: null,
       interests: [],
+      preferences: null,
       currentQuestion: 'destination',
       conversationStarted: true
     });
