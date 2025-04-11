@@ -43,12 +43,12 @@ export async function verifyApiIntegrations(): Promise<ApiStatus[]> {
     },
     {
       api: 'ElevenLabs / Web Speech',
-      keyPresent: !!process.env.ELEVENLABS_API_KEY || typeof window !== 'undefined' && !!window.speechSynthesis,
+      keyPresent: !!process.env.ELEVENLABS_API_KEY,
       notes: 'Voice output'
     },
     {
       api: 'Web Speech / Google STT',
-      keyPresent: !!process.env.GOOGLE_STT_API_KEY || typeof window !== 'undefined' && !!window.SpeechRecognition || !!window.webkitSpeechRecognition,
+      keyPresent: !!process.env.GOOGLE_STT_API_KEY,
       notes: 'Voice input'
     },
     {
@@ -78,7 +78,7 @@ export async function verifyApiIntegrations(): Promise<ApiStatus[]> {
     },
     {
       api: 'Camera API',
-      keyPresent: typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia,
+      keyPresent: false, // Server cannot verify client-side capabilities
       notes: 'Image upload or AR use'
     },
     {

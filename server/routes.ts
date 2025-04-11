@@ -12,6 +12,7 @@ import {
   searchFlights,
   getFlightById
 } from "./lib/travelApi";
+import { verifyApiIntegrations, suggestNextApiConnections } from './lib/apiVerification';
 import { createPaymentIntent, createSubscription, getSubscriptionPlans } from "./lib/stripe";
 import connectPgSimple from 'connect-pg-simple';
 import memorystore from 'memorystore';
@@ -1284,6 +1285,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error purchasing credits:", error);
       res.status(500).json({ message: "Error purchasing credits" });
+    }
+  });
+
+  // API integration verification endpoint
+  app.get("/api/system/verify-integrations", async (req, res) => {
+    try {
+      // Verify all API integrations
+      const apiStatuses = await verifyApiIntegrations();
+      const nextConnections = suggestNextApiConnections(apiStatuses);
+      
+      // Log the results to console for verification
+      console.table(apiStatuses.map(status => ({
+        API: status.api,
+        'Key Present': status.keyPresent ? '✅' : '❌',
+        Notes: status.notes
+      })));
+      
+      res.json({
+        apiStatuses,
+        nextConnections,
+        message: "JetAI System is in Phase 7 Flight Ready Mode"
+      });
+    } catch (error) {
+      console.error("Error verifying API integrations:", error);
+      res.status(500).json({ message: "Error verifying API integrations" });
     }
   });
 
