@@ -1,238 +1,104 @@
 /**
- * Servicio de Google Vertex AI para JetAI
- * Este archivo maneja la integración con Google Vertex AI utilizando Gemini
+ * Integración con Vertex AI (Google) para el procesamiento conversacional
  */
 
-import { VertexAI, HarmCategory, HarmBlockThreshold } from '@google-cloud/vertexai';
-import { ChatMessage } from './ai';
-import { ConversationMemory } from '../types/conversation';
+import { VertexAI } from '@google-cloud/vertexai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { ChatResponse, ConversationMemory } from '../types/conversation';
+import Anthropic from '@anthropic-ai/sdk';
 
-// Inicializar el cliente de Vertex AI
-const PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT_ID || '';
+// Configuración de los modelos
+const PROJECT_ID = 'jetai-travel';
 const LOCATION = 'us-central1';
-const MODEL = 'gemini-1.5-flash';
+const GEMINI_MODEL = 'gemini-1.5-flash-001';
+const CLAUDE_MODEL = 'claude-3-7-sonnet-20250219'; // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
 
-// Inicializar Vertex AI
-const vertexAI = new VertexAI({
-  project: PROJECT_ID,
-  location: LOCATION,
-});
+// Instancias de los clientes de AI
+let vertexAI: VertexAI | null = null;
+let generativeModel: any = null;
+let genAI: GoogleGenerativeAI | null = null;
+let anthropicClient: Anthropic | null = null;
 
-// Obtener el modelo generativo
-const generativeModel = vertexAI.getGenerativeModel({
-  model: MODEL,
-  safetySettings: [
-    {
-      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-    },
-    {
-      category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-    },
-    {
-      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-    },
-    {
-      category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-    },
-  ],
-  generationConfig: {
-    temperature: 0.4,
-    topP: 0.8,
-    topK: 40,
-    maxOutputTokens: 2048,
-  },
-});
+// Inicializar clientes
+const initializeAIClients = () => {
+  // Gemini (Google AI)
+  if (!genAI) {
+    try {
+      if (!process.env.GOOGLE_CLOUD_API_KEY) {
+        throw new Error('GOOGLE_CLOUD_API_KEY no está configurada');
+      }
 
-// Sistema de prompts para el flujo de conversación
-const SYSTEM_PROMPTS = {
-  general: `Eres JetAI, un asistente de viajes de lujo de alta calidad. Tu tono es siempre profesional, cálido y personalizado.
-  Conversas de forma fluida y natural con los usuarios, sin repetir patrones rígidos.
-  Eres sumamente inteligente, con conocimiento profundo en destinos de todo el mundo.
-  Tu flujo de conversación debe ser siempre natural, adaptándote a lo que el usuario quiere, pero siguiendo este patrón:
-  1. Saludo e identificación de intención. Identificas qué quiere hacer el usuario.
-  2. Si el usuario quiere planear un viaje, guíalo paso a paso consultando:
-     - Destino (¿A dónde desea viajar?)
-     - Presupuesto (¿Cuál es su presupuesto aproximado?)
-     - Fechas (¿En qué fechas planea viajar?)
-     - Viajeros (¿Cuántas personas viajarán?)
-     - Intereses (¿Qué actividades o experiencias le interesan?)
-  3. Una vez recolectada la información, proporciona recomendaciones personalizadas.
-  
-  Respuestas:
-  - Usa emojis estratégicamente (1-2 por respuesta) para aumentar la legibilidad.
-  - Asegúrate de usar formato markdown cuando sea apropiado.
-  - Mantén respuestas concisas pero informativas.
-  
-  IMPORTANTE:
-  - Nunca olvides la información que el usuario ya te ha proporcionado.
-  - No hagas múltiples preguntas a la vez, sigue el proceso paso a paso.
-  - Sugiere siempre 3-4 opciones relevantes como respuestas rápidas después de tu mensaje.`,
+      console.log('Initializing Google Gemini AI...');
+      genAI = new GoogleGenerativeAI(process.env.GOOGLE_CLOUD_API_KEY);
+      generativeModel = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+      console.log('Google Gemini AI initialized successfully!');
+    } catch (error) {
+      console.error('Error initializing Google Gemini AI:', error);
+    }
+  }
 
-  greeting: `El usuario está iniciando la conversación. Salúdalo calurosamente como JetAI, preséntate brevemente y pregúntale cómo puedes ayudarle con sus planes de viaje hoy. No asumas que quiere planear un viaje completo, primero identifica su intención.`,
-  
-  destination: `El usuario ha expresado interés en planear un viaje. Pregúntale amablemente sobre su destino deseado. Si ya mencionó un destino, confírmalo y pide más detalles sobre qué parte específica de ese destino le interesa. Si no ha mencionado un destino, sugiérele algunas opciones populares por temporada.`,
-  
-  budget: `Ahora que conoces el destino, pregunta sobre el presupuesto del usuario de manera respetuosa. Ofrece rangos como referencia según el destino mencionado. Adapta tu lenguaje para ser sensible y no presumir limitaciones financieras.`,
-  
-  dates: `Ahora pregunta sobre las fechas del viaje. Si el usuario ya las mencionó, confirma esa información. Ofrece algún consejo breve sobre la temporada si aplica (por ejemplo, si es temporada alta/baja, o algún evento especial durante esas fechas).`,
-  
-  travelers: `Pregunta sobre cuántas personas viajarán y la composición del grupo (familia, pareja, amigos, solo). Adapta tus recomendaciones futuras según esta información.`,
-  
-  interests: `Para personalizar mejor las recomendaciones, pregunta sobre intereses específicos: cultura, gastronomía, naturaleza, aventura, relax, compras, vida nocturna, etc. Esto te ayudará a crear un itinerario más personalizado.`,
-  
-  summary: `Has recopilado toda la información necesaria. Presenta un resumen de los detalles del viaje y ofrece algunas recomendaciones iniciales basadas en sus preferencias. Menciona que podría generarle un itinerario detallado si lo desea.`
+  // Claude (Anthropic)
+  if (!anthropicClient) {
+    try {
+      if (!process.env.ANTHROPIC_API_KEY) {
+        throw new Error('ANTHROPIC_API_KEY no está configurada');
+      }
+
+      console.log('Initializing Anthropic Claude AI...');
+      anthropicClient = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY,
+      });
+      console.log('Anthropic Claude AI initialized successfully!');
+    } catch (error) {
+      console.error('Error initializing Anthropic Claude AI:', error);
+    }
+  }
 };
 
-// Determinar la etapa actual de la conversación
-function determineConversationStage(history: ChatMessage[], memory: ConversationMemory): 'greeting' | 'destination' | 'budget' | 'dates' | 'travelers' | 'interests' | 'summary' {
-  // Si ya hay una etapa actual en la memoria y no está completa, continuar con ella
-  if (memory.currentQuestion && memory.currentQuestion !== 'summary') {
-    switch (memory.currentQuestion) {
-      case 'destination':
-        if (!memory.destination) return 'destination';
-        return 'budget';
-      case 'budget':
-        if (!memory.budget) return 'budget';
-        return 'dates';
-      case 'dates':
-        if (!memory.dates) return 'dates';
-        return 'travelers';
-      case 'travelers':
-        if (!memory.travelers) return 'travelers';
-        return 'interests';
-      case 'interests':
-        if (memory.interests.length === 0) return 'interests';
-        return 'summary';
-      default:
-        return 'greeting';
-    }
-  }
+// Inicializar al importar el módulo
+initializeAIClients();
 
-  // Si no hay historial o sólo hay un mensaje del sistema, comenzar con saludo
-  if (history.length <= 1) {
-    return 'greeting';
-  }
+// Prompt base para el asistente
+const BASE_SYSTEM_PROMPT = `
+Eres JetAI, un asistente de viajes premium, multilingüe y emocionalmente inteligente, diseñado para ofrecer una experiencia personalizada y sofisticada de planificación de viajes. 
 
-  // Determinar etapa según la información recopilada
-  if (!memory.destination) {
-    return 'destination';
-  } else if (!memory.budget) {
-    return 'budget';
-  } else if (!memory.dates) {
-    return 'dates';
-  } else if (!memory.travelers) {
-    return 'travelers';
-  } else if (memory.interests.length === 0) {
-    return 'interests';
-  } else {
-    return 'summary';
-  }
-}
+Tu estilo de comunicación debe ser:
+- Elegante y profesional, como un concierge de hotel de lujo
+- Amigable y empático, adaptándote al tono del usuario
+- Bien organizado, con respuestas estructuradas y claras
+- Conversacional, manteniendo un diálogo natural y fluido
+- Detallado pero conciso, evitando respuestas excesivamente largas
+- Positivo y entusiasta sobre las opciones de viaje
 
-// Extraer información del mensaje para actualizar la memoria
-function extractInformation(message: string, memory: ConversationMemory): ConversationMemory {
-  const newMemory = { ...memory };
-  
-  // Si estamos en la etapa de destino y no hay destino guardado
-  if (memory.currentQuestion === 'destination' && !memory.destination) {
-    // Buscar nombres de ciudades/países comunes - esto es muy básico,
-    // Vertex AI será mucho mejor para extraer esta información
-    const destinationRegex = /(?:a|en|para|visitar|conocer|ir a)\s+([A-Z][a-záéíóúñ]+(?:\s+[A-Z][a-záéíóúñ]+)*)/i;
-    const match = message.match(destinationRegex);
-    if (match && match[1]) {
-      newMemory.destination = match[1].trim();
-    }
-  }
+Durante la conversación, debes:
+1. Ir haciendo preguntas de una en una para recopilar información sobre:
+   - Destino deseado
+   - Presupuesto
+   - Fechas de viaje
+   - Número de viajeros
+   - Intereses especiales
 
-  // Extracción similar para presupuesto (muy básica)
-  if (memory.currentQuestion === 'budget' && !memory.budget) {
-    const budgetRegex = /(\$[\d,]+|\d+[\s]?(?:dólares|euros|pesos|USD|EUR))/i;
-    const match = message.match(budgetRegex);
-    if (match && match[1]) {
-      newMemory.budget = match[1].trim();
-    }
-  }
+2. Adaptar tus respuestas según la memoria de conversación que te proporciono, recordando información previa.
 
-  // La extracción real de información será manejada principalmente por Vertex AI
-  return newMemory;
-}
+3. Proporcionar respuestas contextuales basadas en la temporada actual, el destino y las preferencias.
 
-// Generar sugerencias basadas en la etapa de la conversación
-function generateSuggestions(stage: string, memory: ConversationMemory): string[] {
-  switch (stage) {
-    case 'greeting':
-      return [
-        "Quiero planear un viaje",
-        "Busco destinos para vacaciones",
-        "Necesito ayuda con un itinerario",
-        "¿Qué lugares recomiendas visitar?"
-      ];
-    case 'destination':
-      return [
-        "Me gustaría ir a Europa",
-        "Busco un destino de playa",
-        "Quiero visitar ciudades culturales",
-        "Prefiero destinos con naturaleza"
-      ];
-    case 'budget':
-      return [
-        "Tengo un presupuesto limitado",
-        "Busco opciones de lujo",
-        "Presupuesto medio, unos $2000",
-        "Sin límite de presupuesto"
-      ];
-    case 'dates':
-      return [
-        "El próximo mes",
-        "En verano",
-        "Durante las vacaciones de invierno",
-        "Aún no tengo fechas definidas"
-      ];
-    case 'travelers':
-      return [
-        "Viajo solo/a",
-        "En pareja",
-        "Vacaciones familiares con niños",
-        "Un grupo de amigos"
-      ];
-    case 'interests':
-      return [
-        "Gastronomía y cultura",
-        "Aventura y deportes",
-        "Relajación y playa",
-        "Turismo histórico"
-      ];
-    case 'summary':
-      return [
-        "Muéstrame un itinerario detallado",
-        "Recomienda hoteles",
-        "¿Qué atracciones no debo perderme?",
-        "Cuéntame más sobre la gastronomía local"
-      ];
-    default:
-      return [
-        "Cuéntame más sobre ese destino",
-        "¿Qué me recomiendas hacer allí?",
-        "¿Cuál es la mejor época para visitar?",
-        "Busco información sobre transporte local"
-      ];
-  }
-}
+4. Ofrecer sugerencias específicas cuando sea apropiado.
+
+5. Formatear tus respuestas con markdown cuando sea útil.
+
+6. Ser respetuoso de diferentes culturas, presupuestos y necesidades de accesibilidad.
+
+7. Si no conoces un detalle específico, sé honesto pero siempre ofrece alternativas.
+
+Hoy es ${new Date().toLocaleDateString('es-ES')} y debes considerar esta fecha al recomendar viajes.
+`;
 
 /**
- * Procesar una conversación con Vertex AI
- * @param message Mensaje del usuario
- * @param history Historial de mensajes
- * @param memory Memoria de la conversación
+ * Extrae entidades clave para la memoria de conversación
  */
-export async function processConversation(
-  message: string,
-  history: ChatMessage[] = [],
-  memory: ConversationMemory = {
+const extractConversationEntities = (userMessage: string, currentMemory: ConversationMemory | null = null): ConversationMemory => {
+  // Inicializar con valores actuales o por defecto
+  const memory: ConversationMemory = currentMemory || {
     destination: '',
     budget: '',
     dates: '',
@@ -240,105 +106,362 @@ export async function processConversation(
     interests: [],
     currentQuestion: 'greeting',
     conversationStarted: false
-  }
-): Promise<{
-  message: string;
-  memory: ConversationMemory;
-  suggestions: string[];
-  error?: string;
-}> {
-  try {
-    // Determinar la etapa actual de la conversación
-    const currentStage = determineConversationStage(history, memory);
-    
-    // Actualizar la memoria con la etapa actual
-    const updatedMemory: ConversationMemory = {
-      ...memory,
-      currentQuestion: currentStage,
-      conversationStarted: true
-    };
-    
-    // Extraer información potencial del mensaje del usuario
-    const memoryWithExtractedInfo = extractInformation(message, updatedMemory);
-    
-    // Construir el prompt para Vertex AI
-    const systemPrompt = SYSTEM_PROMPTS[currentStage] || SYSTEM_PROMPTS.general;
-    
-    // Agregar contexto de la conversación
-    let contextPrompt = `Información recopilada:
-- Destino: ${memoryWithExtractedInfo.destination || 'No especificado aún'}
-- Presupuesto: ${memoryWithExtractedInfo.budget || 'No especificado aún'}
-- Fechas: ${memoryWithExtractedInfo.dates || 'No especificadas aún'}
-- Viajeros: ${memoryWithExtractedInfo.travelers || 'No especificado aún'}
-- Intereses: ${memoryWithExtractedInfo.interests.length > 0 ? memoryWithExtractedInfo.interests.join(', ') : 'No especificados aún'}
+  };
 
-Etapa actual: ${currentStage}
+  // Este es un enfoque simplificado - idealmente esto se haría con un modelo de lenguaje natural
+  const lowerMessage = userMessage.toLowerCase();
 
-Instrucciones adicionales:
-- Si el usuario menciona o pregunta por un nuevo destino en cualquier momento, actualiza esa información.
-- Si el usuario da información sobre cualquiera de los campos pendientes, captúrala y avanza al siguiente paso.
-- Mantén un tono amigable y profesional de concierge de lujo.
-- Usa emoji estratégicamente.
-`;
-
-    // Preparar historial de conversación para Vertex AI
-    const chatHistory = history.map(msg => ({
-      role: msg.role === 'assistant' ? 'model' : 'user', 
-      parts: [{ text: msg.content }]
-    }));
+  // Detectar destino
+  if (lowerMessage.includes('quiero ir a') || lowerMessage.includes('me gustaría visitar')) {
+    const destinations = [
+      'parís', 'paris', 'tokio', 'tokyo', 'nueva york', 'new york', 'barcelona', 'madrid', 
+      'londres', 'london', 'roma', 'rome', 'berlín', 'berlin', 'ámsterdam', 'amsterdam', 
+      'cancún', 'cancun', 'bangkok', 'dubai', 'sídney', 'sydney', 'ciudad de méxico', 
+      'mexico city', 'bali', 'singapur', 'singapore', 'kioto', 'kyoto', 'estambul', 'istanbul'
+    ];
     
-    // Agregar el mensaje actual del usuario
-    chatHistory.push({
-      role: 'user',
-      parts: [{ text: message }]
-    });
-
-    // Crear chat y enviar mensaje
-    const chat = generativeModel.startChat({
-      history: chatHistory,
-      systemInstruction: { role: 'system', parts: [{ text: systemPrompt + '\n\n' + contextPrompt }] },
-    });
-
-    const result = await chat.sendMessage(message);
-    const responseText = result.response.candidates[0].content.parts[0].text;
-
-    // Analizar la respuesta para extraer información
-    // Esto sería mejor hacerlo con una llamada separada a la API para análisis estructurado
-    // pero por ahora usamos métodos básicos
-    
-    // Actualizar memoria basado en la respuesta
-    let finalMemory = { ...memoryWithExtractedInfo };
-    
-    // Si detectamos que la conversación avanzó, actualizar la etapa
-    if (currentStage === 'destination' && responseText.includes('presupuesto')) {
-      finalMemory.currentQuestion = 'budget';
-    } else if (currentStage === 'budget' && responseText.includes('fecha')) {
-      finalMemory.currentQuestion = 'dates';
-    } else if (currentStage === 'dates' && (responseText.includes('personas') || responseText.includes('viajar'))) {
-      finalMemory.currentQuestion = 'travelers';
-    } else if (currentStage === 'travelers' && responseText.includes('intereses')) {
-      finalMemory.currentQuestion = 'interests';
-    } else if (currentStage === 'interests' && (responseText.includes('recomend') || responseText.includes('itinerario'))) {
-      finalMemory.currentQuestion = 'summary';
+    for (const destination of destinations) {
+      if (lowerMessage.includes(destination)) {
+        memory.destination = destination.charAt(0).toUpperCase() + destination.slice(1);
+        if (memory.currentQuestion === 'greeting' || memory.currentQuestion === 'destination') {
+          memory.currentQuestion = 'budget';
+        }
+        break;
+      }
     }
+  }
 
-    // Generar sugerencias basadas en la etapa actual
-    const suggestions = generateSuggestions(finalMemory.currentQuestion, finalMemory);
+  // Detectar presupuesto
+  if (
+    lowerMessage.includes('presupuesto') || 
+    lowerMessage.includes('euros') || 
+    lowerMessage.includes('€') || 
+    lowerMessage.includes('dólares') || 
+    lowerMessage.includes('$')
+  ) {
+    const budgetMatch = lowerMessage.match(/\d+(\.\d+)?(k)?\s*(€|\$|euros?|dólares?)/i);
+    if (budgetMatch) {
+      memory.budget = budgetMatch[0];
+      if (memory.currentQuestion === 'budget') {
+        memory.currentQuestion = 'dates';
+      }
+    }
+  }
 
+  // Detectar fechas
+  const monthNames = [
+    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+  ];
+  
+  let dateFound = false;
+  
+  // Comprobar patrones de fecha
+  for (let i = 0; i < monthNames.length; i++) {
+    const month = monthNames[i];
+    if (lowerMessage.includes(month)) {
+      // Buscar patrón como "15 de julio" o "julio"
+      const dayPattern = new RegExp(`\\d+\\s+(?:de\\s+)?${month}`, 'i');
+      const monthPattern = new RegExp(`\\b${month}\\b`, 'i');
+      
+      if (dayPattern.test(lowerMessage)) {
+        const match = lowerMessage.match(dayPattern);
+        if (match && !memory.dates.includes(match[0])) {
+          memory.dates = memory.dates ? `${memory.dates} - ${match[0]}` : match[0];
+          dateFound = true;
+        }
+      } else if (monthPattern.test(lowerMessage)) {
+        if (!memory.dates.includes(month)) {
+          memory.dates = memory.dates ? `${memory.dates} - ${month}` : month;
+          dateFound = true;
+        }
+      }
+    }
+  }
+  
+  // Buscar patrones como "próxima semana", "este fin de semana"
+  const timePatterns = [
+    'próxima semana', 'próximo mes', 'este fin de semana',
+    'semana que viene', 'mes que viene', 'vacaciones de verano',
+    'vacaciones de navidad', 'semana santa', 'verano', 'otoño',
+    'invierno', 'primavera'
+  ];
+  
+  for (const pattern of timePatterns) {
+    if (lowerMessage.includes(pattern) && !memory.dates.includes(pattern)) {
+      memory.dates = memory.dates ? `${memory.dates} - ${pattern}` : pattern;
+      dateFound = true;
+      break;
+    }
+  }
+  
+  if (dateFound && memory.currentQuestion === 'dates') {
+    memory.currentQuestion = 'travelers';
+  }
+
+  // Detectar viajeros
+  const travelerPatterns = [
+    { pattern: /(?:viajar|ir|iremos|vamos|viajo|viajamos)\s+(?:con|en\s+familia|en\s+pareja)/i, value: 'en familia/pareja' },
+    { pattern: /(?:viajar|ir|iremos|vamos|viajo|viajamos)\s+(?:solo|sola|por\s+mi\s+cuenta)/i, value: 'solo/a' },
+    { pattern: /(?:viajar|ir|iremos|vamos|viajo|viajamos)\s+(?:con\s+amigos?|con\s+un\s+grupo)/i, value: 'con amigos' },
+    { pattern: /(?:somos|seremos|vamos)\s+(\d+)\s+personas?/i, value: (m: RegExpMatchArray) => `${m[1]} personas` },
+    { pattern: /(\d+)\s+personas?/i, value: (m: RegExpMatchArray) => `${m[1]} personas` },
+    { pattern: /(?:en\s+pareja|con\s+mi\s+pareja)/i, value: 'en pareja' },
+    { pattern: /(?:con\s+(?:mis|los)\s+niños|con\s+(?:mi|la)\s+familia)/i, value: 'familia con niños' }
+  ];
+
+  for (const { pattern, value } of travelerPatterns) {
+    const match = lowerMessage.match(pattern);
+    if (match) {
+      memory.travelers = typeof value === 'string' ? value : value(match);
+      if (memory.currentQuestion === 'travelers') {
+        memory.currentQuestion = 'interests';
+      }
+      break;
+    }
+  }
+
+  // Detectar intereses
+  const interestCategories = [
+    { keywords: ['playa', 'playas', 'mar', 'nadar', 'bucear', 'submarinismo'], value: 'playas' },
+    { keywords: ['montaña', 'montañas', 'senderismo', 'hiking', 'excursionismo', 'trekking'], value: 'montañas' },
+    { keywords: ['cultura', 'museo', 'museos', 'teatro', 'historia', 'arquitectura', 'arte'], value: 'cultura' },
+    { keywords: ['gastronomía', 'comida', 'restaurantes', 'vino', 'food', 'comer'], value: 'gastronomía' },
+    { keywords: ['aventura', 'adrenalina', 'extremo', 'rafting', 'escalada', 'surf'], value: 'aventura' },
+    { keywords: ['relax', 'relajación', 'spa', 'bienestar', 'descansar', 'tranquilidad'], value: 'relax' },
+    { keywords: ['fiesta', 'discoteca', 'discotecas', 'baile', 'bailar', 'vida nocturna', 'nightlife'], value: 'vida nocturna' },
+    { keywords: ['naturaleza', 'parques', 'parque nacional', 'animales', 'safari', 'flora', 'fauna'], value: 'naturaleza' },
+    { keywords: ['shopping', 'compras', 'tiendas', 'outlet', 'malls', 'mercados'], value: 'compras' },
+    { keywords: ['fotografía', 'fotos', 'instagram', 'paisajes', 'fotográfico'], value: 'fotografía' }
+  ];
+
+  for (const { keywords, value } of interestCategories) {
+    for (const keyword of keywords) {
+      if (lowerMessage.includes(keyword) && !memory.interests.includes(value)) {
+        memory.interests.push(value);
+        break;
+      }
+    }
+  }
+
+  if (memory.interests.length > 0 && memory.currentQuestion === 'interests' && 
+      memory.destination && memory.budget && memory.dates && memory.travelers) {
+    memory.currentQuestion = 'summary';
+  }
+
+  // Marcar conversación como iniciada
+  if (!memory.conversationStarted && lowerMessage.length > 0) {
+    memory.conversationStarted = true;
+  }
+
+  return memory;
+};
+
+/**
+ * Genera sugerencias basadas en el estado actual de la conversación
+ */
+const generateSuggestions = (memory: ConversationMemory): string[] => {
+  const suggestions: string[] = [];
+
+  switch (memory.currentQuestion) {
+    case 'greeting':
+      suggestions.push(
+        "¡Hola! Quiero planificar mi próximo viaje",
+        "¿Qué destinos recomiendas para estas vacaciones?",
+        "Busco un destino con buena relación calidad-precio",
+        "Necesito ideas para un viaje romántico"
+      );
+      break;
+    case 'destination':
+      suggestions.push(
+        "Me gustaría ir a Barcelona",
+        "Estoy pensando en visitar Japón",
+        "¿Qué tal Cancún para vacaciones?",
+        "Quiero visitar alguna ciudad europea"
+      );
+      break;
+    case 'budget':
+      suggestions.push(
+        "Mi presupuesto es de 1000€ por persona",
+        "Tengo unos 2000€ para gastar",
+        "Busco algo económico, menos de 800€",
+        "Presupuesto flexible, priorizando buenas experiencias"
+      );
+      break;
+    case 'dates':
+      suggestions.push(
+        "Quiero viajar en julio",
+        "Para la primera semana de septiembre",
+        "Entre el 15 y 25 de agosto",
+        "Para las próximas vacaciones de Semana Santa"
+      );
+      break;
+    case 'travelers':
+      suggestions.push(
+        "Viajo solo",
+        "Vamos en pareja",
+        "Somos una familia con dos niños",
+        "Un grupo de 4 amigos"
+      );
+      break;
+    case 'interests':
+      suggestions.push(
+        "Me interesa la gastronomía local",
+        "Nos gusta la playa y deportes acuáticos",
+        "Queremos ver museos y sitios históricos",
+        "Buscamos aventura y naturaleza"
+      );
+      break;
+    case 'summary':
+      suggestions.push(
+        "¿Puedes sugerirme un itinerario detallado?",
+        "¿Qué lugares no debo perderme?",
+        "¿Cuál es la mejor forma de moverme por allí?",
+        "¿Qué restaurantes recomiendas?"
+      );
+      break;
+  }
+
+  return suggestions;
+};
+
+/**
+ * Procesa un mensaje del usuario utilizando el modelo apropiado
+ */
+export const processConversation = async (
+  userMessage: string,
+  history: { role: 'user' | 'assistant'; content: string }[] = [],
+  memory: ConversationMemory | null = null
+): Promise<ChatResponse> => {
+  // Verificar si tenemos inicializados los clientes
+  if (!genAI && !anthropicClient) {
+    initializeAIClients();
+    
+    if (!genAI && !anthropicClient) {
+      throw new Error('No se han podido inicializar los modelos de AI');
+    }
+  }
+  
+  try {
+    // Actualizar la memoria de conversación con el mensaje actual
+    const updatedMemory = extractConversationEntities(userMessage, memory);
+    
+    // Preparar contexto completo para el modelo
+    let systemContent = BASE_SYSTEM_PROMPT;
+    
+    // Añadir información de la memoria de conversación al prompt
+    if (updatedMemory) {
+      systemContent += `\n\nInformación del viaje que estamos planificando:`;
+      if (updatedMemory.destination) systemContent += `\n- Destino: ${updatedMemory.destination}`;
+      if (updatedMemory.budget) systemContent += `\n- Presupuesto: ${updatedMemory.budget}`;
+      if (updatedMemory.dates) systemContent += `\n- Fechas: ${updatedMemory.dates}`;
+      if (updatedMemory.travelers) systemContent += `\n- Viajeros: ${updatedMemory.travelers}`;
+      if (updatedMemory.interests.length > 0) systemContent += `\n- Intereses: ${updatedMemory.interests.join(', ')}`;
+      
+      systemContent += `\n\nTu siguiente pregunta debería ser sobre: ${updatedMemory.currentQuestion}`;
+    }
+    
+    let responseContent = '';
+    
+    // Intentar con Gemini primero
+    if (generativeModel) {
+      try {
+        const geminiChat = generativeModel.startChat({
+          generationConfig: {
+            temperature: 0.7,
+            topP: 0.95,
+            topK: 40,
+            maxOutputTokens: 1024,
+          },
+          systemInstruction: systemContent,
+        });
+        
+        // Preparar historial para Gemini
+        const geminiHistory = history.map(msg => ({
+          role: msg.role === 'user' ? 'user' : 'model',
+          parts: [{ text: msg.content }]
+        }));
+        
+        // Realizar la llamada a Gemini
+        const result = await geminiChat.sendMessageStream([
+          ...geminiHistory,
+          {
+            role: 'user',
+            parts: [{ text: userMessage }]
+          }
+        ]);
+        
+        // Extraer respuesta
+        let response = '';
+        for await (const chunk of result.stream) {
+          response += chunk.text();
+        }
+        
+        responseContent = response;
+      } catch (geminiError) {
+        console.error('Error con Gemini, intentando con Claude:', geminiError);
+        throw geminiError; // Fallar al respaldo
+      }
+    }
+    
+    // Si Gemini falla o no está disponible, usar Claude como respaldo
+    if (!responseContent && anthropicClient) {
+      // Formato para Claude
+      // Transformar mensajes para el formato Claude
+      const claudeMessages = [];
+      
+      // Añadir mensajes del historial en el formato correcto para Claude
+      let currentMessages = [...history];
+      currentMessages.push({ role: 'user', content: userMessage });
+      
+      // Añadir el historial en el formato correcto para Claude
+      for (const msg of currentMessages) {
+        claudeMessages.push({
+          role: msg.role as "user" | "assistant",
+          content: msg.content
+        });
+      }
+      
+      // Agregar mensaje de sistema
+      const response = await anthropicClient.messages.create({
+        model: CLAUDE_MODEL,
+        max_tokens: 1024,
+        messages: claudeMessages,
+        system: systemContent,
+      });
+      
+      if (response.content && response.content.length > 0 && 'text' in response.content[0]) {
+        responseContent = response.content[0].text;
+      }
+    }
+    
+    // Si no tenemos respuesta de ningún modelo, lanzar error
+    if (!responseContent) {
+      throw new Error('No se pudo obtener respuesta de ningún modelo disponible');
+    }
+    
+    // Generar sugerencias basadas en el estado actual
+    const suggestions = generateSuggestions(updatedMemory);
+    
+    // Preparar la respuesta completa
     return {
-      message: responseText,
-      memory: finalMemory,
-      suggestions: suggestions,
+      message: responseContent,
+      memory: updatedMemory,
+      suggestions
     };
+    
   } catch (error) {
-    console.error('Error en Vertex AI:', error);
+    console.error('Error en processConversation:', error);
+    
+    // Si todo falla, proporcionar una respuesta de fallback
     return {
-      message: 'Lo siento, ha ocurrido un error al procesar tu solicitud. Por favor, intenta nuevamente.',
-      memory: memory,
-      suggestions: [],
-      error: error instanceof Error ? error.message : 'Error desconocido'
+      message: "Lo siento, estoy teniendo problemas para procesar tu solicitud. ¿Puedes intentarlo de nuevo con otra pregunta?",
+      suggestions: [
+        "¿Qué destinos recomiendas para vacaciones?",
+        "¿Cuál es la mejor época para viajar a Europa?",
+        "Quiero un destino con playas bonitas",
+        "Busco ideas para un viaje familiar"
+      ]
     };
   }
-}
-
-export default { processConversation };
+};

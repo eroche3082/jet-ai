@@ -1,182 +1,215 @@
-/**
- * Hook para manejar el reconocimiento de voz
- * Proporciona funciones para convertir voz a texto usando Web Speech API
- */
+import { useState, useRef, useEffect, useCallback } from 'react';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { activeChatConfig } from '@/lib/chatConfig';
-
-type UseSpeechRecognitionReturn = {
-  transcript: string;
-  isListening: boolean;
-  startListening: () => void;
-  stopListening: () => void;
-  hasPermission: boolean;
-  error: string | null;
-};
-
-// Definir tipos para SpeechRecognition
-interface SpeechRecognitionResult {
-  transcript: string;
-  confidence: number;
-}
-
+// Interfaces para SpeechRecognition
 interface SpeechRecognitionEvent extends Event {
-  results: {
-    [index: number]: {
-      [index: number]: SpeechRecognitionResult;
-    };
-    item(index: number): any;
-    length: number;
+  results: SpeechRecognitionResultList;
+  resultIndex: number;
+}
+
+interface SpeechRecognitionError extends Event {
+  error: string;
+  message: string;
+}
+
+interface SpeechRecognitionOptions {
+  language?: string;
+  continuous?: boolean;
+  interimResults?: boolean;
+  maxAlternatives?: number;
+  autoStart?: boolean;
+}
+
+interface SpeechRecognitionState {
+  isListening: boolean;
+  isBrowserSupported: boolean;
+  transcript: string;
+  interimTranscript: string;
+  errorMessage: string | null;
+}
+
+// Hook principal
+const useSpeechRecognition = (options?: SpeechRecognitionOptions) => {
+  // Valores por defecto
+  const opts = {
+    language: options?.language || 'en-US',
+    continuous: options?.continuous || false,
+    interimResults: options?.interimResults || true,
+    maxAlternatives: options?.maxAlternatives || 1,
+    autoStart: options?.autoStart || false,
   };
-}
 
-interface SpeechRecognition extends EventTarget {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  maxAlternatives: number;
-  onnomatch: (event: Event) => void;
-  onresult: (event: SpeechRecognitionEvent) => void;
-  onerror: (event: Event) => void;
-  onstart: (event: Event) => void;
-  onend: (event: Event) => void;
-  start(): void;
-  stop(): void;
-  abort(): void;
-}
+  // Referencia al objeto de reconocimiento
+  const recognitionRef = useRef<any>(null);
 
-// Extender interface de Window
-declare global {
-  interface Window {
-    SpeechRecognition?: new () => SpeechRecognition;
-    webkitSpeechRecognition?: new () => SpeechRecognition;
-  }
-}
+  // Estado
+  const [state, setState] = useState<SpeechRecognitionState>({
+    isListening: false,
+    isBrowserSupported: false,
+    transcript: '',
+    interimTranscript: '',
+    errorMessage: null,
+  });
 
-/**
- * Hook para manejar el reconocimiento de voz
- */
-export default function useSpeechRecognition(): UseSpeechRecognitionReturn {
-  const [transcript, setTranscript] = useState('');
-  const [isListening, setIsListening] = useState(false);
-  const [hasPermission, setHasPermission] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
-
-  // Verificar disponibilidad de la API al cargar
+  // Configurar el reconocimiento de voz
   useEffect(() => {
-    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
-    if (!SpeechRecognitionAPI) {
-      setError('El reconocimiento de voz no está soportado en este navegador.');
-      setHasPermission(false);
-    }
-  }, []);
+    // Detectar soporte del navegador
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const isSupportedBrowser = !!SpeechRecognition;
 
-  // Reiniciar reconocimiento si se detiene inesperadamente
-  const handleRecognitionEnd = useCallback(() => {
-    setIsListening(false);
-  }, []);
+    setState(prev => ({ ...prev, isBrowserSupported: isSupportedBrowser }));
 
-  // Manejar errores de reconocimiento
-  const handleRecognitionError = useCallback((event: any) => {
-    if (event.error === 'not-allowed') {
-      setHasPermission(false);
-      setError('El acceso al micrófono fue denegado.');
-    } else if (event.error === 'no-speech') {
-      setError('No se detectó ninguna voz.');
-    } else {
-      setError(`Error de reconocimiento: ${event.error}`);
-    }
-    setIsListening(false);
-  }, []);
-
-  // Manejar resultados del reconocimiento
-  const handleRecognitionResult = useCallback((event: SpeechRecognitionEvent) => {
-    const current = event.results[event.results.length - 1];
-    const transcriptResult = current[0].transcript;
-    
-    setTranscript(transcriptResult);
-  }, []);
-
-  // Iniciar reconocimiento de voz
-  const startListening = useCallback(() => {
-    setError(null);
-    
-    if (!hasPermission) {
-      setError('El acceso al micrófono fue denegado. Verifica los permisos.');
+    // Si no hay soporte, salir
+    if (!isSupportedBrowser) {
+      console.warn('El navegador no soporta reconocimiento de voz');
       return;
     }
-    
-    // Detener cualquier reconocimiento en curso
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-    
-    try {
-      const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-      
-      if (!SpeechRecognitionAPI) {
-        setError('El reconocimiento de voz no está soportado en este navegador.');
-        return;
-      }
-      
-      recognitionRef.current = new SpeechRecognitionAPI();
-      
-      // Configurar opciones
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      
-      // Determinar el idioma basado en la configuración
-      let recognitionLang = 'es-ES'; // Español por defecto
-      
-      // Cuando se implemente una selección de idioma, usaríamos eso:
-      // const userLanguage = activeChatConfig.language || 'es-ES';
-      // recognitionRef.current.lang = userLanguage;
-      recognitionRef.current.lang = recognitionLang;
-      
-      // Configurar eventos
-      recognitionRef.current.onstart = () => setIsListening(true);
-      recognitionRef.current.onend = handleRecognitionEnd;
-      recognitionRef.current.onerror = handleRecognitionError;
-      recognitionRef.current.onresult = handleRecognitionResult as any;
-      
-      // Limpiar transcripción anterior
-      setTranscript('');
-      
-      // Iniciar reconocimiento
-      recognitionRef.current.start();
-    } catch (err) {
-      console.error('Error iniciando reconocimiento de voz:', err);
-      setError('Error iniciando reconocimiento de voz.');
-      setIsListening(false);
-    }
-  }, [hasPermission, handleRecognitionEnd, handleRecognitionError, handleRecognitionResult]);
 
-  // Detener reconocimiento de voz
-  const stopListening = useCallback(() => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
+    // Crear instancia
+    if (!recognitionRef.current) {
+      recognitionRef.current = new SpeechRecognition();
+      
+      // Configurar
+      recognitionRef.current.lang = opts.language;
+      recognitionRef.current.continuous = opts.continuous;
+      recognitionRef.current.interimResults = opts.interimResults;
+      recognitionRef.current.maxAlternatives = opts.maxAlternatives;
     }
-    setIsListening(false);
+
+    // Limpiar al desmontar
+    return () => {
+      if (recognitionRef.current && state.isListening) {
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          console.error('Error al detener reconocimiento:', e);
+        }
+      }
+    };
+  }, [
+    opts.continuous,
+    opts.interimResults,
+    opts.language,
+    opts.maxAlternatives,
+    state.isListening
+  ]);
+
+  // Iniciar reconocimiento automáticamente si se solicita
+  useEffect(() => {
+    if (opts.autoStart && state.isBrowserSupported && !state.isListening) {
+      startListening();
+    }
+  }, [opts.autoStart, state.isBrowserSupported, state.isListening]);
+
+  // Establecer manejadores de eventos
+  const setupEventListeners = useCallback(() => {
+    if (!recognitionRef.current) return;
+
+    recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+      let finalTranscript = '';
+      let interimTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+
+      // Si tenemos resultados finales, actualizar la transcripción
+      if (finalTranscript) {
+        setState(prev => ({ 
+          ...prev, 
+          transcript: prev.transcript ? `${prev.transcript} ${finalTranscript}` : finalTranscript,
+          interimTranscript: interimTranscript
+        }));
+      } 
+      // Si solo tenemos resultados provisionales
+      else if (interimTranscript) {
+        setState(prev => ({ ...prev, interimTranscript }));
+      }
+    };
+
+    recognitionRef.current.onerror = (event: SpeechRecognitionError) => {
+      setState(prev => ({ 
+        ...prev, 
+        errorMessage: `Error: ${event.error}, ${event.message || 'No hay detalles adicionales'}` 
+      }));
+    };
+
+    recognitionRef.current.onend = () => {
+      setState(prev => ({ ...prev, isListening: false }));
+    };
+
+    recognitionRef.current.onstart = () => {
+      setState(prev => ({ 
+        ...prev, 
+        isListening: true,
+        errorMessage: null 
+      }));
+    };
   }, []);
 
-  // Limpiar al desmontar
-  useEffect(() => {
-    return () => {
+  // Iniciar escucha
+  const startListening = useCallback(() => {
+    if (!state.isBrowserSupported || state.isListening) return;
+
+    try {
+      // Asegurarse de que los eventos estén configurados
+      setupEventListeners();
+      
+      // Configurar el idioma cada vez que iniciamos (puede cambiar)
+      if (recognitionRef.current) {
+        recognitionRef.current.lang = opts.language;
+        
+        // Reiniciar la transcripción a menos que sea continuo
+        if (!opts.continuous) {
+          setState(prev => ({ ...prev, transcript: '', interimTranscript: '' }));
+        }
+        
+        recognitionRef.current.start();
+      }
+    } catch (error) {
+      console.error('Error al iniciar reconocimiento:', error);
+      setState(prev => ({ 
+        ...prev, 
+        isListening: false,
+        errorMessage: error instanceof Error ? error.message : 'Error desconocido al iniciar reconocimiento'
+      }));
+    }
+  }, [opts.continuous, opts.language, setupEventListeners, state.isBrowserSupported, state.isListening]);
+
+  // Detener escucha
+  const stopListening = useCallback(() => {
+    if (!state.isBrowserSupported || !state.isListening) return;
+
+    try {
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
-    };
+    } catch (error) {
+      console.error('Error al detener reconocimiento:', error);
+    }
+  }, [state.isBrowserSupported, state.isListening]);
+
+  // Reiniciar transcripción
+  const resetTranscript = useCallback(() => {
+    setState(prev => ({ ...prev, transcript: '', interimTranscript: '' }));
   }, []);
 
+  // Objeto de retorno
   return {
-    transcript,
-    isListening,
+    transcript: state.transcript,
+    interimTranscript: state.interimTranscript,
+    finalTranscript: state.transcript,
+    isListening: state.isListening,
+    isBrowserSupported: state.isBrowserSupported,
+    errorMessage: state.errorMessage,
     startListening,
     stopListening,
-    hasPermission,
-    error
+    resetTranscript
   };
-}
+};
+
+export default useSpeechRecognition;

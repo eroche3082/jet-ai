@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Send, Volume2, VolumeX } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Input } from '@/components/ui/input';
+import { Send, Mic, MicOff, VolumeX, Volume2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Loader2 } from 'lucide-react';
+import useSpeechRecognition from '@/hooks/useSpeechRecognition';
+import useTextToSpeech from '@/hooks/useTextToSpeech';
 
-// Definir tipos para SpeechRecognition que no están disponibles por defecto en TypeScript
+// Declaración global para SpeechRecognition
 declare global {
   interface Window {
     SpeechRecognition: any;
@@ -14,12 +16,7 @@ declare global {
   }
 }
 
-// Definir tipos para mensajes y memoria de conversación
-interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-}
-
+// Tipos para la memoria de conversación
 interface ConversationMemory {
   destination: string;
   budget: string;
@@ -30,186 +27,136 @@ interface ConversationMemory {
   conversationStarted: boolean;
 }
 
-// Inicializar memoria de conversación vacía
-const initialMemory: ConversationMemory = {
-  destination: '',
-  budget: '',
-  dates: '',
-  travelers: '',
-  interests: [],
-  currentQuestion: 'greeting',
-  conversationStarted: false
-};
+// Tipo para los mensajes de chat
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
 
 interface VertexAIChatProps {
   className?: string;
-  onClose?: () => void;
   initialMessage?: string;
 }
 
-const VertexAIChat: React.FC<VertexAIChatProps> = ({ className, onClose, initialMessage }) => {
+const VertexAIChat: React.FC<VertexAIChatProps> = ({ 
+  className,
+  initialMessage = "¡Hola! Soy JetAI, tu asistente de viaje. ¿En qué puedo ayudarte hoy?"
+}) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [userInput, setUserInput] = useState('');
+  const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [memory, setMemory] = useState<ConversationMemory>(initialMemory);
-  const [isRecording, setIsRecording] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isAudioSupported, setIsAudioSupported] = useState(false);
+  const [memory, setMemory] = useState<ConversationMemory>({
+    destination: '',
+    budget: '',
+    dates: '',
+    travelers: '',
+    interests: [],
+    currentQuestion: 'greeting',
+    conversationStarted: false
+  });
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Hooks para reconocimiento de voz y texto a voz
+  const { 
+    isListening, 
+    transcript, 
+    startListening, 
+    stopListening, 
+    isBrowserSupported 
+  } = useSpeechRecognition({ language: 'es-ES' });
+  
+  const { 
+    speak, 
+    cancel, 
+    isSpeaking, 
+    isVoiceSupported, 
+    isMuted, 
+    toggleMute 
+  } = useTextToSpeech({ language: 'es-ES' });
 
-  // Verificar soporte de audio
+  // Iniciar la conversación con el mensaje de bienvenida
   useEffect(() => {
-    setIsAudioSupported(
-      'SpeechRecognition' in window || 'webkitSpeechRecognition' in window
-    );
-  }, []);
-
-  // Inicializar reconocimiento de voz si está disponible
-  useEffect(() => {
-    if (isAudioSupported) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'es-ES'; // Idioma por defecto (puede ser cambiado)
-
-      recognitionRef.current.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setUserInput(transcript);
-        // Enviar mensaje automáticamente
-        handleSendMessage(transcript);
-      };
-
-      recognitionRef.current.onerror = (event: any) => {
-        console.error('Error en reconocimiento de voz:', event.error);
-        setIsRecording(false);
-      };
-
-      recognitionRef.current.onend = () => {
-        setIsRecording(false);
-      };
-    }
-
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.abort();
+    if (initialMessage && messages.length === 0) {
+      setMessages([{ role: 'assistant', content: initialMessage }]);
+      
+      // Si el audio está habilitado, lee el mensaje de bienvenida
+      if (isVoiceSupported && !isMuted) {
+        setTimeout(() => speak(initialMessage), 500);
       }
-    };
-  }, [isAudioSupported]);
-
-  // Agregar mensaje inicial
-  useEffect(() => {
-    if (initialMessage) {
-      handleSendMessage(initialMessage);
-    } else {
-      // Si no hay mensaje inicial, agregar un mensaje de bienvenida del asistente
-      setMessages([
-        {
-          role: 'assistant', 
-          content: '¡Bienvenido a JetAI! Soy tu asistente personal de viajes. ¿En qué puedo ayudarte hoy?'
-        }
-      ]);
-      // Sugerencias iniciales
-      setSuggestions([
-        "Quiero planear un viaje",
-        "¿Qué destinos recomiendas?",
-        "Busco vacaciones en la playa",
-        "Viaje cultural a Europa"
-      ]);
     }
-  }, [initialMessage]);
+  }, [initialMessage, isVoiceSupported, isMuted, speak, messages.length]);
 
-  // Auto-scroll al último mensaje
+  // Actualizar el input con la transcripción de voz
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (transcript) {
+      setInputValue(transcript);
+    }
+  }, [transcript]);
+
+  // Desplazarse al final del chat cuando hay nuevos mensajes
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
-  // Text-to-Speech
-  const speakText = async (text: string) => {
-    if (!('speechSynthesis' in window)) return;
-    
-    setIsSpeaking(true);
-    
-    // Detener cualquier síntesis en curso
-    window.speechSynthesis.cancel();
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    
-    // Configurar voz
-    utterance.lang = 'es-ES';
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
-    
-    // Seleccionar voz femenina si está disponible
-    const voices = window.speechSynthesis.getVoices();
-    const spanishVoice = voices.find(voice => 
-      voice.lang.includes('es') && voice.name.includes('Female')
-    );
-    
-    if (spanishVoice) {
-      utterance.voice = spanishVoice;
+  // Leer respuestas del asistente cuando llegan
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.role === 'assistant' && !isMuted && isVoiceSupported) {
+      // Limpiar el texto de markdown antes de leerlo
+      const cleanText = lastMessage.content.replace(/[*#_\[\]]/g, '');
+      speak(cleanText);
     }
+  }, [messages, speak, isMuted, isVoiceSupported]);
+
+  // Enviar mensaje al backend
+  const handleSendMessage = async (content: string = inputValue) => {
+    if (!content.trim()) return;
     
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
+    // Detener cualquier audio actual
+    cancel();
     
-    window.speechSynthesis.speak(utterance);
-  };
-
-  // Detener síntesis de voz
-  const stopSpeaking = () => {
-    window.speechSynthesis.cancel();
-    setIsSpeaking(false);
-  };
-
-  // Toggle grabación de voz
-  const toggleRecording = () => {
-    if (isRecording) {
-      recognitionRef.current?.abort();
-      setIsRecording(false);
-    } else {
-      recognitionRef.current?.start();
-      setIsRecording(true);
-    }
-  };
-
-  // Enviar mensaje
-  const handleSendMessage = async (text: string = userInput) => {
-    if (!text.trim()) return;
-
-    // Agregar mensaje del usuario
-    const userMessage: ChatMessage = { role: 'user', content: text };
+    // Agregar mensaje del usuario al chat
+    const userMessage: ChatMessage = { role: 'user', content };
     setMessages(prev => [...prev, userMessage]);
-    setUserInput('');
+    
+    // Limpiar input y errores
+    setInputValue('');
+    setError(null);
     setIsLoading(true);
-
+    
     try {
-      // Llamar a la API de VertexAI
+      // Preparar historial para enviar a la API (sin incluir el mensaje actual)
+      const history = messages.map(m => ({ 
+        role: m.role, 
+        content: m.content 
+      }));
+      
+      // Llamar a la API de chat con Vertex AI
       const response = await fetch('/api/chat/vertex', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: text,
-          history: messages,
-          memory: memory,
+          message: content,
+          history,
+          memory
         }),
       });
-
+      
       if (!response.ok) {
-        throw new Error('Error en la respuesta del servidor');
+        throw new Error('Error en la conexión con el asistente');
       }
-
+      
       const data = await response.json();
       
-      // Actualizar memoria de conversación
-      setMemory(data.memory);
-      
-      // Agregar mensaje del asistente
+      // Agregar respuesta al chat
       const assistantMessage: ChatMessage = { 
         role: 'assistant', 
         content: data.message 
@@ -217,89 +164,125 @@ const VertexAIChat: React.FC<VertexAIChatProps> = ({ className, onClose, initial
       
       setMessages(prev => [...prev, assistantMessage]);
       
-      // Actualizar sugerencias
-      setSuggestions(data.suggestions || []);
-      
-      // Auto-reproducir respuesta con TTS si estaba grabando
-      if (isRecording) {
-        speakText(data.message);
+      // Actualizar memoria y sugerencias
+      if (data.memory) {
+        setMemory(data.memory);
       }
       
-    } catch (error) {
-      console.error('Error al enviar mensaje:', error);
-      setMessages(prev => [
-        ...prev,
-        { 
-          role: 'assistant', 
-          content: 'Lo siento, ha ocurrido un error al procesar tu mensaje. Por favor, intenta de nuevo.' 
-        }
-      ]);
+      if (data.suggestions && Array.isArray(data.suggestions)) {
+        setSuggestions(data.suggestions);
+      }
+      
+    } catch (err: any) {
+      console.error('Error al enviar mensaje:', err);
+      setError(err.message || 'Error al comunicarse con el asistente');
     } finally {
       setIsLoading(false);
+      // Enfocar el input después de enviar
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
     }
   };
 
-  // Manejar envío con Enter
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+  // Manejar envío desde el formulario
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isListening) {
+      stopListening();
+    }
+    handleSendMessage();
+  };
+  
+  // Manejar clic en sugerencias
+  const handleSuggestionClick = (suggestion: string) => {
+    handleSendMessage(suggestion);
+  };
+  
+  // Manejar toggle de reconocimiento de voz
+  const handleVoiceToggle = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      setInputValue('');
+      startListening();
     }
   };
 
   return (
-    <div className={`flex flex-col h-full ${className}`}>
-      {/* Header */}
-      <div className="p-4 border-b flex justify-between items-center bg-primary/5">
-        <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8 border border-primary/20">
-            <AvatarImage src="/jetai-logo.png" alt="JetAI" />
-            <AvatarFallback>JA</AvatarFallback>
-          </Avatar>
-          <div>
-            <h3 className="font-medium text-sm">JetAI Assistant</h3>
-            <p className="text-xs text-muted-foreground">Powered by Vertex AI</p>
+    <div className={cn("flex flex-col h-full bg-background", className)}>
+      {/* Encabezado */}
+      <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+            <span className="text-primary-foreground font-semibold">J</span>
           </div>
+          <h3 className="font-medium">JetAI Assistant</h3>
         </div>
-        {onClose && (
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <span className="sr-only">Close</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        
+        <div className="flex items-center space-x-2">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={toggleMute}
+            disabled={!isVoiceSupported}
+            title={isMuted ? 'Activar audio' : 'Silenciar'}
+          >
+            {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
           </Button>
-        )}
+        </div>
       </div>
       
-      {/* Chat Messages */}
+      {/* Mensajes */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message, i) => (
-          <div
-            key={i}
-            className={`flex ${
-              message.role === 'user' ? 'justify-end' : 'justify-start'
-            }`}
+        {messages.map((message, index) => (
+          <div 
+            key={index} 
+            className={cn(
+              "flex w-full max-w-full",
+              message.role === 'user' ? "justify-end" : "justify-start"
+            )}
           >
-            <div
-              className={`max-w-[80%] px-4 py-2 rounded-lg ${
-                message.role === 'user'
-                  ? 'bg-primary text-white rounded-tr-none'
-                  : 'bg-muted rounded-tl-none'
-              }`}
+            <div 
+              className={cn(
+                "rounded-lg px-4 py-2 max-w-[85%]",
+                message.role === 'user' 
+                  ? "bg-primary text-primary-foreground" 
+                  : "bg-muted"
+              )}
             >
-              <div className="prose dark:prose-invert prose-sm max-w-none">
+              <ReactMarkdown 
+                components={{
+                  p: ({children}) => <p className="mb-1 last:mb-0">{children}</p>,
+                  ul: ({children}) => <ul className="list-disc pl-4 mb-1">{children}</ul>,
+                  ol: ({children}) => <ol className="list-decimal pl-4 mb-1">{children}</ol>,
+                  li: ({children}) => <li className="mb-0.5">{children}</li>,
+                  a: ({href, children}) => (
+                    <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                      {children}
+                    </a>
+                  ),
+                }}
+                className="prose prose-sm dark:prose-invert max-w-none"
+              >
                 {message.content}
-              </div>
+              </ReactMarkdown>
             </div>
           </div>
         ))}
         
         {isLoading && (
           <div className="flex justify-start">
-            <div className="max-w-[80%] px-4 py-2 rounded-lg bg-muted rounded-tl-none">
-              <div className="flex space-x-2">
-                <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce [animation-delay:-0.3s]"></div>
-                <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce [animation-delay:-0.15s]"></div>
-                <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce"></div>
-              </div>
+            <div className="bg-muted rounded-lg px-4 py-2">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          </div>
+        )}
+        
+        {error && (
+          <div className="flex justify-center">
+            <div className="bg-destructive/10 text-destructive rounded-lg px-4 py-2 text-sm">
+              {error}
             </div>
           </div>
         )}
@@ -307,81 +290,60 @@ const VertexAIChat: React.FC<VertexAIChatProps> = ({ className, onClose, initial
         <div ref={messagesEndRef} />
       </div>
       
-      {/* Suggested Responses */}
+      {/* Sugerencias */}
       {suggestions.length > 0 && (
-        <div className="p-2 overflow-x-auto flex gap-2 border-t">
-          {suggestions.map((suggestion, i) => (
-            <Button
-              key={i}
-              variant="outline"
-              size="sm"
-              className="text-xs whitespace-nowrap"
-              onClick={() => handleSendMessage(suggestion)}
-            >
-              {suggestion}
-            </Button>
-          ))}
+        <div className="p-2 overflow-x-auto whitespace-nowrap border-t">
+          <div className="flex space-x-2 pb-1">
+            {suggestions.map((suggestion, i) => (
+              <button
+                key={i}
+                className="px-3 py-1 text-sm bg-muted rounded-full hover:bg-muted/80 flex-shrink-0"
+                onClick={() => handleSuggestionClick(suggestion)}
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
         </div>
       )}
       
-      {/* Input Area */}
-      <div className="border-t p-4">
-        <div className="flex items-center gap-2">
-          {isAudioSupported && (
-            <Button
-              type="button"
-              size="icon"
-              variant={isRecording ? "default" : "outline"}
-              className={`shrink-0 ${isRecording ? 'text-white bg-red-500 hover:bg-red-600' : ''}`}
-              onClick={toggleRecording}
-            >
-              {isRecording ? <MicOff size={18} /> : <Mic size={18} />}
-            </Button>
-          )}
-          
+      {/* Input */}
+      <div className="p-4 border-t">
+        <form onSubmit={handleSubmit} className="flex space-x-2">
           <div className="relative flex-1">
             <Input
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              onKeyDown={handleKeyPress}
+              ref={inputRef}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
               placeholder="Escribe tu mensaje..."
               className="pr-10"
-              disabled={isLoading || isRecording}
+              disabled={isLoading}
             />
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              className="absolute right-0 top-0 h-full"
-              onClick={() => handleSendMessage()}
-              disabled={!userInput.trim() || isLoading || isRecording}
-            >
-              <Send size={18} />
-              <span className="sr-only">Enviar</span>
-            </Button>
+            {isBrowserSupported && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 transform -translate-y-1/2"
+                onClick={handleVoiceToggle}
+                disabled={isLoading}
+              >
+                {isListening ? (
+                  <MicOff size={18} className="text-destructive" />
+                ) : (
+                  <Mic size={18} />
+                )}
+              </Button>
+            )}
           </div>
-          
-          <Button
-            type="button"
+          <Button 
+            type="submit" 
             size="icon"
-            variant={isSpeaking ? "default" : "outline"}
-            className="shrink-0"
-            onClick={isSpeaking ? stopSpeaking : () => messages.length > 0 && speakText(messages[messages.length - 1].content)}
-            disabled={messages.length === 0 || isLoading}
+            disabled={isLoading || !inputValue.trim()}
           >
-            {isSpeaking ? <VolumeX size={18} /> : <Volume2 size={18} />}
+            <Send size={18} />
           </Button>
-        </div>
-        
-        <div className="mt-2 text-xs text-center text-muted-foreground">
-          {memory.destination && (
-            <div className="flex justify-center gap-2 flex-wrap">
-              {memory.destination && <span className="px-2 py-1 bg-primary/10 rounded-full">📍 {memory.destination}</span>}
-              {memory.budget && <span className="px-2 py-1 bg-primary/10 rounded-full">💰 {memory.budget}</span>}
-              {memory.dates && <span className="px-2 py-1 bg-primary/10 rounded-full">📅 {memory.dates}</span>}
-            </div>
-          )}
-        </div>
+        </form>
       </div>
     </div>
   );

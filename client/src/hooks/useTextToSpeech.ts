@@ -1,232 +1,198 @@
-/**
- * Hook para manejar la síntesis de voz
- * Proporciona funciones para convertir texto a voz usando Web Speech API
- * y Google Cloud Text-to-Speech API para voces premium.
- */
-
 import { useState, useEffect, useCallback } from 'react';
-import { activeChatConfig } from '@/lib/chatConfig';
 
-type UseTextToSpeechReturn = {
-  speak: (text: string) => Promise<void>;
-  stop: () => void;
-  isPremiumVoice: boolean;
+interface TextToSpeechOptions {
+  language?: string;
+  voiceName?: string;
+  pitch?: number;
+  rate?: number;
+  volume?: number;
+}
+
+interface TextToSpeechState {
   isSpeaking: boolean;
-  setVolume: (volume: number) => void;
-  volume: number;
+  isPaused: boolean;
+  isMuted: boolean;
+  isVoiceSupported: boolean;
+  availableVoices: SpeechSynthesisVoice[];
+  errorMessage: string | null;
+  currentUtterance: SpeechSynthesisUtterance | null;
+}
+
+const defaultOptions: TextToSpeechOptions = {
+  language: 'en-US',
+  pitch: 1,
+  rate: 1,
+  volume: 1
 };
 
-/**
- * Hook para manejar la síntesis de voz
- */
-export default function useTextToSpeech(): UseTextToSpeechReturn {
-  const [utterance, setUtterance] = useState<SpeechSynthesisUtterance | null>(null);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [volume, setVolume] = useState(activeChatConfig.audio.volume);
-  const [isPremiumVoice, setIsPremiumVoice] = useState(activeChatConfig.audio.textToSpeech === 'Google TTS');
+const useTextToSpeech = (options?: TextToSpeechOptions) => {
+  const opts = { ...defaultOptions, ...options };
+  
+  const [state, setState] = useState<TextToSpeechState>({
+    isSpeaking: false,
+    isPaused: false,
+    isMuted: false,
+    isVoiceSupported: typeof window !== 'undefined' && 'speechSynthesis' in window,
+    availableVoices: [],
+    errorMessage: null,
+    currentUtterance: null
+  });
 
+  // Actualizar las voces disponibles
   useEffect(() => {
-    // Configurar eventos para la síntesis de voz
-    if (utterance) {
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = (event) => {
-        console.error('TTS error:', event);
-        setIsSpeaking(false);
-      };
-      utterance.volume = volume;
+    if (!state.isVoiceSupported) return;
+
+    const handleVoicesChanged = () => {
+      const voices = speechSynthesis.getVoices();
+      setState(prev => ({ ...prev, availableVoices: voices }));
+    };
+
+    // Algunas versiones de Chrome necesitan usar el evento
+    if (typeof speechSynthesis !== 'undefined') {
+      speechSynthesis.addEventListener('voiceschanged', handleVoicesChanged);
+      // Intentar obtener las voces inmediatamente
+      handleVoicesChanged();
     }
 
     return () => {
-      if (utterance) {
-        utterance.onstart = null;
-        utterance.onend = null;
-        utterance.onerror = null;
+      if (typeof speechSynthesis !== 'undefined') {
+        speechSynthesis.removeEventListener('voiceschanged', handleVoicesChanged);
       }
     };
-  }, [utterance, volume]);
+  }, [state.isVoiceSupported]);
 
-  /**
-   * Limpia el texto para la síntesis de voz
-   */
-  const cleanTextForSpeech = useCallback((text: string): string => {
-    return text
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Quitar negritas
-      .replace(/\*(.*?)\*/g, '$1')     // Quitar cursivas
-      .replace(/```.*?```/gs, '')      // Quitar bloques de código
-      .replace(/`(.*?)`/g, '$1')       // Quitar código inline
-      .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Quitar links
-      .replace(/!\[.*?\]\(.*?\)/g, '')    // Quitar imágenes
-      .replace(/#{1,6}\s+/g, '')          // Quitar encabezados
-      .replace(/\n\s*[-*+]\s+/g, '. ')    // Convertir listas en oraciones
-      .replace(/\n{2,}/g, '. ')           // Convertir párrafos en oraciones
-      .replace(/\s{2,}/g, ' ')            // Eliminar espacios múltiples
-      .replace(/[📍🏨🏖️⛰️🌳✈️🚆🚗🚢🧭🏛️🍽️🌟🎉🥾🏊🌤️☀️❄️🌧️💰📅📋📝😄😌😮💡🏺👨‍🍳🗣️👨‍👩‍👧‍👦👥🏝️🏞️🏜️☀️⛄🌷🍂]/g, '') // Quitar emojis
-      .trim();
-  }, []);
+  // Seleccionar la voz correcta
+  const getVoice = useCallback(() => {
+    if (!state.isVoiceSupported || state.availableVoices.length === 0) return null;
 
-  /**
-   * Habla un texto utilizando la síntesis de voz
-   */
-  const speak = useCallback(async (text: string): Promise<void> => {
-    if (!text) return;
-    
-    // Detener cualquier síntesis de voz activa
-    stop();
-    
-    const cleanedText = cleanTextForSpeech(text);
-    
-    try {
-      // Verificar si usar Google TTS Premium o Web Speech API
-      if (activeChatConfig.audio.textToSpeech === 'Google TTS') {
-        return await speakWithGoogleTTS(cleanedText);
-      } else {
-        return await speakWithBrowserTTS(cleanedText);
-      }
-    } catch (error) {
-      console.error('Error en la síntesis de voz:', error);
-      // Fallback al TTS del navegador si falla Google TTS
-      return await speakWithBrowserTTS(cleanedText);
+    // Buscar por nombre si está especificado
+    if (opts.voiceName) {
+      const namedVoice = state.availableVoices.find(voice => 
+        voice.name.toLowerCase().includes(opts.voiceName!.toLowerCase())
+      );
+      if (namedVoice) return namedVoice;
     }
-  }, [cleanTextForSpeech]);
 
-  /**
-   * Utiliza la API de síntesis de voz del navegador
-   */
-  const speakWithBrowserTTS = useCallback((text: string): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      if (!window.speechSynthesis) {
-        console.error('Web Speech API no está soportada en este navegador');
-        reject(new Error('Web Speech API no soportada'));
-        return;
-      }
-      
-      try {
-        const newUtterance = new SpeechSynthesisUtterance(text);
-        newUtterance.volume = volume;
-        newUtterance.rate = 1.0;
-        newUtterance.pitch = 1.0;
-        
-        // Buscar una voz apropiada
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length > 0) {
-          // Preferir voces de alta calidad
-          const preferredVoice = voices.find(
-            voice => voice.name.includes('Google') || 
-                    voice.name.includes('Premium') || 
-                    voice.name.includes('Female')
-          );
-          
-          if (preferredVoice) {
-            newUtterance.voice = preferredVoice;
-          }
-        }
-        
-        // Configurar eventos
-        newUtterance.onstart = () => setIsSpeaking(true);
-        newUtterance.onend = () => {
-          setIsSpeaking(false);
-          resolve();
-        };
-        newUtterance.onerror = (event) => {
-          console.error('TTS error:', event);
-          setIsSpeaking(false);
-          reject(event);
-        };
-        
-        // Guardar la utterance para poder detenerla
-        setUtterance(newUtterance);
-        
-        // Iniciar la síntesis
-        window.speechSynthesis.speak(newUtterance);
-        setIsPremiumVoice(false);
-      } catch (error) {
-        console.error('Error en Web Speech API:', error);
-        reject(error);
-      }
-    });
-  }, [volume]);
+    // Buscar por idioma
+    const langVoice = state.availableVoices.find(voice => 
+      voice.lang.toLowerCase().includes(opts.language!.toLowerCase())
+    );
+    
+    // Fallback a la primera voz o a una voz en español/inglés
+    return langVoice || 
+      state.availableVoices.find(voice => /^es/.test(voice.lang)) || 
+      state.availableVoices.find(voice => /^en/.test(voice.lang)) || 
+      state.availableVoices[0];
+  }, [opts.language, opts.voiceName, state.availableVoices, state.isVoiceSupported]);
 
-  /**
-   * Utiliza Google Cloud TTS para una voz premium
-   */
-  const speakWithGoogleTTS = useCallback(async (text: string): Promise<void> => {
+  // Función para hablar
+  const speak = useCallback((text: string) => {
+    if (!state.isVoiceSupported || state.isMuted) return;
+    
     try {
-      // Llamar a nuestra API que encapsula Google Cloud TTS
-      const response = await fetch('/api/tts/synthesize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text,
-          voice: activeChatConfig.audio.voice,
-          volume
-        })
-      });
+      // Detener cualquier síntesis actual
+      speechSynthesis.cancel();
       
-      if (!response.ok) {
-        throw new Error(`Error en Google TTS API: ${response.status}`);
-      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voice = getVoice();
       
-      const data = await response.json();
+      if (voice) utterance.voice = voice;
       
-      if (!data.audioUrl) {
-        throw new Error('No se recibió URL de audio');
-      }
+      utterance.lang = opts.language || 'en-US';
+      utterance.pitch = opts.pitch || 1;
+      utterance.rate = opts.rate || 1;
+      utterance.volume = opts.volume || 1;
       
-      // Reproducir el audio recibido
-      const audio = new Audio(data.audioUrl);
-      audio.volume = volume;
-      
-      // Configurar eventos
-      audio.onplay = () => setIsSpeaking(true);
-      audio.onended = () => setIsSpeaking(false);
-      audio.onerror = (e) => {
-        console.error('Error reproduciendo audio TTS:', e);
-        setIsSpeaking(false);
+      // Eventos
+      utterance.onstart = () => {
+        setState(prev => ({ ...prev, isSpeaking: true, isPaused: false }));
       };
       
-      // Reproducir
-      await audio.play();
-      setIsPremiumVoice(true);
+      utterance.onend = () => {
+        setState(prev => ({ ...prev, isSpeaking: false, isPaused: false, currentUtterance: null }));
+      };
       
-      return new Promise((resolve) => {
-        audio.onended = () => {
-          setIsSpeaking(false);
-          resolve();
-        };
-      });
+      utterance.onerror = (event) => {
+        setState(prev => ({ 
+          ...prev, 
+          isSpeaking: false, 
+          isPaused: false, 
+          errorMessage: event.error,
+          currentUtterance: null 
+        }));
+      };
+      
+      setState(prev => ({ ...prev, currentUtterance: utterance }));
+      speechSynthesis.speak(utterance);
     } catch (error) {
-      console.error('Error en Google Cloud TTS:', error);
-      // Si falla, recurrir al TTS del navegador
-      return speakWithBrowserTTS(text);
+      console.error('Error en síntesis de voz:', error);
+      setState(prev => ({ 
+        ...prev, 
+        errorMessage: error instanceof Error ? error.message : 'Error desconocido',
+        isSpeaking: false
+      }));
     }
-  }, [volume, speakWithBrowserTTS]);
+  }, [getVoice, opts.language, opts.pitch, opts.rate, opts.volume, state.isMuted, state.isVoiceSupported]);
 
-  /**
-   * Detiene la síntesis de voz
-   */
-  const stop = useCallback(() => {
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
+  // Pausar
+  const pause = useCallback(() => {
+    if (!state.isVoiceSupported || !state.isSpeaking) return;
+    speechSynthesis.pause();
+    setState(prev => ({ ...prev, isPaused: true }));
+  }, [state.isSpeaking, state.isVoiceSupported]);
+
+  // Reanudar
+  const resume = useCallback(() => {
+    if (!state.isVoiceSupported || !state.isPaused) return;
+    speechSynthesis.resume();
+    setState(prev => ({ ...prev, isPaused: false }));
+  }, [state.isPaused, state.isVoiceSupported]);
+
+  // Cancelar
+  const cancel = useCallback(() => {
+    if (!state.isVoiceSupported) return;
+    speechSynthesis.cancel();
+    setState(prev => ({ 
+      ...prev, 
+      isSpeaking: false, 
+      isPaused: false,
+      currentUtterance: null
+    }));
+  }, [state.isVoiceSupported]);
+
+  // Toggle mute
+  const toggleMute = useCallback(() => {
+    setState(prev => ({ ...prev, isMuted: !prev.isMuted }));
+    
+    // Si está hablando y activamos mute, cancelar
+    if (!state.isMuted && state.isSpeaking) {
+      cancel();
     }
-    
-    // Detener cualquier elemento de audio en reproducción (para Google TTS)
-    document.querySelectorAll('audio').forEach(audio => {
-      if (!audio.paused) {
-        audio.pause();
-        audio.currentTime = 0;
+  }, [cancel, state.isMuted, state.isSpeaking]);
+
+  // Limpiar al desmontar
+  useEffect(() => {
+    return () => {
+      if (state.isVoiceSupported && state.isSpeaking) {
+        speechSynthesis.cancel();
       }
-    });
-    
-    setIsSpeaking(false);
-  }, []);
+    };
+  }, [state.isSpeaking, state.isVoiceSupported]);
 
   return {
     speak,
-    stop,
-    isPremiumVoice,
-    isSpeaking,
-    setVolume,
-    volume
+    pause,
+    resume,
+    cancel,
+    toggleMute,
+    isSpeaking: state.isSpeaking,
+    isPaused: state.isPaused,
+    isMuted: state.isMuted,
+    isVoiceSupported: state.isVoiceSupported,
+    availableVoices: state.availableVoices,
+    errorMessage: state.errorMessage,
+    currentUtterance: state.currentUtterance
   };
-}
+};
+
+export default useTextToSpeech;
