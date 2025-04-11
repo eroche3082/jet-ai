@@ -17,6 +17,11 @@ import { createPaymentIntent, createSubscription, getSubscriptionPlans } from ".
 import connectPgSimple from 'connect-pg-simple';
 import memorystore from 'memorystore';
 import { googleCloud } from './lib/googlecloud';
+import { 
+  processUserMessage, 
+  generateUserItinerary,
+  ConversationStage 
+} from './lib/conversationFlow';
 
 // Configure session store
 const createSessionStore = () => {

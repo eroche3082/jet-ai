@@ -1,0 +1,44 @@
+// Se activa en AIChat.tsx al iniciar el sistema
+
+🛫 Welcome aboard JetAI, your personal AI-powered concierge.  
+Before we begin planning your unforgettable journey, may I have your name and email?
+
+→ A partir de ahí, comienza el flujo uno-a-uno controlado por `conversationFlow.ts`, con los siguientes elementos activados:
+
+✅ Flujo guiado de preguntas con memoria:
+   - Destino
+   - Presupuesto
+   - Fechas aproximadas
+   - Tipo de viajero
+   - Intereses
+   - Preferencias culturales / de idioma / de accesibilidad
+
+✅ Personalidad de asistente:
+   - Estilo Pro Concierge (amable, informativo, profesional y cálido)
+   - Con tono adaptable según el tipo de usuario (amigable para viajes en familia, sofisticado para lujo, etc.)
+
+✅ Voz y emoción:
+   - Reconocimiento de voz activado (🎙️ useSpeechRecognition.ts)
+   - Texto a voz emocional (🔊 useTextToSpeech.ts) según tono del mensaje
+   - Feedback emocional activado (próximo paso: conexión con `sentiment-analysis`)
+
+✅ Conexión directa a funciones:
+   - Al mencionar vuelos, hoteles, actividades o QR → se activa el tab correspondiente
+   - Llamadas directas a APIs desde `apiService.ts` para:
+     - ✈️ `flights.search()` y `flights.book()`
+     - 🏨 `hotels.search()` y `hotels.reserve()`
+     - 🗺️ `experiences.find()` y `qr.generate()`
+     - 📅 `itinerary.generate()`
+
+✅ Seguridad e integraciones confirmadas:
+   - ✅ Gemini, Stripe, Firebase, Google Cloud (Translation, STT, TTS, Vision)
+   - ❌ Aún faltan: Skyscanner API key, Expedia, Booking, TripAdvisor, Amadeus
+
+✅ Tabs sincronizados:
+   - Todos los íconos de la izquierda (VR, QR, Flights, Hotels, Portfolio, etc.) ya están activos con placeholders o conexión real
+   - Falta añadir contenido funcional a algunos tabs como “Audio”, “Portfolio”, “Planner” → se activarán según las respuestas del usuario o comandos tipo “show my itinerary” / “scan QR”
+
+✅ Proceso futuro:
+   - Una vez respondidas todas las preguntas → se genera itinerario inteligente con `itineraryGenerator.ts`
+   - Luego se activa modo “dashboard del viajero” y el tab de “Portfolio” se llena con experiencias, reservas, códigos QR, y más.
+
