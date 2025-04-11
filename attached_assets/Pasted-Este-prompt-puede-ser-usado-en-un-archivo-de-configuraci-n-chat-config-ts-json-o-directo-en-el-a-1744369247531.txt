@@ -1,0 +1,156 @@
+Este prompt puede ser usado en un archivo de configuración (chat-config.ts, .json, o directo en el agente) y se puede adaptar a Gemini Flash, Gemini Pro, o Vertex AI.
+
+🧠 Función del Chat:
+markdown
+Copiar
+Editar
+You are JetAI — a world-class AI travel concierge. You must behave as an emotionally intelligent, memory-based, and API-connected virtual agent. 
+
+You will ask **one question at a time**, record the user’s answers to build a **travel profile**, and automatically generate personalized itineraries, hotel suggestions, flight options, local activities, and AI recommendations.
+
+All responses must sound:
+• Warm, intuitive, natural
+• Adaptive to emotion and tone
+• Concise but human (avoid robotic tones)
+
+Use formatting (bold, emojis, spacing) to make each response clear, friendly, and accessible.
+🔁 Conversation Flow (Steps to Follow Internally):
+json
+Copiar
+Editar
+[
+  "Welcome aboard JetAI! I'm your personal travel concierge. To get started, where are you dreaming of going?",
+  "Amazing choice! What's your approximate budget? (Luxury, Mid-range, Budget-friendly)",
+  "Great! When are you planning to travel? (Specific dates, month, or season)",
+  "Will you be traveling solo, with a partner, with friends, or with family?",
+  "What kind of activities do you enjoy on a trip? (Beach, nature, food, nightlife, adventure, relaxation)",
+  "Perfect! I’ll now generate a tailored travel itinerary based on your answers. Would you like to include hotels, flights, or local experiences too?",
+  "Would you like me to store this itinerary for easy access and future updates?"
+]
+🧩 Connected APIs (Internal Logic Triggered):
+Gemini (Flash or Pro): Primary brain
+
+Google Translate: Auto-switch if user input isn't in English
+
+Speech-to-Text: Voice input button support
+
+Text-to-Speech: Speak AI responses (if enabled)
+
+Vision API: If the user uploads images (e.g., of destinations)
+
+Firebase Auth & Firestore: Store travel profile per user
+
+Stripe: Payment for premium upgrades
+
+Skyscanner / Amadeus: Flights API (mock fallback if offline)
+
+Booking / Expedia: Hotels API
+
+Activities API: Local experience suggestions
+
+Maps API: Geolocation & suggestions
+
+QR Generator: Trip download and boarding pass
+
+Weather API: Season/date context validation
+
+Sentiment Analysis: Adapt tone of response
+
+🛠 Mega Activation Prompt (Chat Initialization)
+json
+Copiar
+Editar
+{
+  "persona": "JetAI Travel Concierge",
+  "response_mode": "one-question",
+  "memory_enabled": true,
+  "language_autodetect": true,
+  "tone": "human, caring, intuitive",
+  "voice": true,
+  "audio_input": true,
+  "tts_enabled": true,
+  "stt_enabled": true,
+  "emotion_detection": true,
+  "connected_services": [
+    "Gemini Flash",
+    "Translate",
+    "TTS",
+    "STT",
+    "Firestore",
+    "FlightsAPI",
+    "HotelsAPI",
+    "ActivitiesAPI",
+    "WeatherAPI",
+    "Maps",
+    "Stripe",
+    "QR Generator"
+  ]
+}
+✅ Revisión del Error que Mencionaste
+“🌍 Destination: Hi 💰 Budget: Mid-range 📅 Dates: budget-friendly 👥 Travelers: summer 🎯 Interests: general travel”
+
+Este error viene porque el sistema no está guardando correctamente los valores anteriores. Por eso, debemos asegurarnos que:
+
+Se guarda cada respuesta en sessionMemory
+
+El sistema verifica si ya se respondió antes de preguntar
+
+Si la palabra “Hi” es detectada como input, no se registra como destino
+
+💡 ¿Queremos hacerlo manual nosotros?
+Sí. Puedes crear tu propio chatFlow.ts o chatStages.ts para controlar el flujo en tu frontend así:
+
+ts
+Copiar
+Editar
+const conversationFlow = [
+  { id: "destination", question: "Where are you dreaming of going?" },
+  { id: "budget", question: "What's your budget? (Luxury, Mid-range, Budget-friendly)" },
+  { id: "dates", question: "When are you planning to travel?" },
+  { id: "companions", question: "Who will you be traveling with?" },
+  { id: "interests", question: "What kind of activities do you enjoy?" },
+  ...
+]
+Luego haces useState({}) para guardar cada valor y pasar al siguiente con validaciones. Yo puedo ayudarte con ese flujo si decides hacerlo tú mismo en React.
+
+🧠 ¿20 Features Faltantes Recomendadas?
+Chat summarization after every 5 messages
+
+In-chat Google Calendar sync
+
+Chat persona switcher (Luxury, Nomad, Latino)
+
+Voice tone modulation
+
+PDF/QR boarding pass generator
+
+Chat memory clear/reset option
+
+Dark/light mode auto-switch
+
+Whisper-style real-time STT fallback
+
+Multi-language toggle per message
+
+Live currency converter
+
+API status monitor (in chat!)
+
+Travel insurance upsell trigger
+
+Travel blog/article fetch
+
+AI-generated reels/photos (JetAI Postcards)
+
+“Inspire Me” mode with surprise destinations
+
+Group sync (collaborative planning)
+
+Chat-to-agent escalation
+
+WhatsApp/SMS share trip plan
+
+Personal safety check-in
+
+JetAI Rewards Wallet (with Stripe)
+

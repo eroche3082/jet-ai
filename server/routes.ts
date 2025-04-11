@@ -274,17 +274,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Chat routes
   app.post("/api/chat", async (req, res) => {
     try {
-      const { message, history } = req.body;
+      const { message, history, personality = 'concierge' } = req.body;
       if (!message) {
         return res.status(400).json({ message: "Message is required" });
       }
       
       const userId = req.user ? (req.user as any).id : null;
-      const response = await chatHandler(message, history, userId);
+      const response = await chatHandler(message, history, userId, personality);
       res.json(response);
     } catch (error) {
       console.error("Chat error:", error);
       res.status(500).json({ message: "Error processing chat message" });
+    }
+  });
+  
+  // Get available AI assistant personalities
+  app.get("/api/chat/personalities", async (req, res) => {
+    try {
+      // Import the personalities from the AI module
+      const { ASSISTANT_PERSONALITIES } = require('./lib/ai');
+      
+      // Format the response for the client
+      const personalities = Object.entries(ASSISTANT_PERSONALITIES).map(([id, data]) => ({
+        id,
+        name: data.name,
+        description: data.description,
+        voiceStyle: data.voiceStyle,
+        exampleResponse: data.exampleResponses[0]
+      }));
+      
+      res.json({ personalities });
+    } catch (error) {
+      console.error("Error fetching personalities:", error);
+      res.status(500).json({ message: "Error fetching assistant personalities" });
     }
   });
 
