@@ -183,8 +183,10 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     const loadVoices = async () => {
       try {
         const voicesData = await googleCloud.tts.getVoices();
-        if (voicesData && Array.isArray(voicesData.voices)) {
-          setAvailableVoices(voicesData.voices);
+        if (voicesData && typeof voicesData === 'object') {
+          const voices = Array.isArray(voicesData) ? voicesData : 
+                       (voicesData.voices && Array.isArray(voicesData.voices)) ? voicesData.voices : [];
+          setAvailableVoices(voices);
         }
       } catch (error) {
         console.error("Error loading TTS voices:", error);
@@ -228,7 +230,7 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
         try {
           // Detect language for better voice synthesis and multilingual support
           const languageResult = await googleCloud.translate.detectLanguage(lastMessage);
-          if (languageResult && languageResult.language) {
+          if (languageResult && typeof languageResult === 'object' && 'language' in languageResult) {
             // Map detected language code to voice language code (e.g., 'en' to 'en-US')
             const languageMapping: Record<string, string> = {
               'en': 'en-US',
@@ -244,7 +246,8 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
               'hi': 'hi-IN'
             };
             
-            const detectedLanguage = languageResult.language.split('-')[0];
+            const langCode = String(languageResult.language || 'en');
+            const detectedLanguage = langCode.split('-')[0];
             const voiceLanguage = languageMapping[detectedLanguage] || 'en-US';
             
             if (currentLanguage !== voiceLanguage) {
@@ -569,9 +572,9 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     if (!isListening && (window.SpeechRecognition || window.webkitSpeechRecognition)) {
       try {
         // Browser compatibility
-        const SpeechRecognitionAPI: typeof SpeechRecognition = window.SpeechRecognition || 
+        const SpeechRecognitionAPI = window.SpeechRecognition || 
           window.webkitSpeechRecognition || 
-          null as unknown as typeof SpeechRecognition;
+          null;
           
         if (!SpeechRecognitionAPI) {
           console.error('Speech recognition not supported in this browser');
@@ -771,19 +774,32 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
           
           if (landmarkResult && landmarkResult.landmarks && landmarkResult.landmarks.length > 0) {
             const landmark = landmarkResult.landmarks[0];
-            analysisMessage = `I can see that you've shared an image of ${landmark.name}! This is located in ${landmark.location || 'a beautiful location'}. \n\nWould you like me to tell you more about this destination or help you plan a trip there?`;
+            // Location puede venir como un objeto locations, por lo que adaptamos el código
+            const locationText = typeof landmark.locations === 'object' && landmark.locations && landmark.locations.length > 0 
+              ? landmark.locations[0].toString() 
+              : 'a beautiful location';
+            analysisMessage = `I can see that you've shared an image of ${landmark.name}! This is located in ${locationText}. \n\nWould you like me to tell you more about this destination or help you plan a trip there?`;
           } else if (analysisResult.labels && analysisResult.labels.length > 0) {
             // Extract travel-relevant labels
-            const travelLabels = analysisResult.labels.filter(label => 
-              ['beach', 'mountain', 'landscape', 'architecture', 'city', 'building', 'resort', 'hotel', 
+            const travelLabels = analysisResult.labels.filter(label => {
+              // Asegurémonos de que label y su propiedad description sea válida
+              if (!label || typeof label !== 'object') return false;
+              
+              const description = typeof label.description === 'string' 
+                ? label.description.toLowerCase() 
+                : '';
+                
+              return ['beach', 'mountain', 'landscape', 'architecture', 'city', 'building', 'resort', 'hotel', 
                'restaurant', 'food', 'museum', 'adventure', 'nature', 'ocean', 'lake', 'river', 
                'forest', 'park', 'hiking', 'camping', 'road trip', 'vacation'].some(keyword => 
-                 label.description.toLowerCase().includes(keyword)
-               )
-            );
+                 description.includes(keyword)
+               );
+            });
             
             if (travelLabels.length > 0) {
-              const topLabels = travelLabels.slice(0, 3).map(l => l.description).join(', ');
+              const topLabels = travelLabels.slice(0, 3)
+                .map(l => typeof l.description === 'string' ? l.description : 'destination')
+                .join(', ');
               analysisMessage = `I see that you've shared a travel image featuring ${topLabels}! This looks like a beautiful destination. \n\nWould you like me to suggest similar places to visit or help you plan a trip to a place like this?`;
             } else {
               analysisMessage = "Thanks for sharing this image! While I can see it, I'm not detecting specific travel landmarks. \n\nIs there a particular destination or type of travel you're interested in exploring?";
