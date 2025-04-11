@@ -299,6 +299,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Vertex AI Chat endpoints
+  app.post("/api/chat/vertex", async (req, res) => {
+    try {
+      const { message, history, memory } = req.body;
+      if (!message) {
+        return res.status(400).json({ message: "Message is required" });
+      }
+      
+      // Analizar la intención del usuario
+      const intentAnalysis = await analyzeUserIntent(message, memory);
+      console.log("User intent analysis:", intentAnalysis);
+      
+      // Procesar la respuesta del usuario y actualizar la memoria
+      const updatedMemory = processUserResponse(message, memory);
+      
+      // Si la intención es generar un itinerario, procesar de manera especial
+      let aiResponse = "";
+      let suggestions = [];
+      
+      if (intentAnalysis.intent === "itinerary_request" && updatedMemory.destination) {
+        // Generar un itinerario personalizado
+        const itineraryPrompt = `Generate a detailed 3-day itinerary for ${updatedMemory.destination} with a ${updatedMemory.budget} budget for ${updatedMemory.travelers}. Focus on these interests: ${updatedMemory.interests.join(', ')}.`;
+        
+        aiResponse = await sendMessageToGemini(itineraryPrompt, history, {
+          systemPrompt: "You are JetAI, a luxury travel concierge. Create detailed, realistic itineraries with specific times, places and activities. Format with markdown for readability."
+        });
+        
+        suggestions = [
+          "Show me hotels in this area",
+          "Find flights to this destination",
+          "Add one more day to itinerary",
+          "Recommend local experiences"
+        ];
+      } else {
+        // Para conversación normal, generar la siguiente pregunta según el flujo
+        aiResponse = generateNextQuestion(updatedMemory);
+        
+        // Sugerencias basadas en la etapa actual
+        switch (updatedMemory.currentQuestion) {
+          case 'destination':
+            suggestions = ["Paris, Francia", "Tokio, Japón", "Nueva York", "Cancún, México"];
+            break;
+          case 'budget':
+            suggestions = ["Lujo", "Medio", "Económico", "No tengo un presupuesto fijo"];
+            break;
+          case 'dates':
+            suggestions = ["Próximo mes", "Verano", "Diciembre", "Semana Santa"];
+            break;
+          case 'travelers':
+            suggestions = ["Solo", "En pareja", "Familia (2 adultos, 2 niños)", "Grupo de amigos"];
+            break;
+          case 'interests':
+            suggestions = ["Playa y relajación", "Cultura e historia", "Gastronomía", "Aventura y deportes"];
+            break;
+          case 'summary':
+            suggestions = ["Generar itinerario", "Cambiar destino", "Ajustar fechas", "Añadir más intereses"];
+            break;
+          default:
+            suggestions = ["¿Qué lugares recomiendas?", "¿Cuál es la mejor época?", "Actividades populares", "Consejos locales"];
+        }
+      }
+      
+      // Formatear y responder
+      const userId = req.user ? (req.user as any).id : null;
+      
+      // Guardar el mensaje en el historial si el usuario está autenticado
+      if (userId) {
+        // Aquí podrías guardar el mensaje en la base de datos
+        try {
+          await storage.saveChatMessage(userId, message, 'user');
+          await storage.saveChatMessage(userId, aiResponse, 'assistant');
+        } catch (error) {
+          console.error("Error saving chat message:", error);
+          // No interrumpir el flujo si falla el guardado
+        }
+      }
+      
+      res.json({
+        message: aiResponse,
+        memory: updatedMemory,
+        suggestions,
+        intent: intentAnalysis.intent
+      });
+    } catch (error) {
+      console.error("Vertex AI Chat error:", error);
+      res.status(500).json({ 
+        message: "Error processing message with Vertex AI",
+        error: error.message
+      });
+    }
+  });
+  
   // Get available AI assistant personalities
   app.get("/api/chat/personalities", async (req, res) => {
     try {

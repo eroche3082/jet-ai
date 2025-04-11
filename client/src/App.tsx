@@ -11,6 +11,7 @@ import Checkout from "@/pages/Checkout";
 import Membership from "@/pages/Membership";
 import PricingPlans from "@/pages/PricingPlans";
 import NotFound from "@/pages/not-found";
+import VertexAIPage from "@/pages/VertexAIPage";
 import Layout from "@/components/Layout";
 import MobileLayout from "@/components/MobileLayout";
 import { useState, useEffect } from 'react';
@@ -120,6 +121,9 @@ function App() {
       <Route path="/signin" component={SignIn} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/checkout" component={Checkout} />
+      
+      {/* AI Assistant routes */}
+      <Route path="/vertex-ai" component={VertexAIPage} />
       
       {/* Partner/Affiliate routes */}
       <Route path="/partner/dashboard" component={PartnerDashboard} />

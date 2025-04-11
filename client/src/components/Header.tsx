@@ -41,6 +41,7 @@ export default function Header() {
     { title: 'Home', path: '/' },
     { title: 'Destinations', path: '/destinations' },
     { title: 'Itineraries', path: '/itineraries' },
+    { title: 'Vertex AI', path: '/vertex-ai' },
     { title: 'About', path: '/about' }
   ];
   

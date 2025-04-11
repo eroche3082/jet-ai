@@ -58,9 +58,9 @@ export async function sendMessageToGemini(
     // Obtener el modelo Gemini
     const generativeModel = vertexAI.getGenerativeModel({
       model: MODEL,
-      generation_config: {
+      generationConfig: {
         temperature: options.temperature || 0.2,
-        max_output_tokens: options.maxOutputTokens || 1024,
+        maxOutputTokens: options.maxOutputTokens || 1024,
       },
     });
 
@@ -91,7 +91,21 @@ export async function sendMessageToGemini(
     const result = await chat.sendMessage(prompt);
     const response = result.response;
     
-    return response.text();
+    // Obtener el texto de la respuesta - asegurando compatibilidad con la API
+    if (response.candidates && response.candidates.length > 0 &&
+        response.candidates[0].content && 
+        response.candidates[0].content.parts && 
+        response.candidates[0].content.parts.length > 0) {
+      return response.candidates[0].content.parts[0].text || '';
+    }
+    
+    // Si no podemos obtener la respuesta del formato esperado, intentar otras propiedades
+    if (typeof response.text === 'function') {
+      return response.text();
+    }
+    
+    // Fallback
+    return 'Lo siento, no pude generar una respuesta. Por favor, intenta nuevamente.';
   } catch (error) {
     console.error('Error in Vertex AI call:', error);
     throw new Error(`Failed to get response from Gemini: ${error.message}`);
