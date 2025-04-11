@@ -15,6 +15,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import EmbedWidgetDemo from "@/components/EmbedWidgetDemo";
+import ApiIntegrationsPanel from "@/components/ApiIntegrationsPanel";
 import { formatCurrency } from '@/lib/utils';
 import {
   ArrowUpRight,
@@ -889,6 +890,9 @@ export default function PartnerDashboard() {
           
           {/* Integration Tab */}
           <TabsContent value="integration" className="space-y-6">
+            {/* API Integrations Panel */}
+            <ApiIntegrationsPanel />
+            
             <Card>
               <CardHeader>
                 <CardTitle>Widget Preview</CardTitle>
