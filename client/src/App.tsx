@@ -12,6 +12,8 @@ import Membership from "@/pages/Membership";
 import PricingPlans from "@/pages/PricingPlans";
 import NotFound from "@/pages/not-found";
 import VertexAIPage from "@/pages/VertexAIPage";
+import CameraPage from "@/pages/CameraPage";
+import QRScannerPage from "@/pages/QRScannerPage";
 import Layout from "@/components/Layout";
 import MobileLayout from "@/components/MobileLayout";
 import { useState, useEffect } from 'react';
@@ -124,6 +126,10 @@ function App() {
       
       {/* AI Assistant routes */}
       <Route path="/vertex-ai" component={VertexAIPage} />
+      
+      {/* Tool routes */}
+      <Route path="/camera" component={CameraPage} />
+      <Route path="/qr-scanner" component={QRScannerPage} />
       
       {/* Partner/Affiliate routes */}
       <Route path="/partner/dashboard" component={PartnerDashboard} />
