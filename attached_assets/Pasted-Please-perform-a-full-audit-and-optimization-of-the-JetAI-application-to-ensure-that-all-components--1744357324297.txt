@@ -1,0 +1,88 @@
+Please perform a full audit and optimization of the JetAI application to ensure that all components are stable, non-redundant, and correctly connected.
+
+We’ve now completed Phase 5 (Franchising + White-Label) and are preparing for full deployment and immersive ChatOS features.
+
+---
+
+### 🧩 1. Fix & Validate Navigation and Layout
+
+- Confirm that **Layout.tsx** is only applied once per page (avoid double wrapping).
+- Ensure that no routes (e.g., `/Itineraries`, `/ItineraryView`) have duplicate headers or menus.
+- Validate that App.tsx and all subpages are correctly structured.
+- Remove any outdated route or component duplications.
+
+---
+
+### 📥 2. Footer and Newsletter Section
+
+- Ensure the new **Footer component** is present on all public pages:
+  - Includes newsletter subscription (connected or ready for integration)
+  - Displays quick links and partner info dynamically
+- Fix any visual misalignments in the footer section.
+
+---
+
+### 🌐 3. Franchising System Check (White-Label Mode)
+
+- Ensure that the **ThemeProvider** dynamically applies visual themes based on subdomains or URL params:
+  - e.g., `luxury.jetai.app` loads JetAI Luxury theme
+  - `espanol.jetai.app` or `jetai.app/espanol` loads Spanish content and style
+- Verify that each partner:
+  - Has a referral link and embed widget
+  - Sees their correct data in the Partner Dashboard
+  - Can copy referral codes and links using the clipboard utility
+
+---
+
+### 🔐 4. Partner Dashboard & Analytics
+
+- Confirm that the Partner Dashboard shows:
+  - Number of referrals
+  - Conversion rate
+  - Estimated commissions
+  - Signup date, embed stats
+- Format currency correctly using `formatCurrency` utility.
+
+---
+
+### 📡 5. Secrets & Environment
+
+- Validate that no sensitive environment variables are exposed to unauthorized users.
+- Make sure `.env` keys are properly scoped and `invite permissions` are secure.
+- Check all integrations: Stripe, Gemini, Firebase, ElevenLabs, etc.
+
+---
+
+### ✈️ 6. Itinerary Engine Cleanup
+
+- Fix any issues with the **Itineraries** and **ItineraryView** pages:
+  - Remove duplicate menus
+  - Ensure data is pulled correctly from storage
+  - Make itinerary details responsive and clean
+- Check CRUD functionality across all itinerary actions.
+
+---
+
+### 💬 7. Prepare for ChatOS Phase (Readiness)
+
+- Verify current AIChat component supports:
+  - Markdown rendering
+  - Emoji
+  - Credits tracking by membership tier
+- Confirm audio features are ready for integration
+- Leave stubs/placeholders for:
+  - In-chat booking actions
+  - Voice input/output
+  - Group trip logic
+  - Rewards sync (VidaRewards + airline/hotel APIs)
+
+---
+
+### 🧠 8. Final Output & Confirmation
+
+- Once all issues are fixed:
+  - Provide a **summary report** of changes
+  - Take screenshots of each section tested (footer, menus, partner dashboard, itinerary, chat)
+  - Confirm that the system is ready for Phase 6 ChatOS implementation and external launch
+
+Thank you!

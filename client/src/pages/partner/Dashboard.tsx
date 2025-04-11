@@ -10,6 +10,10 @@ import { useTheme } from "@/components/ThemeProvider";
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
 import EmbedWidgetDemo from "@/components/EmbedWidgetDemo";
 import { formatCurrency } from '@/lib/utils';
 import {
@@ -28,6 +32,7 @@ import {
   ChevronUp,
   User,
   Eye,
+  Calendar as CalendarIcon,
   ExternalLink,
   Loader2,
   CheckCircle2,
