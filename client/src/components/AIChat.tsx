@@ -36,6 +36,7 @@ import {
 import { activeChatConfig } from '@/lib/chatConfig';
 import useSpeechRecognition from '@/hooks/useSpeechRecognition';
 import useTextToSpeech from '@/hooks/useTextToSpeech';
+import { initializeJetAI, getJetAIState, JetAIState, isJetAIInitialized } from '@/lib/jetAI';
 
 // SpeechRecognition types for TypeScript
 interface SpeechRecognitionEvent extends Event {
@@ -178,6 +179,108 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     '✨ Travel inspiration'
   ];
 
+  // Initialize JetAI system
+  useEffect(() => {
+    // Only initialize once
+    if (!isJetAIInitialized()) {
+      console.log("Initializing JetAI Concierge...");
+      
+      // Initialize with configurations from the prompt
+      initializeJetAI({
+        mode: "concierge",
+        personality: "luxury_travel_expert",
+        languages: ["en", "es"],
+        startWith: "Welcome aboard JetAI, your personal AI-powered travel concierge. I'm here to craft unforgettable travel experiences tailored just for you. How may I assist you today?",
+        
+        conversationFlow: null, // Loaded from existing implementation
+        assistantPersonality: null, // Loaded from existing implementation
+
+        features: {
+          voice: {
+            recognition: useSpeechRecognition,
+            synthesis: useTextToSpeech,
+            autoSpeakResponses: true
+          },
+          fallback: {
+            weather: ["GoogleWeatherAPI", "OpenMeteo"],
+            geocoding: ["GoogleGeocoding", "Nominatim"],
+            routing: ["GoogleRoutesAPI", "OSRM"],
+            places: ["GooglePlaces", "YelpAPI"]
+          },
+          itinerary: {
+            generator: null, // Using existing implementation
+            autoGenerateAfterProfile: true
+          },
+          apiStatus: null, // Using existing monitoring
+          profileExtraction: {
+            extractor: null, // Using existing implementation
+            memory: true,
+          },
+          ai: {
+            provider: "VertexAI",
+            model: "gemini-1.5-flash",
+            chatEndpoint: "/api/chat/vertex",
+            stream: true,
+            emotionalTone: true,
+            sentimentAnalysis: true,
+          }
+        },
+
+        interface: {
+          avatar: {
+            enabled: true,
+            panel: "left",
+            style: "Concierge AI",
+            memoryDisplay: true
+          },
+          chat: {
+            layout: "2-column",
+            suggestionButtons: true,
+            delayPerStage: 300,
+            colorTheme: "luxury"
+          },
+          floatingBubble: {
+            enabled: true,
+            triggersFullScreen: true
+          }
+        },
+
+        validations: {
+          GOOGLE_APPLICATION_CREDENTIALS: "REQUIRED",
+          fallbackServicesWorking: true,
+          chatFlowConnected: true,
+          voiceModulesLoaded: true,
+          GeminiAPIResponding: true
+        },
+
+        testAfterInit: [
+          "GET /api/system/status",
+          "POST /api/chat/vertex { message: 'What's the weather like in Paris today?' }",
+          "POST /api/chat/vertex { message: 'Can you plan a relaxing trip to Bali for me?' }"
+        ],
+
+        finalStep: "Unlock itinerary, flights, hotels, and experience panels after profile is complete."
+      });
+      
+      // Update personality from JetAI config
+      const jetAIState = getJetAIState();
+      if (jetAIState.personality) {
+        setSelectedPersonality(jetAIState.personality);
+      }
+      
+      // Update initial welcome message
+      if (jetAIState.startMessage) {
+        setMessages([{
+          role: 'assistant',
+          content: jetAIState.startMessage
+        }]);
+      }
+      
+      // Update audio settings
+      setAudioEnabled(jetAIState.voiceAutoplay);
+    }
+  }, []);
+  
   // Load available voice options from Google TTS
   useEffect(() => {
     const loadVoices = async () => {
