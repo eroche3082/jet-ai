@@ -762,7 +762,7 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
         </div>
         
         {/* Personality Selector */}
-        {!isLoadingPersonalities && personalities?.length > 0 && (
+        {!isLoadingPersonalities && personalities && personalities.length > 0 && (
           <div className="mt-2 pt-2 border-t border-white/20">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -772,19 +772,21 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
                 >
                   <div className="flex items-center">
                     <UserCheck className="w-4 h-4 mr-2" />
-                    {personalities.find(p => p.id === selectedPersonality)?.name || 'Assistant Personality'}
+                    {personalities && personalities.find(p => p.id === selectedPersonality)?.name || 'Assistant Personality'}
                   </div>
                   <i className="fas fa-chevron-down text-xs"></i>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                {personalities.map((personality) => (
+              <DropdownMenuContent align="end" className="w-56 max-h-80 overflow-y-auto">
+                {personalities && personalities.map((personality) => (
                   <DropdownMenuItem 
                     key={personality.id}
                     onClick={() => setSelectedPersonality(personality.id)}
-                    className="cursor-pointer"
+                    className={`cursor-pointer hover:bg-gray-100 ${
+                      personality.id === selectedPersonality ? 'bg-primary/10' : ''
+                    }`}
                   >
-                    <div className="flex flex-col">
+                    <div className="flex flex-col py-1">
                       <span className="font-semibold">{personality.name}</span>
                       <span className="text-xs text-gray-500">{personality.description}</span>
                     </div>
