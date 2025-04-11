@@ -1,10 +1,12 @@
 /**
  * Cliente de flujo de conversación para JetAI
  * Este archivo maneja la lógica del flujo de conversación en el cliente,
- * conectando con el servidor para procesar las respuestas y mantener el estado.
+ * enviando mensajes al servidor y actualizando la UI.
  */
 
-// Las mismas definiciones de tipos que en el servidor para mantener consistencia
+import { apiRequest } from '@/lib/queryClient';
+
+// Etapas de la conversación (debe coincidir con el servidor)
 export enum ConversationStage {
   GREETING,
   ASK_NAME_EMAIL,
@@ -17,6 +19,7 @@ export enum ConversationStage {
   GENERAL
 }
 
+// Interfaz del perfil de usuario (debe coincidir con el servidor)
 export interface UserProfile {
   currentStage: ConversationStage;
   name?: string;
@@ -36,7 +39,7 @@ export interface UserProfile {
   }>;
 }
 
-// Tipos de mensajes
+// Interfaz de mensaje para el chat
 export interface Message {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -45,6 +48,19 @@ export interface Message {
   status?: 'pending' | 'sent' | 'delivered' | 'error';
   emotion?: 'happy' | 'sad' | 'angry' | 'neutral' | 'excited' | 'confused';
 }
+
+// Preguntas para cada etapa (debe coincidir con el servidor)
+export const STAGE_QUESTIONS: Record<ConversationStage, string> = {
+  [ConversationStage.GREETING]: "👋 ¡Hola! Soy JetAI, tu asistente de viajes personal. Estoy aquí para ayudarte a planificar tu próxima aventura. ¿Cómo puedo ayudarte hoy?",
+  [ConversationStage.ASK_NAME_EMAIL]: "Para personalizar mejor tu experiencia, ¿podrías compartir tu nombre y email?",
+  [ConversationStage.ASK_DESTINATION]: "¡Excelente! ¿A dónde te gustaría viajar?",
+  [ConversationStage.ASK_BUDGET]: "¿Cuál es tu presupuesto aproximado para este viaje?",
+  [ConversationStage.ASK_DATES]: "¿En qué fechas estás considerando viajar?",
+  [ConversationStage.ASK_TRAVELERS]: "¿Con quién viajarás? ¿Solo, en pareja, familia o amigos?",
+  [ConversationStage.ASK_INTERESTS]: "¿Qué tipo de actividades o experiencias te interesan para este viaje? (Por ejemplo: cultura, gastronomía, aventura, relax, etc.)",
+  [ConversationStage.ITINERARY_REQUEST]: "¡Gracias por toda la información! ¿Te gustaría que te genere un itinerario personalizado basado en tus preferencias?",
+  [ConversationStage.GENERAL]: "¿Hay algo más en lo que pueda ayudarte con respecto a tu viaje?"
+};
 
 /**
  * Crea un nuevo perfil de usuario vacío
@@ -55,19 +71,6 @@ export function createNewUserProfile(): UserProfile {
     conversationHistory: []
   };
 }
-
-// Mensajes predefinidos para cada etapa (igual que en el servidor)
-export const STAGE_QUESTIONS: Record<ConversationStage, string> = {
-  [ConversationStage.GREETING]: "🛫 Welcome aboard JetAI, your personal AI-powered concierge. Before we begin planning your unforgettable journey, may I have your name and email?",
-  [ConversationStage.ASK_NAME_EMAIL]: "Before we begin planning your unforgettable journey, may I have your name and email?",
-  [ConversationStage.ASK_DESTINATION]: "Thank you! Now, where would you like to travel to? You can specify a city, country, or region.",
-  [ConversationStage.ASK_BUDGET]: "Excellent choice! What's your approximate budget for this trip?",
-  [ConversationStage.ASK_DATES]: "When are you planning to travel? You can be specific or general (e.g., 'July 2025' or 'next weekend').",
-  [ConversationStage.ASK_TRAVELERS]: "How many people will be traveling? Will you be traveling with children or have any special needs?",
-  [ConversationStage.ASK_INTERESTS]: "What activities or experiences interest you for this trip? (e.g., cuisine, culture, adventure, relaxation...)",
-  [ConversationStage.ITINERARY_REQUEST]: "Great! Based on your preferences, would you like me to prepare a personalized itinerary?",
-  [ConversationStage.GENERAL]: "Is there anything else you'd like to know about your trip?"
-};
 
 /**
  * Genera un ID único para los mensajes
@@ -80,26 +83,27 @@ function generateMessageId(): string {
  * Comprueba si un mensaje está relacionado con vuelos
  */
 export function isFlightRelated(text: string): boolean {
-  const flightTerms = [
-    "flight", "fly", "airline", "airport", "departure", "arrival", "connection", 
-    "connection", "vuelo", "volar", "aerolínea", "aeropuerto", "vuelos", "plane", "avión"
+  const flightKeywords = [
+    'vuelo', 'vuelos', 'flight', 'flights', 'avión', 'airplane', 'aerolínea', 'airline',
+    'aeropuerto', 'airport', 'reserva de vuelo', 'flight booking', 'escala', 'layover'
   ];
-  
-  const lowercaseText = text.toLowerCase();
-  return flightTerms.some(term => lowercaseText.includes(term));
+
+  const lowerText = text.toLowerCase();
+  return flightKeywords.some(keyword => lowerText.includes(keyword));
 }
 
 /**
  * Comprueba si un mensaje está relacionado con hoteles
  */
 export function isHotelRelated(text: string): boolean {
-  const hotelTerms = [
-    "hotel", "hostel", "airbnb", "resort", "accommodation", "stay", "room", "lodge", 
-    "booking", "alojamiento", "hostal", "habitación", "reserva", "hospedaje"
+  const hotelKeywords = [
+    'hotel', 'hoteles', 'hotels', 'alojamiento', 'accommodation', 'hospedaje', 'lodging',
+    'habitación', 'room', 'motel', 'hostal', 'hostel', 'apartamento', 'apartment', 'airbnb',
+    'reserva', 'booking', 'check-in', 'checkout'
   ];
-  
-  const lowercaseText = text.toLowerCase();
-  return hotelTerms.some(term => lowercaseText.includes(term));
+
+  const lowerText = text.toLowerCase();
+  return hotelKeywords.some(keyword => lowerText.includes(keyword));
 }
 
 /**
@@ -107,124 +111,63 @@ export function isHotelRelated(text: string): boolean {
  */
 export function isGreeting(text: string): boolean {
   const greetings = [
-    // Inglés
-    "hi", "hello", "hey", "howdy", "hiya", "good morning", "good afternoon", "good evening", "what's up", "sup",
-    // Español
-    "hola", "buenos días", "buenas tardes", "buenas noches", "qué tal", "cómo estás",
-    // Francés
-    "bonjour", "salut", "bonsoir", "ça va",
-    // Alemán
-    "hallo", "guten tag", "guten morgen", "guten abend",
-    // Italiano
-    "ciao", "buongiorno", "buonasera", "salve",
-    // Portugués
-    "olá", "bom dia", "boa tarde", "boa noite",
+    'hola', 'hello', 'hi', 'hey', 'buenos días', 'buenas tardes', 'buenas noches',
+    'good morning', 'good afternoon', 'good evening', 'saludos', 'greetings',
+    'qué tal', 'cómo estás', 'how are you'
   ];
-
-  const lowercaseText = text.toLowerCase().trim();
   
-  return greetings.some(greeting => 
-    lowercaseText === greeting || 
-    lowercaseText.startsWith(`${greeting} `) ||
-    lowercaseText.startsWith(`${greeting},`)
-  );
+  const lowerText = text.toLowerCase();
+  return greetings.some(greeting => lowerText.includes(greeting));
 }
 
 /**
  * Extrae información de idioma del texto
  */
 export function detectLanguage(text: string): string | null {
-  // Patrones simples para detectar idiomas basados en caracteres distintivos o expresiones
-  if (/[áéíóúüñ¿¡]/i.test(text)) {
-    return 'es-ES'; // Español
-  }
+  // Esta es una implementación simple - en producción se usaría una API de detección de idioma
+  const spanishPatterns = ['hola', 'buenos días', 'gracias', 'por favor', 'cómo estás', 'me gustaría', 'quiero', 'viaje'];
+  const frenchPatterns = ['bonjour', 'merci', 's\'il vous plaît', 'comment allez-vous', 'je voudrais', 'voyage'];
+  const germanPatterns = ['hallo', 'guten tag', 'danke', 'bitte', 'wie geht es dir', 'ich möchte', 'reise'];
   
-  if (/[àâçéèêëîïôùûüÿ]/i.test(text)) {
-    return 'fr-FR'; // Francés
-  }
+  const lowerText = text.toLowerCase();
   
-  if (/[äöüß]/i.test(text)) {
-    return 'de-DE'; // Alemán
-  }
-  
-  if (/[àèéìòó]/i.test(text)) {
-    return 'it-IT'; // Italiano
-  }
-  
-  if (/[ãõêç]/i.test(text)) {
-    return 'pt-BR'; // Portugués
-  }
-  
-  // Detectar frases en diferentes idiomas
-  const text_lower = text.toLowerCase();
-  if (text_lower.includes('gracias') || text_lower.includes('buenos días') || text_lower.includes('cómo estás')) {
+  if (spanishPatterns.some(pattern => lowerText.includes(pattern))) {
     return 'es-ES';
-  }
-  
-  if (text_lower.includes('merci') || text_lower.includes('bonjour') || text_lower.includes('comment ça va')) {
+  } else if (frenchPatterns.some(pattern => lowerText.includes(pattern))) {
     return 'fr-FR';
-  }
-  
-  if (text_lower.includes('danke') || text_lower.includes('guten tag') || text_lower.includes('wie geht es dir')) {
+  } else if (germanPatterns.some(pattern => lowerText.includes(pattern))) {
     return 'de-DE';
   }
   
-  if (text_lower.includes('grazie') || text_lower.includes('buongiorno') || text_lower.includes('come stai')) {
-    return 'it-IT';
-  }
-  
-  if (text_lower.includes('obrigado') || text_lower.includes('bom dia') || text_lower.includes('como vai')) {
-    return 'pt-BR';
-  }
-  
-  return null; // No se detectó un idioma específico, probablemente inglés o indeterminado
+  // Por defecto asumimos inglés
+  return 'en-US';
 }
 
 /**
  * Extrae la emoción del texto (análisis básico)
  */
 export function detectEmotion(text: string): 'happy' | 'sad' | 'angry' | 'neutral' | 'excited' | 'confused' {
-  const text_lower = text.toLowerCase();
+  // Esta es una implementación simple - en producción se usaría una API de análisis de sentimientos
+  const happyPatterns = ['feliz', 'contento', 'happy', 'great', 'awesome', 'amazing', 'excelente', 'bueno', 'good'];
+  const sadPatterns = ['triste', 'sad', 'disappointed', 'unhappy', 'unfortunate', 'lamentable'];
+  const angryPatterns = ['enfadado', 'angry', 'mad', 'furious', 'upset', 'frustrado', 'frustrated'];
+  const excitedPatterns = ['emocionado', 'excited', 'thrilled', 'entusiasmado', 'enthusiastic', 'cannot wait'];
+  const confusedPatterns = ['confundido', 'confused', 'not sure', 'no entiendo', 'don\'t understand', 'unclear'];
   
-  // Patrones emocionales simples
-  const happyPatterns = ['happy', 'glad', 'great', 'good', 'excellent', 'fantastic', 'wonderful', 'contento', 'feliz', 'genial'];
-  const sadPatterns = ['sad', 'unhappy', 'disappointed', 'sorry', 'unfortunately', 'triste', 'lamento', 'desafortunadamente'];
-  const angryPatterns = ['angry', 'annoyed', 'frustrated', 'terrible', 'worst', 'bad', 'hate', 'furioso', 'molesto', 'terrible'];
-  const excitedPatterns = ['excited', 'amazing', 'wow', 'awesome', 'incredible', 'love', 'can\'t wait', 'emocionado', 'increíble', 'impresionante'];
-  const confusedPatterns = ['confused', 'unsure', 'not sure', 'don\'t understand', 'what do you mean', 'confundido', 'no entiendo', 'qué quieres decir'];
+  const lowerText = text.toLowerCase();
   
-  // Verificar patrones
-  if (happyPatterns.some(pattern => text_lower.includes(pattern))) {
+  if (happyPatterns.some(pattern => lowerText.includes(pattern))) {
     return 'happy';
-  }
-  
-  if (sadPatterns.some(pattern => text_lower.includes(pattern))) {
+  } else if (sadPatterns.some(pattern => lowerText.includes(pattern))) {
     return 'sad';
-  }
-  
-  if (angryPatterns.some(pattern => text_lower.includes(pattern))) {
+  } else if (angryPatterns.some(pattern => lowerText.includes(pattern))) {
     return 'angry';
-  }
-  
-  if (excitedPatterns.some(pattern => text_lower.includes(pattern))) {
+  } else if (excitedPatterns.some(pattern => lowerText.includes(pattern))) {
     return 'excited';
-  }
-  
-  if (confusedPatterns.some(pattern => text_lower.includes(pattern))) {
+  } else if (confusedPatterns.some(pattern => lowerText.includes(pattern))) {
     return 'confused';
   }
   
-  // Signos de exclamación para entusiasmo
-  if (text.includes('!') && !text.includes('?')) {
-    return 'excited';
-  }
-  
-  // Preguntas largas pueden indicar confusión
-  if ((text.match(/\?/g) || []).length > 1) {
-    return 'confused';
-  }
-  
-  // Por defecto, neutral
   return 'neutral';
 }
 
@@ -240,68 +183,19 @@ export async function processMessage(
   emotion?: 'happy' | 'sad' | 'angry' | 'neutral' | 'excited' | 'confused';
 }> {
   try {
-    const response = await fetch('/api/conversation/process', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message,
-        profile,
-      }),
+    const response = await apiRequest('POST', '/api/conversation/process', {
+      message,
+      profile
     });
-
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status}`);
-    }
-
-    return await response.json();
+    
+    const result = await response.json();
+    return result;
   } catch (error) {
-    console.error('Error processing message:', error);
-    
-    // Manejo de errores básico (en modo offline o cuando hay errores)
-    // Intentamos imitar el comportamiento del servidor
-    const detectedEmotion = detectEmotion(message);
-    
-    // Actualizar perfil con información básica (análisis en el cliente)
-    let updatedProfile = { ...profile };
-    
-    // Detectar idioma
-    const detectedLanguage = detectLanguage(message);
-    if (detectedLanguage) {
-      updatedProfile.language = detectedLanguage;
-    }
-    
-    // Crear una respuesta básica
-    let response = "I'm sorry, I'm having trouble connecting to my knowledge base. Could you try again?";
-    
-    // Si estamos en modo offline, intentar avanzar la conversación
-    if (isGreeting(message)) {
-      updatedProfile.currentStage = ConversationStage.ASK_NAME_EMAIL;
-      response = STAGE_QUESTIONS[ConversationStage.ASK_NAME_EMAIL];
-    } else if (profile.currentStage === ConversationStage.GREETING || profile.currentStage === ConversationStage.ASK_NAME_EMAIL) {
-      // Extraer nombre/email manualmente
-      if (message.includes('@')) {
-        updatedProfile.email = message;
-      } else {
-        updatedProfile.name = message;
-      }
-      updatedProfile.currentStage = ConversationStage.ASK_DESTINATION;
-      response = STAGE_QUESTIONS[ConversationStage.ASK_DESTINATION];
-    } else {
-      // Solo avanzamos una etapa
-      const currentStageIndex = Object.values(ConversationStage).indexOf(profile.currentStage);
-      const nextStageIndex = Math.min(currentStageIndex + 1, Object.values(ConversationStage).length - 1);
-      const nextStage = Object.values(ConversationStage)[nextStageIndex];
-      
-      updatedProfile.currentStage = nextStage as ConversationStage;
-      response = STAGE_QUESTIONS[nextStage as ConversationStage];
-    }
-    
+    console.error('Error procesando mensaje:', error);
     return {
-      response,
-      updatedProfile,
-      emotion: detectedEmotion,
+      response: 'Lo siento, tuve problemas procesando tu mensaje. ¿Podrías intentarlo nuevamente?',
+      updatedProfile: profile,
+      emotion: 'confused'
     };
   }
 }
@@ -311,23 +205,15 @@ export async function processMessage(
  */
 export async function requestItinerary(profile: UserProfile): Promise<string> {
   try {
-    const response = await fetch('/api/itinerary/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ profile }),
+    const response = await apiRequest('POST', '/api/itinerary/generate-from-profile', {
+      profile
     });
-
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.itinerary;
+    
+    const result = await response.json();
+    return result.itinerary;
   } catch (error) {
-    console.error('Error generating itinerary:', error);
-    return "I'm sorry, I couldn't generate your itinerary at this time. Please try again later.";
+    console.error('Error generando itinerario:', error);
+    return 'Lo siento, no pude generar un itinerario en este momento. Por favor, intenta nuevamente más tarde.';
   }
 }
 
@@ -337,10 +223,10 @@ export async function requestItinerary(profile: UserProfile): Promise<string> {
 export function createInitialSystemMessage(): Message {
   return {
     id: generateMessageId(),
-    role: 'assistant',
+    role: 'system',
     content: STAGE_QUESTIONS[ConversationStage.GREETING],
     timestamp: new Date(),
-    status: 'delivered',
+    status: 'delivered'
   };
 }
 
@@ -351,10 +237,9 @@ export function createUserMessage(content: string): Message {
   return {
     id: generateMessageId(),
     role: 'user',
-    content,
+    content: content,
     timestamp: new Date(),
-    status: 'sent',
-    emotion: detectEmotion(content)
+    status: 'sent'
   };
 }
 
@@ -362,16 +247,17 @@ export function createUserMessage(content: string): Message {
  * Crea un nuevo mensaje del asistente
  */
 export function createAssistantMessage(
-  content: string, 
-  emotion: 'happy' | 'sad' | 'angry' | 'neutral' | 'excited' | 'confused' = 'neutral'
+  content: string,
+  emotion: 'happy' | 'sad' | 'angry' | 'neutral' | 'excited' | 'confused' = 'neutral',
+  status: 'pending' | 'sent' | 'delivered' | 'error' = 'delivered'
 ): Message {
   return {
     id: generateMessageId(),
     role: 'assistant',
-    content,
+    content: content,
     timestamp: new Date(),
-    status: 'delivered',
-    emotion
+    status: status,
+    emotion: emotion
   };
 }
 
@@ -379,12 +265,11 @@ export function createAssistantMessage(
  * Extrae comandos especiales de un mensaje del usuario
  */
 export function extractCommand(message: string): { command: string; args: string } | null {
-  const commandPattern = /^\/([a-zA-Z]+)(?:\s+(.+))?$/;
-  const match = message.match(commandPattern);
+  const commandRegex = /^\/([a-zA-Z0-9]+)(?:\s+(.+))?$/;
+  const match = message.match(commandRegex);
   
   if (match) {
-    const command = match[1].toLowerCase();
-    const args = match[2] || '';
+    const [, command, args = ''] = match;
     return { command, args };
   }
   
@@ -395,31 +280,49 @@ export function extractCommand(message: string): { command: string; args: string
  * Ejecuta un comando especial
  */
 export function executeCommand(command: string, args: string): string {
-  switch (command) {
+  switch (command.toLowerCase()) {
     case 'help':
       return `
-**Available commands:**
-- /reset - Reset the conversation
-- /itinerary - Generate a travel itinerary
-- /flights - Search for flights
-- /hotels - Search for accommodations
-- /activities - Find local activities
-- /language [code] - Change language (e.g., /language es)
-- /help - Show this help message
-      `;
-    case 'reset':
-      // El reseteo real se maneja en el componente
-      return "Conversation has been reset. How can I help you plan your next journey?";
+### Comandos disponibles:
+- **/help** - Muestra esta ayuda
+- **/restart** - Reinicia la conversación
+- **/language [código]** - Cambia el idioma (en, es, fr, de)
+- **/itinerary** - Genera un itinerario con la información proporcionada
+- **/voice [on/off]** - Activa o desactiva la voz
+`;
+    
+    case 'restart':
+      return 'Conversación reiniciada.';
+    
     case 'language':
-      const validLanguages = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ja', 'ko', 'zh'];
       const lang = args.trim().toLowerCase();
+      let langName = '';
       
-      if (!lang || !validLanguages.includes(lang)) {
-        return `Please specify a valid language code: ${validLanguages.join(', ')}`;
+      switch (lang) {
+        case 'en': case 'english': case 'inglés': langName = 'inglés'; break;
+        case 'es': case 'spanish': case 'español': langName = 'español'; break;
+        case 'fr': case 'french': case 'francés': langName = 'francés'; break;
+        case 'de': case 'german': case 'alemán': langName = 'alemán'; break;
+        default: return 'Idioma no reconocido. Idiomas soportados: en (inglés), es (español), fr (francés), de (alemán).';
       }
       
-      return `Language changed to ${lang}. How can I assist you with your travel plans?`;
+      return `Idioma cambiado a ${langName}.`;
+    
+    case 'itinerary':
+      return 'Generando itinerario con la información proporcionada...';
+    
+    case 'voice':
+      const voiceOption = args.trim().toLowerCase();
+      
+      if (voiceOption === 'on') {
+        return 'Asistente por voz activado.';
+      } else if (voiceOption === 'off') {
+        return 'Asistente por voz desactivado.';
+      } else {
+        return 'Opción no reconocida. Utiliza "/voice on" para activar o "/voice off" para desactivar.';
+      }
+    
     default:
-      return `Unknown command: /${command}. Type /help to see available commands.`;
+      return `Comando no reconocido: /${command}. Usa /help para ver los comandos disponibles.`;
   }
 }

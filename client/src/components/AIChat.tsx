@@ -22,11 +22,16 @@ import googleCloud from '@/lib/googlecloud';
 import { 
   ConversationStage, 
   STAGE_QUESTIONS, 
-  determineNextStage, 
-  updateTravelProfile, 
-  getTravelProfileSummary,
+  UserProfile,
   isGreeting,
-  TravelProfile
+  createUserMessage,
+  createAssistantMessage,
+  createInitialSystemMessage,
+  processMessage,
+  requestItinerary,
+  detectLanguage,
+  extractCommand,
+  executeCommand
 } from '@/lib/conversationFlow';
 import { activeChatConfig } from '@/lib/chatConfig';
 import useSpeechRecognition from '@/hooks/useSpeechRecognition';

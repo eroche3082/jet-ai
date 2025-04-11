@@ -1590,6 +1590,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.saveChatMessage(userId, response, 'assistant');
       }
       
+      // Log the conversation for debugging
+      console.log(`User: ${message}`);
+      console.log(`JetAI (${emotion || 'neutral'}): ${response}`);
+      console.log(`Stage: ${ConversationStage[updatedProfile.currentStage]}`);
+      
       res.json({
         response,
         updatedProfile,
