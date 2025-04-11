@@ -4,22 +4,33 @@ import { Home, Search, Map, User, Menu, X, MessageSquare, Plus } from 'lucide-re
 import { cn } from '@/lib/utils';
 import ChatBubble from './ChatBubble';
 import AIChat from './AIChat';
+import Layout from './Layout';
 
 interface MobileLayoutProps {
   children: ReactNode;
+  isChatOpen?: boolean;
+  onChatToggle?: (isOpen: boolean) => void;
 }
 
-export default function MobileLayout({ children }: MobileLayoutProps) {
+export default function MobileLayout({ 
+  children, 
+  isChatOpen: externalChatOpen,
+  onChatToggle
+}: MobileLayoutProps) {
   const [location] = useLocation();
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [internalChatOpen, setInternalChatOpen] = useState(false);
   const [isPWA, setIsPWA] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  // Use either the internal or external chat state
+  const isChatOpen = externalChatOpen !== undefined ? externalChatOpen : internalChatOpen;
   
   // Detect if the app is running as a PWA
   useEffect(() => {
     // Check if the display mode is standalone (PWA)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    const isFromHomeScreen = window.navigator.standalone; // iOS Safari
+    // @ts-ignore - Property standalone exists on iOS Safari
+    const isFromHomeScreen = window.navigator.standalone; 
     
     // Also check URL params in case we want to test PWA mode
     const urlParams = new URLSearchParams(window.location.search);
@@ -29,7 +40,12 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
   }, []);
   
   const toggleChat = () => {
-    setIsChatOpen(!isChatOpen);
+    const newState = !isChatOpen;
+    if (onChatToggle) {
+      onChatToggle(newState);
+    } else {
+      setInternalChatOpen(newState);
+    }
   };
   
   const toggleMenu = () => {
@@ -121,7 +137,16 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
       </main>
       
       {/* AI Chat */}
-      <AIChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+      <AIChat 
+        isOpen={isChatOpen} 
+        onClose={() => {
+          if (onChatToggle) {
+            onChatToggle(false);
+          } else {
+            setInternalChatOpen(false);
+          }
+        }} 
+      />
       
       {/* Floating Chat Button (only in non-PWA mode) */}
       {!isPWA && !isChatOpen && (

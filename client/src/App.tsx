@@ -149,11 +149,14 @@ function App() {
   return (
     <ThemeProvider>
       {isMobile ? (
-        <MobileLayout>
+        <MobileLayout
+          isChatOpen={isChatOpen}
+          onChatToggle={setIsChatOpen}
+        >
           {renderRoutes()}
         </MobileLayout>
       ) : (
-        <>
+        <Layout>
           {renderRoutes()}
           {/* Floating chat bubble (desktop only) */}
           <div className="fixed bottom-6 right-6 z-50">
@@ -166,7 +169,7 @@ function App() {
               <ChatBubble onClick={toggleChat} />
             )}
           </div>
-        </>
+        </Layout>
       )}
     </ThemeProvider>
   );
