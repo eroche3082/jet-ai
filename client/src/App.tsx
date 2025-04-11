@@ -1,6 +1,7 @@
 import { Switch, Route, useLocation } from "wouter";
 import Home from "@/pages/Home";
 import Destinations from "@/pages/Destinations";
+import DestinationDetail from "@/pages/DestinationDetail";
 import Itineraries from "@/pages/Itineraries";
 import ItineraryView from "@/pages/ItineraryView";
 import About from "@/pages/About";
@@ -108,6 +109,7 @@ function App() {
       {/* Main application routes */}
       <Route path="/" component={Home} />
       <Route path="/destinations" component={Destinations} />
+      <Route path="/destinations/:id/:slug" component={DestinationDetail} />
       <Route path="/itineraries" component={Itineraries} />
       <Route path="/itineraries/:id">
         {(params) => <ItineraryView params={params} />}
