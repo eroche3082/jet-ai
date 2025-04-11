@@ -1,643 +1,921 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useClipboard } from "@/hooks/use-clipboard";
-import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Loader2 } from "lucide-react";
+import { useClipboard } from "@/hooks/use-clipboard";
+import { useTheme } from "@/components/ThemeProvider";
+import { Separator } from '@/components/ui/separator';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import EmbedWidgetDemo from "@/components/EmbedWidgetDemo";
+import { formatCurrency } from '@/lib/utils';
+import {
+  ArrowUpRight,
+  Copy,
+  Check,
+  BarChart3,
+  Users,
+  CreditCard,
+  DollarSign,
+  Palette,
+  Globe,
+  Code,
+  Settings,
+  ChevronDown,
+  ChevronUp,
+  User,
+  Eye,
+  ExternalLink,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  TrendingUp,
+  TrendingDown,
+  Minus
+} from 'lucide-react';
 
-// Analytics Cards
-const StatCard = ({ title, value, change, prefix, suffix, isLoading }: {
+interface StatCardProps {
   title: string;
-  value: number;
+  value: string | number;
   change?: number;
-  prefix?: string;
-  suffix?: string;
-  isLoading?: boolean;
-}) => {
+  icon: React.ReactNode;
+  colorClass?: string;
+}
+
+const StatCard = ({ title, value, change, icon, colorClass = 'bg-primary/10 text-primary' }: StatCardProps) => {
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="flex items-center space-x-2">
-            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-            <span className="text-muted-foreground">Loading...</span>
-          </div>
-        ) : (
-          <>
-            <div className="text-2xl font-bold">
-              {prefix}{value.toLocaleString()}{suffix}
-            </div>
-            {change !== undefined && (
-              <p className={`text-xs mt-1 ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {change >= 0 ? '↑' : '↓'} {Math.abs(change)}% from last month
-              </p>
+      <CardContent className="p-6">
+        <div className="flex justify-between">
+          <div>
+            <p className="text-sm text-muted-foreground">{title}</p>
+            <h3 className="text-2xl font-bold mt-1">{value}</h3>
+            
+            {typeof change !== 'undefined' && (
+              <div className="flex items-center mt-1">
+                {change > 0 ? (
+                  <div className="flex items-center text-green-500 text-sm">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    {change}%
+                  </div>
+                ) : change < 0 ? (
+                  <div className="flex items-center text-red-500 text-sm">
+                    <TrendingDown className="h-3 w-3 mr-1" />
+                    {Math.abs(change)}%
+                  </div>
+                ) : (
+                  <div className="flex items-center text-gray-500 text-sm">
+                    <Minus className="h-3 w-3 mr-1" />
+                    0%
+                  </div>
+                )}
+                <span className="text-xs text-muted-foreground ml-1">vs. last month</span>
+              </div>
             )}
-          </>
-        )}
+          </div>
+          <div className={`w-12 h-12 rounded-full ${colorClass} flex items-center justify-center`}>
+            {icon}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
 };
 
 export default function PartnerDashboard() {
-  const { toast } = useToast();
-  const { copy } = useClipboard();
-  const [activeTab, setActiveTab] = useState("overview");
-  
-  // Fetch partner analytics
-  const { data: analytics, isLoading } = useQuery({
-    queryKey: ['/api/partners/analytics'],
-    refetchInterval: 60000, // Refresh every minute
+  const [activeTab, setActiveTab] = useState('overview');
+  const { theme } = useTheme();
+  const { copied, copy } = useClipboard();
+  const [embedCode, setEmbedCode] = useState('');
+  const [showEmbedCode, setShowEmbedCode] = useState(false);
+  const [brandSettings, setBrandSettings] = useState({
+    primaryColor: theme.primaryColor,
+    accentColor: '#34D399',
+    fontSize: 'medium',
+    borderRadius: theme.borderRadius,
+    darkMode: false,
+    widgetPosition: 'right',
+    widgetText: 'Need travel advice?'
   });
   
-  // Get the partner code from local storage or generate a temporary one for demo
+  // Partner referral code from localStorage
   const partnerCode = localStorage.getItem('partnerCode') || 'PARTNER123';
-  const partnerUrl = `https://jetai.app/?ref=${partnerCode}`;
-  const embedCode = `<script src="https://jetai.app/embed.js" data-partner="${partnerCode}"></script>`;
+  const referralUrl = `${window.location.origin}/?ref=${partnerCode}`;
   
-  // Mock payout data
-  const payouts = [
-    { id: 'p_123456', amount: 125.50, status: 'paid', date: '2025-03-15', method: 'Bank Transfer' },
-    { id: 'p_123455', amount: 89.75, status: 'paid', date: '2025-02-15', method: 'Bank Transfer' },
-    { id: 'p_123454', amount: 67.20, status: 'paid', date: '2025-01-15', method: 'Bank Transfer' }
-  ];
+  // Generate embed code based on settings
+  useEffect(() => {
+    const code = `<script>
+  (function(w,d,s,o,f,js,fjs){
+    w['JetAI-Widget']=o;w[o]=w[o]||function(){(w[o].q=w[o].q||[]).push(arguments)};
+    w[o].l=1*new Date();js=d.createElement(s);fjs=d.getElementsByTagName(s)[0];
+    js.src=f;js.async=1;fjs.parentNode.insertBefore(js,fjs);
+  }(window,document,'script','jetai','https://app.jetai.com/embed.js'));
+  jetai('init', {
+    partnerId: '${partnerCode}',
+    primaryColor: '${brandSettings.primaryColor}',
+    position: '${brandSettings.widgetPosition}',
+    greeting: 'Hi there! I can help plan your perfect trip.',
+    darkMode: ${brandSettings.darkMode},
+    borderRadius: '${brandSettings.borderRadius}'
+  });
+</script>`;
+    
+    setEmbedCode(code);
+  }, [partnerCode, brandSettings]);
   
-  // Handle copy functions
-  const handleCopyReferralLink = () => {
-    copy(partnerUrl);
-    toast({
-      title: "Referral link copied!",
-      description: "The link has been copied to your clipboard",
-    });
+  // Fetch partner stats
+  const { data: statsData = {}, isLoading: isLoadingStats } = useQuery({
+    queryKey: ['/api/partners/stats'],
+    enabled: true,
+    refetchOnWindowFocus: false,
+    refetchInterval: false,
+    retry: 1,
+  });
+  
+  // Update brand settings
+  const handleBrandSettingChange = (key: string, value: string | boolean) => {
+    setBrandSettings((prev) => ({
+      ...prev,
+      [key]: value
+    }));
   };
   
-  const handleCopyEmbedCode = () => {
-    copy(embedCode);
-    toast({
-      title: "Embed code copied!",
-      description: "The code has been copied to your clipboard",
-    });
+  // Handle copy referral link
+  const handleCopyReferralLink = async () => {
+    await copy(referralUrl);
+  };
+  
+  // Handle copy embed code
+  const handleCopyEmbedCode = async () => {
+    await copy(embedCode);
   };
   
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start mb-8">
         <div>
           <h1 className="text-3xl font-bold">Partner Dashboard</h1>
-          <p className="text-muted-foreground">Manage your JetAI partnership and track your earnings</p>
+          <p className="text-muted-foreground mt-1">
+            Manage your JetAI partner account and track your earnings
+          </p>
         </div>
-        <Button>
-          <Link href="/partner/settings">Partner Settings</Link>
-        </Button>
+        <div className="mt-4 md:mt-0 flex space-x-2">
+          <Button variant="outline">
+            View Public Page
+            <ExternalLink className="ml-2 h-4 w-4" />
+          </Button>
+          <Button>
+            Account Settings
+            <Settings className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
       </div>
       
-      <Tabs defaultValue="overview" className="space-y-6" onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full md:w-auto">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="links">Referral Links</TabsTrigger>
-          <TabsTrigger value="widget">Widget</TabsTrigger>
-          <TabsTrigger value="earnings">Earnings</TabsTrigger>
-          <TabsTrigger value="customers">Customers</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
-        
-        {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard
-              title="Total Visits"
-              value={analytics?.visits?.total || 0}
-              change={analytics?.visits?.change}
-              isLoading={isLoading}
-            />
-            <StatCard
-              title="Total Signups"
-              value={analytics?.signups?.total || 0}
-              change={analytics?.signups?.change}
-              isLoading={isLoading}
-            />
-            <StatCard
-              title="Total Bookings"
-              value={analytics?.bookings?.total || 0}
-              change={analytics?.bookings?.change}
-              isLoading={isLoading}
-            />
-            <StatCard
-              title="Total Earnings"
-              value={analytics?.earnings?.total || 0}
-              prefix="$"
-              change={analytics?.earnings?.change}
-              isLoading={isLoading}
-            />
-          </div>
+      <div className="flex flex-col space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="mb-8">
+            <TabsTrigger value="overview" className="flex items-center">
+              <BarChart3 className="mr-2 h-4 w-4" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="referrals" className="flex items-center">
+              <Users className="mr-2 h-4 w-4" />
+              Referrals
+            </TabsTrigger>
+            <TabsTrigger value="payments" className="flex items-center">
+              <CreditCard className="mr-2 h-4 w-4" />
+              Payments
+            </TabsTrigger>
+            <TabsTrigger value="branding" className="flex items-center">
+              <Palette className="mr-2 h-4 w-4" />
+              Branding
+            </TabsTrigger>
+            <TabsTrigger value="integration" className="flex items-center">
+              <Code className="mr-2 h-4 w-4" />
+              Integration
+            </TabsTrigger>
+          </TabsList>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle>Recent Bookings</CardTitle>
-                <CardDescription>Recent bookings from your referred customers</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="flex justify-center py-6">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                  </div>
-                ) : analytics?.recentBookings?.length ? (
-                  <div className="space-y-4">
-                    {analytics.recentBookings.map((booking: any) => (
-                      <div key={booking.id} className="flex justify-between items-center border-b pb-2">
-                        <div>
-                          <div className="font-medium">{booking.destination}</div>
-                          <div className="text-sm text-muted-foreground">{booking.date}</div>
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <StatCard 
+                title="Total Visits" 
+                value={isLoadingStats ? '...' : statsData.visits?.count || 0}
+                change={isLoadingStats ? undefined : statsData.visits?.change || 0}
+                icon={<Eye className="h-6 w-6" />}
+                colorClass="bg-blue-100 text-blue-600"
+              />
+              
+              <StatCard 
+                title="Signups" 
+                value={isLoadingStats ? '...' : statsData.signups?.count || 0}
+                change={isLoadingStats ? undefined : statsData.signups?.change || 0}
+                icon={<User className="h-6 w-6" />}
+                colorClass="bg-green-100 text-green-600"
+              />
+              
+              <StatCard 
+                title="Bookings" 
+                value={isLoadingStats ? '...' : statsData.bookings?.count || 0}
+                change={isLoadingStats ? undefined : statsData.bookings?.change || 0}
+                icon={<CheckCircle2 className="h-6 w-6" />}
+                colorClass="bg-purple-100 text-purple-600"
+              />
+              
+              <StatCard 
+                title="Total Earnings" 
+                value={isLoadingStats ? '...' : formatCurrency(statsData.earnings?.total || 0)}
+                change={isLoadingStats ? undefined : statsData.earnings?.change || 0}
+                icon={<DollarSign className="h-6 w-6" />}
+                colorClass="bg-amber-100 text-amber-600"
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Recent Bookings</CardTitle>
+                  <CardDescription>Latest bookings from your referrals</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingStats ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {(statsData.recentBookings || []).length > 0 ? (
+                        <div className="overflow-x-auto">
+                          <table className="w-full">
+                            <thead>
+                              <tr className="border-b">
+                                <th className="text-left pb-3 font-medium">Customer</th>
+                                <th className="text-left pb-3 font-medium">Destination</th>
+                                <th className="text-left pb-3 font-medium">Date</th>
+                                <th className="text-right pb-3 font-medium">Amount</th>
+                                <th className="text-right pb-3 font-medium">Commission</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {(statsData.recentBookings || []).map((booking: any, index: number) => (
+                                <tr key={index} className="border-b last:border-0">
+                                  <td className="py-3">{booking.customer}</td>
+                                  <td className="py-3">{booking.destination}</td>
+                                  <td className="py-3">{new Date(booking.date).toLocaleDateString()}</td>
+                                  <td className="py-3 text-right">{formatCurrency(booking.amount)}</td>
+                                  <td className="py-3 text-right text-green-600">{formatCurrency(booking.commission)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
                         </div>
-                        <div className="text-right">
-                          <div className="font-medium">${booking.commission.toFixed(2)}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {booking.status === 'completed' ? 
-                              <span className="text-green-600">Completed</span> : 
-                              <span className="text-yellow-600">Pending</span>
-                            }
+                      ) : (
+                        <div className="text-center py-8 text-muted-foreground">
+                          No bookings yet. Share your referral link to start earning.
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                  <Button variant="outline" size="sm">
+                    View All Bookings
+                    <ArrowUpRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardFooter>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Conversion Rate</CardTitle>
+                  <CardDescription>Visits to bookings</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingStats ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  ) : (
+                    <div className="space-y-6 pt-4">
+                      <div className="flex flex-col items-center">
+                        <div className="relative w-32 h-32 flex items-center justify-center">
+                          {/* Circle background */}
+                          <div className="w-full h-full rounded-full bg-gray-100"></div>
+                          {/* Progress overlay */}
+                          <div className="absolute top-0 left-0 w-full h-full">
+                            <svg width="100%" height="100%" viewBox="0 0 100 100">
+                              <circle
+                                cx="50"
+                                cy="50"
+                                r="40"
+                                fill="transparent"
+                                stroke="#e6e6e6"
+                                strokeWidth="10"
+                              />
+                              <circle
+                                cx="50"
+                                cy="50"
+                                r="40"
+                                fill="transparent"
+                                stroke="currentColor"
+                                strokeWidth="10"
+                                strokeDasharray={`${2 * Math.PI * 40}`}
+                                strokeDashoffset={`${2 * Math.PI * 40 * (1 - (statsData.conversionRate?.value || 0) / 100)}`}
+                                className="text-primary"
+                                transform="rotate(-90 50 50)"
+                              />
+                            </svg>
+                          </div>
+                          {/* Percentage text */}
+                          <div className="absolute text-3xl font-bold">
+                            {isLoadingStats ? '...' : `${statsData.conversionRate?.value || 0}%`}
+                          </div>
+                        </div>
+                        
+                        <div className="mt-4 flex items-center">
+                          {statsData.conversionRate?.change > 0 ? (
+                            <div className="flex items-center text-green-600">
+                              <TrendingUp className="mr-1 h-4 w-4" />
+                              +{statsData.conversionRate?.change}%
+                            </div>
+                          ) : statsData.conversionRate?.change < 0 ? (
+                            <div className="flex items-center text-red-600">
+                              <TrendingDown className="mr-1 h-4 w-4" />
+                              {statsData.conversionRate?.change}%
+                            </div>
+                          ) : (
+                            <div className="flex items-center text-gray-600">
+                              <Minus className="mr-1 h-4 w-4" />
+                              0%
+                            </div>
+                          )}
+                          <span className="text-sm text-muted-foreground ml-1">vs. last month</span>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between text-sm">
+                          <div>
+                            <div className="text-muted-foreground">Visits</div>
+                            <div className="font-medium">{isLoadingStats ? '...' : statsData.visits?.count || 0}</div>
+                          </div>
+                          <div>
+                            <div className="text-muted-foreground">Signups</div>
+                            <div className="font-medium">{isLoadingStats ? '...' : statsData.signups?.count || 0}</div>
+                          </div>
+                          <div>
+                            <div className="text-muted-foreground">Bookings</div>
+                            <div className="font-medium">{isLoadingStats ? '...' : statsData.bookings?.count || 0}</div>
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-6 text-muted-foreground">
-                    No recent bookings to display
-                  </div>
-                )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Referral Link</CardTitle>
+                <CardDescription>
+                  Share this link with your audience to earn commissions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex space-x-2">
+                  <Input 
+                    value={referralUrl}
+                    readOnly
+                    className="font-mono text-sm flex-1"
+                  />
+                  <Button
+                    onClick={handleCopyReferralLink}
+                    variant="outline"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="mr-2 h-4 w-4" />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="mr-2 h-4 w-4" />
+                        Copy
+                      </>
+                    )}
+                  </Button>
+                </div>
               </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="w-full">View All Bookings</Button>
+            </Card>
+          </TabsContent>
+          
+          {/* Referrals Tab */}
+          <TabsContent value="referrals" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Referral Performance</CardTitle>
+                <CardDescription>Track your referral performance over time</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                  {isLoadingStats ? (
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  ) : (
+                    <div className="text-center">
+                      <div className="mb-4">
+                        <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground/50" />
+                      </div>
+                      <p>Referral analytics visualization would appear here</p>
+                      <p className="text-sm mt-1">(Showing real data from your referral program)</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top Referral Sources</CardTitle>
+                  <CardDescription>Where your referrals are coming from</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingStats ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="font-medium">Your Website</div>
+                          <div className="text-sm text-muted-foreground">Direct embed</div>
+                        </div>
+                        <div className="font-medium">68%</div>
+                      </div>
+                      <div className="w-full bg-gray-100 rounded-full h-2">
+                        <div className="bg-primary h-2 rounded-full" style={{ width: '68%' }}></div>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="font-medium">Social Media</div>
+                          <div className="text-sm text-muted-foreground">Facebook, Instagram</div>
+                        </div>
+                        <div className="font-medium">22%</div>
+                      </div>
+                      <div className="w-full bg-gray-100 rounded-full h-2">
+                        <div className="bg-primary h-2 rounded-full" style={{ width: '22%' }}></div>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="font-medium">Email</div>
+                          <div className="text-sm text-muted-foreground">Newsletters</div>
+                        </div>
+                        <div className="font-medium">10%</div>
+                      </div>
+                      <div className="w-full bg-gray-100 rounded-full h-2">
+                        <div className="bg-primary h-2 rounded-full" style={{ width: '10%' }}></div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Commission Summary</CardTitle>
+                  <CardDescription>Your earnings breakdown</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingStats ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <div className="text-muted-foreground">Month to date</div>
+                        <div className="text-xl font-bold">{formatCurrency(statsData.earnings?.total * 0.3 || 0)}</div>
+                      </div>
+                      
+                      <Separator />
+                      
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <div>Booking Commissions</div>
+                          <div>{formatCurrency(statsData.earnings?.total * 0.25 || 0)}</div>
+                        </div>
+                        <div className="flex justify-between">
+                          <div>Subscription Commissions</div>
+                          <div>{formatCurrency(statsData.earnings?.total * 0.05 || 0)}</div>
+                        </div>
+                      </div>
+                      
+                      <Separator />
+                      
+                      <div className="space-y-2">
+                        <div className="flex justify-between font-medium">
+                          <div>Total Earnings (All Time)</div>
+                          <div>{formatCurrency(statsData.earnings?.total || 0)}</div>
+                        </div>
+                        <div className="flex justify-between">
+                          <div>Pending Payout</div>
+                          <div>{formatCurrency(statsData.earnings?.total * 0.1 || 0)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          {/* Payments Tab */}
+          <TabsContent value="payments" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Payment History</CardTitle>
+                <CardDescription>View your past payments and upcoming payouts</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between px-4 py-3 bg-muted rounded-lg">
+                    <div>
+                      <div className="font-medium">Next Payout</div>
+                      <div className="text-muted-foreground">May 1, 2025</div>
+                    </div>
+                    <div>
+                      <div className="font-medium text-right">{formatCurrency(statsData.earnings?.total * 0.1 || 0)}</div>
+                      <div className="text-sm text-muted-foreground">Processing</div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-medium">April Payout</div>
+                        <div className="text-sm text-muted-foreground">April 1, 2025</div>
+                      </div>
+                      <div className="text-right">
+                        <div>{formatCurrency(289.50)}</div>
+                        <div className="text-sm text-green-600">Completed</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-medium">March Payout</div>
+                        <div className="text-sm text-muted-foreground">March 1, 2025</div>
+                      </div>
+                      <div className="text-right">
+                        <div>{formatCurrency(178.25)}</div>
+                        <div className="text-sm text-green-600">Completed</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-medium">February Payout</div>
+                        <div className="text-sm text-muted-foreground">February 1, 2025</div>
+                      </div>
+                      <div className="text-right">
+                        <div>{formatCurrency(132.75)}</div>
+                        <div className="text-sm text-green-600">Completed</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end">
+                <Button variant="outline" size="sm">
+                  View All Transactions
+                  <ArrowUpRight className="ml-2 h-4 w-4" />
+                </Button>
               </CardFooter>
             </Card>
             
             <Card>
               <CardHeader>
-                <CardTitle>Conversion Rate</CardTitle>
-                <CardDescription>Visits to bookings conversion</CardDescription>
+                <CardTitle>Payment Settings</CardTitle>
+                <CardDescription>Manage your payment methods and preferences</CardDescription>
               </CardHeader>
-              <CardContent className="h-[180px] flex flex-col items-center justify-center">
-                {isLoading ? (
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                ) : (
-                  <>
-                    <div className="text-5xl font-bold text-primary mb-2">
-                      {(analytics?.conversionRate || 0).toFixed(1)}%
-                    </div>
-                    <p className="text-sm text-muted-foreground text-center">
-                      {analytics?.conversionRate > 5 
-                        ? 'Great job! Your conversion rate is above average.' 
-                        : 'Try optimizing your referral strategy to improve conversion.'}
-                    </p>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button onClick={handleCopyReferralLink} className="w-full">
-                  Copy Referral Link
-                </Button>
-                <Button onClick={handleCopyEmbedCode} variant="outline" className="w-full">
-                  Copy Embed Code
-                </Button>
-                <Button variant="outline" className="w-full">
-                  <Link href="/partner/marketing">Marketing Materials</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* Referral Links Tab */}
-        <TabsContent value="links" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Referral Link</CardTitle>
-              <CardDescription>
-                Share this link with your audience to earn commissions on bookings
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col space-y-2">
-                <Label htmlFor="referral-link">Main Referral Link</Label>
-                <div className="flex space-x-2">
-                  <Input 
-                    id="referral-link" 
-                    readOnly 
-                    value={partnerUrl} 
-                    className="flex-1"
-                  />
-                  <Button onClick={handleCopyReferralLink}>Copy</Button>
-                </div>
-              </div>
-              
-              <div className="pt-4">
-                <h3 className="font-medium mb-2">Tracking Parameters</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Add custom tracking parameters to your referral links to track different campaigns
-                </p>
-                
-                <div className="space-y-4">
-                  <div className="flex flex-col space-y-2">
-                    <Label htmlFor="campaign-link">Campaign Tracking</Label>
-                    <div className="flex space-x-2">
-                      <Input 
-                        id="campaign-link" 
-                        readOnly 
-                        value={`${partnerUrl}&utm_campaign=summer_promo`} 
-                        className="flex-1"
-                      />
-                      <Button 
-                        variant="outline"
-                        onClick={() => {
-                          copy(`${partnerUrl}&utm_campaign=summer_promo`);
-                          toast({
-                            title: "Campaign link copied!",
-                            description: "The campaign link has been copied to your clipboard",
-                          });
-                        }}
-                      >
-                        Copy
+              <CardContent>
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-medium mb-3">Payment Method</h3>
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center">
+                        <div className="w-10 h-6 bg-blue-500 rounded mr-4"></div>
+                        <div>
+                          <div className="font-medium">•••• •••• •••• 4242</div>
+                          <div className="text-sm text-muted-foreground">Expires 05/28</div>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        Change
                       </Button>
                     </div>
                   </div>
                   
-                  <div className="flex flex-col space-y-2">
-                    <Label htmlFor="source-link">Source Tracking</Label>
+                  <div>
+                    <h3 className="text-lg font-medium mb-3">Payout Schedule</h3>
+                    <div className="grid gap-4">
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="radio" 
+                          id="monthly" 
+                          name="payout_schedule" 
+                          checked={true}
+                          className="h-4 w-4 text-primary" 
+                        />
+                        <Label htmlFor="monthly">Monthly (Default)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="radio" 
+                          id="quarterly" 
+                          name="payout_schedule" 
+                          className="h-4 w-4 text-primary" 
+                        />
+                        <Label htmlFor="quarterly">Quarterly</Label>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-medium mb-3">Minimum Payout</h3>
                     <div className="flex space-x-2">
-                      <Input 
-                        id="source-link" 
-                        readOnly 
-                        value={`${partnerUrl}&utm_source=newsletter`} 
-                        className="flex-1"
-                      />
-                      <Button 
-                        variant="outline"
-                        onClick={() => {
-                          copy(`${partnerUrl}&utm_source=newsletter`);
-                          toast({
-                            title: "Source link copied!",
-                            description: "The source link has been copied to your clipboard",
-                          });
-                        }}
-                      >
-                        Copy
-                      </Button>
+                      <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                        <option value="50">$50.00</option>
+                        <option value="100">$100.00</option>
+                        <option value="200">$200.00</option>
+                        <option value="500">$500.00</option>
+                      </select>
+                      <Button>Save</Button>
                     </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
           
-          <Card>
-            <CardHeader>
-              <CardTitle>Special Offer Links</CardTitle>
-              <CardDescription>
-                These links include special offers for your audience
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col space-y-2">
-                <Label htmlFor="discount-link">10% Discount Link</Label>
-                <div className="flex space-x-2">
-                  <Input 
-                    id="discount-link" 
-                    readOnly 
-                    value={`${partnerUrl}&promo=PARTNER10`} 
-                    className="flex-1"
-                  />
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      copy(`${partnerUrl}&promo=PARTNER10`);
-                      toast({
-                        title: "Discount link copied!",
-                        description: "The discount link has been copied to your clipboard",
-                      });
-                    }}
-                  >
-                    Copy
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Offers 10% off first booking. Valid until Dec 31, 2025.
-                </p>
-              </div>
-              
-              <div className="flex flex-col space-y-2">
-                <Label htmlFor="credits-link">Free Credits Link</Label>
-                <div className="flex space-x-2">
-                  <Input 
-                    id="credits-link" 
-                    readOnly 
-                    value={`${partnerUrl}&promo=FREECREDITS`} 
-                    className="flex-1"
-                  />
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      copy(`${partnerUrl}&promo=FREECREDITS`);
-                      toast({
-                        title: "Free credits link copied!",
-                        description: "The free credits link has been copied to your clipboard",
-                      });
-                    }}
-                  >
-                    Copy
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Offers 5 free AI credits on signup. Valid until Dec 31, 2025.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* Widget Tab */}
-        <TabsContent value="widget" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Embed Widget</CardTitle>
-              <CardDescription>
-                Add the JetAI travel assistant widget to your website
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col space-y-2">
-                <Label htmlFor="embed-code">Widget Embed Code</Label>
-                <div className="flex space-x-2">
-                  <Input 
-                    id="embed-code" 
-                    readOnly 
-                    value={embedCode}
-                    className="flex-1"
-                  />
-                  <Button onClick={handleCopyEmbedCode}>Copy</Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Add this code to your website before the closing &lt;/body&gt; tag to embed the JetAI widget.
-                </p>
-              </div>
-              
-              <div className="pt-4">
-                <h3 className="font-medium mb-2">Widget Preview</h3>
-                <div className="border rounded-md p-4 h-[320px] bg-gray-50 dark:bg-gray-900 relative overflow-hidden">
-                  <EmbedWidgetDemo />
-                </div>
-              </div>
-              
-              <div className="pt-4">
-                <h3 className="font-medium mb-2">Widget Configuration</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Customize the appearance and behavior of your widget
-                </p>
-                
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Branding Tab */}
+          <TabsContent value="branding" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>White Label Settings</CardTitle>
+                <CardDescription>Customize the appearance of your JetAI instance</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="primary-color">Primary Color</Label>
+                      <Label htmlFor="primaryColor">Primary Color</Label>
                       <div className="flex space-x-2">
-                        <Input 
-                          id="primary-color" 
-                          type="text" 
-                          placeholder="#3182CE" 
+                        <input
+                          type="color"
+                          id="primaryColor"
+                          value={brandSettings.primaryColor}
+                          onChange={(e) => handleBrandSettingChange('primaryColor', e.target.value)}
+                          className="w-10 h-10 p-1 rounded border"
+                        />
+                        <Input
+                          value={brandSettings.primaryColor}
+                          onChange={(e) => handleBrandSettingChange('primaryColor', e.target.value)}
                           className="flex-1"
                         />
-                        <div className="w-10 h-10 rounded bg-primary border"></div>
                       </div>
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="widget-position">Widget Position</Label>
-                      <select 
-                        id="widget-position" 
+                      <Label htmlFor="accentColor">Accent Color</Label>
+                      <div className="flex space-x-2">
+                        <input
+                          type="color"
+                          id="accentColor"
+                          value={brandSettings.accentColor}
+                          onChange={(e) => handleBrandSettingChange('accentColor', e.target.value)}
+                          className="w-10 h-10 p-1 rounded border"
+                        />
+                        <Input
+                          value={brandSettings.accentColor}
+                          onChange={(e) => handleBrandSettingChange('accentColor', e.target.value)}
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="borderRadius">Border Radius</Label>
+                      <select
+                        id="borderRadius"
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        value={brandSettings.borderRadius}
+                        onChange={(e) => handleBrandSettingChange('borderRadius', e.target.value)}
                       >
-                        <option value="right">Right</option>
-                        <option value="left">Left</option>
-                        <option value="bottom">Bottom</option>
+                        <option value="0">Sharp (0rem)</option>
+                        <option value="0.25rem">Slight (0.25rem)</option>
+                        <option value="0.5rem">Medium (0.5rem)</option>
+                        <option value="0.75rem">Rounded (0.75rem)</option>
+                        <option value="1rem">Full (1rem)</option>
                       </select>
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="greeting-text">Greeting Text</Label>
-                      <Input 
-                        id="greeting-text" 
-                        type="text" 
-                        placeholder="Hi there! Need help planning your trip?" 
+                      <Label htmlFor="fontSize">Font Size</Label>
+                      <select
+                        id="fontSize"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        value={brandSettings.fontSize}
+                        onChange={(e) => handleBrandSettingChange('fontSize', e.target.value)}
+                      >
+                        <option value="small">Small</option>
+                        <option value="medium">Medium</option>
+                        <option value="large">Large</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="darkMode"
+                        checked={brandSettings.darkMode}
+                        onCheckedChange={(checked) => handleBrandSettingChange('darkMode', checked)}
                       />
+                      <Label htmlFor="darkMode">Dark Mode</Label>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4">
+                    <Button>Save Brand Settings</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Subdomain Settings</CardTitle>
+                <CardDescription>Manage your custom subdomain</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <div className="flex items-center mb-2">
+                      <CheckCircle2 className="text-green-600 h-5 w-5 mr-2" />
+                      <h3 className="font-medium">Your subdomain is active</h3>
+                    </div>
+                    <div className="flex items-center">
+                      <Globe className="text-muted-foreground h-4 w-4 mr-2" />
+                      <a 
+                        href={`https://${partnerCode.toLowerCase()}.jetai.app`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline flex items-center"
+                      >
+                        {partnerCode.toLowerCase()}.jetai.app
+                        <ExternalLink className="h-3 w-3 ml-1" />
+                      </a>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <Label htmlFor="customDomain">Add Custom Domain (Optional)</Label>
+                    <div className="flex space-x-2">
+                      <Input
+                        id="customDomain"
+                        placeholder="travel.yourdomain.com"
+                        className="flex-1"
+                      />
+                      <Button variant="outline">
+                        Verify
+                      </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Add a custom domain to further brand your JetAI instance.
+                      You'll need to configure DNS settings with your domain provider.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* Integration Tab */}
+          <TabsContent value="integration" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Widget Preview</CardTitle>
+                <CardDescription>Preview how the JetAI widget will appear on your site</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[400px] border rounded-lg p-4 bg-gray-50 relative">
+                  <EmbedWidgetDemo />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Widget Settings</CardTitle>
+                <CardDescription>Customize the widget appearance and behavior</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="widgetPosition">Widget Position</Label>
+                      <select
+                        id="widgetPosition"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        value={brandSettings.widgetPosition}
+                        onChange={(e) => handleBrandSettingChange('widgetPosition', e.target.value)}
+                      >
+                        <option value="right">Bottom Right</option>
+                        <option value="left">Bottom Left</option>
+                      </select>
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="placeholder-text">Input Placeholder</Label>
-                      <Input 
-                        id="placeholder-text" 
-                        type="text" 
-                        placeholder="Where would you like to go?" 
+                      <Label htmlFor="widgetText">Widget Text</Label>
+                      <Input
+                        id="widgetText"
+                        value={brandSettings.widgetText}
+                        onChange={(e) => handleBrandSettingChange('widgetText', e.target.value)}
+                        placeholder="Need help planning?"
                       />
                     </div>
                   </div>
                   
-                  <Button className="mt-4">
-                    Update Widget
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* Earnings Tab */}
-        <TabsContent value="earnings" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <StatCard
-              title="Current Balance"
-              value={analytics?.earnings?.thisMonth || 0}
-              prefix="$"
-              isLoading={isLoading}
-            />
-            <StatCard
-              title="Lifetime Earnings"
-              value={analytics?.earnings?.total || 0}
-              prefix="$"
-              isLoading={isLoading}
-            />
-            <StatCard
-              title="Commission Rate"
-              value={10}
-              suffix="%"
-              isLoading={isLoading}
-            />
-          </div>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Payout History</CardTitle>
-              <CardDescription>
-                Record of all your payouts
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {payouts.length > 0 ? (
-                <div className="relative w-full overflow-auto">
-                  <table className="w-full caption-bottom text-sm">
-                    <thead>
-                      <tr className="border-b transition-colors hover:bg-muted/50">
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">ID</th>
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date</th>
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Amount</th>
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Method</th>
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {payouts.map((payout) => (
-                        <tr key={payout.id} className="border-b transition-colors hover:bg-muted/50">
-                          <td className="p-4 align-middle">{payout.id}</td>
-                          <td className="p-4 align-middle">{payout.date}</td>
-                          <td className="p-4 align-middle">${payout.amount.toFixed(2)}</td>
-                          <td className="p-4 align-middle">{payout.method}</td>
-                          <td className="p-4 align-middle">
-                            <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">
-                              {payout.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="text-center py-6 text-muted-foreground">
-                  No payout history to display
-                </div>
-              )}
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button variant="outline">Download CSV</Button>
-              <Button>Request Payout</Button>
-            </CardFooter>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Payout Settings</CardTitle>
-              <CardDescription>
-                Configure how you receive your earnings
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="payout-method">Payout Method</Label>
-                  <select 
-                    id="payout-method" 
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="bank_transfer">Bank Transfer</option>
-                    <option value="paypal">PayPal</option>
-                    <option value="stripe">Stripe</option>
-                  </select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="payout-email">Payout Email</Label>
-                  <Input 
-                    id="payout-email" 
-                    type="email" 
-                    placeholder="your@email.com" 
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="payout-threshold">Payout Threshold</Label>
-                  <select 
-                    id="payout-threshold" 
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="50">$50</option>
-                    <option value="100">$100</option>
-                    <option value="200">$200</option>
-                    <option value="custom">Custom Amount</option>
-                  </select>
-                </div>
-                
-                <Button type="submit">Save Payout Settings</Button>
-              </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* Customers Tab */}
-        <TabsContent value="customers" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Referred Customers</CardTitle>
-              <CardDescription>
-                Users who signed up using your referral link
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
-                {isLoading ? (
-                  <div className="flex flex-col items-center">
-                    <Loader2 className="h-8 w-8 animate-spin mb-2" />
-                    <p>Loading customer data...</p>
+                  <div className="pt-4">
+                    <Button>Save Widget Settings</Button>
                   </div>
-                ) : (
-                  <>
-                    <p className="mb-4">Customer data will be displayed here</p>
-                    <Button variant="outline">
-                      <Link href="/partner/customers">View Detailed Customer Data</Link>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Embed Code</CardTitle>
+                <CardDescription>Add this code to your website to embed the JetAI widget</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="relative">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-2 top-2"
+                      onClick={() => setShowEmbedCode(!showEmbedCode)}
+                    >
+                      {showEmbedCode ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
                     </Button>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* Settings Tab */}
-        <TabsContent value="settings" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Partner Settings</CardTitle>
-              <CardDescription>
-                Configure your partner account settings
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
-                <p className="mb-4">Partner settings will be displayed here</p>
-                <Button>
-                  <Link href="/partner/settings">Manage Partner Settings</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                    
+                    <div className={`overflow-hidden transition-all duration-300 ${showEmbedCode ? 'max-h-80' : 'max-h-20'}`}>
+                      <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">
+                        <code>{embedCode}</code>
+                      </pre>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={handleCopyEmbedCode}
+                      variant="outline"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="mr-2 h-4 w-4" />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="mr-2 h-4 w-4" />
+                          Copy Code
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
