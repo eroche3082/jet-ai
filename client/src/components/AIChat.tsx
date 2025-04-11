@@ -7,7 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import { 
   Infinity, AlertCircle, CreditCard, Mic, Volume2, Volume, VolumeX, 
   Globe, Lightbulb, Image, Calendar, Coffee, User, UserCheck,
-  Settings, Sparkles, Camera, PanelRightOpen
+  Settings, Sparkles, Camera, PanelRightOpen, BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
