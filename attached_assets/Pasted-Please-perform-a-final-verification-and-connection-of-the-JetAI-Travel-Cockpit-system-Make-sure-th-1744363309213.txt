@@ -1,0 +1,59 @@
+Please perform a final verification and connection of the JetAI Travel Cockpit system.
+
+Make sure that the "Flights" tab is fully functional with the following features:
+
+---
+
+### 🧭 Frontend (UI/UX)
+- Display interactive flight search results using the `FlightSearchResults.tsx` component
+- Enable:
+  - Filtering by price, airline, stops
+  - Sorting by departure time, arrival time, price
+  - Mobile responsiveness
+- Show clear booking button per flight result
+- Highlight selected flights with visual state
+
+---
+
+### 🔁 Backend Integration
+- Confirm `/api/flights/search` is functional with:
+  - Real API if key present
+  - Mock fallback if key is missing
+- Confirm `/api/flights/book` is saving booking with success response
+- Store bookings in session memory or Firebase
+- Track user ID if logged in
+
+---
+
+### 📡 API KEY CHECKLIST
+
+Return a `console.table()` log with current status:
+
+| API | KEY Present | Notes |
+|-----|-------------|-------|
+| Skyscanner/Amadeus | ✅/❌ | Flight search |
+| Booking/Expedia | ✅/❌ | Hotel integration |
+| Viator/GetYourGuide | ✅/❌ | Activities |
+| Google Maps | ✅/❌ | Place names + coordinates |
+| Stripe | ✅/❌ | Payments |
+| Firebase | ✅/❌ | Auth + DB |
+| ElevenLabs / Web Speech | ✅/❌ | Voice output |
+| Web Speech / Google STT | ✅/❌ | Voice input |
+| Google Calendar | ✅/❌ | Sync trips |
+| Mailchimp/Sendinblue | ✅/❌ | Newsletter |
+| Weather API | ✅/❌ | Forecast per destination |
+| Google Custom Search | ✅/❌ | Travel blogs |
+| VidaRewards | ✅/❌ | Points & perks |
+| Camera API | ✅/❌ | Image upload or AR use |
+| Rome2Rio / Transit | ✅/❌ | Transport routes |
+
+---
+
+### 🧠 Next Steps Suggestion (AI)
+After verifying, suggest the **next 5 API features to connect**, based on missing keys and travel flow priorities.
+
+---
+
+Please log all results clearly and make any adjustments automatically to align the app into **Phase 7 Flight Ready Mode**.
+
+Once validated, JetAI should now function as a fully capable **AI-powered flight planner with live or fallback data**, booking options, and reward tracking.
