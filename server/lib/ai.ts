@@ -1,16 +1,41 @@
 import OpenAI from "openai";
+import * as fs from 'fs';
+import * as path from 'path';
 
-// Initialize OpenAI client
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_KEY || '' 
-});
+// Initialize OpenAI client if API key is available
+let openai: OpenAI | null = null;
+if (process.env.OPENAI_API_KEY || process.env.OPENAI_KEY) {
+  openai = new OpenAI({ 
+    apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_KEY || '' 
+  });
+}
 
-// Initialize Google Gemini client if API key is available
+// Initialize Google Gemini client
 let geminiClient: any = null;
-if (process.env.GEMINI_API_KEY) {
-  const { GoogleGenerativeAI } = require("@google/generative-ai");
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  geminiClient = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+// Load credentials from the Google credentials JSON file
+try {
+  const credentialsPath = path.resolve(process.cwd(), 'google-credentials-global.json');
+  if (fs.existsSync(credentialsPath)) {
+    console.log("Found Google credentials file, initializing Gemini...");
+    
+    // Use the Google Generative AI SDK
+    import('@google/generative-ai').then(({ GoogleGenerativeAI }) => {
+      // Get project ID from credentials
+      const credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
+      
+      // Use the Vertex AI API with service account credentials
+      const genAI = new GoogleGenerativeAI();
+      geminiClient = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      console.log("Google Gemini AI initialized successfully!");
+    }).catch(err => {
+      console.error("Error initializing Google Generative AI:", err);
+    });
+  } else {
+    console.warn("Google credentials file not found at:", credentialsPath);
+  }
+} catch (error) {
+  console.error("Error loading Google credentials:", error);
 }
 
 // Export chat message interface

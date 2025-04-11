@@ -7,19 +7,21 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { chatHandler } from "./lib/ai";
 import { travelSearchDestinations, travelSearchExperiences, travelSearchAccommodations } from "./lib/travelApi";
 import { createPaymentIntent, createSubscription, getSubscriptionPlans } from "./lib/stripe";
+import connectPgSimple from 'connect-pg-simple';
+import memorystore from 'memorystore';
 
 // Configure session store
 const createSessionStore = () => {
   if (process.env.NODE_ENV === "production" && process.env.DATABASE_URL) {
     // Use a database session store in production
-    const pgSession = require('connect-pg-simple')(session);
+    const pgSession = connectPgSimple(session);
     return new pgSession({
       conString: process.env.DATABASE_URL,
       tableName: 'session',
     });
   } else {
     // Use memory store for development
-    const MemoryStore = require('memorystore')(session);
+    const MemoryStore = memorystore(session);
     return new MemoryStore({
       checkPeriod: 86400000 // Prune expired entries every 24h
     });
