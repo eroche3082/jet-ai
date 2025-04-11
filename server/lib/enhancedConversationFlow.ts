@@ -387,6 +387,22 @@ function detectWeatherQuery(message: string): boolean {
   ];
   
   const messageText = message.toLowerCase();
+  
+  // Patrones específicos de preguntas sobre clima
+  const weatherPatterns = [
+    /cómo\s+está\s+el\s+(clima|tiempo)/i,
+    /qué\s+(clima|tiempo)\s+(hay|hace)/i,
+    /cuál\s+es\s+(?:la|el)\s+(temperatura|clima|pronóstico)/i
+  ];
+  
+  // Comprobar patrones específicos
+  for (const pattern of weatherPatterns) {
+    if (pattern.test(messageText)) {
+      return true;
+    }
+  }
+  
+  // Verificar palabras clave
   return weatherKeywords.some(keyword => messageText.includes(keyword));
 }
 
