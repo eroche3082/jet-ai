@@ -209,6 +209,46 @@ const VertexAIChat: React.FC<VertexAIChatProps> = ({
     }
   };
 
+  // Renderizar componente de mensaje con wrapper para evitar problema con ReactMarkdown
+  const renderMessage = (message: ChatMessage, index: number) => {
+    return (
+      <div 
+        key={index} 
+        className={cn(
+          "flex w-full max-w-full",
+          message.role === 'user' ? "justify-end" : "justify-start"
+        )}
+      >
+        <div 
+          className={cn(
+            "rounded-lg px-4 py-2 max-w-[85%]",
+            message.role === 'user' 
+              ? "bg-primary text-primary-foreground" 
+              : "bg-muted"
+          )}
+        >
+          <div className="prose prose-sm dark:prose-invert max-w-none">
+            <ReactMarkdown 
+              components={{
+                p: ({children}) => <p className="mb-1 last:mb-0">{children}</p>,
+                ul: ({children}) => <ul className="list-disc pl-4 mb-1">{children}</ul>,
+                ol: ({children}) => <ol className="list-decimal pl-4 mb-1">{children}</ol>,
+                li: ({children}) => <li className="mb-0.5">{children}</li>,
+                a: ({href, children}) => (
+                  <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                    {children}
+                  </a>
+                ),
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className={cn("flex flex-col h-full bg-background", className)}>
       {/* Encabezado */}
@@ -235,42 +275,7 @@ const VertexAIChat: React.FC<VertexAIChatProps> = ({
       
       {/* Mensajes */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message, index) => (
-          <div 
-            key={index} 
-            className={cn(
-              "flex w-full max-w-full",
-              message.role === 'user' ? "justify-end" : "justify-start"
-            )}
-          >
-            <div 
-              className={cn(
-                "rounded-lg px-4 py-2 max-w-[85%]",
-                message.role === 'user' 
-                  ? "bg-primary text-primary-foreground" 
-                  : "bg-muted"
-              )}
-            >
-              <div className="prose prose-sm dark:prose-invert max-w-none">
-                <ReactMarkdown 
-                  components={{
-                    p: ({children}) => <p className="mb-1 last:mb-0">{children}</p>,
-                    ul: ({children}) => <ul className="list-disc pl-4 mb-1">{children}</ul>,
-                    ol: ({children}) => <ol className="list-decimal pl-4 mb-1">{children}</ol>,
-                    li: ({children}) => <li className="mb-0.5">{children}</li>,
-                    a: ({href, children}) => (
-                      <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                        {children}
-                      </a>
-                    ),
-                  }}
-                >
-                  {message.content}
-                </ReactMarkdown>
-              </div>
-            </div>
-          </div>
-        ))}
+        {messages.map((message, index) => renderMessage(message, index))}
         
         {isLoading && (
           <div className="flex justify-start">
