@@ -880,9 +880,33 @@ export default function TravelMemoryScrapbook({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => addNewItem('photo')}>
-                  <Camera className="w-4 h-4 mr-2" />
-                  <span>Add Photo</span>
+                <DropdownMenuItem asChild>
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center">
+                      <Camera className="w-4 h-4 mr-2" />
+                      <span>Add Photo</span>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="h-7 px-2 ml-auto flex items-center gap-1 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addNewItem('photo');
+                        }}
+                      >
+                        <ImageIcon className="h-3 w-3" />
+                        <span>Basic</span>
+                      </Button>
+                      <SmartImageUploader 
+                        onImageSelected={handleSmartImageSelected}
+                        buttonText="Smart"
+                        buttonVariant="outline"
+                        buttonIcon={false}
+                      />
+                    </div>
+                  </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => addNewItem('note')}>
                   <PenSquare className="w-4 h-4 mr-2" />

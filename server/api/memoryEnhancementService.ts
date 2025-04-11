@@ -1,175 +1,269 @@
 /**
- * Memory Enhancement Service
+ * Servicio de API para mejora de memorias de viaje
  * 
- * Este servicio proporciona endpoints API para mejorar los recuerdos de viaje
- * utilizando las APIs de Google Cloud (Vision, Speech, Translation, etc.)
+ * Este módulo proporciona endpoints de API para mejorar las memorias de viaje usando servicios de Google Cloud:
+ * - Análisis de imágenes
+ * - Traducción de texto
+ * - Generación de audio
+ * - Información de ubicaciones
  */
 
-import { Router } from 'express';
+import { Request, Response } from 'express';
 import multer from 'multer';
-import * as googleCloudServices from '../lib/googleCloudServices';
+import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import * as googleCloudServices from '../lib/googleCloudServices';
 
-// Configuración de multer para manejo de archivos
+// Configuración de multer para manejar la carga de archivos
 const storage = multer.memoryStorage();
 const upload = multer({ 
   storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB límite por archivo
-  }
+  limits: { fileSize: 10 * 1024 * 1024 } // Limitar a 10MB
 });
 
-const router = Router();
+// Middleware para manejar errores de multer
+const handleMulterError = (err: any, req: Request, res: Response, next: Function) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({
+        error: 'El archivo es demasiado grande. El tamaño máximo permitido es 10MB.'
+      });
+    }
+    return res.status(400).json({ error: err.message });
+  }
+  next(err);
+};
 
-/**
- * Analiza una imagen y extrae información útil como etiquetas, ubicaciones, etc.
- * POST /api/memory-enhancement/analyze-image
- */
-router.post('/analyze-image', upload.single('image'), async (req, res) => {
+// Handlers para los endpoints de la API
+
+// Analizar imagen
+export const analyzeImageHandler = async (req: Request, res: Response) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'No image file provided' });
+      return res.status(400).json({ error: 'No se proporcionó ninguna imagen' });
     }
 
-    // Analizar la imagen con Vision API
-    const analysisResult = await googleCloudServices.analyzeImage(req.file.buffer);
+    const imageBuffer = req.file.buffer;
     
-    // Subir la imagen a Cloud Storage
-    const fileName = `travel-memory-${uuidv4()}.${req.file.originalname.split('.').pop()}`;
-    const uploadResult = await googleCloudServices.uploadBuffer(
-      req.file.buffer, 
-      fileName, 
-      req.file.mimetype
-    );
-
-    // Detectar ubicación de puntos de referencia si están disponibles
-    let locationInfo = null;
-    if (analysisResult.landmarks && analysisResult.landmarks.length > 0) {
-      const landmarkName = analysisResult.landmarks[0].description;
-      locationInfo = await googleCloudServices.getLocationInfo(landmarkName || '');
+    // Verificar si Google Cloud Vision está disponible
+    if (!googleCloudServices.isVisionAvailable()) {
+      return res.status(503).json({ 
+        error: 'El servicio de análisis de imágenes no está disponible',
+        message: 'La API de Google Cloud Vision no está configurada correctamente.'
+      });
     }
-
-    return res.json({
-      analysis: analysisResult,
-      uploadedImage: uploadResult,
-      locationInfo,
+    
+    // Analizar la imagen
+    const analysis = await googleCloudServices.analyzeImage(imageBuffer);
+    
+    // Devolver resultados
+    return res.status(200).json({
+      analysis,
+      message: 'Imagen analizada con éxito'
     });
   } catch (error) {
-    console.error('Error al procesar imagen:', error);
-    return res.status(500).json({ error: 'Error processing image', details: error.message });
+    console.error('Error analizando imagen:', error);
+    return res.status(500).json({ 
+      error: 'Error al procesar la imagen',
+      message: error.message || 'Ocurrió un error al analizar la imagen'
+    });
   }
-});
+};
 
-/**
- * Genera una narración de audio para un recuerdo
- * POST /api/memory-enhancement/generate-audio
- */
-router.post('/generate-audio', async (req, res) => {
+// Traducir texto
+export const translateTextHandler = async (req: Request, res: Response) => {
   try {
-    const { text, languageCode, voiceName, gender } = req.body;
+    const { text, targetLanguage, sourceLanguage } = req.body;
     
-    if (!text) {
-      return res.status(400).json({ error: 'No text provided' });
+    if (!text || !targetLanguage) {
+      return res.status(400).json({ 
+        error: 'Parámetros incompletos',
+        message: 'Se requiere el texto a traducir y el idioma de destino'
+      });
     }
     
-    const audioResult = await googleCloudServices.textToSpeech(
+    // Verificar si Google Cloud Translate está disponible
+    if (!googleCloudServices.isTranslationAvailable()) {
+      return res.status(503).json({ 
+        error: 'El servicio de traducción no está disponible',
+        message: 'La API de Google Cloud Translate no está configurada correctamente.'
+      });
+    }
+    
+    // Traducir el texto
+    const translation = await googleCloudServices.translateText(
+      text, 
+      targetLanguage,
+      sourceLanguage || 'es'
+    );
+    
+    return res.status(200).json({
+      translation,
+      message: 'Texto traducido con éxito'
+    });
+  } catch (error) {
+    console.error('Error traduciendo texto:', error);
+    return res.status(500).json({ 
+      error: 'Error al traducir el texto',
+      message: error.message || 'Ocurrió un error al traducir el texto'
+    });
+  }
+};
+
+// Generar audio
+export const generateAudioHandler = async (req: Request, res: Response) => {
+  try {
+    const { text, languageCode, voiceName, ssmlGender } = req.body;
+    
+    if (!text) {
+      return res.status(400).json({ 
+        error: 'Parámetros incompletos',
+        message: 'Se requiere el texto para generar el audio'
+      });
+    }
+    
+    // Verificar si Google Cloud Text-to-Speech está disponible
+    if (!googleCloudServices.isTextToSpeechAvailable()) {
+      return res.status(503).json({ 
+        error: 'El servicio de generación de audio no está disponible',
+        message: 'La API de Google Cloud Text-to-Speech no está configurada correctamente.'
+      });
+    }
+    
+    // Generar el audio
+    const audioData = await googleCloudServices.generateAudio(
       text,
       languageCode || 'es-ES',
       voiceName || 'es-ES-Standard-A',
-      gender || 'FEMALE'
+      ssmlGender || 'FEMALE'
     );
     
-    return res.json(audioResult);
-  } catch (error) {
-    console.error('Error al generar audio:', error);
-    return res.status(500).json({ error: 'Error generating audio', details: error.message });
-  }
-});
-
-/**
- * Traduce texto a otro idioma
- * POST /api/memory-enhancement/translate
- */
-router.post('/translate', async (req, res) => {
-  try {
-    const { text, targetLanguage } = req.body;
-    
-    if (!text || !targetLanguage) {
-      return res.status(400).json({ error: 'Text and target language are required' });
-    }
-    
-    const translationResult = await googleCloudServices.translateText(text, targetLanguage);
-    
-    return res.json(translationResult);
-  } catch (error) {
-    console.error('Error al traducir texto:', error);
-    return res.status(500).json({ error: 'Error translating text', details: error.message });
-  }
-});
-
-/**
- * Obtiene información detallada sobre una ubicación
- * POST /api/memory-enhancement/location-info
- */
-router.post('/location-info', async (req, res) => {
-  try {
-    const { query } = req.body;
-    
-    if (!query) {
-      return res.status(400).json({ error: 'Location query is required' });
-    }
-    
-    const locationInfo = await googleCloudServices.getLocationInfo(query);
-    
-    if (!locationInfo) {
-      return res.status(404).json({ error: 'Location not found' });
-    }
-    
-    // Obtener atracciones cercanas si hay coordenadas disponibles
-    let nearbyAttractions = [];
-    if (locationInfo.location) {
-      nearbyAttractions = await googleCloudServices.getNearbyAttractions(
-        locationInfo.location.lat,
-        locationInfo.location.lng
-      );
-    }
-    
-    // Generar URL de mapa estático
-    const staticMapUrl = googleCloudServices.getStaticMapUrl(
-      locationInfo.location.lat,
-      locationInfo.location.lng
-    );
-    
-    return res.json({
-      locationInfo,
-      nearbyAttractions,
-      staticMapUrl,
+    return res.status(200).json({
+      audioUrl: audioData.audioUrl,
+      audioContent: audioData.audioContent,
+      message: 'Audio generado con éxito'
     });
   } catch (error) {
-    console.error('Error al obtener información de ubicación:', error);
-    return res.status(500).json({ error: 'Error getting location information', details: error.message });
+    console.error('Error generando audio:', error);
+    return res.status(500).json({ 
+      error: 'Error al generar el audio',
+      message: error.message || 'Ocurrió un error al generar el audio'
+    });
   }
-});
+};
 
-/**
- * Analiza texto de un destino para extraer información relevante
- * POST /api/memory-enhancement/analyze-destination-text
- */
-router.post('/analyze-destination-text', async (req, res) => {
+// Obtener información de ubicación
+export const getLocationInfoHandler = async (req: Request, res: Response) => {
   try {
-    const { text } = req.body;
+    const { query } = req.query;
     
-    if (!text) {
-      return res.status(400).json({ error: 'Text is required' });
+    if (!query) {
+      return res.status(400).json({ 
+        error: 'Parámetros incompletos',
+        message: 'Se requiere la consulta de ubicación'
+      });
     }
     
-    const analysisResult = await googleCloudServices.analyzeDestinationText(text);
+    // Verificar si Google Maps está disponible
+    if (!googleCloudServices.isMapsAvailable()) {
+      return res.status(503).json({ 
+        error: 'El servicio de geolocalización no está disponible',
+        message: 'La API de Google Maps no está configurada correctamente.'
+      });
+    }
     
-    return res.json(analysisResult);
+    // Obtener información de la ubicación
+    const locationInfo = await googleCloudServices.getLocationInfo(query as string);
+    
+    // Procesar atracciones cercanas si existen
+    let nearbyAttractions = [];
+    if (locationInfo.nearbyAttractions && locationInfo.nearbyAttractions.length > 0) {
+      nearbyAttractions = locationInfo.nearbyAttractions.map(attraction => ({
+        name: attraction.name,
+        vicinity: attraction.vicinity,
+        rating: attraction.rating
+      }));
+    }
+    
+    return res.status(200).json({
+      locationInfo: locationInfo.locationInfo,
+      nearbyAttractions,
+      staticMapUrl: locationInfo.staticMapUrl,
+      message: 'Información de ubicación obtenida con éxito'
+    });
   } catch (error) {
-    console.error('Error al analizar texto de destino:', error);
-    return res.status(500).json({ error: 'Error analyzing destination text', details: error.message });
+    console.error('Error obteniendo información de ubicación:', error);
+    return res.status(500).json({ 
+      error: 'Error al obtener información de ubicación',
+      message: error.message || 'Ocurrió un error al obtener información de la ubicación'
+    });
   }
-});
+};
 
-export default router;
+// Almacenar archivo (imagen, audio, etc.)
+export const storeFileHandler = async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No se proporcionó ningún archivo' });
+    }
+    
+    // Verificar si Google Cloud Storage está disponible
+    if (!googleCloudServices.isStorageAvailable()) {
+      return res.status(503).json({ 
+        error: 'El servicio de almacenamiento no está disponible',
+        message: 'La API de Google Cloud Storage no está configurada correctamente.'
+      });
+    }
+    
+    const fileBuffer = req.file.buffer;
+    const originalName = req.file.originalname;
+    const fileExtension = path.extname(originalName);
+    const fileName = `${uuidv4()}${fileExtension}`;
+    const contentType = req.file.mimetype;
+    
+    // Almacenar el archivo
+    const fileData = await googleCloudServices.storeFile(fileBuffer, fileName, contentType);
+    
+    return res.status(200).json({
+      url: fileData.url,
+      fileName: fileData.fileName,
+      bucket: fileData.bucket,
+      message: 'Archivo almacenado con éxito'
+    });
+  } catch (error) {
+    console.error('Error almacenando archivo:', error);
+    return res.status(500).json({ 
+      error: 'Error al almacenar el archivo',
+      message: error.message || 'Ocurrió un error al almacenar el archivo'
+    });
+  }
+};
+
+// Configuración de middlewares para los endpoints
+export const configureRoutes = (app: any) => {
+  // Endpoint para analizar imagen
+  app.post('/api/memories/analyze-image', upload.single('image'), handleMulterError, analyzeImageHandler);
+  
+  // Endpoint para traducir texto
+  app.post('/api/memories/translate', translateTextHandler);
+  
+  // Endpoint para generar audio
+  app.post('/api/memories/generate-audio', generateAudioHandler);
+  
+  // Endpoint para obtener información de ubicación
+  app.get('/api/memories/location-info', getLocationInfoHandler);
+  
+  // Endpoint para almacenar archivos
+  app.post('/api/memories/store-file', upload.single('file'), handleMulterError, storeFileHandler);
+
+  console.log('Rutas de mejora de memorias configuradas correctamente');
+};
+
+export default {
+  configureRoutes,
+  analyzeImageHandler,
+  translateTextHandler,
+  generateAudioHandler,
+  getLocationInfoHandler,
+  storeFileHandler
+};

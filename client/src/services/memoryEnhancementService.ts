@@ -6,7 +6,33 @@
  * los servicios de Google Cloud.
  */
 
-import { apiRequest } from '@/lib/queryClient';
+export const API_BASE_URL = '/api/memories';
+
+/**
+ * Códigos de idioma para selección en la interfaz
+ */
+export const LANGUAGE_OPTIONS = [
+  { code: 'es-ES', name: 'Español' },
+  { code: 'en-US', name: 'Inglés' },
+  { code: 'fr-FR', name: 'Francés' },
+  { code: 'de-DE', name: 'Alemán' },
+  { code: 'it-IT', name: 'Italiano' },
+  { code: 'pt-PT', name: 'Portugués' },
+  { code: 'ja-JP', name: 'Japonés' },
+  { code: 'zh-CN', name: 'Chino' },
+  { code: 'ko-KR', name: 'Coreano' },
+  { code: 'ru-RU', name: 'Ruso' },
+  { code: 'ar-SA', name: 'Árabe' },
+  { code: 'nl-NL', name: 'Holandés' },
+  { code: 'sv-SE', name: 'Sueco' },
+  { code: 'no-NO', name: 'Noruego' },
+  { code: 'da-DK', name: 'Danés' },
+  { code: 'pl-PL', name: 'Polaco' },
+  { code: 'cs-CZ', name: 'Checo' },
+  { code: 'tr-TR', name: 'Turco' },
+  { code: 'hu-HU', name: 'Húngaro' },
+  { code: 'th-TH', name: 'Tailandés' },
+];
 
 /**
  * Analiza una imagen para extraer información
@@ -18,17 +44,22 @@ export async function analyzeImage(imageFile: File) {
   const formData = new FormData();
   formData.append('image', imageFile);
   
-  const response = await fetch('/api/memory-enhancement/analyze-image', {
-    method: 'POST',
-    body: formData,
-  });
-  
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Error al analizar imagen');
+  try {
+    const response = await fetch(`${API_BASE_URL}/analyze-image`, {
+      method: 'POST',
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error al analizar la imagen');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error en el servicio de análisis de imagen:', error);
+    throw error;
   }
-  
-  return response.json();
 }
 
 /**
@@ -41,24 +72,39 @@ export async function analyzeImage(imageFile: File) {
  * @returns URL del audio generado
  */
 export async function generateAudio(
-  text: string, 
-  languageCode?: string, 
-  voiceName?: string, 
-  gender?: 'MALE' | 'FEMALE' | 'NEUTRAL'
+  text: string,
+  languageCode: string = 'es-ES',
+  voiceName?: string,
+  gender: string = 'FEMALE'
 ) {
-  const response = await apiRequest('POST', '/api/memory-enhancement/generate-audio', {
-    text,
-    languageCode,
-    voiceName,
-    gender
-  });
-  
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Error al generar audio');
+  try {
+    const response = await fetch(`${API_BASE_URL}/generate-audio`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text,
+        languageCode,
+        voiceName,
+        ssmlGender: gender,
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error al generar el audio');
+    }
+    
+    const data = await response.json();
+    return {
+      audioUrl: data.audioUrl,
+      audioContent: data.audioContent,
+    };
+  } catch (error) {
+    console.error('Error en el servicio de generación de audio:', error);
+    throw error;
   }
-  
-  return response.json();
 }
 
 /**
@@ -69,17 +115,29 @@ export async function generateAudio(
  * @returns Texto traducido y el idioma detectado
  */
 export async function translateText(text: string, targetLanguage: string) {
-  const response = await apiRequest('POST', '/api/memory-enhancement/translate', {
-    text,
-    targetLanguage
-  });
-  
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Error al traducir texto');
+  try {
+    const response = await fetch(`${API_BASE_URL}/translate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text,
+        targetLanguage,
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error al traducir el texto');
+    }
+    
+    const data = await response.json();
+    return data.translation;
+  } catch (error) {
+    console.error('Error en el servicio de traducción:', error);
+    throw error;
   }
-  
-  return response.json();
 }
 
 /**
@@ -89,16 +147,49 @@ export async function translateText(text: string, targetLanguage: string) {
  * @returns Información detallada sobre la ubicación, incluyendo coordenadas, puntos de interés cercanos, etc.
  */
 export async function getLocationInfo(query: string) {
-  const response = await apiRequest('POST', '/api/memory-enhancement/location-info', {
-    query
-  });
-  
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Error al obtener información de ubicación');
+  try {
+    const response = await fetch(`${API_BASE_URL}/location-info?query=${encodeURIComponent(query)}`, {
+      method: 'GET',
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error al obtener información de la ubicación');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error en el servicio de información de ubicación:', error);
+    throw error;
   }
+}
+
+/**
+ * Sube un archivo al servidor de almacenamiento
+ * 
+ * @param file Archivo a subir
+ * @returns URL y datos del archivo almacenado
+ */
+export async function storeFile(file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
   
-  return response.json();
+  try {
+    const response = await fetch(`${API_BASE_URL}/store-file`, {
+      method: 'POST',
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error al almacenar el archivo');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error en el servicio de almacenamiento de archivos:', error);
+    throw error;
+  }
 }
 
 /**
@@ -108,33 +199,20 @@ export async function getLocationInfo(query: string) {
  * @returns Información sobre entidades mencionadas y análisis de sentimiento
  */
 export async function analyzeDestinationText(text: string) {
-  const response = await apiRequest('POST', '/api/memory-enhancement/analyze-destination-text', {
-    text
-  });
-  
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Error al analizar texto');
-  }
-  
-  return response.json();
+  // Esta función podría implementarse en el futuro para añadir análisis de texto
+  // usando Google Natural Language API u otro servicio similar
+  return {
+    entities: [],
+    sentiment: { score: 0, magnitude: 0 },
+  };
 }
 
-/**
- * Códigos de idioma para selección en la interfaz
- */
-export const LANGUAGE_OPTIONS = [
-  { code: 'es-ES', name: 'Español' },
-  { code: 'en-US', name: 'Inglés (US)' },
-  { code: 'en-GB', name: 'Inglés (UK)' },
-  { code: 'fr-FR', name: 'Francés' },
-  { code: 'de-DE', name: 'Alemán' },
-  { code: 'it-IT', name: 'Italiano' },
-  { code: 'pt-PT', name: 'Portugués' },
-  { code: 'zh-CN', name: 'Chino (Mandarín)' },
-  { code: 'ja-JP', name: 'Japonés' },
-  { code: 'ko-KR', name: 'Coreano' },
-  { code: 'ru-RU', name: 'Ruso' },
-  { code: 'ar-XA', name: 'Árabe' },
-  { code: 'hi-IN', name: 'Hindi' },
-];
+export default {
+  analyzeImage,
+  generateAudio,
+  translateText,
+  getLocationInfo,
+  storeFile,
+  analyzeDestinationText,
+  LANGUAGE_OPTIONS,
+};

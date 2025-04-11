@@ -1,418 +1,402 @@
 /**
- * Google Cloud Services Integration
+ * Servicios de Google Cloud
  * 
- * Este archivo centraliza todas las integraciones con servicios de Google Cloud
- * para mejorar las capacidades de JetAI como asistente de viaje.
+ * Este módulo proporciona funciones para interactuar con varios servicios de Google Cloud,
+ * incluyendo:
+ * - Google Cloud Vision para análisis de imágenes
+ * - Google Cloud Translate para traducción de texto
+ * - Google Cloud Text-to-Speech para generación de audio
+ * - Google Cloud Storage para almacenamiento de archivos
+ * - Google Maps para información de ubicaciones
  */
 
 import { ImageAnnotatorClient } from '@google-cloud/vision';
 import { TranslationServiceClient } from '@google-cloud/translate';
 import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 import { Storage } from '@google-cloud/storage';
-import { Client as MapsClient } from '@googlemaps/google-maps-services-js';
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import { v4 as uuidv4 } from 'uuid';
+import { Client } from '@googlemaps/google-maps-services-js';
 
-// Configuración de clientes para los servicios
-const visionClient = new ImageAnnotatorClient();
-const translateClient = new TranslationServiceClient();
-const textToSpeechClient = new TextToSpeechClient();
-const storage = new Storage();
-const mapsClient = new MapsClient({});
+// Inicializar clientes de Google Cloud
+// Verificar si se configuró correctamente la variable de entorno GOOGLE_APPLICATION_CREDENTIALS
+if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  console.warn('La variable de entorno GOOGLE_APPLICATION_CREDENTIALS no está configurada.');
+  console.warn('Si quieres utilizar los servicios de Google Cloud, debes configurar esta variable.');
+}
 
-// Nombre del bucket para almacenamiento
-const BUCKET_NAME = 'jetai-travel-memories';
+// Opciones de autenticación
+const isKeyAvailable = (key: string) => {
+  return process.env[key] !== undefined;
+};
 
-// Configurar proyecto ID (para APIs que lo requieren)
-const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID || 'jetai-travel-companion';
+// Inicializar clientes según las claves disponibles
+let visionClient: ImageAnnotatorClient | null = null;
+let translationClient: TranslationServiceClient | null = null;
+let textToSpeechClient: TextToSpeechClient | null = null;
+let storageClient: Storage | null = null;
+let mapsClient: Client | null = null;
 
-/**
- * Analiza una imagen y extrae información útil como:
- * - Etiquetas (objetos, escenas)
- * - Texto (OCR)
- * - Puntos de referencia
- * - Ubicaciones
- * - Análisis de sentimiento de la escena
- */
-export async function analyzeImage(imageBuffer: Buffer) {
+// Inicializar Vision API si hay credenciales o clave API
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS || isKeyAvailable('GOOGLE_CLOUD_VISION_API_KEY')) {
   try {
-    // Realizar múltiples tipos de detección en una sola imagen
-    const [result] = await visionClient.annotateImage({
-      image: {
-        content: imageBuffer.toString('base64')
-      },
-      features: [
-        { type: 'LABEL_DETECTION', maxResults: 10 },
-        { type: 'LANDMARK_DETECTION', maxResults: 5 },
-        { type: 'TEXT_DETECTION' },
-        { type: 'IMAGE_PROPERTIES' },
-        { type: 'SAFE_SEARCH_DETECTION' }
-      ]
-    });
-
-    return {
-      labels: result.labelAnnotations?.map(label => ({
-        description: label.description,
-        score: label.score
-      })) || [],
-      landmarks: result.landmarkAnnotations?.map(landmark => ({
-        description: landmark.description,
-        score: landmark.score,
-        location: landmark.locations?.[0]?.latLng
-      })) || [],
-      text: result.textAnnotations?.[0]?.description || '',
-      colors: result.imagePropertiesAnnotation?.dominantColors?.colors?.map(color => ({
-        color: {
-          red: color.color?.red,
-          green: color.color?.green,
-          blue: color.color?.blue
-        },
-        score: color.score,
-        pixelFraction: color.pixelFraction
-      })) || [],
-      safeSearch: result.safeSearchAnnotation || {}
-    };
+    visionClient = new ImageAnnotatorClient();
+    console.log('Cliente de Google Cloud Vision inicializado correctamente');
   } catch (error) {
-    console.error('Error al analizar imagen con Vision API:', error);
-    throw error;
+    console.error('Error inicializando el cliente de Google Cloud Vision:', error);
   }
 }
 
-/**
- * Traduce texto a un idioma destino
- */
-export async function translateText(text: string, targetLanguage: string) {
+// Inicializar Translation API si hay credenciales o clave API
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS || isKeyAvailable('GOOGLE_TRANSLATE_API_KEY')) {
   try {
-    const [response] = await translateClient.translateText({
+    translationClient = new TranslationServiceClient();
+    console.log('Cliente de Google Cloud Translate inicializado correctamente');
+  } catch (error) {
+    console.error('Error inicializando el cliente de Google Cloud Translate:', error);
+  }
+}
+
+// Inicializar Text-to-Speech API si hay credenciales o clave API
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS || isKeyAvailable('GOOGLE_TTS_API_KEY')) {
+  try {
+    textToSpeechClient = new TextToSpeechClient();
+    console.log('Cliente de Google Cloud Text-to-Speech inicializado correctamente');
+  } catch (error) {
+    console.error('Error inicializando el cliente de Google Cloud Text-to-Speech:', error);
+  }
+}
+
+// Inicializar Storage
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  try {
+    storageClient = new Storage();
+    console.log('Cliente de Google Cloud Storage inicializado correctamente');
+  } catch (error) {
+    console.error('Error inicializando el cliente de Google Cloud Storage:', error);
+  }
+}
+
+// Inicializar Google Maps
+if (isKeyAvailable('GOOGLE_CLOUD_API_KEY')) {
+  try {
+    mapsClient = new Client({});
+    console.log('Cliente de Google Maps inicializado correctamente');
+  } catch (error) {
+    console.error('Error inicializando el cliente de Google Maps:', error);
+  }
+}
+
+// Nombre del bucket predeterminado para almacenar archivos
+const DEFAULT_BUCKET_NAME = 'jetai-travel-memories';
+
+// Funciones para verificar disponibilidad de servicios
+export const isVisionAvailable = () => visionClient !== null;
+export const isTranslationAvailable = () => translationClient !== null;
+export const isTextToSpeechAvailable = () => textToSpeechClient !== null;
+export const isStorageAvailable = () => storageClient !== null;
+export const isMapsAvailable = () => mapsClient !== null && isKeyAvailable('GOOGLE_CLOUD_API_KEY');
+
+// Función para analizar una imagen con Google Cloud Vision
+export async function analyzeImage(imageBuffer: Buffer) {
+  if (!visionClient) {
+    throw new Error('Google Cloud Vision no está disponible');
+  }
+
+  try {
+    // Analizar con múltiples funciones de Vision API
+    const [labelResponse] = await visionClient.labelDetection(imageBuffer);
+    const [textResponse] = await visionClient.textDetection(imageBuffer);
+    const [landmarkResponse] = await visionClient.landmarkDetection(imageBuffer);
+    const [faceResponse] = await visionClient.faceDetection(imageBuffer);
+    const [localizationResponse] = await visionClient.imageProperties(imageBuffer);
+
+    // Procesamiento de etiquetas
+    const labels = labelResponse.labelAnnotations || [];
+
+    // Procesamiento de texto
+    const fullText = textResponse.fullTextAnnotation?.text || '';
+
+    // Procesamiento de landmarks
+    const landmarks = landmarkResponse.landmarkAnnotations || [];
+
+    // Procesamiento de rostros
+    const faces = faceResponse.faceAnnotations || [];
+
+    // Procesamiento de propiedades de imagen (colores dominantes)
+    const imageProperties = localizationResponse.imagePropertiesAnnotation;
+    const dominantColors = imageProperties?.dominantColors?.colors || [];
+
+    // Organizar respuesta
+    return {
+      labels: labels.map(label => ({
+        description: label.description,
+        score: label.score,
+      })),
+      text: fullText,
+      landmarks: landmarks.map(landmark => ({
+        description: landmark.description,
+        score: landmark.score,
+        location: landmark.locations && landmark.locations[0]?.latLng ? {
+          lat: landmark.locations[0].latLng.latitude,
+          lng: landmark.locations[0].latLng.longitude,
+        } : undefined,
+      })),
+      faces: faces.length,
+      dominantColors: dominantColors.map(color => ({
+        color: {
+          red: color.color?.red || 0,
+          green: color.color?.green || 0,
+          blue: color.color?.blue || 0,
+        },
+        score: color.score,
+        pixelFraction: color.pixelFraction,
+      })),
+    };
+  } catch (error) {
+    console.error('Error al analizar la imagen:', error);
+    throw new Error(`Error al analizar la imagen: ${error}`);
+  }
+}
+
+// Función para traducir texto con Google Cloud Translate
+export async function translateText(text: string, targetLanguage: string, sourceLang = 'es') {
+  if (!translationClient) {
+    throw new Error('Google Cloud Translate no está disponible');
+  }
+
+  try {
+    // El ID del proyecto debe ser reemplazado con el ID real del proyecto de Google Cloud
+    const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID || 'jetai-travel-assistant';
+    
+    const request = {
       parent: `projects/${projectId}/locations/global`,
       contents: [text],
       mimeType: 'text/plain',
+      sourceLanguageCode: sourceLang,
       targetLanguageCode: targetLanguage,
-    });
+    };
 
+    // Ejecutar traducción
+    const [response] = await translationClient.translateText(request);
+    
+    // Procesar respuesta
+    const translatedText = response.translations && response.translations[0]?.translatedText 
+      ? response.translations[0].translatedText
+      : '';
+    
+    const detectedLanguage = response.translations && response.translations[0]?.detectedLanguageCode 
+      ? response.translations[0].detectedLanguageCode
+      : sourceLang;
+    
     return {
-      translatedText: response.translations?.[0]?.translatedText || text,
-      detectedLanguage: response.translations?.[0]?.detectedLanguageCode || 'en'
+      translatedText,
+      detectedLanguage,
     };
   } catch (error) {
     console.error('Error al traducir texto:', error);
-    throw error;
+    throw new Error(`Error al traducir texto: ${error}`);
   }
 }
 
-/**
- * Convierte texto a voz (para narraciones de viaje)
- */
-export async function textToSpeech(
-  text: string, 
-  languageCode: string = 'es-ES',
-  voiceName: string = 'es-ES-Standard-A',
-  gender: 'MALE' | 'FEMALE' | 'NEUTRAL' = 'FEMALE'
+// Función para generar audio con Google Cloud Text-to-Speech
+export async function generateAudio(
+  text: string,
+  languageCode = 'es-ES',
+  voiceName = 'es-ES-Standard-A',
+  ssmlGender = 'FEMALE'
 ) {
+  if (!textToSpeechClient) {
+    throw new Error('Google Cloud Text-to-Speech no está disponible');
+  }
+
   try {
-    const [response] = await textToSpeechClient.synthesizeSpeech({
+    // Configuración de la solicitud
+    const request = {
       input: { text },
-      voice: { 
+      voice: {
         languageCode,
         name: voiceName,
-        ssmlGender: gender as any
+        ssmlGender,
       },
-      audioConfig: { audioEncoding: 'MP3' },
-    });
-
-    const audioContent = response.audioContent as Uint8Array;
-    
-    // Generar un nombre único para el archivo
-    const fileName = `speech-${uuidv4()}.mp3`;
-    
-    // Subir a Storage
-    const uploadResult = await uploadBuffer(
-      Buffer.from(audioContent), 
-      fileName, 
-      'audio/mpeg'
-    );
-    
-    return {
-      audioUrl: uploadResult.publicUrl,
-      fileName,
-      duration: audioContent.length / 1024 / 24, // Estimación aproximada en segundos
+      audioConfig: { audioEncoding: 'MP3' as const },
     };
+
+    // Generar audio
+    const [response] = await textToSpeechClient.synthesizeSpeech(request);
+    const audioContent = response.audioContent;
+
+    // Si está disponible Storage, guardamos el archivo
+    if (storageClient) {
+      const bucket = storageClient.bucket(DEFAULT_BUCKET_NAME);
+      
+      // Verificar si el bucket existe, si no, crearlo
+      const [exists] = await bucket.exists();
+      if (!exists) {
+        await bucket.create();
+      }
+      
+      // Crear un archivo temporal
+      const fileName = `audio-${uuidv4()}.mp3`;
+      const tempLocalFile = path.join(os.tmpdir(), fileName);
+      
+      // Guardar el audio en un archivo temporal
+      fs.writeFileSync(tempLocalFile, audioContent as Buffer);
+      
+      // Subir el archivo a Google Cloud Storage
+      await bucket.upload(tempLocalFile, {
+        destination: `audio/${fileName}`,
+        metadata: {
+          contentType: 'audio/mp3',
+        },
+      });
+      
+      // Obtener URL pública
+      const file = bucket.file(`audio/${fileName}`);
+      const [url] = await file.getSignedUrl({
+        action: 'read',
+        expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // Expira en 1 semana
+      });
+      
+      // Eliminar archivo temporal
+      fs.unlinkSync(tempLocalFile);
+      
+      return {
+        audioUrl: url,
+        audioContent: audioContent?.toString('base64'),
+      };
+    } else {
+      // Si no hay Storage, devolvemos el contenido en base64
+      return {
+        audioContent: audioContent?.toString('base64'),
+        audioUrl: null,
+      };
+    }
   } catch (error) {
-    console.error('Error al convertir texto a voz:', error);
-    throw error;
+    console.error('Error al generar audio:', error);
+    throw new Error(`Error al generar audio: ${error}`);
   }
 }
 
-/**
- * Obtiene información sobre una ubicación (geocodificación)
- */
+// Función para obtener información de una ubicación con Google Maps
 export async function getLocationInfo(query: string) {
+  if (!mapsClient || !isKeyAvailable('GOOGLE_CLOUD_API_KEY')) {
+    throw new Error('Google Maps API no está disponible');
+  }
+
   try {
-    const response = await mapsClient.geocode({
+    // Geocodificar la ubicación
+    const geocodeResponse = await mapsClient.geocode({
       params: {
         address: query,
-        key: process.env.GOOGLE_CLOUD_API_KEY || ''
-      }
-    });
-
-    const results = response.data.results;
-    if (!results || results.length === 0) {
-      return null;
-    }
-
-    const location = results[0];
-    return {
-      formattedAddress: location.formatted_address,
-      placeId: location.place_id,
-      location: {
-        lat: location.geometry.location.lat,
-        lng: location.geometry.location.lng
+        key: process.env.GOOGLE_CLOUD_API_KEY as string,
       },
-      types: location.types,
-      components: location.address_components
+    });
+    
+    const location = geocodeResponse.data.results[0]?.geometry.location;
+    const formattedAddress = geocodeResponse.data.results[0]?.formatted_address;
+    
+    if (!location) {
+      throw new Error('No se pudo encontrar la ubicación');
+    }
+    
+    // Obtener lugares cercanos
+    const placesResponse = await mapsClient.placesNearby({
+      params: {
+        location,
+        radius: 1000, // 1km
+        type: 'tourist_attraction',
+        key: process.env.GOOGLE_CLOUD_API_KEY as string,
+      },
+    });
+    
+    // Generar URL de mapa estático
+    const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${location.lat},${location.lng}&zoom=14&size=600x300&maptype=roadmap&markers=color:red%7C${location.lat},${location.lng}&key=${process.env.GOOGLE_CLOUD_API_KEY}`;
+    
+    // Extraer y procesar atracciones cercanas
+    const nearbyAttractions = placesResponse.data.results.map(place => ({
+      name: place.name,
+      vicinity: place.vicinity,
+      rating: place.rating,
+      photos: place.photos?.[0].photo_reference,
+    }));
+    
+    return {
+      locationInfo: {
+        location,
+        formattedAddress,
+      },
+      nearbyAttractions,
+      staticMapUrl,
     };
   } catch (error) {
     console.error('Error al obtener información de ubicación:', error);
-    throw error;
+    throw new Error(`Error al obtener información de ubicación: ${error}`);
   }
 }
 
-/**
- * Sube un archivo a Google Cloud Storage
- */
-export async function uploadFile(filePath: string, destination?: string) {
+// Función para almacenar un archivo en Google Cloud Storage
+export async function storeFile(fileBuffer: Buffer, fileName: string, contentType: string) {
+  if (!storageClient) {
+    throw new Error('Google Cloud Storage no está disponible');
+  }
+
   try {
-    await ensureBucketExists();
-
-    const fileName = destination || path.basename(filePath);
-    const file = storage.bucket(BUCKET_NAME).file(fileName);
-
-    await storage.bucket(BUCKET_NAME).upload(filePath, {
-      destination: fileName,
+    const bucket = storageClient.bucket(DEFAULT_BUCKET_NAME);
+    
+    // Verificar si el bucket existe, si no, crearlo
+    const [exists] = await bucket.exists();
+    if (!exists) {
+      await bucket.create();
+    }
+    
+    // Crear un archivo temporal
+    const tempLocalFile = path.join(os.tmpdir(), fileName);
+    
+    // Guardar el buffer en un archivo temporal
+    fs.writeFileSync(tempLocalFile, fileBuffer);
+    
+    // Subir el archivo a Google Cloud Storage
+    await bucket.upload(tempLocalFile, {
+      destination: `files/${fileName}`,
       metadata: {
-        cacheControl: 'public, max-age=31536000',
-      },
-    });
-
-    await file.makePublic();
-
-    return {
-      fileName,
-      publicUrl: `https://storage.googleapis.com/${BUCKET_NAME}/${fileName}`
-    };
-  } catch (error) {
-    console.error('Error al subir archivo a Cloud Storage:', error);
-    throw error;
-  }
-}
-
-/**
- * Sube un buffer a Google Cloud Storage
- */
-export async function uploadBuffer(
-  buffer: Buffer, 
-  destination: string, 
-  contentType: string = 'application/octet-stream'
-) {
-  try {
-    await ensureBucketExists();
-
-    const file = storage.bucket(BUCKET_NAME).file(destination);
-    
-    await file.save(buffer, {
-      contentType,
-      metadata: {
-        cacheControl: 'public, max-age=31536000',
+        contentType,
       },
     });
     
-    await file.makePublic();
-    
-    return {
-      fileName: destination,
-      publicUrl: `https://storage.googleapis.com/${BUCKET_NAME}/${destination}`
-    };
-  } catch (error) {
-    console.error('Error al subir buffer a Cloud Storage:', error);
-    throw error;
-  }
-}
-
-/**
- * Asegura que el bucket existe, lo crea si no
- */
-async function ensureBucketExists() {
-  try {
-    const [buckets] = await storage.getBuckets();
-    const bucketExists = buckets.some(bucket => bucket.name === BUCKET_NAME);
-    
-    if (!bucketExists) {
-      await storage.createBucket(BUCKET_NAME, {
-        location: 'us-central1',
-        storageClass: 'STANDARD',
-      });
-    }
-  } catch (error) {
-    console.error('Error al verificar/crear bucket:', error);
-    throw error;
-  }
-}
-
-/**
- * Obtiene información sobre atracciones turísticas cercanas a una ubicación
- */
-export async function getNearbyAttractions(latitude: number, longitude: number, radius: number = 5000) {
-  try {
-    const response = await mapsClient.placesNearby({
-      params: {
-        location: { lat: latitude, lng: longitude },
-        radius,
-        type: 'tourist_attraction',
-        key: process.env.GOOGLE_CLOUD_API_KEY || ''
-      }
+    // Obtener URL pública
+    const file = bucket.file(`files/${fileName}`);
+    const [url] = await file.getSignedUrl({
+      action: 'read',
+      expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // Expira en 1 semana
     });
-
-    return response.data.results.map(place => ({
-      name: place.name,
-      location: place.geometry?.location,
-      placeId: place.place_id,
-      rating: place.rating,
-      types: place.types,
-      vicinity: place.vicinity,
-      photos: place.photos?.map(photo => ({
-        reference: photo.photo_reference,
-        width: photo.width,
-        height: photo.height,
-      }))
-    }));
-  } catch (error) {
-    console.error('Error al obtener atracciones cercanas:', error);
-    throw error;
-  }
-}
-
-/**
- * Obtiene una URL de mapa estático para una ubicación
- */
-export function getStaticMapUrl(
-  latitude: number, 
-  longitude: number, 
-  zoom: number = 14,
-  width: number = 600,
-  height: number = 300,
-  scale: number = 2
-) {
-  const params = new URLSearchParams({
-    center: `${latitude},${longitude}`,
-    zoom: zoom.toString(),
-    size: `${width}x${height}`,
-    scale: scale.toString(),
-    maptype: 'roadmap',
-    markers: `color:red|${latitude},${longitude}`,
-    key: process.env.GOOGLE_CLOUD_API_KEY || ''
-  });
-
-  return `https://maps.googleapis.com/maps/api/staticmap?${params.toString()}`;
-}
-
-/**
- * Detección de entidades y análisis de sentimiento para un destino
- * Útil para analizar reseñas o descripciones de destinos
- */
-export async function analyzeDestinationText(text: string) {
-  try {
-    // Esta función depende de la API de Natural Language, 
-    // que no instalamos aún, pero podríamos integrarla en el futuro
-    // Por ahora, usamos un análisis simple basado en palabras clave
     
-    const sentiment = calculateSimpleSentiment(text);
-    const entities = extractBasicEntities(text);
+    // Eliminar archivo temporal
+    fs.unlinkSync(tempLocalFile);
     
     return {
-      sentiment: {
-        score: sentiment.score,
-        magnitude: sentiment.magnitude,
-        overall: sentiment.overall
-      },
-      entities
+      url,
+      fileName: `files/${fileName}`,
+      bucket: DEFAULT_BUCKET_NAME,
     };
   } catch (error) {
-    console.error('Error al analizar texto de destino:', error);
-    throw error;
+    console.error('Error al almacenar archivo:', error);
+    throw new Error(`Error al almacenar archivo: ${error}`);
   }
 }
 
-// Función auxiliar para extraer entidades básicas
-function extractBasicEntities(text: string) {
-  const words = text.toLowerCase().split(/\s+/);
-  
-  // Categorías de entidades para turismo
-  const categories = {
-    attractions: ['museo', 'museo', 'castillo', 'palacio', 'monumento', 'catedral', 'iglesia', 'plaza', 'parque', 'torre', 'puente', 'estadio', 'montaña', 'lago', 'río', 'playa', 'calle', 'templo'],
-    activities: ['visitar', 'explorar', 'caminar', 'nadar', 'bucear', 'escalar', 'pasear', 'degustar', 'probar', 'comer', 'beber', 'comprar', 'fotografiar', 'admirar', 'relajarse', 'descansar'],
-    accommodation: ['hotel', 'hostel', 'apartamento', 'resort', 'camping', 'cabaña', 'alojamiento', 'habitación', 'suite', 'posada'],
-    food: ['restaurante', 'café', 'bar', 'comida', 'plato', 'menú', 'desayuno', 'almuerzo', 'cena', 'postre', 'bebida'],
-    transportation: ['avión', 'tren', 'autobús', 'metro', 'taxi', 'barco', 'ferry', 'coche', 'bicicleta', 'transporte']
-  };
-  
-  const entities: Record<string, string[]> = {};
-  
-  // Buscar palabras clave por categoría
-  for (const [category, keywords] of Object.entries(categories)) {
-    entities[category] = [];
-    
-    for (const keyword of keywords) {
-      const regex = new RegExp(`\\b${keyword}\\w*\\b`, 'gi');
-      const matches = text.match(regex);
-      
-      if (matches) {
-        entities[category].push(...matches);
-      }
-    }
-    
-    // Eliminar duplicados
-    entities[category] = [...new Set(entities[category])];
-  }
-  
-  return entities;
-}
-
-// Función auxiliar para calcular un sentimiento simple
-function calculateSimpleSentiment(text: string) {
-  const positiveWords = ['hermoso', 'increíble', 'excelente', 'maravilloso', 'fantástico', 'espectacular', 'impresionante', 'recomendable', 'genial', 'agradable', 'divertido', 'relajante', 'acogedor', 'amable', 'limpio', 'seguro', 'bueno', 'recomendado', 'inolvidable', 'encantador'];
-  
-  const negativeWords = ['horrible', 'terrible', 'malo', 'desagradable', 'sucio', 'peligroso', 'caro', 'decepcionante', 'aburrido', 'estresante', 'incómodo', 'desorganizado', 'ruidoso', 'evitar', 'sobrevalorado', 'problemático', 'complicado', 'difícil', 'abarrotado', 'conflictivo'];
-  
-  const words = text.toLowerCase().split(/\s+/);
-  
-  let positiveCount = 0;
-  let negativeCount = 0;
-  
-  words.forEach(word => {
-    if (positiveWords.some(positive => word.includes(positive))) {
-      positiveCount++;
-    }
-    if (negativeWords.some(negative => word.includes(negative))) {
-      negativeCount++;
-    }
-  });
-  
-  const score = (positiveCount - negativeCount) / Math.max(1, words.length);
-  const magnitude = (positiveCount + negativeCount) / Math.max(1, words.length);
-  
-  let overall = 'neutral';
-  if (score > 0.05) overall = 'positive';
-  if (score < -0.05) overall = 'negative';
-  
-  return {
-    score,
-    magnitude,
-    overall,
-    details: {
-      positiveCount,
-      negativeCount,
-      wordCount: words.length
-    }
-  };
-}
+// Interfaz pública del módulo
+export default {
+  isVisionAvailable,
+  isTranslationAvailable,
+  isTextToSpeechAvailable,
+  isStorageAvailable,
+  isMapsAvailable,
+  analyzeImage,
+  translateText,
+  generateAudio,
+  getLocationInfo,
+  storeFile,
+};

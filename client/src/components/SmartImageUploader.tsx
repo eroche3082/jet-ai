@@ -53,7 +53,7 @@ import {
   Info,
   Globe,
   Mic,
-  Translate
+  Globe2
 } from 'lucide-react';
 import { analyzeImage, generateAudio, translateText, getLocationInfo } from '@/services/memoryEnhancementService';
 import { LANGUAGE_OPTIONS } from '@/services/memoryEnhancementService';
@@ -528,7 +528,7 @@ export default function SmartImageUploader({
                   <div className="space-y-2">
                     <Label>Etiquetas</Label>
                     <div className="flex flex-wrap gap-2">
-                      {imageAnalysis?.analysis.labels.slice(0, 10).map((label: any, index: number) => (
+                      {imageAnalysis && imageAnalysis.analysis && imageAnalysis.analysis.labels && imageAnalysis.analysis.labels.slice(0, 10).map((label: any, index: number) => (
                         <Badge 
                           key={index}
                           variant={selectedTags.includes(label.description) ? "default" : "outline"}
@@ -698,7 +698,7 @@ export default function SmartImageUploader({
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base flex items-center">
-                        <Translate className="h-4 w-4 mr-2" />
+                        <Globe className="h-4 w-4 mr-2" />
                         Traducciones
                       </CardTitle>
                       <CardDescription>
