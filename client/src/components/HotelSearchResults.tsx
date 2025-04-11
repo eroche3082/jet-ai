@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HotelResult, HotelSearchParams, searchHotels } from '../lib/hotels';
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MapPin, Star, Calendar, Users, Wifi, SwimmingPool, Utensils, Dumbbell } from 'lucide-react';
+import { MapPin, Star, Calendar, Users, Wifi, Waves, Utensils, Dumbbell } from 'lucide-react';
 
 interface HotelSearchResultsProps {
   destination: string | null;
@@ -153,7 +153,7 @@ export default function HotelSearchResults({
   const getAmenityIcon = (amenity: string) => {
     const lowerAmenity = amenity.toLowerCase();
     if (lowerAmenity.includes('wifi')) return <Wifi className="h-4 w-4 mr-1" />;
-    if (lowerAmenity.includes('pool')) return <SwimmingPool className="h-4 w-4 mr-1" />;
+    if (lowerAmenity.includes('pool')) return <Waves className="h-4 w-4 mr-1" />;
     if (lowerAmenity.includes('restaurant') || lowerAmenity.includes('dining')) return <Utensils className="h-4 w-4 mr-1" />;
     if (lowerAmenity.includes('fitness') || lowerAmenity.includes('gym')) return <Dumbbell className="h-4 w-4 mr-1" />;
     return null;
