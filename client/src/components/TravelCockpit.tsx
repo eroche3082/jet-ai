@@ -1008,6 +1008,60 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
       // Navigate to QR scanner page
       window.location.href = '/qr-scanner';
       return;
+    } else if (tab === 'hotels') {
+      // Close the Travel Cockpit
+      onClose();
+      // Navigate to hotels page
+      window.location.href = '/hotels';
+      return;
+    } else if (tab === 'flights') {
+      // Close the Travel Cockpit
+      onClose();
+      // Navigate to flights page
+      window.location.href = '/flights';
+      return;
+    } else if (tab === 'planner') {
+      // Close the Travel Cockpit
+      onClose();
+      // Navigate to planner page
+      window.location.href = '/planner';
+      return;
+    } else if (tab === 'audio') {
+      // Close the Travel Cockpit
+      onClose();
+      // Navigate to audio tools page
+      window.location.href = '/audio';
+      return;
+    } else if (tab === 'bookings') {
+      // Close the Travel Cockpit
+      onClose();
+      // Navigate to bookings page
+      window.location.href = '/bookings';
+      return;
+    } else if (tab === 'ar') {
+      // Close the Travel Cockpit
+      onClose();
+      // Navigate to AR page
+      window.location.href = '/ar';
+      return;
+    } else if (tab === 'portfolio') {
+      // Close the Travel Cockpit
+      onClose();
+      // Navigate to portfolio page
+      window.location.href = '/portfolio';
+      return;
+    } else if (tab === 'suggestions') {
+      // Close the Travel Cockpit
+      onClose();
+      // Navigate to suggestions page
+      window.location.href = '/suggestions';
+      return;
+    } else if (tab === 'memories') {
+      // Close the Travel Cockpit
+      onClose();
+      // Navigate to memories page
+      window.location.href = '/memories';
+      return;
     }
     
     // For other tabs, just update the active tab
@@ -1019,7 +1073,6 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
     explore: 'Explore',
     hotels: 'Hotels',
     flights: 'Flights',
-    itineraries: 'Itineraries',
     planner: 'Planner',
     audio: 'Audio',
     camera: 'Camera',
@@ -1028,6 +1081,7 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
     ar: 'AR',
     portfolio: 'Portfolio',
     suggestions: 'Suggestions',
+    memories: 'Memories',
   };
 
   // Get the right CSS class for the main container based on screen size and state
