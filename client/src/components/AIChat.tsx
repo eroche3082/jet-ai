@@ -17,7 +17,7 @@ const WELCOME_MESSAGE = "👋 Hi there! I'm your **JetAI** travel assistant.\n\n
 
 export default function AIChat({ isOpen, onClose }: AIChatProps) {
   const [inputMessage, setInputMessage] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>([
+  const [messages, setMessages] = useState<ExtendedChatMessage[]>([
     {
       role: 'assistant',
       content: WELCOME_MESSAGE
@@ -66,10 +66,10 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
   };
 
   // Enhanced message sending with error handling and retry logic
-  const handleSendMessage = async (retry = false) => {
-    if (!inputMessage.trim() && !retry) return;
+  const handleSendMessage = async (event?: React.MouseEvent, retry = false) => {
+    if ((!inputMessage.trim() && !retry) || isLoading) return;
     
-    const userMessage: ChatMessage = { 
+    const userMessage: ExtendedChatMessage = { 
       role: 'user', 
       content: inputMessage 
     };
@@ -83,39 +83,65 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     
     try {
       // Add user preferences to context if available
-      const contextEnhancedMessages = [...messages];
+      const contextEnhancedMessages: ChatMessage[] = [...messages];
       if (Object.keys(userPreferences).length > 0 && contextEnhancedMessages.length <= 3) {
-        // Only inject preferences early in the conversation
-        contextEnhancedMessages.unshift({
+        // Only inject preferences early in the conversation to help with personalization
+        const preferencesMessage: ChatMessage = {
           role: 'system',
           content: `User preferences: ${JSON.stringify(userPreferences)}`
-        });
+        };
+        // Add as first message without mutating original messages array
+        const enhancedMessages = [preferencesMessage, ...messages.filter(m => m.role !== 'system')];
+        
+        const response = await sendChatMessage(
+          retry ? 'Can you try again? I didn\'t understand your last response.' : inputMessage,
+          enhancedMessages
+        );
+        
+        // Reset error count on successful response
+        setErrorCount(0);
+        
+        // Set suggestions from response
+        if (response.suggestions && response.suggestions.length > 0) {
+          setSuggestions(response.suggestions);
+        }
+        
+        // Format the response by adding emojis based on content
+        const enhancedResponse = enhanceResponseWithEmojis(response.message);
+        
+        setMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: enhancedResponse 
+        }]);
+        
+        // Extract and save any preferences mentioned in the user's message
+        extractPreferences(inputMessage);
+      } else {
+        // Normal flow without preferences
+        const response = await sendChatMessage(
+          retry ? 'Can you try again? I didn\'t understand your last response.' : inputMessage,
+          contextEnhancedMessages
+        );
+        
+        // Reset error count on successful response
+        setErrorCount(0);
+        
+        // Set suggestions from response
+        if (response.suggestions && response.suggestions.length > 0) {
+          setSuggestions(response.suggestions);
+        }
+        
+        // Format the response by adding emojis based on content
+        const enhancedResponse = enhanceResponseWithEmojis(response.message);
+        
+        setMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: enhancedResponse 
+        }]);
+        
+        // Extract and save any preferences mentioned in the user's message
+        extractPreferences(inputMessage);
       }
-      
-      const response = await sendChatMessage(
-        retry ? 'Can you try again? I didn\'t understand your last response.' : inputMessage,
-        retry ? messages : contextEnhancedMessages
-      );
-      
-      // Reset error count on successful response
-      setErrorCount(0);
-      
-      // Set suggestions from response
-      if (response.suggestions && response.suggestions.length > 0) {
-        setSuggestions(response.suggestions);
-      }
-      
-      // Format the response by adding emojis based on content
-      const enhancedResponse = enhanceResponseWithEmojis(response.message);
-      
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: enhancedResponse 
-      }]);
-      
-      // Extract and save any preferences mentioned in the user's message
-      extractPreferences(inputMessage);
-      
     } catch (error) {
       console.error('Error sending message:', error);
       setErrorCount(prev => prev + 1);
@@ -149,7 +175,8 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
   // Detect emojis and add them to responses based on content themes
   const enhanceResponseWithEmojis = (text: string): string => {
     // Only add emojis if the text doesn't already have them
-    if (/[\u{1F300}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u.test(text)) {
+    const emojiRegex = /[\uD800-\uDBFF][\uDC00-\uDFFF]|[\u2600-\u27BF]/;
+    if (emojiRegex.test(text)) {
       return text;
     }
     
@@ -338,7 +365,7 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
             className="flex-1 bg-gray-100 rounded-full py-2 px-4 text-sm focus:outline-none"
           />
           <button 
-            onClick={handleSendMessage}
+            onClick={(e) => handleSendMessage(e)}
             disabled={!inputMessage.trim() || isLoading}
             className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center text-white transition ${
               !inputMessage.trim() || isLoading ? 'bg-primary/50' : 'bg-primary hover:bg-primary/90'
