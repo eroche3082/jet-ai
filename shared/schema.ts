@@ -7,15 +7,33 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
-  email: text("email"),
+  email: text("email").notNull(),
   fullName: text("full_name"),
   avatarUrl: text("avatar_url"),
   memberSince: timestamp("member_since").defaultNow(),
+  
+  // Authentication
+  googleId: text("google_id"),
+  lastLoginAt: timestamp("last_login_at"),
+  
+  // Subscription & Premium Features
+  membershipTier: text("membership_tier").default("free").notNull(),
+  isSubscribed: boolean("is_subscribed").default(false),
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
-  isSubscribed: boolean("is_subscribed").default(false),
   subscriptionPlan: text("subscription_plan"),
   subscriptionEndDate: timestamp("subscription_end_date"),
+  
+  // Usage limits
+  aiCreditsRemaining: integer("ai_credits_remaining").default(5).notNull(),
+  monthlySearches: integer("monthly_searches").default(0),
+  maxMonthlySearches: integer("max_monthly_searches").default(10),
+  
+  // Preferences & Settings
+  preferences: json("preferences").$type<Record<string, string>>(),
+  travelStyle: json("travel_style").$type<Record<string, number>>(), // For scoring different travel styles
+  
+  // Timestamps
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -106,6 +124,46 @@ export const chatHistory = pgTable("chat_history", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Itineraries table for AI-generated travel plans
+export const itineraries = pgTable("itineraries", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  title: text("title").notNull(),
+  destination: text("destination").notNull(),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  totalDays: integer("total_days").notNull(),
+  budget: integer("budget"),
+  currency: text("currency").default("USD"),
+  travelStyle: text("travel_style"), // "luxury", "budget", "adventure", "cultural", etc.
+  statusComplete: boolean("status_complete").default(false),
+  content: json("content").$type<{
+    days: Array<{
+      day: number;
+      date?: string;
+      activities: Array<{
+        time: string;
+        title: string;
+        description: string;
+        location?: string;
+        coordinates?: { lat: number; lng: number };
+        duration?: number; // in minutes
+        cost?: number;
+        weatherForecast?: string;
+        transportMode?: string;
+        travelTime?: number; // in minutes from previous activity
+      }>;
+    }>;
+    notes?: string;
+    totalCost?: number;
+    recommendedAccommodations?: Array<{ id: number; name: string }>;
+  }>(),
+  isPublic: boolean("is_public").default(false),
+  isBookmarked: boolean("is_bookmarked").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Schemas for insertion
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -179,6 +237,20 @@ export const insertChatHistorySchema = createInsertSchema(chatHistory).pick({
   role: true,
 });
 
+export const insertItinerarySchema = createInsertSchema(itineraries).pick({
+  userId: true,
+  title: true,
+  destination: true,
+  startDate: true,
+  endDate: true,
+  totalDays: true,
+  budget: true,
+  currency: true,
+  travelStyle: true,
+  content: true,
+  isPublic: true,
+});
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -200,3 +272,6 @@ export type InsertSavedItem = z.infer<typeof insertSavedItemSchema>;
 
 export type ChatHistory = typeof chatHistory.$inferSelect;
 export type InsertChatHistory = z.infer<typeof insertChatHistorySchema>;
+
+export type Itinerary = typeof itineraries.$inferSelect;
+export type InsertItinerary = z.infer<typeof insertItinerarySchema>;

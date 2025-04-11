@@ -1,5 +1,5 @@
 import { users, type User, type InsertUser } from "@shared/schema";
-import type { Booking, Destination, SavedItem } from "@shared/schema";
+import type { Booking, Destination, SavedItem, Itinerary, InsertItinerary } from "@shared/schema";
 
 // Storage interface with all required methods
 export interface IStorage {
@@ -10,11 +10,18 @@ export interface IStorage {
   updateUser(id: number, data: Partial<User>): Promise<User | undefined>;
   updateStripeCustomerId(userId: number, customerId: string): Promise<User | undefined>;
   updateUserStripeInfo(userId: number, info: { customerId: string, subscriptionId: string }): Promise<User | undefined>;
+  
+  // Membership management
+  upgradeToFreemium(userId: number): Promise<User | undefined>;
+  upgradeToPremium(userId: number): Promise<User | undefined>;
+  decrementAICredits(userId: number, count?: number): Promise<User | undefined>;
+  rechargePremiumBenefits(userId: number): Promise<User | undefined>;
 
   // User profiles
   getUserProfile(userId: number): Promise<any | undefined>;
   getUserBookings(userId: number): Promise<Booking[]>;
   getUserSavedItems(userId: number): Promise<SavedItem[]>;
+  getUserItineraries(userId: number): Promise<Itinerary[]>;
   
   // Destinations
   getDestinations(filters?: any): Promise<Destination[]>;
@@ -31,6 +38,14 @@ export interface IStorage {
   // Chat History
   saveChatMessage(userId: number, message: string, role: 'user' | 'assistant'): Promise<void>;
   getChatHistory(userId: number, limit?: number): Promise<any[]>;
+  
+  // Itineraries
+  createItinerary(itinerary: InsertItinerary): Promise<Itinerary>;
+  getItineraryById(id: number): Promise<Itinerary | undefined>;
+  updateItinerary(id: number, data: Partial<Itinerary>): Promise<Itinerary | undefined>;
+  deleteItinerary(id: number): Promise<boolean>;
+  shareItinerary(id: number, isPublic: boolean): Promise<Itinerary | undefined>;
+  bookmarkItinerary(id: number, isBookmarked: boolean): Promise<Itinerary | undefined>;
 }
 
 // In-memory storage implementation
@@ -41,6 +56,7 @@ export class MemStorage implements IStorage {
   private savedItems: Map<number, SavedItem[]>;
   private destinations: Map<string, Destination>;
   private chatHistory: Map<number, any[]>;
+  private itineraries: Map<number, Itinerary>;
   currentId: number;
 
   constructor() {
