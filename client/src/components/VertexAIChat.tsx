@@ -251,22 +251,23 @@ const VertexAIChat: React.FC<VertexAIChatProps> = ({
                   : "bg-muted"
               )}
             >
-              <ReactMarkdown 
-                components={{
-                  p: ({children}) => <p className="mb-1 last:mb-0">{children}</p>,
-                  ul: ({children}) => <ul className="list-disc pl-4 mb-1">{children}</ul>,
-                  ol: ({children}) => <ol className="list-decimal pl-4 mb-1">{children}</ol>,
-                  li: ({children}) => <li className="mb-0.5">{children}</li>,
-                  a: ({href, children}) => (
-                    <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                      {children}
-                    </a>
-                  ),
-                }}
-                className="prose prose-sm dark:prose-invert max-w-none"
-              >
-                {message.content}
-              </ReactMarkdown>
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                <ReactMarkdown 
+                  components={{
+                    p: ({children}) => <p className="mb-1 last:mb-0">{children}</p>,
+                    ul: ({children}) => <ul className="list-disc pl-4 mb-1">{children}</ul>,
+                    ol: ({children}) => <ol className="list-decimal pl-4 mb-1">{children}</ol>,
+                    li: ({children}) => <li className="mb-0.5">{children}</li>,
+                    a: ({href, children}) => (
+                      <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                        {children}
+                      </a>
+                    ),
+                  }}
+                >
+                  {message.content}
+                </ReactMarkdown>
+              </div>
             </div>
           </div>
         ))}
