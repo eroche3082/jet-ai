@@ -300,7 +300,13 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
 
   return (
     <div 
-      className={`chat-window bg-white rounded-2xl shadow-xl overflow-hidden mb-4 w-full sm:w-96 ${isOpen ? 'open' : ''}`}
+      className={`chat-window bg-white rounded-2xl shadow-xl overflow-hidden mb-4 fixed z-50 
+        ${isOpen ? 'open' : 'hidden'} 
+        transition-all duration-300 ease-in-out
+        ${window.innerWidth < 640 
+          ? 'inset-0 m-0 max-h-[100vh] rounded-none' // Mobile: full screen
+          : 'bottom-6 right-6 w-96 max-h-[500px]'    // Desktop: floating window
+        }`}
     >
       {/* Chat Header */}
       <div className="bg-primary text-white p-4">
@@ -325,7 +331,11 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
       </div>
       
       {/* Chat Messages */}
-      <div className="p-4 h-96 overflow-y-auto custom-scrollbar">
+      <div className={`p-4 overflow-y-auto custom-scrollbar ${
+        window.innerWidth < 640 
+          ? 'h-[calc(100vh-160px)]' // Mobile: full height minus header and input
+          : 'h-96'                  // Desktop: fixed height
+      }`}>
         {messages.map((message, index) => (
           <div key={index} className={`mb-4 flex ${message.role === 'user' ? 'justify-end' : ''}`}>
             {message.role === 'assistant' && (
