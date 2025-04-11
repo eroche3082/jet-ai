@@ -57,19 +57,74 @@ export const getWeatherHandler = async (req: Request, res: Response) => {
       return res.status(500).json({ error: 'No se ha configurado la clave API' });
     }
     
-    const response = await fetch(
-      `https://weather.googleapis.com/v1/current?location=${lat},${lon}&key=${apiKey}`
-    );
-    
-    if (!response.ok) {
-      throw new Error(`Error en Weather API: ${response.statusText}`);
+    try {
+      // Intentar con Google Weather API
+      const response = await fetch(
+        `https://weather.googleapis.com/v1/current?location=${lat},${lon}&key=${apiKey}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`Error en Weather API: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      res.json(data);
+    } catch (primaryError) {
+      console.log('El servicio de Weather API no está disponible, usando fallback...');
+      
+      // FALLBACK: Usar OpenMeteo API (servicio gratuito sin API key)
+      try {
+        const fallbackResponse = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&timezone=auto`
+        );
+        
+        if (!fallbackResponse.ok) {
+          throw new Error('Error en el servicio de clima alternativo');
+        }
+        
+        const fallbackData = await fallbackResponse.json();
+        
+        // Transformar datos de fallback para coincidir con el formato esperado
+        const formattedData = {
+          current: {
+            temperature: {
+              value: fallbackData.current.temperature_2m,
+              unit: fallbackData.current_units.temperature_2m
+            },
+            humidity: {
+              value: fallbackData.current.relative_humidity_2m,
+              unit: fallbackData.current_units.relative_humidity_2m
+            },
+            windSpeed: {
+              value: fallbackData.current.wind_speed_10m,
+              unit: fallbackData.current_units.wind_speed_10m
+            },
+            precipitation: {
+              value: fallbackData.current.precipitation,
+              unit: fallbackData.current_units.precipitation
+            },
+            weatherCode: fallbackData.current.weather_code,
+            _source: 'fallback_openmeteo'
+          },
+          location: {
+            latitude: Number(lat),
+            longitude: Number(lon)
+          }
+        };
+        
+        res.json(formattedData);
+      } catch (fallbackError: any) {
+        // Si ambos servicios fallan, enviar error más detallado
+        console.error('Error en el servicio de clima alternativo:', fallbackError);
+        throw new Error('Todos los servicios de clima están fallando');
+      }
     }
-    
-    const data = await response.json();
-    res.json(data);
   } catch (error: any) {
     console.error('Error en el servicio de clima:', error);
-    res.status(500).json({ error: error.message });
+    res.status(503).json({ 
+      error: error.message,
+      suggestion: 'Verifica que la API de Weather esté habilitada en tu cuenta de Google Cloud.'
+    });
   }
 };
 
@@ -87,21 +142,89 @@ export const geocodeHandler = async (req: Request, res: Response) => {
       return res.status(500).json({ error: 'No se ha configurado la clave API' });
     }
     
-    const response = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-        address as string
-      )}&key=${apiKey}`
-    );
-    
-    if (!response.ok) {
-      throw new Error(`Error en Geocoding API: ${response.statusText}`);
+    try {
+      // Intentar con Google Geocoding API
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+          address as string
+        )}&key=${apiKey}`
+      );
+      
+      const data = await response.json();
+      
+      // Verificar si hay error de autorización
+      if (data.status === 'REQUEST_DENIED') {
+        throw new Error(data.error_message || 'Error de autorización en Geocoding API');
+      }
+      
+      res.json(data);
+    } catch (primaryError) {
+      console.log('El servicio de Geocoding API no está disponible, usando fallback...');
+      
+      // FALLBACK: Usar OpenStreetMap Nominatim (servicio gratuito sin API key)
+      try {
+        const fallbackResponse = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+            address as string
+          )}&format=json&addressdetails=1&limit=5`,
+          {
+            headers: {
+              'User-Agent': 'JetAI/1.0' // Nominatim requiere un User-Agent
+            }
+          }
+        );
+        
+        if (!fallbackResponse.ok) {
+          throw new Error('Error en el servicio de geocodificación alternativo');
+        }
+        
+        const fallbackData = await fallbackResponse.json();
+        
+        // Transformar datos de fallback para coincidir con el formato de Google
+        const formattedData = {
+          results: fallbackData.map((item: any) => ({
+            place_id: item.place_id,
+            formatted_address: item.display_name,
+            geometry: {
+              location: {
+                lat: parseFloat(item.lat),
+                lng: parseFloat(item.lon)
+              },
+              location_type: 'APPROXIMATE',
+              viewport: {
+                northeast: {
+                  lat: parseFloat(item.boundingbox[1]),
+                  lng: parseFloat(item.boundingbox[3])
+                },
+                southwest: {
+                  lat: parseFloat(item.boundingbox[0]),
+                  lng: parseFloat(item.boundingbox[2])
+                }
+              }
+            },
+            types: [item.type],
+            address_components: Object.entries(item.address).map(([type, value]) => ({
+              long_name: value,
+              short_name: value,
+              types: [type]
+            })),
+            _source: 'fallback_nominatim'
+          })),
+          status: fallbackData.length > 0 ? 'OK' : 'ZERO_RESULTS'
+        };
+        
+        res.json(formattedData);
+      } catch (fallbackError: any) {
+        console.error('Error en el servicio de geocodificación alternativo:', fallbackError);
+        throw new Error('Todos los servicios de geocodificación están fallando');
+      }
     }
-    
-    const data = await response.json();
-    res.json(data);
   } catch (error: any) {
     console.error('Error en el servicio de geocodificación:', error);
-    res.status(500).json({ error: error.message });
+    res.status(503).json({ 
+      error: error.message,
+      suggestion: 'Verifica que la API de Geocoding esté habilitada en tu cuenta de Google Cloud.'
+    });
   }
 };
 
