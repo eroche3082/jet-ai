@@ -73,26 +73,28 @@ export default function MobileLayout({
       {/* Mobile Header - Conditional for PWA */}
       {(!isPWA || isMenuOpen) && (
         <header className={cn(
-          "sticky top-0 z-40 bg-white shadow-sm py-3 px-4",
+          "sticky top-0 z-50 bg-white shadow-sm py-3 px-4",
           isPWA && "pt-safe-top"
         )}>
-          <div className="flex justify-between items-center">
-            <Link href="/" className="flex items-center">
-              <span className="text-primary text-2xl mr-2">
-                <i className="fas fa-paper-plane"></i>
-              </span>
-              <span className="font-display font-bold text-xl text-dark">
-                Jet<span className="text-primary">AI</span>
-              </span>
-            </Link>
-            
-            <button
-              onClick={toggleMenu}
-              className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100"
-              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-            >
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
+          <div className="container mx-auto">
+            <div className="flex justify-between items-center">
+              <Link href="/" className="flex items-center">
+                <span className="text-primary text-2xl sm:text-3xl mr-2">
+                  <i className="fas fa-paper-plane"></i>
+                </span>
+                <span className="font-display font-bold text-xl sm:text-2xl text-dark">
+                  Jet<span className="text-primary">AI</span>
+                </span>
+              </Link>
+              
+              <button
+                onClick={toggleMenu}
+                className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100"
+                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              >
+                {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </button>
+            </div>
           </div>
         </header>
       )}

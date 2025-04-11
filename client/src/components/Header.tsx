@@ -156,26 +156,27 @@ export default function Header() {
         
         {/* Mobile Navigation Menu */}
         <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:hidden mt-4 pb-4 animate-fade-in`}>
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              href={link.path}
-              className={`block py-2 font-accent font-medium ${
-                location === link.path ? 'text-primary' : 'text-dark hover:text-primary'
-              }`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              {link.title}
-            </Link>
-          ))}
-          
-          {isLoggedIn ? (
-            <>
-              <div className="border-t border-gray-100 my-2"></div>
+          <div className="divide-y">
+            <div className="py-2">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  href={link.path}
+                  className={`block py-3 font-medium ${
+                    location === link.path ? 'text-primary' : 'text-dark hover:text-primary'
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {link.title}
+                </Link>
+              ))}
+            </div>
+            
+            {isLoggedIn ? (
               <div className="py-2">
                 <Link 
                   href="/dashboard" 
-                  className="block py-2 font-accent font-medium text-dark hover:text-primary"
+                  className="block py-3 font-medium text-dark hover:text-primary"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <i className="fas fa-columns mr-2 text-primary/80"></i>
@@ -183,7 +184,7 @@ export default function Header() {
                 </Link>
                 <Link 
                   href="/membership" 
-                  className="block py-2 font-accent font-medium text-dark hover:text-primary"
+                  className="block py-3 font-medium text-dark hover:text-primary"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <i className="fas fa-crown mr-2 text-primary/80"></i>
@@ -191,7 +192,7 @@ export default function Header() {
                 </Link>
                 <Link 
                   href="/itineraries" 
-                  className="block py-2 font-accent font-medium text-dark hover:text-primary"
+                  className="block py-3 font-medium text-dark hover:text-primary"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <i className="fas fa-map-marked-alt mr-2 text-primary/80"></i>
@@ -211,22 +212,24 @@ export default function Header() {
                       console.error('Logout error:', error);
                     }
                   }}
-                  className="block w-full text-left py-2 font-accent font-medium text-red-600"
+                  className="block w-full text-left py-3 font-medium text-red-600"
                 >
                   <i className="fas fa-sign-out-alt mr-2"></i>
                   Sign Out
                 </button>
               </div>
-            </>
-          ) : (
-            <Link
-              href="/signin"
-              className="block py-2 mt-2 text-center font-accent font-medium text-white bg-primary hover:bg-primary/90 px-5 py-2 rounded-full"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Sign In
-            </Link>
-          )}
+            ) : (
+              <div className="py-4">
+                <Link
+                  href="/signin"
+                  className="block py-3 text-center font-medium text-white bg-primary hover:bg-primary/90 rounded-full"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Sign In / Sign Up
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
