@@ -26,6 +26,12 @@ export interface ChatConfig {
     responseStyle: 'concise' | 'detailed' | 'adaptive';
     emojiUsage: 'none' | 'minimal' | 'moderate' | 'expressive';
   };
+  behavior: {
+    voiceReplyIfVoiceEnabled: boolean;
+    continueConversationAfterItinerary: boolean;
+    autoSuggestNearbyAttractions: boolean;
+    rememberUserPreferences: boolean;
+  };
   languageSupport: string[];
   appearance: {
     theme: 'light' | 'dark' | 'system';
@@ -59,6 +65,12 @@ const defaultChatConfig: ChatConfig = {
     conversationFlow: 'hybrid',
     responseStyle: 'adaptive',
     emojiUsage: 'moderate'
+  },
+  behavior: {
+    voiceReplyIfVoiceEnabled: true,
+    continueConversationAfterItinerary: true,
+    autoSuggestNearbyAttractions: true,
+    rememberUserPreferences: true
   },
   languageSupport: [
     'English',

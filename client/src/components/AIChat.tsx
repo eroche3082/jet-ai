@@ -29,6 +29,8 @@ import {
   TravelProfile
 } from '@/lib/conversationFlow';
 import { activeChatConfig } from '@/lib/chatConfig';
+import useSpeechRecognition from '@/hooks/useSpeechRecognition';
+import useTextToSpeech from '@/hooks/useTextToSpeech';
 
 // SpeechRecognition types for TypeScript
 interface SpeechRecognitionEvent extends Event {
