@@ -48,8 +48,10 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
   const { data: membership, isLoading: isMembershipLoading } = useQuery({
     queryKey: ['/api/user/membership'],
     retry: false,
-    // Don't show errors for auth issues
     staleTime: 60000,
+    enabled: true,
+    // Don't fail if user isn't authenticated yet
+    throwOnError: false,
   });
   
   // Mutation for decrementing credits after successful AI response

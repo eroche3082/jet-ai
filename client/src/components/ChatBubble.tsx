@@ -22,6 +22,7 @@ export default function ChatBubble({ onClick }: ChatBubbleProps) {
     retry: false,
     staleTime: 60000,
     enabled: true,
+    throwOnError: false,
   });
 
   useEffect(() => {
