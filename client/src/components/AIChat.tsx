@@ -48,8 +48,8 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
   const { data: membership, isLoading: isMembershipLoading } = useQuery({
     queryKey: ['/api/user/membership'],
     retry: false,
-    // Don't show error if not logged in
-    onError: () => {},
+    // Don't show errors for auth issues
+    staleTime: 60000,
   });
   
   // Mutation for decrementing credits after successful AI response
@@ -392,6 +392,51 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
         <div ref={messagesEndRef} />
       </div>
       
+      {/* Credit information */}
+      {membershipData && (
+        <div className="px-4 pt-2">
+          {isPremium ? (
+            <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+              <div className="flex items-center">
+                <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">
+                  <div className="flex items-center">
+                    <Infinity className="w-3 h-3 mr-1" />
+                    <span>Premium</span>
+                  </div>
+                </Badge>
+              </div>
+              <span className="text-amber-700">Unlimited credits</span>
+            </div>
+          ) : creditsRemaining > 0 ? (
+            <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+              <div className="flex items-center">
+                <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">
+                  {membershipData.membershipTier === 'freemium' ? 'Freemium' : 'Basic'}
+                </Badge>
+              </div>
+              <span className={`${creditsRemaining <= 3 ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
+                {creditsRemaining} AI credits remaining
+              </span>
+            </div>
+          ) : (
+            <Alert variant="destructive" className="mb-2 py-2">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Out of AI Credits</AlertTitle>
+              <AlertDescription>
+                <div className="mt-2 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                  <Link href="/membership">
+                    <Button size="sm" variant="outline" className="w-full sm:w-auto">
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      Upgrade Plan
+                    </Button>
+                  </Link>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
+      )}
+
       {/* Chat Input */}
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center">
@@ -403,17 +448,28 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
             onKeyPress={handleKeyPress}
             placeholder="Type your travel question..." 
             className="flex-1 bg-gray-100 rounded-full py-2 px-4 text-sm focus:outline-none"
+            disabled={membershipData && !hasCredits}
           />
           <button 
             onClick={(e) => handleSendMessage(e)}
-            disabled={!inputMessage.trim() || isLoading}
+            disabled={!inputMessage.trim() || isLoading || (membershipData && !hasCredits)}
             className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center text-white transition ${
-              !inputMessage.trim() || isLoading ? 'bg-primary/50' : 'bg-primary hover:bg-primary/90'
+              !inputMessage.trim() || isLoading || (membershipData && !hasCredits) 
+                ? 'bg-primary/50 cursor-not-allowed' 
+                : 'bg-primary hover:bg-primary/90'
             }`}
+            title={membershipData && !hasCredits ? "You're out of AI credits" : ""}
           >
             <i className="fas fa-paper-plane"></i>
           </button>
         </div>
+
+        {membershipData && creditsRemaining <= 3 && creditsRemaining > 0 && (
+          <div className="mt-2 text-xs text-amber-600 flex items-center">
+            <AlertCircle className="w-3 h-3 mr-1" />
+            <span>You're running low on AI credits. <Link href="/membership" className="underline">Upgrade your plan</Link></span>
+          </div>
+        )}
       </div>
     </div>
   );

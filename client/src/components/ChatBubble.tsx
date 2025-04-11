@@ -20,8 +20,8 @@ export default function ChatBubble({ onClick }: ChatBubbleProps) {
   const { data: membership } = useQuery({
     queryKey: ['/api/user/membership'],
     retry: false,
-    // Don't show error if not logged in
-    onError: () => {},
+    staleTime: 60000,
+    enabled: true,
   });
 
   useEffect(() => {
