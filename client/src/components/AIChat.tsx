@@ -4,10 +4,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Link } from 'wouter';
 import ReactMarkdown from 'react-markdown';
-import { Infinity, AlertCircle, CreditCard, Mic, Volume2, Volume, VolumeX } from 'lucide-react';
+import { 
+  Infinity, AlertCircle, CreditCard, Mic, Volume2, Volume, VolumeX, 
+  Globe, Lightbulb, Image, Calendar, Coffee
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import googleCloud from '@/lib/googlecloud';
 
 // SpeechRecognition types for TypeScript
 interface SpeechRecognitionEvent extends Event {
@@ -88,6 +92,18 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
   const [speechSynthesis, setSpeechSynthesis] = useState<SpeechSynthesisUtterance | null>(null);
   const recognitionRef = useRef<any>(null);
   
+  // Multi-language and sentiment analysis states
+  const [currentLanguage, setCurrentLanguage] = useState('en-US');
+  const [detectedEmotions, setDetectedEmotions] = useState<{
+    score: number;
+    magnitude: number;
+    emotion?: 'happy' | 'sad' | 'angry' | 'neutral' | 'excited' | 'confused';
+  }>({ score: 0, magnitude: 0, emotion: 'neutral' });
+  const [availableVoices, setAvailableVoices] = useState<any[]>([]);
+  const [selectedVoice, setSelectedVoice] = useState<string>('en-US-Wavenet-F');
+  const [imageUploaded, setImageUploaded] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   // Fetch membership data for credit information
   const { data: membership, isLoading: isMembershipLoading } = useQuery({
     queryKey: ['/api/user/membership'],
@@ -123,6 +139,24 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     '✨ Travel inspiration'
   ];
 
+  // Load available voice options from Google TTS
+  useEffect(() => {
+    const loadVoices = async () => {
+      try {
+        const voicesData = await googleCloud.tts.getVoices();
+        if (voicesData && Array.isArray(voicesData.voices)) {
+          setAvailableVoices(voicesData.voices);
+        }
+      } catch (error) {
+        console.error("Error loading TTS voices:", error);
+      }
+    };
+
+    if (isPremium || membershipData?.membershipTier === 'freemium') {
+      loadVoices();
+    }
+  }, [membershipData]);
+
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
@@ -145,6 +179,93 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
       speakMessage(lastMessage.content);
     }
   }, [isOpen, messages, audioEnabled]);
+  
+  // Detect language and analyze sentiment of new user messages
+  useEffect(() => {
+    const analyzeLatestUserMessage = async () => {
+      if (messages.length > 0 && messages[messages.length - 1].role === 'user') {
+        const lastMessage = messages[messages.length - 1].content;
+        
+        try {
+          // Detect language for better voice synthesis and multilingual support
+          const languageResult = await googleCloud.translate.detectLanguage(lastMessage);
+          if (languageResult && languageResult.language) {
+            // Map detected language code to voice language code (e.g., 'en' to 'en-US')
+            const languageMapping: Record<string, string> = {
+              'en': 'en-US',
+              'es': 'es-ES',
+              'fr': 'fr-FR',
+              'de': 'de-DE',
+              'it': 'it-IT',
+              'pt': 'pt-BR',
+              'ja': 'ja-JP',
+              'zh': 'zh-CN',
+              'ru': 'ru-RU',
+              'ar': 'ar-XA',
+              'hi': 'hi-IN'
+            };
+            
+            const detectedLanguage = languageResult.language.split('-')[0];
+            const voiceLanguage = languageMapping[detectedLanguage] || 'en-US';
+            
+            if (currentLanguage !== voiceLanguage) {
+              setCurrentLanguage(voiceLanguage);
+              
+              // Update voice selection based on language
+              if (availableVoices.length > 0) {
+                const languageVoices = availableVoices.filter(v => 
+                  v.languageCodes && v.languageCodes.includes(voiceLanguage)
+                );
+                
+                if (languageVoices.length > 0) {
+                  // Prefer female voices with WaveNet or Neural2 quality
+                  const bestVoice = languageVoices.find(v => 
+                    (v.name.includes('WaveNet') || v.name.includes('Neural2')) && 
+                    v.ssmlGender === 'FEMALE'
+                  ) || languageVoices[0];
+                  
+                  setSelectedVoice(bestVoice.name);
+                }
+              }
+            }
+          }
+          
+          // Analyze sentiment for emotion-adjusted responses
+          const sentimentResult = await googleCloud.naturalLanguage.analyzeSentiment(lastMessage);
+          if (sentimentResult) {
+            // Determine emotion from sentiment score and magnitude
+            // score: -1 (negative) to 1 (positive), magnitude: 0 (neutral) to infinity (strong)
+            const { score, magnitude } = sentimentResult;
+            
+            let emotion: 'happy' | 'sad' | 'angry' | 'neutral' | 'excited' | 'confused' = 'neutral';
+            
+            if (magnitude < 0.3) {
+              emotion = 'neutral';
+            } else if (score > 0.5 && magnitude > 1.0) {
+              emotion = 'excited';
+            } else if (score > 0.2) {
+              emotion = 'happy';
+            } else if (score < -0.5 && magnitude > 0.8) {
+              emotion = 'angry';
+            } else if (score < -0.2) {
+              emotion = 'sad';
+            } else {
+              emotion = 'confused';
+            }
+            
+            setDetectedEmotions({ score, magnitude, emotion });
+          }
+        } catch (error) {
+          console.error("Error analyzing message:", error);
+        }
+      }
+    };
+    
+    // Only run sentiment analysis for premium users to save API credits
+    if ((isPremium || membershipData?.membershipTier === 'freemium') && messages.length > 0) {
+      analyzeLatestUserMessage();
+    }
+  }, [messages, availableVoices, currentLanguage, isPremium, membershipData]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -405,16 +526,13 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     }
   };
   
-  // Text-to-speech functionality
-  const speakMessage = (message: string) => {
+  // Enhanced Text-to-speech using Google Cloud TTS
+  const speakMessage = async (message: string) => {
     if (!audioEnabled) {
       setAudioEnabled(true);
     }
     
-    // Stop any current speech
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-      
+    try {
       // Clean the message content (remove markdown, emojis, etc.)
       const cleanMessage = message
         .replace(/[*_#~`]/g, '')         // Remove markdown
@@ -422,26 +540,65 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
         .replace(/\[.*?\]\(.*?\)/g, '$1') // Replace links with just the text
         .trim();
       
-      const utterance = new SpeechSynthesisUtterance(cleanMessage);
-      utterance.volume = audioVolume;
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
-      utterance.lang = 'en-US';
+      // First try Google Cloud TTS (premium quality)
+      const isPremiumUser = isPremium || membershipData?.membershipTier === 'freemium';
       
-      // Try to find a more natural voice if available
-      const voices = window.speechSynthesis.getVoices();
-      const preferredVoice = voices.find(voice => 
-        voice.name.includes('Samantha') || 
-        voice.name.includes('Female') || 
-        voice.name.includes('Google')
-      );
-      
-      if (preferredVoice) {
-        utterance.voice = preferredVoice;
+      if (isPremiumUser) {
+        try {
+          // Use Google Cloud TTS for premium quality
+          const audioUrl = await googleCloud.tts.synthesize(
+            cleanMessage, 
+            {
+              language: currentLanguage,
+              voice: selectedVoice,
+              // Adjust pitch and rate based on emotion for more natural speech
+              pitch: detectedEmotions.emotion === 'excited' ? 0.2 : 
+                    detectedEmotions.emotion === 'sad' ? -0.2 : 0,
+              speakingRate: detectedEmotions.emotion === 'excited' ? 1.1 : 
+                           detectedEmotions.emotion === 'sad' ? 0.9 : 1.0
+            }
+          );
+          
+          // Play the audio
+          const audio = new Audio(audioUrl);
+          audio.volume = audioVolume;
+          audio.play();
+          return;
+        } catch (error) {
+          console.error('Error with Google Cloud TTS, falling back to browser TTS:', error);
+          // Fall back to browser TTS if Google Cloud TTS fails
+        }
       }
       
-      setSpeechSynthesis(utterance);
-      window.speechSynthesis.speak(utterance);
+      // Fallback to browser TTS
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(cleanMessage);
+        utterance.volume = audioVolume;
+        utterance.rate = detectedEmotions.emotion === 'excited' ? 1.1 : 
+                        detectedEmotions.emotion === 'sad' ? 0.9 : 1.0;
+        utterance.pitch = detectedEmotions.emotion === 'excited' ? 1.2 : 
+                         detectedEmotions.emotion === 'sad' ? 0.8 : 1.0;
+        utterance.lang = currentLanguage;
+        
+        // Try to find a more natural voice if available
+        const voices = window.speechSynthesis.getVoices();
+        const preferredVoice = voices.find(voice => 
+          voice.name.includes('Samantha') || 
+          voice.name.includes('Female') || 
+          voice.name.includes('Google')
+        );
+        
+        if (preferredVoice) {
+          utterance.voice = preferredVoice;
+        }
+        
+        setSpeechSynthesis(utterance);
+        window.speechSynthesis.speak(utterance);
+      }
+    } catch (error) {
+      console.error('Error with text-to-speech:', error);
     }
   };
   
@@ -463,6 +620,102 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     if (speechSynthesis && window.speechSynthesis) {
       speechSynthesis.volume = newVolume;
     }
+  };
+  
+  // Handle image upload and analysis
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files || event.target.files.length === 0 || !isPremium) {
+      return;
+    }
+    
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    
+    setIsLoading(true);
+    setInputMessage("Analyzing this travel image...");
+    
+    reader.onloadend = async () => {
+      try {
+        const base64Image = (reader.result as string).split(',')[1];
+        
+        // Add the image to messages
+        setMessages(prev => [...prev, { 
+          role: 'user', 
+          content: `<Uploaded a travel image for analysis>` 
+        }]);
+        
+        // Save image URL to state
+        setImageUploaded(reader.result as string);
+        
+        // Analyze the image with Vision API
+        const analysisResult = await googleCloud.vision.analyzeImage(base64Image);
+        
+        if (analysisResult) {
+          // Check for landmarks
+          const landmarkResult = await googleCloud.vision.detectLandmarks(base64Image);
+          
+          // Create a rich response based on the image analysis
+          let analysisMessage = '';
+          
+          if (landmarkResult && landmarkResult.landmarks && landmarkResult.landmarks.length > 0) {
+            const landmark = landmarkResult.landmarks[0];
+            analysisMessage = `I can see that you've shared an image of ${landmark.name}! This is located in ${landmark.location || 'a beautiful location'}. \n\nWould you like me to tell you more about this destination or help you plan a trip there?`;
+          } else if (analysisResult.labels && analysisResult.labels.length > 0) {
+            // Extract travel-relevant labels
+            const travelLabels = analysisResult.labels.filter(label => 
+              ['beach', 'mountain', 'landscape', 'architecture', 'city', 'building', 'resort', 'hotel', 
+               'restaurant', 'food', 'museum', 'adventure', 'nature', 'ocean', 'lake', 'river', 
+               'forest', 'park', 'hiking', 'camping', 'road trip', 'vacation'].some(keyword => 
+                 label.description.toLowerCase().includes(keyword)
+               )
+            );
+            
+            if (travelLabels.length > 0) {
+              const topLabels = travelLabels.slice(0, 3).map(l => l.description).join(', ');
+              analysisMessage = `I see that you've shared a travel image featuring ${topLabels}! This looks like a beautiful destination. \n\nWould you like me to suggest similar places to visit or help you plan a trip to a place like this?`;
+            } else {
+              analysisMessage = "Thanks for sharing this image! While I can see it, I'm not detecting specific travel landmarks. \n\nIs there a particular destination or type of travel you're interested in exploring?";
+            }
+          } else {
+            analysisMessage = "Thanks for sharing this image! I can see it, but I don't have specific details about the location. \n\nCan you tell me more about where this is or what type of travel experience you're looking for?";
+          }
+          
+          // Add the analysis as an assistant message
+          setMessages(prev => [...prev, { 
+            role: 'assistant', 
+            content: analysisMessage 
+          }]);
+          
+          // Clear the input field
+          setInputMessage('');
+        }
+      } catch (error) {
+        console.error('Error analyzing image:', error);
+        setMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: "I'm sorry, but I couldn't analyze this image. Could you try uploading a different image or just tell me what destination you're interested in?" 
+        }]);
+      } finally {
+        setIsLoading(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }
+    };
+    
+    reader.onerror = () => {
+      setIsLoading(false);
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: "I had trouble reading that image. Could you try uploading a different one or just describe the destination you're interested in?" 
+      }]);
+      
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    };
+    
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -646,6 +899,28 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
           >
             <Mic className={`w-5 h-5 ${isListening ? 'animate-pulse' : ''}`} />
           </button>
+          
+          {/* Image upload button */}
+          <label 
+            htmlFor="imageUpload" 
+            className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${
+              (membershipData && !hasCredits) || isLoading 
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                : 'bg-gray-200 hover:bg-gray-300 text-primary'
+            }`}
+            title="Upload a travel image for analysis"
+          >
+            <Image className="w-5 h-5" />
+            <input
+              type="file"
+              id="imageUpload"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handleImageUpload}
+              disabled={(membershipData && !hasCredits) || isLoading}
+            />
+          </label>
           
           {/* Audio toggle button */}
           <button
