@@ -1191,7 +1191,7 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
             {Object.keys(tabTitles).map(tab => (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => handleTabClick(tab)}
                 className={`p-3 rounded-lg ${activeTab === tab ? 'bg-primary text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                 title={tabTitles[tab]}
               >
@@ -1622,7 +1622,7 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
               <div className="text-center">
                 <h2 className="text-lg font-semibold mb-2">{tabTitles[activeTab]} Feature</h2>
                 <p className="text-gray-500 dark:text-gray-400">This feature is coming soon.</p>
-                <Button variant="outline" className="mt-4" onClick={() => setActiveTab('explore')}>
+                <Button variant="outline" className="mt-4" onClick={() => handleTabClick('explore')}>
                   Return to Explore
                 </Button>
               </div>
