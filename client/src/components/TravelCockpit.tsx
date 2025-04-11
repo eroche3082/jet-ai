@@ -96,15 +96,15 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
   // States
   const [activeTab, setActiveTab] = useState('explore');
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'assistant', content: 'Welcome to your JetAI Travel Cockpit! How can I assist with your travel plans today?' }
+    { role: 'assistant', content: 'Welcome aboard JetAI! I\'ll be your personal travel concierge today. To get started, I\'d love to know — where are you dreaming of going?' }
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([
-    'Plan a trip to Italy',
-    'Find hotels near the Eiffel Tower',
-    'Show beach destinations under $1,000',
-    'Create a QR with my itinerary'
+    'Paris, France',
+    'Bali, Indonesia',
+    'Tokyo, Japan',
+    'New York City, USA'
   ]);
   const [errorCount, setErrorCount] = useState(0);
   const [userPreferences, setUserPreferences] = useState<Record<string, string>>({});
@@ -116,6 +116,25 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
   const [aiModel, setAiModel] = useState('flash'); // 'flash' or 'pro'
   const [language, setLanguage] = useState('en'); // 'en', 'es', 'fr'
   const [personality, setPersonality] = useState('concierge'); // 'concierge', 'guide', 'adventurer'
+  
+  // Travel memory system - stores user's trip preferences
+  const [travelMemory, setTravelMemory] = useState<{
+    destination: string | null;
+    budget: string | null;
+    dates: string | null;
+    travelers: string | null;
+    interests: string[];
+    currentQuestion: 'destination' | 'budget' | 'dates' | 'travelers' | 'interests' | 'summary';
+    conversationStarted: boolean;
+  }>({
+    destination: null,
+    budget: null,
+    dates: null,
+    travelers: null,
+    interests: [],
+    currentQuestion: 'destination',
+    conversationStarted: false
+  });
   
   // Mocked membership data - in a real app, this would come from the authenticated user
   const [membershipData, setMembershipData] = useState<MembershipData | null>({
@@ -188,7 +207,288 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
     localStorage.setItem('userTravelPreferences', JSON.stringify(updatedPreferences));
   };
 
-  // Enhanced message sending with error handling and retry logic
+  // Check if we need to restart the conversation
+  const shouldRestartConversation = (input: string): boolean => {
+    // Detect restart phrases
+    const restartPhrases = [
+      'new trip', 'start over', 'different destination', 'new destination', 
+      'another trip', 'different trip', 'restart', 'reset', 'new journey',
+      'new vacation', 'plan another'
+    ];
+    
+    const inputLower = input.toLowerCase();
+    return restartPhrases.some(phrase => inputLower.includes(phrase));
+  };
+  
+  // Reset the conversation flow to start a new trip
+  const resetConversation = () => {
+    setTravelMemory({
+      destination: null,
+      budget: null,
+      dates: null,
+      travelers: null,
+      interests: [],
+      currentQuestion: 'destination',
+      conversationStarted: true
+    });
+    
+    // Clear old messages except for the welcome message
+    setMessages([
+      { 
+        role: 'assistant', 
+        content: "Welcome aboard JetAI! I'll be your personal travel concierge today. To get started, I'd love to know — where are you dreaming of going?" 
+      }
+    ]);
+    
+    // Reset suggestions
+    setSuggestions([
+      "Paris, France",
+      "Bali, Indonesia",
+      "Tokyo, Japan",
+      "New York City, USA"
+    ]);
+  };
+  
+  // Process the user's response in the memory system
+  const processUserResponse = (userInput: string) => {
+    const input = userInput.trim().toLowerCase();
+    
+    // Check if we should restart the conversation
+    if (shouldRestartConversation(input)) {
+      resetConversation();
+      return 'destination';
+    }
+    
+    // Mark the conversation as started
+    if (!travelMemory.conversationStarted) {
+      setTravelMemory(prev => ({...prev, conversationStarted: true}));
+    }
+    
+    const { currentQuestion } = travelMemory;
+    
+    // Update memory based on current question
+    let nextQuestion: 'destination' | 'budget' | 'dates' | 'travelers' | 'interests' | 'summary' = 'budget';
+    let updatedMemory = { ...travelMemory };
+    
+    // Check if user is trying to change a previous answer
+    if (input.includes('actually') || input.includes('instead') || input.includes('change')) {
+      if (input.includes('destination') || input.includes('going to') || input.includes('travel to')) {
+        updatedMemory.destination = extractDestination(input);
+        nextQuestion = currentQuestion; // Stay on current question after correction
+      } else if (input.includes('budget') || input.includes('spend') || input.includes('cost')) {
+        updatedMemory.budget = extractBudget(input);
+        nextQuestion = currentQuestion; // Stay on current question after correction
+      } else if (input.includes('date') || input.includes('when') || input.includes('month')) {
+        updatedMemory.dates = extractDates(input);
+        nextQuestion = currentQuestion; // Stay on current question after correction
+      } else if (input.includes('traveler') || input.includes('people') || input.includes('family') || 
+                 input.includes('alone') || input.includes('solo') || input.includes('with me')) {
+        updatedMemory.travelers = extractTravelers(input);
+        nextQuestion = currentQuestion; // Stay on current question after correction
+      } else if (input.includes('interest') || input.includes('activities') || input.includes('like to')) {
+        updatedMemory.interests = extractInterests(input);
+        nextQuestion = currentQuestion; // Stay on current question after correction
+      }
+    } else {
+      // Normal flow: process current question and determine next question
+      switch (currentQuestion) {
+        case 'destination':
+          updatedMemory.destination = extractDestination(input);
+          nextQuestion = 'budget';
+          break;
+        case 'budget':
+          updatedMemory.budget = extractBudget(input);
+          nextQuestion = 'dates';
+          break;
+        case 'dates':
+          updatedMemory.dates = extractDates(input);
+          nextQuestion = 'travelers';
+          break;
+        case 'travelers':
+          updatedMemory.travelers = extractTravelers(input);
+          nextQuestion = 'interests';
+          break;
+        case 'interests':
+          updatedMemory.interests = extractInterests(input);
+          nextQuestion = 'summary';
+          break;
+        case 'summary':
+          // In summary state, we can start a new conversation or refine existing answers
+          nextQuestion = 'summary'; // Stay in summary state unless explicitly changed
+          break;
+      }
+    }
+    
+    // Update the memory with new data
+    updatedMemory.currentQuestion = nextQuestion;
+    setTravelMemory(updatedMemory);
+    
+    return nextQuestion;
+  };
+  
+  // Helper functions to extract specific information from user input
+  const extractDestination = (input: string): string => {
+    // Remove common phrases that might precede the destination
+    const cleanedInput = input
+      .replace(/i want to go to/i, '')
+      .replace(/i'm thinking about/i, '')
+      .replace(/maybe/i, '')
+      .replace(/i'd like to visit/i, '')
+      .replace(/i plan to visit/i, '')
+      .replace(/i'm traveling to/i, '')
+      .replace(/i'm going to/i, '')
+      .replace(/i would like to go to/i, '')
+      .trim();
+      
+    // If it's just a destination name, return it
+    if (cleanedInput.length < 30 && !cleanedInput.includes(',')) {
+      return cleanedInput.charAt(0).toUpperCase() + cleanedInput.slice(1);
+    }
+    
+    // Try to extract the first location name
+    // This is a simple extraction - in a real app, use NLP to better identify location names
+    const words = cleanedInput.split(' ');
+    for (let i = 0; i < words.length; i++) {
+      if (words[i].length > 3 && /^[A-Za-z]+$/.test(words[i])) {
+        return words[i].charAt(0).toUpperCase() + words[i].slice(1);
+      }
+    }
+    
+    // Fallback
+    return cleanedInput;
+  };
+  
+  const extractBudget = (input: string): string => {
+    if (input.includes('luxury') || input.includes('expensive') || input.includes('high-end')) {
+      return 'Luxury';
+    } else if (input.includes('budget') || input.includes('cheap') || input.includes('affordable')) {
+      return 'Budget';
+    } else if (input.includes('mid') || input.includes('moderate') || input.includes('middle')) {
+      return 'Mid-range';
+    }
+    
+    // Try to extract dollar amounts
+    const amountMatch = input.match(/\$(\d+)/);
+    if (amountMatch && amountMatch[1]) {
+      const amount = parseInt(amountMatch[1]);
+      if (amount < 1000) {
+        return 'Budget';
+      } else if (amount < 5000) {
+        return 'Mid-range';
+      } else {
+        return 'Luxury';
+      }
+    }
+    
+    // Default to mid-range if we can't determine
+    return 'Mid-range';
+  };
+  
+  const extractDates = (input: string): string => {
+    // Try to identify month names
+    const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+    for (const month of months) {
+      if (input.includes(month)) {
+        return month.charAt(0).toUpperCase() + month.slice(1);
+      }
+    }
+    
+    // Try to identify seasons
+    if (input.includes('summer')) return 'Summer';
+    if (input.includes('fall') || input.includes('autumn')) return 'Fall';
+    if (input.includes('winter')) return 'Winter';
+    if (input.includes('spring')) return 'Spring';
+    
+    // Try to identify relative timeframes
+    if (input.includes('next week')) return 'Next week';
+    if (input.includes('next month')) return 'Next month';
+    if (input.includes('next year')) return 'Next year';
+    
+    return input; // Return the whole input if we can't parse it
+  };
+  
+  const extractTravelers = (input: string): string => {
+    if (input.includes('solo') || input.includes('alone') || input.includes('by myself')) {
+      return 'Solo traveler';
+    }
+    
+    if (input.includes('couple') || input.includes('with my partner') || 
+        input.includes('with my spouse') || input.includes('with my girlfriend') || 
+        input.includes('with my boyfriend') || input.includes('with my wife') || 
+        input.includes('with my husband')) {
+      return 'Couple';
+    }
+    
+    if (input.includes('family') || input.includes('kids') || input.includes('children')) {
+      return 'Family trip';
+    }
+    
+    if (input.includes('friends') || input.includes('group')) {
+      return 'Group of friends';
+    }
+    
+    // Try to extract numbers
+    const numMatch = input.match(/(\d+)/);
+    if (numMatch && numMatch[1]) {
+      const num = parseInt(numMatch[1]);
+      return `${num} travelers`;
+    }
+    
+    return input; // Return the whole input if we can't parse it
+  };
+  
+  const extractInterests = (input: string): string[] => {
+    const interests: string[] = [];
+    
+    // Common travel interests
+    const interestKeywords = [
+      'beach', 'sun', 'ocean', 'swimming', 
+      'mountains', 'hiking', 'trekking', 'climbing', 
+      'culture', 'history', 'museums', 'art', 
+      'food', 'cuisine', 'dining', 'restaurants', 
+      'adventure', 'sports', 'activities', 
+      'relaxation', 'spa', 'wellness', 
+      'shopping', 'luxury', 'photography', 
+      'wildlife', 'nature', 'parks',
+      'city', 'urban', 'nightlife'
+    ];
+    
+    for (const interest of interestKeywords) {
+      if (input.includes(interest)) {
+        interests.push(interest);
+      }
+    }
+    
+    return interests.length > 0 ? interests : ['general travel'];
+  };
+  
+  // Generate the next question based on the current state
+  const getNextQuestion = (): string => {
+    switch (travelMemory.currentQuestion) {
+      case 'destination':
+        return "Welcome aboard JetAI! I'll be your personal travel concierge today. To get started, I'd love to know — where are you dreaming of going?";
+      case 'budget':
+        return `${travelMemory.destination} is an excellent choice! To help personalize your experience, could you share your approximate budget for this trip? (Luxury, Mid-range, Budget)`;
+      case 'dates':
+        return `Perfect! And when are you planning to visit ${travelMemory.destination}? (Month, season, or specific dates)`;
+      case 'travelers':
+        return `Great timing! Will you be traveling solo, as a couple, or with family/friends?`;
+      case 'interests':
+        return `Wonderful! To curate the perfect ${travelMemory.destination} experience, what activities or experiences interest you most? (Beach, culture, food, adventure, etc.)`;
+      case 'summary':
+        return `Thank you for all the details! Here's what I have for your trip:\n\n` +
+               `🌍 Destination: ${travelMemory.destination}\n` +
+               `💰 Budget: ${travelMemory.budget}\n` +
+               `📅 Dates: ${travelMemory.dates}\n` +
+               `👥 Travelers: ${travelMemory.travelers}\n` +
+               `🎯 Interests: ${travelMemory.interests.join(', ')}\n\n` +
+               `Would you like me to create a personalized itinerary based on this information, or is there anything you'd like to adjust?`;
+      default:
+        return "What would you like to know about your upcoming trip?";
+    }
+  };
+  
+  // Enhanced message sending with error handling and memory system
   const handleSendMessage = async (event?: React.MouseEvent, retry = false) => {
     if ((!inputMessage.trim() && !retry) || isLoading) return;
     
@@ -205,66 +505,107 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
     setIsLoading(true);
     
     try {
-      // Add user preferences to context if available
-      const contextEnhancedMessages: ChatMessage[] = [...messages];
-      if (Object.keys(userPreferences).length > 0 && contextEnhancedMessages.length <= 3) {
-        // Only inject preferences early in the conversation to help with personalization
-        const preferencesMessage: ChatMessage = {
-          role: 'system',
-          content: `User preferences: ${JSON.stringify(userPreferences)}`
-        };
-        // Add as first message without mutating original messages array
-        const enhancedMessages = [preferencesMessage, ...messages.filter(m => m.role !== 'system')];
+      // Process the user response in the memory system
+      processUserResponse(inputMessage);
+      
+      // Generate the next AI response based on the conversational state
+      let aiResponse = '';
+      
+      // In summary state, we can generate a more complex response using AI
+      if (travelMemory.currentQuestion === 'summary' && inputMessage.toLowerCase().includes('itinerary')) {
+        // This is where you would call the AI to generate an itinerary
+        const contextEnhancedMessages: ChatMessage[] = [
+          { 
+            role: 'system', 
+            content: `You are a travel concierge planning a trip to ${travelMemory.destination} for ${travelMemory.travelers} with a ${travelMemory.budget} budget in ${travelMemory.dates}. Their interests include: ${travelMemory.interests.join(', ')}.` 
+          },
+          ...messages
+        ];
         
         const response = await sendChatMessage(
-          retry ? 'Can you try again? I didn\'t understand your last response.' : inputMessage,
-          enhancedMessages
-        );
-        
-        // Reset error count on successful response
-        setErrorCount(0);
-        
-        // Set suggestions from response
-        if (response.suggestions && response.suggestions.length > 0) {
-          setSuggestions(response.suggestions);
-        }
-        
-        // Format the response by adding emojis based on content
-        const enhancedResponse = enhanceResponseWithEmojis(response.message);
-        
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: enhancedResponse 
-        }]);
-        
-        // Extract and save any preferences mentioned in the user's message
-        extractPreferences(inputMessage);
-      } else {
-        // Normal flow without preferences
-        const response = await sendChatMessage(
-          retry ? 'Can you try again? I didn\'t understand your last response.' : inputMessage,
+          `Create a detailed 3-day itinerary for ${travelMemory.destination}`,
           contextEnhancedMessages
         );
         
-        // Reset error count on successful response
-        setErrorCount(0);
-        
-        // Set suggestions from response
-        if (response.suggestions && response.suggestions.length > 0) {
-          setSuggestions(response.suggestions);
-        }
-        
         // Format the response by adding emojis based on content
-        const enhancedResponse = enhanceResponseWithEmojis(response.message);
+        aiResponse = enhanceResponseWithEmojis(response.message);
         
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: enhancedResponse 
-        }]);
+        // Set suggestions for after the itinerary
+        setSuggestions([
+          "Show me hotels",
+          "Find flights",
+          "Local experiences",
+          "Adjust my itinerary"
+        ]);
+      } else {
+        // For normal flow, just get the next question
+        aiResponse = getNextQuestion();
         
-        // Extract and save any preferences mentioned in the user's message
-        extractPreferences(inputMessage);
+        // Set appropriate suggestions based on the current question
+        switch (travelMemory.currentQuestion) {
+          case 'destination':
+            setSuggestions([
+              "Paris, France",
+              "Bali, Indonesia",
+              "Tokyo, Japan",
+              "New York City, USA"
+            ]);
+            break;
+          case 'budget':
+            setSuggestions([
+              "Luxury",
+              "Mid-range",
+              "Budget-friendly",
+              "No specific budget"
+            ]);
+            break;
+          case 'dates':
+            setSuggestions([
+              "Next month",
+              "Summer",
+              "Winter holidays",
+              "Flexible dates"
+            ]);
+            break;
+          case 'travelers':
+            setSuggestions([
+              "Solo trip",
+              "Couple",
+              "Family vacation",
+              "Group of friends"
+            ]);
+            break;
+          case 'interests':
+            setSuggestions([
+              "Beach & relaxation",
+              "Culture & history",
+              "Food & dining",
+              "Adventure activities"
+            ]);
+            break;
+          case 'summary':
+            setSuggestions([
+              "Create my itinerary",
+              "Change destination",
+              "Adjust dates",
+              "Add more interests"
+            ]);
+            break;
+        }
       }
+      
+      // Add the AI response to the messages
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: aiResponse 
+      }]);
+      
+      // Reset error count on successful response
+      setErrorCount(0);
+      
+      // Extract and save any preferences mentioned in the user's message
+      extractPreferences(inputMessage);
+      
     } catch (error) {
       console.error('Error sending message:', error);
       setErrorCount(prev => prev + 1);
