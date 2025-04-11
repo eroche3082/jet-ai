@@ -13,6 +13,7 @@ import {
   getFlightById
 } from "./lib/travelApi";
 import { verifyApiIntegrations, suggestNextApiConnections } from './lib/apiVerification';
+import { verifyAllApis, generateApiActivationInstructions } from './lib/apiVerificationService';
 import { createPaymentIntent, createSubscription, getSubscriptionPlans } from "./lib/stripe";
 import connectPgSimple from 'connect-pg-simple';
 import memorystore from 'memorystore';
@@ -24,6 +25,8 @@ import {
 import { generateUserItinerary } from './lib/itineraryGenerator';
 import { processConversation } from './lib/vertexAI';
 import { configureRoutes as configureMemoryRoutes } from './api/memoryEnhancementService';
+import { configureRoutes as configureGoogleApiRoutes } from './api/googleApiService';
+import { configureApiKey } from './lib/googleApiConfig';
 
 // Configure session store
 const createSessionStore = () => {
