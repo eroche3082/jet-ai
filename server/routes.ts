@@ -37,6 +37,56 @@ const createSessionStore = () => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Google Places API routes
+  app.get('/api/places/autocomplete', async (req, res) => {
+    try {
+      const { input, types = 'locality|country' } = req.query;
+      
+      if (!input) {
+        return res.status(400).json({ error: 'Input query is required' });
+      }
+      
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
+          input as string
+        )}&types=${types}&key=${process.env.GOOGLE_CLOUD_API_KEY}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`Google Places API error: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      console.error('Error in places autocomplete:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+  
+  app.get('/api/places/details', async (req, res) => {
+    try {
+      const { place_id } = req.query;
+      
+      if (!place_id) {
+        return res.status(400).json({ error: 'Place ID is required' });
+      }
+      
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&fields=name,formatted_address,geometry,photos,place_id,types,formatted_phone_number,website,rating,opening_hours&key=${process.env.GOOGLE_CLOUD_API_KEY}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`Google Places API error: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      console.error('Error in place details:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
   // Setup sessions
   app.use(
     session({

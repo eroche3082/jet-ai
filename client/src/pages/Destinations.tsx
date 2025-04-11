@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import DestinationCard from '@/components/DestinationCard';
+import DestinationSearchInput from '@/components/DestinationSearchInput';
 
 // Destination data
 const destinations = [
@@ -180,18 +181,17 @@ export default function Destinations() {
           
           {/* Search Form */}
           <form onSubmit={handleSearch} className="max-w-md mx-auto">
-            <div className="relative">
-              <input 
-                type="text" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search destinations or countries..." 
-                className="w-full py-3 px-5 pl-12 rounded-full border border-gray-200 focus:outline-none focus:border-primary"
-              />
-              <button type="submit" className="absolute left-4 top-1/2 transform -translate-y-1/2 text-primary">
-                <i className="fas fa-search"></i>
-              </button>
-            </div>
+            <DestinationSearchInput 
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onSelect={(place) => {
+                setSearchQuery(place.description);
+                toast({
+                  title: "Destination selected",
+                  description: `Showing results for ${place.mainText}, ${place.secondaryText || ''}`,
+                });
+              }}
+            />
           </form>
         </div>
       </div>
