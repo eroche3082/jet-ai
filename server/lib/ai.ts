@@ -17,18 +17,25 @@ let geminiClient: any = null;
 try {
   console.log("Initializing Google Gemini AI...");
   
-  // Use the Google Generative AI SDK with a generic API key
+  // Use the Google Generative AI SDK with environment variable API key
   import('@google/generative-ai').then(({ GoogleGenerativeAI }) => {
-    // For Replit environment
-    const genAI = new GoogleGenerativeAI("AIzaSyDMp6BuDPpT7WHb0IgugW9xq_xGiSAQeTY");
+    // Check for API key in environment variables
+    const apiKey = process.env.GEMINI_API_KEY;
     
-    // Using Gemini Pro model
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY environment variable is not set");
+    }
+    
+    // Initialize with proper API key
+    const genAI = new GoogleGenerativeAI(apiKey);
+    
+    // Using Gemini 1.5 Flash (latest model) with optimized settings
     geminiClient = genAI.getGenerativeModel({ 
-      model: "gemini-pro",
+      model: "gemini-1.5-flash", // Latest Gemini model with fast response times
       generationConfig: {
         temperature: 0.7,
         topP: 0.9,
-        maxOutputTokens: 1024,
+        maxOutputTokens: 4096, // Increased token limit for more detailed responses
       }
     });
     console.log("Google Gemini AI initialized successfully!");
@@ -226,40 +233,169 @@ async function handleWithGemini(
   isDestinationRequest: boolean,
   isItineraryRequest: boolean
 ): Promise<ChatResponse> {
-  // Build prompt for Gemini
+  // Set max retries for API call resilience
+  const MAX_RETRIES = 3;
+  let retryCount = 0;
+  
+  // Enhance the prompt for better conversational flow
   let prompt = `${TRAVEL_AGENT_PROMPT}\n\n`;
   
-  // Add chat history
+  // Enhanced history formatting with improved context
   for (const msg of formattedHistory) {
     prompt += `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}\n\n`;
   }
   
-  // Add current message
-  prompt += `User: ${message}\n\nRespond with valid JSON only:`;
-
-  const result = await geminiClient.generateContent(prompt);
-  const response = result.response;
-  const text = response.text();
+  // Add current message with clearer instructions
+  prompt += `User: ${message}\n\n`;
   
-  try {
-    // Extract JSON from response (Gemini might add text before/after JSON)
-    const jsonMatch = text.match(/({[\s\S]*})/);
-    if (jsonMatch && jsonMatch[0]) {
-      const parsedResponse = JSON.parse(jsonMatch[0]);
-      return parsedResponse;
+  // Check for query types that benefit from follow-up questions
+  if (isVagueQuery(message)) {
+    prompt += `Before providing recommendations, ask follow-up questions to better understand the user's preferences for a more personalized response.\n\n`;
+  }
+  
+  // Add specific JSON-formatting instruction
+  prompt += `Respond with valid JSON only in this exact structure: { "message": "Your response", "suggestions": ["option1", "option2", "option3"] }`;
+  
+  // Add specific instructions for destination recommendations
+  if (isDestinationRequest) {
+    prompt += `, including a "destinations" array with items that have id, name, country, description, imageUrl (use Unsplash URLs), and rating (1-5)`;
+  }
+  
+  // Add specific instructions for itinerary generation
+  if (isItineraryRequest) {
+    prompt += `, including an "itinerary" object with a days array, where each day has activities with time, title, description, and location`;
+  }
+  
+  prompt += `:`;
+
+  // Implement retry logic for API resilience
+  while (retryCount < MAX_RETRIES) {
+    try {
+      const result = await geminiClient.generateContent(prompt);
+      const response = result.response;
+      const text = response.text();
+      
+      try {
+        // Enhanced JSON parsing with better error handling
+        const jsonMatch = text.match(/({[\s\S]*})/);
+        if (jsonMatch && jsonMatch[0]) {
+          try {
+            const parsedResponse = JSON.parse(jsonMatch[0]);
+            
+            // Validate required fields to ensure proper formatting
+            if (!parsedResponse.message) {
+              parsedResponse.message = "I'm here to help with your travel plans. What would you like to know?";
+            }
+            
+            // Ensure suggestions are always available
+            if (!parsedResponse.suggestions || !Array.isArray(parsedResponse.suggestions) || parsedResponse.suggestions.length === 0) {
+              parsedResponse.suggestions = [
+                "Tell me about popular destinations",
+                "Help me plan a budget trip",
+                "What are the best times to visit Europe?"
+              ];
+            }
+            
+            // Track user preferences for future personalization
+            trackUserPreferences(message);
+            
+            return parsedResponse;
+          } catch (jsonError) {
+            console.error("JSON parse error:", jsonError);
+            throw new Error("Invalid JSON format");
+          }
+        } else {
+          throw new Error("No JSON found in response");
+        }
+      } catch (error) {
+        console.error("Error processing Gemini response:", error);
+        
+        // Fallback to simple text response with pre-defined suggestions
+        if (text && text.length > 0) {
+          return {
+            message: text,
+            suggestions: [
+              "Tell me more about your travel preferences",
+              "What kind of trip are you planning?",
+              "Are you looking for a specific type of destination?"
+            ]
+          };
+        }
+        
+        throw error; // Re-throw for retry mechanism
+      }
+    } catch (apiError) {
+      console.error(`Gemini API error (attempt ${retryCount + 1}/${MAX_RETRIES}):`, apiError);
+      retryCount++;
+      
+      // Last attempt failed, return graceful fallback
+      if (retryCount >= MAX_RETRIES) {
+        return {
+          message: "I'm having trouble connecting to my travel knowledge database at the moment. Let me try again with a simpler approach. How can I help with your travel plans?",
+          suggestions: [
+            "Tell me where you'd like to go",
+            "What type of vacation are you looking for?",
+            "Try again in a moment"
+          ]
+        };
+      }
+      
+      // Wait before retry with exponential backoff
+      await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
     }
-    
-    // Fallback if no JSON detected
-    return {
-      message: text,
-      suggestions: ["Can you tell me more about what you're looking for?"]
-    };
-  } catch (error) {
-    console.error("Error parsing Gemini response:", error);
-    return {
-      message: text,
-      suggestions: ["Can you tell me more about what you're looking for?"]
-    };
+  }
+  
+  // This should never be reached due to the return in the last retry attempt
+  return {
+    message: "I apologize for the technical difficulties. Please try again with your travel question.",
+    suggestions: ["Try again", "Ask in a different way", "Contact support"]
+  };
+}
+
+/**
+ * Detects if a query is vague and would benefit from follow-up questions
+ */
+function isVagueQuery(message: string): boolean {
+  // Check for very short queries
+  if (message.trim().split(/\s+/).length < 4) {
+    return true;
+  }
+  
+  // Check for generic travel queries without specifics
+  const vaguePatterns = [
+    /where should i (?:go|travel)/i,
+    /recommend (?:a place|somewhere)/i,
+    /best (?:places|destinations|cities|countries)/i,
+    /plan (?:a trip|a vacation|my holiday)/i,
+    /^help me$/i,
+    /travel (?:advice|suggestions|ideas)/i
+  ];
+  
+  return vaguePatterns.some(pattern => pattern.test(message));
+}
+
+/**
+ * Tracks user preferences from messages for future personalization
+ * This is a placeholder for future database integration
+ */
+function trackUserPreferences(message: string): void {
+  // This would store preferences in a database in a production version
+  // For now, we just log that we'd track these preferences
+  const preferencePatterns = [
+    { pattern: /budget|cheap|affordable|expensive|luxury/i, category: 'budget' },
+    { pattern: /beach|mountain|city|countryside|nature|urban/i, category: 'environment' },
+    { pattern: /family|solo|couple|honeymoon|friends/i, category: 'travelGroup' },
+    { pattern: /adventure|relaxation|culture|food|shopping/i, category: 'activityType' },
+    { pattern: /summer|winter|spring|fall|season/i, category: 'season' }
+  ];
+  
+  const detectedPreferences = preferencePatterns
+    .filter(({ pattern }) => pattern.test(message))
+    .map(({ category }) => category);
+  
+  if (detectedPreferences.length > 0) {
+    console.log(`User preferences detected: ${detectedPreferences.join(', ')}`);
+    // In a full implementation, these would be saved to the user profile
   }
 }
 

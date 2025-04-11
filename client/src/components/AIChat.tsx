@@ -1,27 +1,40 @@
-import { useState, useEffect, useRef } from 'react';
-import { ChatMessage, sendChatMessage } from '@/lib/ai';
+import { useState, useEffect, useRef, MouseEvent } from 'react';
+import { ChatMessage, sendChatMessage, ChatResponse } from '@/lib/ai';
+import ReactMarkdown from 'react-markdown';
+
+// Extended ChatMessage type to include system messages
+interface ExtendedChatMessage extends Omit<ChatMessage, 'role'> {
+  role: 'user' | 'assistant' | 'system';
+}
 
 interface AIChatProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+// Enhanced welcome message with emoji and formatting
+const WELCOME_MESSAGE = "👋 Hi there! I'm your **JetAI** travel assistant.\n\nI can help you:\n* Plan personalized trips\n* Recommend amazing destinations\n* Create detailed itineraries\n* Find accommodations and activities\n\nWhat kind of travel experience are you looking for today?";
+
 export default function AIChat({ isOpen, onClose }: AIChatProps) {
   const [inputMessage, setInputMessage] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: "Hi there! I'm your JetAI travel assistant. I can help you plan trips, find destinations, create itineraries, and more. What can I help you with today?"
+      content: WELCOME_MESSAGE
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorCount, setErrorCount] = useState(0);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [userPreferences, setUserPreferences] = useState<Record<string, string>>({});
 
+  // Enhanced quick actions with emojis
   const quickActions = [
-    'Plan a trip',
-    'Find destinations',
-    'Travel inspiration'
+    '✈️ Plan a trip',
+    '🌍 Find destinations',
+    '✨ Travel inspiration'
   ];
 
   useEffect(() => {
@@ -29,31 +42,172 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
       inputRef.current.focus();
     }
     scrollToBottom();
+    
+    // Load user preferences from localStorage if available
+    const savedPreferences = localStorage.getItem('userTravelPreferences');
+    if (savedPreferences) {
+      try {
+        setUserPreferences(JSON.parse(savedPreferences));
+      } catch (e) {
+        console.error('Error loading saved preferences:', e);
+      }
+    }
   }, [isOpen, messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
+  // Save detected preferences to localStorage
+  const savePreferences = (newPreferences: Record<string, string>) => {
+    const updatedPreferences = { ...userPreferences, ...newPreferences };
+    setUserPreferences(updatedPreferences);
+    localStorage.setItem('userTravelPreferences', JSON.stringify(updatedPreferences));
+  };
+
+  // Enhanced message sending with error handling and retry logic
+  const handleSendMessage = async (retry = false) => {
+    if (!inputMessage.trim() && !retry) return;
     
-    const userMessage: ChatMessage = { role: 'user', content: inputMessage };
-    setMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
+    const userMessage: ChatMessage = { 
+      role: 'user', 
+      content: inputMessage 
+    };
+    
+    if (!retry) {
+      setMessages(prev => [...prev, userMessage]);
+      setInputMessage('');
+    }
+    
     setIsLoading(true);
     
     try {
-      const response = await sendChatMessage(inputMessage, messages);
-      setMessages(prev => [...prev, { role: 'assistant', content: response.message }]);
-    } catch (error) {
-      console.error('Error sending message:', error);
+      // Add user preferences to context if available
+      const contextEnhancedMessages = [...messages];
+      if (Object.keys(userPreferences).length > 0 && contextEnhancedMessages.length <= 3) {
+        // Only inject preferences early in the conversation
+        contextEnhancedMessages.unshift({
+          role: 'system',
+          content: `User preferences: ${JSON.stringify(userPreferences)}`
+        });
+      }
+      
+      const response = await sendChatMessage(
+        retry ? 'Can you try again? I didn\'t understand your last response.' : inputMessage,
+        retry ? messages : contextEnhancedMessages
+      );
+      
+      // Reset error count on successful response
+      setErrorCount(0);
+      
+      // Set suggestions from response
+      if (response.suggestions && response.suggestions.length > 0) {
+        setSuggestions(response.suggestions);
+      }
+      
+      // Format the response by adding emojis based on content
+      const enhancedResponse = enhanceResponseWithEmojis(response.message);
+      
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: "I'm sorry, I'm having trouble processing your request right now. Please try again later." 
+        content: enhancedResponse 
       }]);
+      
+      // Extract and save any preferences mentioned in the user's message
+      extractPreferences(inputMessage);
+      
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setErrorCount(prev => prev + 1);
+      
+      // Different error messages based on error count
+      let errorMessage = "I'm sorry, I'm having trouble processing your request right now.";
+      
+      if (errorCount >= 2) {
+        errorMessage = "I seem to be having persistent trouble connecting. Please check your internet connection or try again later.";
+      } else if (errorCount === 1) {
+        errorMessage = "I apologize for the difficulty. Let me try a simpler approach. Could you rephrase your question?";
+      }
+      
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: errorMessage 
+      }]);
+      
+      // Provide appropriate suggestions based on error
+      setSuggestions([
+        "Ask a different question",
+        "Try again later",
+        "Use simpler language"
+      ]);
+      
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Detect emojis and add them to responses based on content themes
+  const enhanceResponseWithEmojis = (text: string): string => {
+    // Only add emojis if the text doesn't already have them
+    if (/[\u{1F300}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u.test(text)) {
+      return text;
+    }
+    
+    // Add relevant emojis based on content
+    if (/beach|ocean|sea|sand|swim/i.test(text)) {
+      text = `🏖️ ${text}`;
+    } else if (/mountain|hiking|trek|climb/i.test(text)) {
+      text = `⛰️ ${text}`;
+    } else if (/food|restaurant|cuisine|eat|dining/i.test(text)) {
+      text = `🍽️ ${text}`;
+    } else if (/hotel|stay|accommodation|resort/i.test(text)) {
+      text = `🏨 ${text}`;
+    } else if (/flight|airport|plane/i.test(text)) {
+      text = `✈️ ${text}`;
+    } else if (/cost|price|budget|money|expensive/i.test(text)) {
+      text = `💰 ${text}`;
+    } else if (/itinerary|plan|schedule/i.test(text)) {
+      text = `📝 ${text}`;
+    } else {
+      // Default travel emoji for other responses
+      text = `🧳 ${text}`;
+    }
+    
+    return text;
+  };
+
+  // Extract user preferences from messages
+  const extractPreferences = (message: string) => {
+    const preferences: Record<string, string> = {};
+    
+    // Budget preferences
+    if (/budget|cheap|affordable/i.test(message)) {
+      preferences.budget = 'budget';
+    } else if (/luxury|expensive|high-end/i.test(message)) {
+      preferences.budget = 'luxury';
+    }
+    
+    // Environment preferences
+    if (/beach|ocean|sea|island/i.test(message)) {
+      preferences.environment = 'beach';
+    } else if (/mountain|hiking|nature|outdoor/i.test(message)) {
+      preferences.environment = 'nature';
+    } else if (/city|urban|metropolitan/i.test(message)) {
+      preferences.environment = 'urban';
+    }
+    
+    // Activity preferences
+    if (/adventure|exciting|thrill/i.test(message)) {
+      preferences.activityType = 'adventure';
+    } else if (/relax|peaceful|quiet|calm/i.test(message)) {
+      preferences.activityType = 'relaxation';
+    } else if (/culture|museum|history|art/i.test(message)) {
+      preferences.activityType = 'cultural';
+    }
+    
+    // Save detected preferences
+    if (Object.keys(preferences).length > 0) {
+      savePreferences(preferences);
     }
   };
 
@@ -64,7 +218,14 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
   };
 
   const handleQuickAction = (action: string) => {
-    setInputMessage(action);
+    // Remove the emoji prefix if present
+    const cleanAction = action.replace(/^[^\w]+ /, '');
+    setInputMessage(cleanAction);
+    handleSendMessage();
+  };
+  
+  const handleSuggestionClick = (suggestion: string) => {
+    setInputMessage(suggestion);
     handleSendMessage();
   };
 
@@ -111,7 +272,15 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
                   : 'bg-gray-100 rounded-lg rounded-tl-none'
               } p-3 max-w-[80%]`}
             >
-              <p className="text-sm">{message.content}</p>
+              {message.role === 'assistant' ? (
+                <div className="text-sm markdown-content">
+                  <ReactMarkdown>
+                    {message.content}
+                  </ReactMarkdown>
+                </div>
+              ) : (
+                <p className="text-sm">{message.content}</p>
+              )}
             </div>
             
             {message.role === 'user' && (
