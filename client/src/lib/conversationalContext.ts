@@ -1,490 +1,375 @@
-import { firestore } from '@/lib/firebase';
-import { doc, getDoc, setDoc, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
+/**
+ * JetAI Conversational Context Manager
+ * Phase 4: Automation & Predictive Intelligence
+ * 
+ * This module implements a memory and context system for maintaining
+ * conversational state across tab switches and user sessions
+ */
 
-// Types for the conversational context system
-export interface ChatFlow {
-  id: string;
-  tab: string;
-  name: string;
-  steps: ChatFlowStep[];
-  triggers: string[];
-  completed?: boolean;
-}
+import { MemoryContext, TravelDestination, ChatMessage } from '@/types';
+import { v4 as uuidv4 } from 'uuid';
 
-export interface ChatFlowStep {
-  id: string;
-  question: string;
-  responseType: 'text' | 'selection' | 'yesno' | 'numeric' | 'date' | 'location';
-  options?: string[];
-  nextStepId?: string;
-  actionType?: 'save' | 'api' | 'redirect' | 'display';
-  actionParams?: Record<string, any>;
-}
+// Memory storage key in localStorage
+const MEMORY_STORAGE_KEY = 'jetai_memory_context';
 
-export interface ChatAction {
-  type: string;
-  params: Record<string, any>;
-  tab: string;
-  trigger: string;
-}
-
-export interface ConversationMemory {
-  activeTab: string | null;
-  activeFlow: string | null;
-  currentStepId: string | null;
-  flowResponses: Record<string, any>;
-  flowHistory: string[];
-  tabContext: Record<string, any>;
-}
-
-// TabActionsMap defines the actions available per tab
-export interface TabAction {
-  id: string;
-  trigger: string;
-  description: string;
-  handler: (params: any) => Promise<any>;
-}
-
-// Initial state for a new conversation
-const initialConversationMemory: ConversationMemory = {
-  activeTab: null,
-  activeFlow: null,
-  currentStepId: null,
-  flowResponses: {},
-  flowHistory: [],
-  tabContext: {}
+// Default memory context
+const DEFAULT_MEMORY_CONTEXT: MemoryContext = {
+  userId: '',
+  sessionId: '',
+  currentTab: 'chat',
+  recentSearches: [],
+  recentDestinations: [],
+  detectedIntents: [],
+  lastUpdateTime: new Date(),
+  customValues: {}
 };
 
-// Collection of chat flows organized by tab
-const chatFlows: Record<string, ChatFlow[]> = {
-  dashboard: [
-    {
-      id: 'travel-planning-flow',
-      tab: 'dashboard',
-      name: 'Travel Planning Flow',
-      triggers: ['plan a trip', 'create trip', 'new journey', 'travel to'],
-      steps: [
-        {
-          id: 'tp-step-1',
-          question: 'Great! Let\'s plan your trip. Where would you like to go?',
-          responseType: 'location',
-          nextStepId: 'tp-step-2'
-        },
-        {
-          id: 'tp-step-2',
-          question: 'When are you planning to visit {location}?',
-          responseType: 'date',
-          nextStepId: 'tp-step-3'
-        },
-        {
-          id: 'tp-step-3',
-          question: 'How long will you be staying in {location}?',
-          responseType: 'numeric',
-          nextStepId: 'tp-step-4'
-        },
-        {
-          id: 'tp-step-4',
-          question: 'What\'s your budget for this trip to {location}?',
-          responseType: 'numeric',
-          nextStepId: 'tp-step-5'
-        },
-        {
-          id: 'tp-step-5',
-          question: 'Would you like me to create an itinerary for your {duration} days in {location}?',
-          responseType: 'yesno',
-          actionType: 'redirect',
-          actionParams: { tab: 'itineraries', action: 'create', prepopulate: true }
-        }
-      ]
-    }
-  ],
-  explore: [
-    {
-      id: 'destination-discovery-flow',
-      tab: 'explore',
-      name: 'Destination Discovery Flow',
-      triggers: ['find destinations', 'where should I go', 'recommend places', 'discover locations'],
-      steps: [
-        {
-          id: 'dd-step-1',
-          question: 'I'd love to help you discover destinations. What type of experience are you looking for? (e.g., beach, mountains, city, cultural)',
-          responseType: 'text',
-          nextStepId: 'dd-step-2'
-        },
-        {
-          id: 'dd-step-2',
-          question: 'What's your rough budget for this trip? (low, medium, high)',
-          responseType: 'selection',
-          options: ['Low - under $1,000', 'Medium - $1,000 to $3,000', 'High - over $3,000'],
-          nextStepId: 'dd-step-3'
-        },
-        {
-          id: 'dd-step-3',
-          question: 'When are you planning to travel?',
-          responseType: 'date',
-          nextStepId: 'dd-step-4'
-        },
-        {
-          id: 'dd-step-4',
-          question: 'How long would you like to travel for?',
-          responseType: 'numeric',
-          nextStepId: 'dd-step-5'
-        },
-        {
-          id: 'dd-step-5',
-          question: 'Are you interested in popular tourist destinations or off-the-beaten-path locations?',
-          responseType: 'selection',
-          options: ['Popular destinations', 'Off-the-beaten-path', 'Mix of both'],
-          actionType: 'display',
-          actionParams: { component: 'destination-recommendations' }
-        }
-      ]
-    }
-  ],
-  profile: [
-    {
-      id: 'preferences-setup-flow',
-      tab: 'profile',
-      name: 'Travel Preferences Setup Flow',
-      triggers: ['update preferences', 'set my travel style', 'travel preferences', 'my profile'],
-      steps: [
-        {
-          id: 'ps-step-1',
-          question: 'Let's update your travel preferences. What type of traveler are you?',
-          responseType: 'selection',
-          options: ['Budget Explorer', 'Comfort Seeker', 'Luxury Traveler', 'Adventure Enthusiast', 'Cultural Immersion'],
-          nextStepId: 'ps-step-2'
-        },
-        {
-          id: 'ps-step-2',
-          question: 'What types of accommodation do you prefer?',
-          responseType: 'selection',
-          options: ['Hostels', 'Budget Hotels', 'Mid-range Hotels', 'Luxury Hotels', 'Vacation Rentals', 'Resorts', 'All-Inclusive'],
-          nextStepId: 'ps-step-3'
-        },
-        {
-          id: 'ps-step-3',
-          question: 'What interests you most when traveling? Select all that apply.',
-          responseType: 'selection',
-          options: ['History & Culture', 'Food & Cuisine', 'Nature & Outdoors', 'Adventure Activities', 'Relaxation', 'Nightlife', 'Shopping'],
-          nextStepId: 'ps-step-4'
-        },
-        {
-          id: 'ps-step-4',
-          question: 'Do you have any dietary restrictions I should know about?',
-          responseType: 'selection',
-          options: ['None', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Kosher', 'Halal', 'Other'],
-          nextStepId: 'ps-step-5'
-        },
-        {
-          id: 'ps-step-5',
-          question: 'What languages do you speak?',
-          responseType: 'text',
-          actionType: 'save',
-          actionParams: { collection: 'userPreferences' }
-        }
-      ]
-    }
-  ],
-  // Additional flows for other tabs would be defined here
+// Maximum items to store in various context collections
+const MEMORY_LIMITS = {
+  recentSearches: 10,
+  recentDestinations: 5,
+  detectedIntents: 15,
+  conversationTurns: 20 // For conversation history
 };
 
-// TabActionsMap defines the actions available per tab
-interface TabAction {
-  id: string;
-  trigger: string;
-  description: string;
-  handler: (params: any) => Promise<any>;
-}
-
-// These would be implemented in the actual application
-const mockActionHandler = async (params: any) => {
-  console.log('Action executed:', params);
-  return { success: true, data: {} };
-};
-
-// Map of available actions per tab
-const tabActionsMap: Record<string, TabAction[]> = {
-  dashboard: [
-    {
-      id: 'show-upcoming-trips',
-      trigger: 'show my upcoming trips',
-      description: 'Display countdown timer for next trip',
-      handler: mockActionHandler
-    },
-    {
-      id: 'update-weather',
-      trigger: 'update weather forecast',
-      description: 'Show weather forecast for saved destinations',
-      handler: mockActionHandler
-    },
-    {
-      id: 'create-new-trip',
-      trigger: 'create a new trip',
-      description: 'Start trip creation flow',
-      handler: mockActionHandler
-    },
-    {
-      id: 'check-flight-status',
-      trigger: 'check flight status',
-      description: 'Show status of booked flights',
-      handler: mockActionHandler
-    }
+// Intent detection patterns (simplified - in a real app, use NLP)
+const INTENT_PATTERNS: Record<string, RegExp[]> = {
+  'search_flights': [
+    /\b(?:find|search|look\s+for|get|book)\s+(?:a\s+)?(?:flights?|planes?)\b/i,
+    /\bfly(?:ing)?\s+(?:to|from|between)\b/i
   ],
-  // Other tab actions would be defined similarly
+  'search_hotels': [
+    /\b(?:find|search|look\s+for|get|book)\s+(?:a\s+)?(?:hotels?|accommodations?|rooms?|places?\s+to\s+stay)\b/i
+  ],
+  'check_weather': [
+    /\b(?:what'?s\s+the\s+)?weather\b/i,
+    /\b(?:temperature|forecast|rain|sunny|cloudy)\b/i
+  ],
+  'budget_inquiry': [
+    /\b(?:budget|cost|price|expensive|cheap|spending|money)\b/i
+  ],
+  'itinerary_request': [
+    /\b(?:itinerary|schedule|plan|agenda|activities)\b/i
+  ],
+  'transport_options': [
+    /\b(?:transport|taxi|uber|bus|train|subway|metro|car\s+rental)\b/i
+  ],
+  'food_recommendations': [
+    /\b(?:food|restaurant|eat|dinner|lunch|breakfast|cuisine|dining)\b/i
+  ],
+  'attraction_inquiry': [
+    /\b(?:attractions?|landmarks?|museums?|things\s+to\s+do|places\s+to\s+visit|sights?|sightseeing)\b/i
+  ],
+  'translation_request': [
+    /\b(?:translate|translation|language|say\s+in|speak\s+in)\b/i
+  ]
 };
+
+// Singleton instance
+let memoryContext: MemoryContext | null = null;
 
 /**
- * Check if a user message matches any trigger phrases for available actions
+ * Initialize the memory context system
  */
-export function matchTriggerPhrases(message: string, currentTab: string): TabAction | null {
-  const normalizedMessage = message.toLowerCase().trim();
+export function initializeMemoryContext(userId: string = ''): MemoryContext {
+  // Generate a unique session ID
+  const sessionId = uuidv4();
   
-  const actions = tabActionsMap[currentTab] || [];
-  
-  for (const action of actions) {
-    if (normalizedMessage.includes(action.trigger)) {
-      return action;
-    }
-  }
-  
-  return null;
-}
-
-/**
- * Find a conversation flow by matching trigger phrases
- */
-export function findMatchingFlow(message: string, currentTab: string): ChatFlow | null {
-  const normalizedMessage = message.toLowerCase().trim();
-  const tabFlows = chatFlows[currentTab] || [];
-  
-  for (const flow of tabFlows) {
-    for (const trigger of flow.triggers) {
-      if (normalizedMessage.includes(trigger.toLowerCase())) {
-        return flow;
+  // Try to load existing memory from localStorage
+  try {
+    const savedMemory = localStorage.getItem(MEMORY_STORAGE_KEY);
+    if (savedMemory) {
+      const parsed = JSON.parse(savedMemory);
+      
+      // Convert date strings back to Date objects
+      const restored = {
+        ...parsed,
+        lastUpdateTime: new Date(parsed.lastUpdateTime)
+      };
+      
+      // If the user ID matches, use the saved memory
+      if (userId && restored.userId === userId) {
+        // Update the session ID to the new one
+        restored.sessionId = sessionId;
+        memoryContext = restored;
+        return memoryContext;
       }
     }
+  } catch (error) {
+    console.error('Error loading memory context:', error);
   }
   
-  return null;
-}
-
-/**
- * Get the current tab context based on the active tab
- */
-export function getTabContextPrompt(tab: string): string {
-  const contextMap: Record<string, string> = {
-    dashboard: "You're viewing the Dashboard where you can see your upcoming trips, weather forecasts, and travel stats. I can help you plan new trips or check details about existing ones.",
-    explore: "You're in the Explore section where you can discover new destinations. I can help you find places based on your interests, budget, and travel style.",
-    profile: "You're in your Profile section. Here you can update your travel preferences, languages, and dietary restrictions.",
-    "travel-wallet": "You're in the Travel Wallet section where you can manage your travel budget and expenses. I can help you track spending, convert currencies, or analyze your expenses.",
-    bookings: "You're in the Bookings section where you can manage your flight, hotel, and activity reservations. I can help you find or manage bookings.",
-    itineraries: "You're in the Itineraries section where you can create and manage your trip plans. I can help you build day-by-day schedules for your trips.",
-    chat: "This is the main Chat interface. I can answer general travel questions or redirect you to specific tools as needed.",
-    tools: "You're in the Tools section which offers useful travel utilities like currency conversion, translation, and packing lists.",
-    settings: "You're in the Settings section where you can customize your app experience, manage notifications, and control your data."
+  // If we couldn't load a saved context or the user ID doesn't match,
+  // create a new context
+  memoryContext = {
+    ...DEFAULT_MEMORY_CONTEXT,
+    userId,
+    sessionId,
+    lastUpdateTime: new Date()
   };
   
-  return contextMap[tab] || "I'm your JetAI travel assistant. How can I help you today?";
+  // Save it to localStorage
+  saveMemoryContext();
+  
+  return memoryContext;
 }
 
 /**
- * Get the current step in an active flow
+ * Save the current memory context to localStorage
  */
-export function getCurrentFlowStep(memory: ConversationMemory): ChatFlowStep | null {
-  if (!memory.activeFlow || !memory.currentStepId) return null;
+function saveMemoryContext(): void {
+  if (!memoryContext) return;
   
-  const tabFlows = chatFlows[memory.activeTab || ''] || [];
-  const activeFlow = tabFlows.find(flow => flow.id === memory.activeFlow);
-  
-  if (!activeFlow) return null;
-  
-  return activeFlow.steps.find(step => step.id === memory.currentStepId) || null;
+  try {
+    // Update the last update time
+    memoryContext.lastUpdateTime = new Date();
+    
+    // Serialize and save
+    localStorage.setItem(MEMORY_STORAGE_KEY, JSON.stringify(memoryContext));
+  } catch (error) {
+    console.error('Error saving memory context:', error);
+  }
 }
 
 /**
- * Process a step response and update the conversation memory
+ * Get the current memory context
  */
-export function processStepResponse(memory: ConversationMemory, response: string): {
-  memory: ConversationMemory;
-  nextQuestion: string | null;
-  action: any | null;
-} {
-  const currentStep = getCurrentFlowStep(memory);
-  if (!currentStep) {
-    return { memory, nextQuestion: null, action: null };
+export function getMemoryContext(): MemoryContext {
+  if (!memoryContext) {
+    return initializeMemoryContext();
+  }
+  return memoryContext;
+}
+
+/**
+ * Reset the memory context
+ */
+export function resetMemoryContext(): void {
+  const userId = memoryContext?.userId || '';
+  memoryContext = initializeMemoryContext(userId);
+}
+
+/**
+ * Update current active tab
+ */
+export function updateCurrentTab(tabName: string): void {
+  if (!memoryContext) initializeMemoryContext();
+  if (memoryContext) {
+    memoryContext.currentTab = tabName;
+    saveMemoryContext();
+  }
+}
+
+/**
+ * Add a search term to recent searches
+ */
+export function addRecentSearch(searchTerm: string): void {
+  if (!memoryContext) initializeMemoryContext();
+  if (!memoryContext || !searchTerm.trim()) return;
+  
+  // Remove the term if it already exists to avoid duplicates
+  memoryContext.recentSearches = memoryContext.recentSearches.filter(
+    s => s.toLowerCase() !== searchTerm.toLowerCase()
+  );
+  
+  // Add the new term at the beginning
+  memoryContext.recentSearches.unshift(searchTerm);
+  
+  // Trim the list if needed
+  if (memoryContext.recentSearches.length > MEMORY_LIMITS.recentSearches) {
+    memoryContext.recentSearches = memoryContext.recentSearches.slice(
+      0, MEMORY_LIMITS.recentSearches
+    );
   }
   
-  // Store the response
-  const updatedMemory = {
-    ...memory,
-    flowResponses: {
-      ...memory.flowResponses,
-      [currentStep.id]: response
-    }
-  };
+  saveMemoryContext();
+}
+
+/**
+ * Add a destination to recent destinations
+ */
+export function addRecentDestination(destination: TravelDestination): void {
+  if (!memoryContext) initializeMemoryContext();
+  if (!memoryContext || !destination) return;
   
-  // Check if we should perform an action
-  let action = null;
-  if (currentStep.actionType && currentStep.actionParams) {
-    action = {
-      type: currentStep.actionType,
-      params: currentStep.actionParams
-    };
+  // Remove the destination if it already exists to avoid duplicates
+  memoryContext.recentDestinations = memoryContext.recentDestinations.filter(
+    d => d.id !== destination.id
+  );
+  
+  // Add the new destination at the beginning
+  memoryContext.recentDestinations.unshift(destination);
+  
+  // Trim the list if needed
+  if (memoryContext.recentDestinations.length > MEMORY_LIMITS.recentDestinations) {
+    memoryContext.recentDestinations = memoryContext.recentDestinations.slice(
+      0, MEMORY_LIMITS.recentDestinations
+    );
   }
   
-  // Move to next step if available
-  let nextQuestion = null;
-  if (currentStep.nextStepId) {
-    updatedMemory.currentStepId = currentStep.nextStepId;
-    
-    // Get the next step
-    const tabFlows = chatFlows[memory.activeTab || ''] || [];
-    const activeFlow = tabFlows.find(flow => flow.id === memory.activeFlow);
-    
-    if (activeFlow) {
-      const nextStep = activeFlow.steps.find(step => step.id === currentStep.nextStepId);
-      if (nextStep) {
-        // Replace any placeholders in the question with values from responses
-        let processedQuestion = nextStep.question;
-        for (const [stepId, stepResponse] of Object.entries(updatedMemory.flowResponses)) {
-          const step = activeFlow.steps.find(s => s.id === stepId);
-          if (step) {
-            const placeholder = `{${step.id.split('-').pop()}}`;
-            processedQuestion = processedQuestion.replace(placeholder, stepResponse as string);
-          }
-        }
-        nextQuestion = processedQuestion;
+  saveMemoryContext();
+}
+
+/**
+ * Update active itinerary ID
+ */
+export function updateActiveItinerary(itineraryId?: string): void {
+  if (!memoryContext) initializeMemoryContext();
+  if (memoryContext) {
+    memoryContext.activeItineraryId = itineraryId;
+    saveMemoryContext();
+  }
+}
+
+/**
+ * Detect user intents from message content
+ */
+export function detectIntents(message: string): string[] {
+  const detectedIntents: string[] = [];
+  
+  // Check each intent pattern
+  Object.entries(INTENT_PATTERNS).forEach(([intent, patterns]) => {
+    for (const pattern of patterns) {
+      if (pattern.test(message)) {
+        detectedIntents.push(intent);
+        break; // Only add each intent once
       }
     }
-  } else {
-    // End of flow
-    updatedMemory.activeFlow = null;
-    updatedMemory.currentStepId = null;
-    if (updatedMemory.flowHistory.indexOf(memory.activeFlow as string) === -1) {
-      updatedMemory.flowHistory = [...updatedMemory.flowHistory, memory.activeFlow as string];
-    }
+  });
+  
+  // If any intents were detected, add them to the memory
+  if (detectedIntents.length > 0) {
+    addDetectedIntents(detectedIntents);
   }
   
-  return { memory: updatedMemory, nextQuestion, action };
+  return detectedIntents;
 }
 
 /**
- * Start a new conversation flow
+ * Add detected intents to memory
  */
-export function startConversationFlow(memory: ConversationMemory, flow: ChatFlow): {
-  memory: ConversationMemory;
-  firstQuestion: string;
-} {
-  const firstStep = flow.steps[0];
+function addDetectedIntents(intents: string[]): void {
+  if (!memoryContext) initializeMemoryContext();
+  if (!memoryContext || !intents.length) return;
   
-  const updatedMemory = {
-    ...memory,
-    activeFlow: flow.id,
-    currentStepId: firstStep.id
+  // Add new intents to the beginning of the list
+  const uniqueIntents = intents.filter(
+    i => !memoryContext?.detectedIntents.includes(i)
+  );
+  
+  if (uniqueIntents.length > 0) {
+    memoryContext.detectedIntents = [
+      ...uniqueIntents,
+      ...memoryContext.detectedIntents
+    ];
+    
+    // Trim the list if needed
+    if (memoryContext.detectedIntents.length > MEMORY_LIMITS.detectedIntents) {
+      memoryContext.detectedIntents = memoryContext.detectedIntents.slice(
+        0, MEMORY_LIMITS.detectedIntents
+      );
+    }
+    
+    saveMemoryContext();
+  }
+}
+
+/**
+ * Focus conversation on a specific topic
+ */
+export function setConversationFocus(focus?: string): void {
+  if (!memoryContext) initializeMemoryContext();
+  if (memoryContext) {
+    memoryContext.conversationFocus = focus;
+    saveMemoryContext();
+  }
+}
+
+/**
+ * Set a custom memory value
+ */
+export function setCustomMemoryValue(key: string, value: any): void {
+  if (!memoryContext) initializeMemoryContext();
+  if (memoryContext && key) {
+    memoryContext.customValues[key] = value;
+    saveMemoryContext();
+  }
+}
+
+/**
+ * Get a custom memory value
+ */
+export function getCustomMemoryValue(key: string): any {
+  if (!memoryContext) initializeMemoryContext();
+  if (memoryContext && key && key in memoryContext.customValues) {
+    return memoryContext.customValues[key];
+  }
+  return undefined;
+}
+
+/**
+ * Process a new message to update context
+ */
+export function processMessage(message: ChatMessage): void {
+  if (message.role === 'user') {
+    // Detect intents in user messages
+    detectIntents(message.content);
+  }
+}
+
+/**
+ * Synchronize memory between tabs
+ */
+export function setupCrossTabSync(): void {
+  window.addEventListener('storage', (event) => {
+    if (event.key === MEMORY_STORAGE_KEY && event.newValue) {
+      try {
+        const newContext = JSON.parse(event.newValue);
+        
+        // Only update if the user is the same
+        if (memoryContext && newContext.userId === memoryContext.userId) {
+          // Preserve our current session ID
+          const sessionId = memoryContext.sessionId;
+          
+          // Update our context with the new values
+          memoryContext = {
+            ...newContext,
+            sessionId,
+            lastUpdateTime: new Date(newContext.lastUpdateTime)
+          };
+          
+          // Dispatch an event so components can react to memory changes
+          window.dispatchEvent(new CustomEvent('jetai:memory-updated', {
+            detail: { memoryContext }
+          }));
+        }
+      } catch (error) {
+        console.error('Error processing cross-tab memory sync:', error);
+      }
+    }
+  });
+}
+
+/**
+ * Subscribe to memory updates
+ */
+export function subscribeToMemoryUpdates(
+  callback: (context: MemoryContext) => void
+): () => void {
+  const handler = (event: Event) => {
+    const customEvent = event as CustomEvent;
+    if (customEvent.detail && customEvent.detail.memoryContext) {
+      callback(customEvent.detail.memoryContext);
+    }
   };
   
-  return {
-    memory: updatedMemory,
-    firstQuestion: firstStep.question
+  window.addEventListener('jetai:memory-updated', handler as EventListener);
+  
+  // Return unsubscribe function
+  return () => {
+    window.removeEventListener('jetai:memory-updated', handler as EventListener);
   };
 }
 
-/**
- * Save the conversation memory to Firebase for the user
- */
-export async function saveConversationMemory(userId: string, memory: ConversationMemory): Promise<void> {
-  try {
-    if (!firestore) return;
-    
-    const userMemoryRef = doc(firestore, 'users', userId, 'conversation', 'memory');
-    await setDoc(userMemoryRef, {
-      ...memory,
-      lastUpdated: serverTimestamp()
-    });
-  } catch (error) {
-    console.error('Error saving conversation memory:', error);
-  }
-}
-
-/**
- * Load the conversation memory from Firebase for the user
- */
-export async function loadConversationMemory(userId: string): Promise<ConversationMemory> {
-  try {
-    if (!firestore) return initialConversationMemory;
-    
-    const userMemoryRef = doc(firestore, 'users', userId, 'conversation', 'memory');
-    const snapshot = await getDoc(userMemoryRef);
-    
-    if (snapshot.exists()) {
-      return snapshot.data() as ConversationMemory;
-    }
-    
-    return initialConversationMemory;
-  } catch (error) {
-    console.error('Error loading conversation memory:', error);
-    return initialConversationMemory;
-  }
-}
-
-/**
- * Update the active tab in the conversation memory
- */
-export async function updateActiveTab(userId: string, tab: string): Promise<void> {
-  try {
-    if (!firestore) return;
-    
-    const userMemoryRef = doc(firestore, 'users', userId, 'conversation', 'memory');
-    
-    // First check if the document exists
-    const snapshot = await getDoc(userMemoryRef);
-    
-    if (snapshot.exists()) {
-      await updateDoc(userMemoryRef, {
-        activeTab: tab,
-        lastUpdated: serverTimestamp()
-      });
-    } else {
-      await setDoc(userMemoryRef, {
-        ...initialConversationMemory,
-        activeTab: tab,
-        lastUpdated: serverTimestamp()
-      });
-    }
-  } catch (error) {
-    console.error('Error updating active tab:', error);
-  }
-}
-
-/**
- * Save a chat message to the user's history with context
- */
-export async function saveChatMessage(
-  userId: string,
-  message: string,
-  role: 'user' | 'assistant',
-  context?: {
-    tab?: string;
-    flow?: string;
-    stepId?: string;
-    actionPerformed?: any;
-  }
-): Promise<void> {
-  try {
-    if (!firestore) return;
-    
-    const userChatRef = doc(firestore, 'users', userId, 'conversation', 'history');
-    
-    await updateDoc(userChatRef, {
-      messages: arrayUnion({
-        role,
-        content: message,
-        timestamp: new Date().toISOString(),
-        context: context || {}
-      })
-    });
-  } catch (error) {
-    console.error('Error saving chat message:', error);
-  }
-}
+// Initialize cross-tab synchronization
+setupCrossTabSync();
