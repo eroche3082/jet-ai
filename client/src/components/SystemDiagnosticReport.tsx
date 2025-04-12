@@ -133,15 +133,21 @@ const SystemDiagnosticReport: React.FC = () => {
     return { status: 'error', percentage };
   };
 
-  // Current system report data
+  // Current system report data - FULL PHASE EXECUTION MODE
   const systemReport: SystemReport = {
     phase_0_initialization: {
       app_skeleton_created: "✅",
       env_and_secrets_loaded: "✅",
       firebase_connected: "✅",
-      replit_initialized: "✅",
+      replit_initialized: "✅", 
       github_repo_linked: "❌",
-      suggestions: ["Link GitHub repo for backup and automation"]
+      api_keys_secured: "✅",
+      project_structure_defined: "✅",
+      suggestions: [
+        "Link GitHub repo for backup and version control",
+        "Implement dev/prod environment separation",
+        "Add automated CI/CD pipeline"
+      ]
     },
     phase_1_ui_layout: {
       header_navbar: "✅",
@@ -149,17 +155,34 @@ const SystemDiagnosticReport: React.FC = () => {
       footer_with_admin_panel: "✅",
       responsive_layout: "⚠️",
       route_navigation: "✅",
-      suggestions: ["Add dark mode switch in navbar"]
+      mobile_optimization: "⚠️",
+      chat_bubble_ui: "✅",
+      theme_consistency: "✅",
+      suggestions: [
+        "Add dark mode toggle in navigation",
+        "Improve tablet responsiveness",
+        "Fix minor mobile UI issues in chat interface"
+      ]
     },
     phase_2_chatbot_core: {
       chatbot_visible: "✅",
       vertex_ai_connected: "✅",
-      voice_input_output: "✅",
+      openai_fallback: "✅",
+      anthropic_integration: "✅",
+      voice_input: "✅",
+      voice_output: "✅",
       multilingual_support: "✅",
       firebase_context_memory: "⚠️",
       onboarding_flow_active: "✅",
       dashboard_linked_to_profile: "⚠️",
-      suggestions: ["Add loading animation during onboarding", "Improve error handling for voice input"]
+      emoji_sentiment: "✅",
+      conversation_history: "✅",
+      suggestions: [
+        "Improve Firebase context memory for longer conversations",
+        "Add loading animation during onboarding steps",
+        "Implement enhanced error handling for voice input/output",
+        "Create automated memory pruning for long-term users"
+      ]
     },
     phase_3_tab_modules: {
       dashboard_tab: "✅",
@@ -167,7 +190,17 @@ const SystemDiagnosticReport: React.FC = () => {
       explore_tab: "⚠️",
       profile_tab: "⚠️",
       smart_tools_tab: "❌",
-      suggestions: ["Group tabs into collapsible sections", "Add skeleton loading states for all tabs"]
+      travel_wallet_tab: "⚠️",
+      itinerary_builder: "⚠️",
+      booking_management: "❌",
+      destination_discovery: "⚠️",
+      real_time_alerts: "❌",
+      suggestions: [
+        "Complete profile tab functionality",
+        "Group tabs into collapsible sections for mobile",
+        "Add skeleton loading states for all tabs",
+        "Implement real-time alerts for travel notifications"
+      ]
     },
     phase_4_user_personalization: {
       subscriber_profile_system: "⚠️",
@@ -175,38 +208,83 @@ const SystemDiagnosticReport: React.FC = () => {
       personalized_dashboard: "⚠️",
       avatar_name_by_chatbot: "✅",
       smart_recommendations: "❌",
-      suggestions: ["Add preference wizard in profile settings", "Enable user avatar customization"]
+      user_preferences_storage: "✅",
+      travel_style_quiz: "⚠️",
+      loyalty_points_system: "❌",
+      travel_history_tracking: "⚠️",
+      suggestions: [
+        "Complete travel style preference quiz",
+        "Add preference wizard in profile settings",
+        "Implement AI-powered itinerary recommendations",
+        "Build loyalty points system for repeat users"
+      ]
     },
     phase_5_external_integrations: {
       stripe_connected: "✅",
       maps_apis_working: "✅",
       google_apis_connected: "✅",
+      amadeus_integration: "⚠️",
       third_party_apis: "⚠️",
-      suggestions: ["Add fallback providers for each API", "Implement retry mechanism for failed API calls"]
+      weather_service: "⚠️",
+      flight_booking_api: "❌",
+      hotel_booking_api: "❌",
+      car_rental_api: "❌",
+      suggestions: [
+        "Complete Amadeus API integration for flights",
+        "Add hotel booking API integration",
+        "Implement fallback providers for critical APIs",
+        "Create retry mechanism for failed API calls"
+      ]
     },
     phase_6_testing_qa: {
       mobile_testing: "⚠️",
       tablet_testing: "⚠️",
       multibrowser_testing: "❌",
       error_handling: "⚠️",
-      chatbot_tab_testing: "✅",
-      suggestions: ["Create automated test suite", "Add error boundary components"]
+      chatbot_qa: "✅",
+      performance_testing: "❌",
+      security_testing: "❌",
+      load_testing: "❌",
+      usability_testing: "⚠️",
+      suggestions: [
+        "Create automated test suite for core features",
+        "Add error boundary components throughout app",
+        "Implement performance monitoring and optimization",
+        "Complete cross-browser compatibility testing"
+      ]
     },
     phase_7_admin_tools: {
       admin_dashboard: "✅",
       log_viewer: "⚠️",
+      user_management: "❌",
       subscriber_list: "❌",
       onboarding_override: "❌",
       ai_prompt_tester: "⚠️",
       system_diagnostics: "✅",
-      suggestions: ["Add analytics dashboard for admin", "Create user impersonation tool for debugging"]
+      chatbot_performance_monitor: "⚠️",
+      phase_tracker: "✅",
+      suggestions: [
+        "Develop complete user management interface",
+        "Add analytics dashboard for admin",
+        "Create user impersonation tool for debugging",
+        "Implement API usage monitoring dashboard"
+      ]
     },
     phase_8_prelaunch: {
       seo_basics: "❌",
       privacy_terms: "⚠️",
       social_links: "✅",
       contact_form: "⚠️",
-      suggestions: ["Add structured data for SEO", "Create sitemap.xml"]
+      marketing_pages: "❌",
+      analytics_setup: "⚠️",
+      demo_accounts: "❌",
+      performance_optimization: "❌",
+      suggestions: [
+        "Create SEO-optimized landing pages",
+        "Add structured data for rich snippets",
+        "Complete legal documents (privacy policy, terms)",
+        "Set up demo accounts for different user types"
+      ]
     },
     phase_9_deployment: {
       firebase_hosting: "❌",
@@ -214,12 +292,24 @@ const SystemDiagnosticReport: React.FC = () => {
       ssl_active: "❌",
       post_deploy_test: "❌",
       final_checklist: "❌",
-      suggestions: ["Set up CI/CD pipeline", "Configure server-side caching"]
+      monitoring_setup: "❌",
+      backup_system: "❌",
+      scaling_plan: "❌",
+      suggestions: [
+        "Configure Firebase hosting with custom domain",
+        "Set up monitoring and alerting system",
+        "Create automated backup system",
+        "Implement CDN for static assets"
+      ]
     },
     current_phase: {
-      current_phase: "PHASE 2 – Chatbot Core Implemented",
-      next_focus: "PHASE 3 – Complete tab modules integration",
-      priority_actions: ["Complete Profile Tab", "Enable Dashboard Analytics", "Improve Firebase Context Memory"]
+      current_phase: "PHASE 3 – Tab Modules Integration",
+      next_focus: "PHASE 4 – User Personalization Enhancement",
+      priority_actions: [
+        "Complete Profile Tab with preferences interface",
+        "Enhance Firebase context memory for chatbot", 
+        "Implement travel style recommendation system"
+      ]
     }
   };
 
