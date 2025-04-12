@@ -1,0 +1,61 @@
+🔧 Objetivo:
+Fortalecer la experiencia completa de compra, simulación, prueba y checkout de Parachop AI. Unificar experiencia shopper ↔ host, e integrar componentes funcionales en vivo.
+
+🔁 Flujo completo esperado:
+1. Usuario elige modo: Shopper o Host
+2. Shopper interactúa con AI → recibe productos recomendados (vía `ProductCarousel`)
+3. Puede hacer prueba virtual en `ARView`
+4. Puede añadir al carrito (→ `cart.tsx`)
+5. Procede a `checkout.tsx` con integración Stripe/PayPal
+6. Recibe confirmación visual + email simulado
+7. (Opcional) Host crea nuevo stream en `create-stream.tsx`
+
+---
+
+🧩 Tareas de esta Fase:
+
+✅ **1. Finalizar el flujo de Checkout**
+- Validar si `checkout.tsx` está recibiendo el carrito desde contexto o props.
+- Crear mock de productos si es necesario (`/scripts/test-products.ts`)
+- Mostrar detalles de producto, monto total, y botón de pago.
+- Activar `Stripe Checkout` en modo prueba.
+
+✅ **2. Enviar email de confirmación simulado**
+- Usar `EmailJS`, `Formspree` o backend temporal (`/api/send-confirmation`)
+- Simular envío al correo del usuario con resumen del pedido.
+
+✅ **3. Finalizar prueba AR**
+- Validar que los modelos `.glb` cargan correctamente.
+- Añadir selector de modelo y cambiar color/estilo (si aplica).
+- Mostrar overlay de info del producto mientras se ve en AR.
+
+✅ **4. Mejorar flujo AI con memoria**
+- En `use-chat.ts`, añadir historial limitado para que recuerde la talla/color
+- Si el usuario dijo antes: "Me gustan vestidos rojos", que influya en la próxima sugerencia
+
+✅ **5. Integración de eventos en vivo (modo Host)**
+- Simular transmisión en `create-stream.tsx` (video embed o pantalla falsa)
+- Permitir añadir productos durante el live
+- Simular interacción en tiempo real
+
+✅ **6. Añadir Feedback Visual por pasos**
+- Mostrar barra de progreso en `checkout.tsx` (Paso 1: Info → Paso 2: Pago → Paso 3: Confirmación)
+- Añadir animaciones ligeras con `framer-motion`
+
+✅ **7. Panel Admin Básico**
+- Crear `/admin/dashboard.tsx`
+- Mostrar: número de compras, streams creados, usuarios registrados
+- Usar datos mock por ahora
+
+---
+
+📦 Resultado esperado:
+> Plataforma funcional desde la bienvenida del usuario hasta el pago y confirmación, con flujo claro, interfaz AR integrada, recomendación AI ajustada al perfil, y modo Host simulado en vivo.
+
+---
+
+¿Activamos ahora mismo las tareas una a una, comenzando por el flujo de checkout con Stripe y simulación de carrito?
+
+O si prefieres, preparo todos los **archivos base** que debes crear/modificar con comentarios explicativos para cada uno.
+
+¡Estoy lista, Capitana! 🛒✨

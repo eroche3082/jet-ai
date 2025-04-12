@@ -1,0 +1,92 @@
+initializeJetAI({
+  assistantProfile: {
+    name: "JetAI",
+    role: "Luxury Travel Concierge",
+    avatar: "🛩️",
+    languages: ["en", "es", "fr", "pt", "it", "de"],
+    tone: "elegant, efficient, empathetic",
+    personality: "A luxury AI concierge with a deep knowledge of world travel, emotional intelligence, and real-time planning abilities. Speaks in clear, elegant language. Reacts to user mood. Calms, recommends, surprises. Think: a fusion between a personal butler, a nomad expert, and a travel therapist.",
+    greeting: {
+      enabled: true,
+      message: "🌍 Welcome aboard JetAI — your personal travel concierge. What's your name and email to begin crafting your perfect journey?"
+    },
+    fallbackStyle: "graceful & informative",
+  },
+
+  conversationFlow: {
+    mode: "one-question-at-a-time",
+    sequence: [
+      "What's your name?",
+      "Can I get your email to send confirmations?",
+      "Where would you like to go?",
+      "What's your travel budget? (Luxury, Mid-range, Budget)",
+      "When are you planning to go?",
+      "Who are you traveling with? (Solo, Couple, Family, Friends)",
+      "What kind of experiences do you enjoy? (Beach, Culture, Adventure, Food, Nature)",
+    ],
+    sentimentDetection: true,
+    memoryEnabled: true,
+    voiceEnabled: true,
+    autoGenerateItinerary: true,
+    errorHandling: "explain + fallback",
+    multilingualSupport: true,
+  },
+
+  integrations: {
+    flights: "Amadeus | Skyscanner | fallback mock",
+    hotels: "Booking.com | Expedia | fallback mock",
+    weather: "Google Weather | OpenMeteo fallback",
+    geocoding: "Google Maps | Nominatim fallback",
+    routing: "Google Routes | OSRM fallback",
+    voice: "Google STT / TTS | ElevenLabs",
+    translations: "Google Translate",
+    recommendations: "Custom ML + Gemini",
+    emotionalSupport: "Gemini + Spotify + YouTube",
+    payments: "Stripe",
+    storage: "Firebase",
+    avatars: "DALL·E | Ready Player Me",
+    media: "Pixabay | Unsplash | Pexels",
+  },
+
+  systemModules: {
+    aiMemory: true,
+    zenMode: true,
+    travelWallet: true,
+    itineraryEngine: true,
+    bookingFlow: true,
+    exploreFeed: true,
+    QRScanner: true,
+    offlineTips: true,
+    emergencyAlerts: true,
+    travelGamification: true,
+    multilingualPrompts: true,
+    avatarPanel: true,
+  },
+
+  UIOptions: {
+    avatarOnLeft: true,
+    fullScreenChat: true,
+    tabSyncEnabled: true,
+    emotionalFeedback: true,
+    showStatusBadges: true,
+    allowUserToAdjustFlow: true,
+    floatingButtonEnabled: true,
+    mobileFirstLayout: true,
+    PWA: true,
+    darkMode: "auto",
+  },
+
+  developerMode: {
+    logAPIs: true,
+    recordFallbacks: true,
+    debugPromptFlow: false,
+    endpointStatusCheck: "/api/system/status",
+    notifyIfOffline: true,
+    metrics: {
+      enabled: true,
+      trackAPIs: true,
+      conversations: true,
+      languagesUsed: true,
+    },
+  }
+});

@@ -185,123 +185,98 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     if (!isJetAIInitialized()) {
       console.log("Initializing JetAI Concierge...");
       
-      // Initialize with configurations from the prompt
+      // Initialize with full luxury configuration
       initializeJetAI({
-        personality: "Concierge",
         assistantProfile: {
-          name: "JetAI Travel Concierge",
-          description: "A multilingual, emotionally-aware luxury travel assistant designed to help users plan personalized adventures. Offers flight, hotel, activity, weather and emotional support all via conversational flow.",
-          languages: ["en", "es", "fr", "pt", "de", "it"],
-          tone: "elegant, empathetic, knowledgeable",
-          voiceEnabled: true,
-          avatar: "leftPanel",
-          theme: "luxury-airline-ui"
+          name: "JetAI",
+          role: "Luxury Travel Concierge",
+          avatar: "🛩️",
+          languages: ["en", "es", "fr", "pt", "it", "de"],
+          tone: "elegant, efficient, empathetic",
+          personality: "A luxury AI concierge with a deep knowledge of world travel, emotional intelligence, and real-time planning abilities. Speaks in clear, elegant language. Reacts to user mood. Calms, recommends, surprises. Think: a fusion between a personal butler, a nomad expert, and a travel therapist.",
+          greeting: {
+            enabled: true,
+            message: "🌍 Welcome aboard JetAI — your personal travel concierge. What's your name and email to begin crafting your perfect journey?"
+          },
+          fallbackStyle: "graceful & informative",
         },
 
         conversationFlow: {
           mode: "one-question-at-a-time",
-          entrySequence: [
-            "Welcome aboard JetAI! I'm your personal travel concierge. Let's get started — what's your name?",
-            "Great to meet you, {{name}}. Could I have your email so I can send your travel details?",
-            "Where are you dreaming of going?",
-            "What's your budget? (Luxury, Mid-range, Budget)",
-            "When are you planning to travel?",
-            "Who are you traveling with?",
-            "What kind of experiences are you looking for? (Relaxation, Adventure, Food, Culture, Nightlife)",
-            "Would you like me to create your custom itinerary now?"
+          sequence: [
+            "What's your name?",
+            "Can I get your email to send confirmations?",
+            "Where would you like to go?",
+            "What's your travel budget? (Luxury, Mid-range, Budget)",
+            "When are you planning to go?",
+            "Who are you traveling with? (Solo, Couple, Family, Friends)",
+            "What kind of experiences do you enjoy? (Beach, Culture, Adventure, Food, Nature)",
           ],
-          multilingualPatterns: true,
-          profileExtraction: true,
-          emotionDetection: true
+          sentimentDetection: true,
+          memoryEnabled: true,
+          voiceEnabled: true,
+          autoGenerateItinerary: true,
+          errorHandling: "explain + fallback",
+          multilingualSupport: true,
         },
 
         integrations: {
-          flights: {
-            providers: ["Amadeus", "Skyscanner"],
-            fallback: "mockFlightSearch"
-          },
-          hotels: {
-            providers: ["Booking.com", "Expedia"],
-            fallback: "mockHotelSearch"
-          },
-          weather: {
-            primary: "Google Weather API",
-            fallback: "OpenMeteo"
-          },
-          geolocation: {
-            primary: "Google Geocoding API",
-            fallback: "Nominatim"
-          },
-          routes: {
-            primary: "Google Routes",
-            fallback: "OSRM"
-          },
-          translation: "Google Cloud Translate",
-          payment: "Stripe",
-          calendar: "Google Calendar API",
-          voice: {
-            stt: "Google STT",
-            tts: "Google TTS",
-            fallbackVoice: "ElevenLabs"
-          },
-          aiModels: {
-            default: "Gemini 1.5 Flash",
-            fallback: "Claude v2.1"
-          }
+          flights: "Amadeus | Skyscanner | fallback mock",
+          hotels: "Booking.com | Expedia | fallback mock",
+          weather: "Google Weather | OpenMeteo fallback",
+          geocoding: "Google Maps | Nominatim fallback",
+          routing: "Google Routes | OSRM fallback",
+          voice: "Google STT / TTS | ElevenLabs",
+          translations: "Google Translate",
+          recommendations: "Custom ML + Gemini",
+          emotionalSupport: "Gemini + Spotify + YouTube",
+          payments: "Stripe",
+          storage: "Firebase",
+          avatars: "DALL·E | Ready Player Me",
+          media: "Pixabay | Unsplash | Pexels",
         },
 
         systemModules: {
-          itineraryGenerator: true,
-          travelMemory: true,
-          bookingEngine: true,
-          fallbackReporting: true,
+          aiMemory: true,
+          zenMode: true,
+          travelWallet: true,
+          itineraryEngine: true,
+          bookingFlow: true,
           exploreFeed: true,
-          emotionSupport: {
-            enabled: true,
-            suggestions: ["relaxing music", "breathing exercises", "inspirational travel reels"],
-            providers: ["Spotify", "YouTube"]
-          },
-          gamification: {
-            points: true,
-            rewards: true,
-            JetMilesSystem: true
-          }
-        },
-
-        monitoring: {
-          endpoint: "/api/system/status",
-          trackFallbackUsage: true,
-          logErrors: true,
-          alertAdminsOnFailure: true
-        },
-
-        ui: {
-          chatComponent: "AIChat.tsx",
+          QRScanner: true,
+          offlineTips: true,
+          emergencyAlerts: true,
+          travelGamification: true,
+          multilingualPrompts: true,
           avatarPanel: true,
-          floatingButton: true,
-          voiceControls: true,
-          mobileOptimized: true,
-          animatedUI: true,
-          multilingualUI: true
         },
 
-        startup: {
-          welcomeMessage: true,
-          checkEnvironment: true,
-          fallbackRecovery: true,
-          autoLanguageDetection: true,
-          offlineTipsIfDisconnected: true
+        UIOptions: {
+          avatarOnLeft: true,
+          fullScreenChat: true,
+          tabSyncEnabled: true,
+          emotionalFeedback: true,
+          showStatusBadges: true,
+          allowUserToAdjustFlow: true,
+          floatingButtonEnabled: true,
+          mobileFirstLayout: true,
+          PWA: true,
+          darkMode: "auto",
         },
 
-        tests: [
-          "¿Cuál es el clima en París?",
-          "Buscar vuelos a Bali",
-          "Recomiéndame actividades en Roma",
-          "Quiero un hotel en Nueva York con vista",
-          "¿Qué me recomiendas si viajo con niños?",
-          "Estoy estresado — ¿alguna música para relajarme?",
-          "¿Cómo está el tráfico de mi ruta en Tokio?"
-        ]
+        developerMode: {
+          logAPIs: true,
+          recordFallbacks: true,
+          debugPromptFlow: false,
+          endpointStatusCheck: "/api/system/status",
+          notifyIfOffline: true,
+          metrics: {
+            enabled: true,
+            trackAPIs: true,
+            conversations: true,
+            languagesUsed: true,
+          },
+        }
       });
       
       // Update personality from JetAI config
