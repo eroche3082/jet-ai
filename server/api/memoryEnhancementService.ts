@@ -256,7 +256,7 @@ export const configureRoutes = (app: any) => {
   // Endpoint para almacenar archivos
   app.post('/api/memories/store-file', upload.single('file'), handleMulterError, storeFileHandler);
 
-  console.log('Rutas de mejora de memorias configuradas correctamente');
+  console.log('Memory enhancement routes configured successfully');
 };
 
 export default {

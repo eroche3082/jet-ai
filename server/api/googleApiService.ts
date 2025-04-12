@@ -582,7 +582,7 @@ export const configureRoutes = (app: any) => {
   
   app.use('/api', router);
   
-  console.log('Rutas de Google API configuradas correctamente');
+  console.log('Google API routes configured successfully');
 };
 
 export default {

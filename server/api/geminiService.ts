@@ -317,7 +317,7 @@ export const configureRoutes = (app: any) => {
   
   app.use('/api', router);
   
-  console.log('✅ Rutas del servicio Gemini configuradas correctamente');
+  console.log('✅ Gemini service routes configured successfully');
 };
 
 export default {
