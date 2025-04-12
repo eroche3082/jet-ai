@@ -12,6 +12,7 @@ import Membership from "@/pages/Membership";
 import PricingPlans from "@/pages/PricingPlans";
 import NotFound from "@/pages/not-found";
 import VertexAIPage from "@/pages/VertexAIPage";
+import GeminiTestPage from "@/pages/GeminiTestPage";
 import CameraPage from "@/pages/CameraPage";
 import QRScannerPage from "@/pages/QRScannerPage";
 import HotelsPage from "@/pages/HotelsPage";
@@ -135,6 +136,7 @@ function App() {
       
       {/* AI Assistant routes */}
       <Route path="/vertex-ai" component={VertexAIPage} />
+      <Route path="/gemini-test" component={GeminiTestPage} />
       
       {/* Tool routes */}
       <Route path="/camera" component={CameraPage} />
