@@ -16,7 +16,7 @@ const SUBSCRIBERS_COLLECTION = 'subscribers';
  */
 export async function saveSubscriberData(userId: string, data: Partial<UserProfile>): Promise<void> {
   try {
-    const userRef = doc(db, SUBSCRIBERS_COLLECTION, userId);
+    const userRef = doc(firestore, SUBSCRIBERS_COLLECTION, userId);
     const userSnap = await getDoc(userRef);
     
     // Prepare data with timestamps
@@ -48,7 +48,7 @@ export async function saveSubscriberData(userId: string, data: Partial<UserProfi
  */
 export async function getSubscriberProfile(userId: string): Promise<UserProfile | null> {
   try {
-    const userRef = doc(db, SUBSCRIBERS_COLLECTION, userId);
+    const userRef = doc(firestore, SUBSCRIBERS_COLLECTION, userId);
     const userSnap = await getDoc(userRef);
     
     if (userSnap.exists()) {
@@ -105,7 +105,7 @@ export async function completeOnboarding(userId: string, preferences?: UserProfi
  */
 export async function incrementAIInteractions(userId: string): Promise<void> {
   try {
-    const userRef = doc(db, SUBSCRIBERS_COLLECTION, userId);
+    const userRef = doc(firestore, SUBSCRIBERS_COLLECTION, userId);
     const userSnap = await getDoc(userRef);
     
     if (userSnap.exists()) {

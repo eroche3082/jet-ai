@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { GiftIcon, FlightIcon, MapPinIcon, ActivityIcon, HotelIcon, HeartIcon, UserIcon } from 'lucide-react';
+import { GiftIcon, Plane as FlightIcon, MapPinIcon, Activity as ActivityIcon, Hotel as HotelIcon, Heart as HeartIcon, UserIcon } from 'lucide-react';
 
 interface DashboardRendererProps {
   onStartOnboarding?: () => void;
@@ -36,9 +36,9 @@ const DashboardRenderer: React.FC<DashboardRendererProps> = ({ onStartOnboarding
       return `Based on your interest in ${destination}, I can help you find the best ${travelerType.toLowerCase()} experiences there. Ask me for recommendations!`;
     } else if (interests.length > 0) {
       const interest = interests[0];
-      return `I see you're interested in ${interest}. I can suggest destinations that are perfect for ${interest.toLowerCase()} enthusiasts!`;
+      return `I see you are interested in ${interest}. I can suggest destinations that are perfect for ${interest.toLowerCase()} enthusiasts!`;
     } else {
-      return 'Ask me about your next travel destination and I'll provide personalized recommendations!';
+      return 'Ask me about your next travel destination and I will provide personalized recommendations!';
     }
   };
   
