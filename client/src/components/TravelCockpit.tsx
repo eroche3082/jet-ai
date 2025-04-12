@@ -30,7 +30,8 @@ import {
   X,
   Image,
   Plane,
-  CalendarDays
+  CalendarDays,
+  PaintBucket
 } from 'lucide-react';
 import HotelSearchResults from './HotelSearchResults';
 import FlightSearchResults from './FlightSearchResults';
