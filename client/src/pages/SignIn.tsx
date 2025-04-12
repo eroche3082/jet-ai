@@ -237,14 +237,35 @@ export default function SignIn() {
                   <div className="grid grid-cols-2 gap-3 mt-6">
                     <button
                       type="button"
-                      className="py-2.5 px-4 rounded-lg border border-gray-200 flex justify-center items-center text-dark hover:bg-gray-50 transition"
+                      onClick={() => {
+                        setIsLoading(true);
+                        signInWithGoogle()
+                          .then(() => {
+                            toast({
+                              title: "Sesión iniciada con Google",
+                              description: "¡Bienvenido a JetAI!",
+                            });
+                            setLocation('/dashboard');
+                          })
+                          .catch((error: any) => {
+                            toast({
+                              title: "Error de inicio de sesión",
+                              description: error.message || "No pudimos iniciar sesión con Google",
+                              variant: "destructive",
+                            });
+                          })
+                          .finally(() => setIsLoading(false));
+                      }}
+                      disabled={isLoading}
+                      className="py-2.5 px-4 rounded-lg border border-gray-200 flex justify-center items-center text-dark hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <i className="fab fa-google text-red-500 mr-2"></i>
                       Google
                     </button>
                     <button
                       type="button"
-                      className="py-2.5 px-4 rounded-lg border border-gray-200 flex justify-center items-center text-dark hover:bg-gray-50 transition"
+                      disabled
+                      className="py-2.5 px-4 rounded-lg border border-gray-200 flex justify-center items-center text-dark hover:bg-gray-50 transition opacity-50 cursor-not-allowed"
                     >
                       <i className="fab fa-facebook text-blue-600 mr-2"></i>
                       Facebook
@@ -367,14 +388,35 @@ export default function SignIn() {
                   <div className="grid grid-cols-2 gap-3 mt-6">
                     <button
                       type="button"
-                      className="py-2.5 px-4 rounded-lg border border-gray-200 flex justify-center items-center text-dark hover:bg-gray-50 transition"
+                      onClick={() => {
+                        setIsLoading(true);
+                        signInWithGoogle()
+                          .then(() => {
+                            toast({
+                              title: "Cuenta creada con Google",
+                              description: "¡Bienvenido a JetAI!",
+                            });
+                            setLocation('/dashboard');
+                          })
+                          .catch((error: any) => {
+                            toast({
+                              title: "Error al registrarse con Google",
+                              description: error.message || "No pudimos crear tu cuenta con Google",
+                              variant: "destructive",
+                            });
+                          })
+                          .finally(() => setIsLoading(false));
+                      }}
+                      disabled={isLoading}
+                      className="py-2.5 px-4 rounded-lg border border-gray-200 flex justify-center items-center text-dark hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <i className="fab fa-google text-red-500 mr-2"></i>
                       Google
                     </button>
                     <button
                       type="button"
-                      className="py-2.5 px-4 rounded-lg border border-gray-200 flex justify-center items-center text-dark hover:bg-gray-50 transition"
+                      disabled
+                      className="py-2.5 px-4 rounded-lg border border-gray-200 flex justify-center items-center text-dark hover:bg-gray-50 transition opacity-50 cursor-not-allowed"
                     >
                       <i className="fab fa-facebook text-blue-600 mr-2"></i>
                       Facebook
