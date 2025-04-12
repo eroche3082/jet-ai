@@ -303,7 +303,7 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({
       
       // Create assistant message
       const assistantMessage: Omit<ChatMessage, 'id'> = {
-        uid: currentUser.uid,
+        uid: userId,
         content: aiResponse.text,
         role: 'assistant',
         timestamp: new Date(),
@@ -335,7 +335,7 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({
       
       // Add error message
       const errorMessage: Omit<ChatMessage, 'id'> = {
-        uid: currentUser.uid,
+        uid: userId,
         content: "I'm sorry, I encountered an error processing your message. Please try again.",
         role: 'assistant',
         timestamp: new Date(),
