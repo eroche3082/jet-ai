@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clipboard, Download, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { auth, firestore } from '@/lib/firebase';
+import { getDocs, collection, query, where } from 'firebase/firestore';
 
 // Phase item interface
 interface PhaseItem {
@@ -42,6 +44,57 @@ interface SystemReport {
 const SystemDiagnosticReport: React.FC = () => {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const [report, setReport] = useState<SystemReport | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Function to get live system statistics
+  const fetchSystemStats = async () => {
+    try {
+      // This would normally pull from Firebase or an API
+      // For now, we'll use our default report data
+      setReport(systemReport);
+      
+      // Real implementation would look something like this:
+      /*
+      // Count active users
+      const userCount = await getDocs(query(collection(firestore, 'users'), where('lastActive', '>', new Date(Date.now() - 86400000))));
+      
+      // Count total chat messages
+      const chatMessages = await getDocs(collection(firestore, 'chatMessages'));
+      
+      // Check API services status
+      const apiServiceStatus = await checkAPIServicesStatus();
+      
+      // Update the report with live data
+      */
+    } catch (error) {
+      console.error('Error fetching system stats:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch system statistics',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  // Load initial data
+  useEffect(() => {
+    fetchSystemStats();
+  }, []);
+
+  // Refresh report data
+  const refreshReport = () => {
+    setRefreshing(true);
+    fetchSystemStats();
+    toast({
+      title: 'Report refreshed',
+      description: 'System diagnostic data has been updated',
+    });
+  };
 
   // Get system status based on completion percentage
   const getSystemStatus = (report: SystemReport): { status: 'ok' | 'warning' | 'error', percentage: number } => {
@@ -264,6 +317,31 @@ const SystemDiagnosticReport: React.FC = () => {
     );
   };
 
+  // Use default report if state is null
+  const reportData = report || systemReport;
+  const status = reportData ? getSystemStatus(reportData) : { status: 'warning' as const, percentage: 0 };
+
+  if (isLoading) {
+    return (
+      <Card className="w-full shadow-md">
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-center">
+            <CardTitle>System Diagnostic Report</CardTitle>
+            <div className="animate-pulse">
+              <Badge variant="outline">Loading...</Badge>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="py-10">
+          <div className="flex flex-col items-center justify-center">
+            <RefreshCw className="h-8 w-8 animate-spin text-primary mb-4" />
+            <p className="text-muted-foreground">Loading system diagnostic data...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full shadow-md">
       <CardHeader className="pb-2">
@@ -273,21 +351,21 @@ const SystemDiagnosticReport: React.FC = () => {
             <CardDescription>Current status and progress of JetAI platform</CardDescription>
           </div>
           <Badge 
-            className={`${getStatusColor(systemStatus.status)} text-white`}
+            className={`${getStatusColor(status.status)} text-white`}
           >
-            {getStatusMessage(systemStatus.status)}: {systemStatus.percentage}%
+            {getStatusMessage(status.status)}: {status.percentage}%
           </Badge>
         </div>
       </CardHeader>
       <CardContent className="pb-2">
         {/* Current Phase Summary */}
         <div className="mb-4 p-3 rounded-md bg-muted/50">
-          <h3 className="font-bold">{systemReport.current_phase.current_phase}</h3>
-          <p className="text-sm text-muted-foreground">Next focus: {systemReport.current_phase.next_focus}</p>
+          <h3 className="font-bold">{reportData.current_phase.current_phase}</h3>
+          <p className="text-sm text-muted-foreground">Next focus: {reportData.current_phase.next_focus}</p>
           <div className="mt-2">
             <span className="text-xs font-semibold">Priority Actions:</span>
             <ul className="text-xs mt-1 space-y-1 list-disc list-inside">
-              {systemReport.current_phase.priority_actions.map((action, index) => (
+              {reportData.current_phase.priority_actions.map((action, index) => (
                 <li key={index}>{action}</li>
               ))}
             </ul>
@@ -296,7 +374,7 @@ const SystemDiagnosticReport: React.FC = () => {
 
         {/* Phase Reports */}
         <div className="space-y-4">
-          {Object.entries(systemReport).map(([phaseKey, phase]) => {
+          {Object.entries(reportData).map(([phaseKey, phase]) => {
             if (phaseKey === 'current_phase') return null;
             
             // Type guard to ensure we only render Phase objects
@@ -319,6 +397,7 @@ const SystemDiagnosticReport: React.FC = () => {
           variant="ghost" 
           size="sm" 
           onClick={copyReportToClipboard}
+          disabled={refreshing}
         >
           <Clipboard className="h-4 w-4 mr-1" />
           {copied ? 'Copied!' : 'Copy Report'}
@@ -328,6 +407,7 @@ const SystemDiagnosticReport: React.FC = () => {
             variant="outline" 
             size="sm" 
             onClick={downloadReportAsJSON}
+            disabled={refreshing}
           >
             <Download className="h-4 w-4 mr-1" />
             Download JSON
@@ -335,9 +415,20 @@ const SystemDiagnosticReport: React.FC = () => {
           <Button
             variant="secondary"
             size="sm"
+            onClick={refreshReport}
+            disabled={refreshing}
           >
-            <RefreshCw className="h-4 w-4 mr-1" />
-            Refresh Report
+            {refreshing ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
+                Updating...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4 mr-1" />
+                Refresh Report
+              </>
+            )}
           </Button>
         </div>
       </CardFooter>
