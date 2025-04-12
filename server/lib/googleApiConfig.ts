@@ -42,7 +42,13 @@ const GOOGLE_KEYS = {
 const GOOGLE_API_KEY = GOOGLE_KEYS.AI;
 
 // Inicializar el cliente de Gemini (Generative Language API)
-const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+// Usamos API key del grupo 2 o 3 que tienen habilitado Generative Language API
+const genAI = new GoogleGenerativeAI(GOOGLE_KEYS.AI || GOOGLE_KEYS.FIREBASE);
+
+// IMPORTANTE: Modelos disponibles:
+// - models/gemini-1.5-flash-latest (rápido, eficiente)
+// - models/gemini-1.5-pro-latest (más potente, multimodal)
+// - gemini-pro (modelo antiguo fallback)
 
 // Interfaces para los clientes de APIs
 interface ApiClients {

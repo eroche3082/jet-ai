@@ -47,16 +47,25 @@ export const generateChatResponse = async (req: Request, res: Response) => {
         systemPrompt = `Eres JetAI, un asistente de viajes inteligente, emocional y multilingüe. Tu objetivo es ayudar a los usuarios a planificar viajes, encontrar destinos, reservar vuelos y hoteles, y proporcionar información útil para sus viajes. Responde de manera amable, útil y concisa.`;
     }
     
-    // Intentar obtener el modelo Gemini 1.5 Pro con fallback a gemini-pro
-    let modelName = "gemini-1.5-pro";
+    // Intentar obtener el modelo Gemini utilizando la versión más reciente
+    // Nombres actualizados: models/gemini-1.5-flash-latest, models/gemini-1.5-pro-latest
+    let modelName = "models/gemini-1.5-flash-latest";
     let model;
     
     try {
       model = genAI.getGenerativeModel({ model: modelName });
     } catch (error) {
-      console.log('⚠️ Error al obtener el modelo gemini-1.5-pro, usando fallback a gemini-pro');
-      modelName = "gemini-pro";
-      model = genAI.getGenerativeModel({ model: modelName });
+      console.log(`⚠️ Error al obtener el modelo ${modelName}, intentando fallback`);
+      // Intenta con gemini-pro
+      try {
+        modelName = "gemini-pro";
+        model = genAI.getGenerativeModel({ model: modelName });
+      } catch (secondError) {
+        console.log(`⚠️ Error al obtener el modelo ${modelName}, usando último fallback`);
+        // Último intento con una versión anterior
+        modelName = "models/gemini-pro";
+        model = genAI.getGenerativeModel({ model: modelName });
+      }
     }
     
     // Crear chat con contexto del sistema
@@ -123,14 +132,43 @@ export const checkGeminiStatus = async (_req: Request, res: Response) => {
     }
     
     // Intenta hacer una solicitud simple para verificar la conexión
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-    const result = await model.generateContent("Hola");
-    const response = await result.response;
-    const text = response.text();
+    // Nombres actualizados: models/gemini-1.5-flash-latest, models/gemini-1.5-pro-latest
+    let modelName = "models/gemini-1.5-flash-latest";
+    let model;
+    let text;
+    
+    try {
+      // Primero intenta con el modelo más reciente
+      model = genAI.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent("Hola");
+      const response = await result.response;
+      text = response.text();
+    } catch (error) {
+      console.log(`⚠️ Error al verificar con modelo ${modelName}, intentando fallback`);
+      
+      try {
+        // Intenta con gemini-pro 
+        modelName = "gemini-pro";
+        model = genAI.getGenerativeModel({ model: modelName });
+        const result = await model.generateContent("Hola");
+        const response = await result.response;
+        text = response.text();
+      } catch (secondError) {
+        console.log(`⚠️ Error al verificar con modelo ${modelName}, usando último fallback`);
+        
+        // Último intento con una versión anterior
+        modelName = "models/gemini-pro";
+        model = genAI.getGenerativeModel({ model: modelName });
+        const result = await model.generateContent("Hola");
+        const response = await result.response;
+        text = response.text();
+      }
+    }
     
     return res.status(200).json({
       status: 'available',
       message: 'Servicio Gemini disponible y funcionando',
+      model: modelName,
       sample: text
     });
     
