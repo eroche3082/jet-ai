@@ -205,15 +205,12 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({
   const handleSendMessage = async (messageText: string) => {
     if (!messageText.trim()) return;
     
-    if (!currentUser) {
-      // Show auth modal or redirect to login
-      alert('Please log in to chat with JetAI');
-      return;
-    }
+    // Create a unique ID for guest users if no user is logged in
+    const userId = currentUser ? currentUser.uid : `guest-${Date.now()}`;
     
     // Create user message
     const userMessage: Omit<ChatMessage, 'id'> = {
-      uid: currentUser.uid,
+      uid: userId,
       content: messageText,
       role: 'user',
       timestamp: new Date()
@@ -297,7 +294,7 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({
         role: 'user',
         content: messageText,
         id: messageId || 'temp-user-message',
-        uid: currentUser.uid,
+        uid: userId,
         timestamp: new Date()
       });
       
