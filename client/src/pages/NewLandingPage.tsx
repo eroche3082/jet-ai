@@ -75,7 +75,7 @@ export default function NewLandingPage() {
         <div 
           className="absolute inset-0 z-0 bg-cover bg-center"
           style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2029&auto=format&fit=crop')",
+            backgroundImage: "url('https://images.unsplash.com/photo-1557993706-7bb5408e85fe?q=80&w=2069&auto=format&fit=crop')",
             backgroundPosition: "center"
           }}
         ></div>
@@ -121,7 +121,7 @@ export default function NewLandingPage() {
       <div className="py-10 bg-gray-50">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <Plane className="h-6 w-6 text-primary" />
@@ -131,7 +131,7 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Personalized itineraries based on preferences, time, and budget.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <Globe className="h-6 w-6 text-primary" />
@@ -141,7 +141,7 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Find flights with the best value for your money.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <Languages className="h-6 w-6 text-primary" />
@@ -151,7 +151,7 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Translate conversations and phrases across 30+ languages.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <HeartHandshake className="h-6 w-6 text-primary" />
@@ -161,7 +161,7 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Information about customs and etiquette at your destination.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <Wallet className="h-6 w-6 text-primary" />
@@ -171,7 +171,7 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Monitor and suggest adjustments to your travel budget.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <FileCheck className="h-6 w-6 text-primary" />
@@ -181,7 +181,7 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Verify passports, visas, and travel documents.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <BrainCircuit className="h-6 w-6 text-primary" />
@@ -191,7 +191,7 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Remember previous conversations and preferences for consistent recommendations.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <PackageCheck className="h-6 w-6 text-primary" />
@@ -201,7 +201,7 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Luggage lists tailored to your destination and activities.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <Cloud className="h-6 w-6 text-primary" />
@@ -211,7 +211,7 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Anticipate and notify about adverse weather conditions.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <Mountain className="h-6 w-6 text-primary" />
@@ -221,7 +221,7 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Upload images to receive detailed information about landmarks.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <Stethoscope className="h-6 w-6 text-primary" />
@@ -231,17 +231,17 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Medical translations and location of nearby hospitals.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
-                  <Bus className="h-6 w-6 text-primary" />
+                  <Plane className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-lg font-semibold ml-3">Transport Connection Optimizer</h3>
               </div>
               <p className="text-gray-600 flex-grow">Optimal transportation combinations for efficiency and savings.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <User className="h-6 w-6 text-primary" />
@@ -251,7 +251,7 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Activities and experiences that match your interests.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <ShieldCheck className="h-6 w-6 text-primary" />
@@ -261,7 +261,7 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Safety assessment of different areas at your destination.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <Leaf className="h-6 w-6 text-primary" />
@@ -271,7 +271,7 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Estimate and offset the carbon footprint of your trip.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <Hotel className="h-6 w-6 text-primary" />
@@ -281,7 +281,7 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Analyze hotels, Airbnb, and more based on your preferences.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <CalendarCheck className="h-6 w-6 text-primary" />
@@ -291,7 +291,7 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Make reservations directly with automatic confirmation.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <Clock className="h-6 w-6 text-primary" />
@@ -301,7 +301,7 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Mini-itineraries to make the most of long airport layovers.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <BadgeDollarSign className="h-6 w-6 text-primary" />
@@ -311,7 +311,7 @@ export default function NewLandingPage() {
               <p className="text-gray-600 flex-grow">Alerts about temporary deals that match your preferences.</p>
             </Card>
             
-            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+            <Card className="p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col bg-white">
               <div className="flex items-center mb-4">
                 <div className="bg-primary/10 p-3 rounded-full">
                   <PanelTopOpen className="h-6 w-6 text-primary" />
@@ -454,37 +454,43 @@ export default function NewLandingPage() {
           <h2 className="text-3xl font-bold text-center mb-12">What Our Users Say</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-gray-50 p-6 rounded-lg shadow-sm">
-              <div className="flex items-center mb-4">
-                <div className="h-12 w-12 rounded-full bg-gray-300"></div>
-                <div className="ml-4">
-                  <h4 className="font-semibold">Sarah Johnson</h4>
-                  <p className="text-sm text-gray-600">Travel Blogger</p>
+            <div className="bg-gray-50 p-8 rounded-lg">
+              <div className="flex items-center justify-center mb-6">
+                <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-400">SJ</span>
                 </div>
               </div>
-              <p className="text-gray-700 italic">"JET AI transformed how I plan my trips. The AI assistant understood exactly what I wanted and created the perfect itinerary."</p>
+              <div className="text-center">
+                <h4 className="font-semibold text-lg mb-1">Sarah Johnson</h4>
+                <p className="text-sm text-gray-500 mb-4">Travel Blogger</p>
+                <p className="text-gray-700 italic leading-relaxed">"JET AI transformed how I plan my trips. The AI assistant understood exactly what I wanted and created the perfect itinerary."</p>
+              </div>
             </div>
             
-            <div className="bg-gray-50 p-6 rounded-lg shadow-sm">
-              <div className="flex items-center mb-4">
-                <div className="h-12 w-12 rounded-full bg-gray-300"></div>
-                <div className="ml-4">
-                  <h4 className="font-semibold">Michael Chen</h4>
-                  <p className="text-sm text-gray-600">Business Traveler</p>
+            <div className="bg-gray-50 p-8 rounded-lg">
+              <div className="flex items-center justify-center mb-6">
+                <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-400">MC</span>
                 </div>
               </div>
-              <p className="text-gray-700 italic">"The real-time flight comparator saved me hundreds of dollars. I also love how it suggests activities based on my interests."</p>
+              <div className="text-center">
+                <h4 className="font-semibold text-lg mb-1">Michael Chen</h4>
+                <p className="text-sm text-gray-500 mb-4">Business Traveler</p>
+                <p className="text-gray-700 italic leading-relaxed">"The real-time flight comparator saved me hundreds of dollars. I also love how it suggests activities based on my interests."</p>
+              </div>
             </div>
             
-            <div className="bg-gray-50 p-6 rounded-lg shadow-sm">
-              <div className="flex items-center mb-4">
-                <div className="h-12 w-12 rounded-full bg-gray-300"></div>
-                <div className="ml-4">
-                  <h4 className="font-semibold">Emma Rodriguez</h4>
-                  <p className="text-sm text-gray-600">Family Vacationer</p>
+            <div className="bg-gray-50 p-8 rounded-lg">
+              <div className="flex items-center justify-center mb-6">
+                <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-400">ER</span>
                 </div>
               </div>
-              <p className="text-gray-700 italic">"Planning trips for the whole family used to be stressful. Now with JET AI, it's actually enjoyable! The personalized suggestions are spot on."</p>
+              <div className="text-center">
+                <h4 className="font-semibold text-lg mb-1">Emma Rodriguez</h4>
+                <p className="text-sm text-gray-500 mb-4">Family Vacationer</p>
+                <p className="text-gray-700 italic leading-relaxed">"Planning trips for the whole family used to be stressful. Now with JET AI, it's actually enjoyable! The personalized suggestions are spot on."</p>
+              </div>
             </div>
           </div>
         </div>
