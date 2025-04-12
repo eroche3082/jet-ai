@@ -25,11 +25,17 @@ import { Link, useLocation } from 'wouter';
 
 interface UniversalChatbotProps {
   className?: string;
+  defaultOpen?: boolean;
+  defaultMaximized?: boolean;
 }
 
-const UniversalChatbot: React.FC<UniversalChatbotProps> = ({ className }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMaximized, setIsMaximized] = useState(false);
+const UniversalChatbot: React.FC<UniversalChatbotProps> = ({ 
+  className,
+  defaultOpen = false,
+  defaultMaximized = false 
+}) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [isMaximized, setIsMaximized] = useState(defaultMaximized);
   const [activeTab, setActiveTab] = useState('chat');
   const [isMicActive, setIsMicActive] = useState(false);
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
@@ -48,9 +54,14 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({ className }) => {
     };
   }, [isOpen, isMaximized]);
 
-  // Close chat on location change
+  // Handle chat state based on location
   useEffect(() => {
-    if (isMaximized) {
+    // Auto-open chat on /chat page
+    if (location === '/chat') {
+      setIsOpen(true);
+      setIsMaximized(true);
+    } else if (isMaximized) {
+      // Close fullscreen on other page changes
       setIsMaximized(false);
     }
   }, [location]);
@@ -68,6 +79,11 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({ className }) => {
 
   const handleClose = () => {
     setIsOpen(false);
+    
+    // If we're on the dedicated chat page, redirect back to home
+    if (location === '/chat') {
+      window.location.href = '/';
+    }
   };
 
   const toggleMic = () => {
