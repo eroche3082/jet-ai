@@ -1,31 +1,18 @@
-import { useLocation } from 'wouter';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { MessageSquare } from 'lucide-react';
-import { Link } from 'wouter';
+import React from 'react';
+import DashboardLayout from '@/components/DashboardLayout';
+import AIChat from '@/components/AIChat';
 
 export default function ChatPage() {
-  const [location, setLocation] = useLocation();
-  
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="flex-1 p-4 md:p-8 flex flex-col items-center justify-center gap-4">
-        <Card className="w-full max-w-md p-6 text-center space-y-4">
-          <MessageSquare className="h-12 w-12 mx-auto text-primary" />
-          <h1 className="text-2xl font-bold">Chat Functionality Removed</h1>
-          <p className="text-muted-foreground">
-            The chat functionality has been removed from this application.
-            Please navigate back to the home page.
-          </p>
-          <div className="flex gap-2 justify-center">
-            <Button asChild variant="outline">
-              <Link href="/">
-                Back to Home
-              </Link>
-            </Button>
-          </div>
-        </Card>
+    <DashboardLayout>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">AI Travel Assistant</h1>
+        <p className="text-gray-600 mt-1">Your personal AI travel companion for all your journey needs</p>
       </div>
-    </div>
+      
+      <div className="bg-white rounded-lg border shadow-sm overflow-hidden h-[calc(100vh-180px)]">
+        <AIChat />
+      </div>
+    </DashboardLayout>
   );
 }
