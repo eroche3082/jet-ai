@@ -272,20 +272,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ open, onOpenChange }) => {
         }
       } catch (error) {
         console.error('Error loading phases data:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load phases data from Firebase',
-          variant: 'destructive',
-        });
+        // Just log the error but continue with default phases
       } finally {
-        setLoading(false);
+        // Always set loading to false after a short delay to ensure UI renders
+        setTimeout(() => {
+          setLoading(false);
+        }, 300);
       }
     };
 
     if (open) {
       loadPhases();
     }
-  }, [open, toast]);
+  }, [open]);
 
   // Toggle a specific item
   const toggleItem = (phaseId: string, itemId: string) => {
