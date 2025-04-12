@@ -14,7 +14,8 @@ import {
   VolumeX, 
   Camera,
   Globe,
-  Languages
+  Languages,
+  Download
 } from 'lucide-react';
 import { generateQRCode } from '@/lib/qrCode';
 import { Button } from '@/components/ui/button';
@@ -122,6 +123,18 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({
     // Redirect to QR scanner page
     window.location.href = '/qr-scanner';
   };
+  
+  // Handle QR code generation
+  const handleQrGenerateClick = async () => {
+    try {
+      // Generate QR code for the current page
+      const qrCodeUrl = await generateQRCode(window.location.href);
+      setQrCodeData(qrCodeUrl);
+      setQrCodeModalOpen(true);
+    } catch (error) {
+      console.error('Failed to generate QR code:', error);
+    }
+  };
 
   // Handle AR mode
   const handleARClick = () => {
@@ -171,6 +184,53 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({
 
   return (
     <>
+      {/* QR Code Modal */}
+      <Dialog open={qrCodeModalOpen} onOpenChange={setQrCodeModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Share via QR Code</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center p-4">
+            {qrCodeData ? (
+              <div className="p-2 bg-white rounded-lg">
+                <img src={qrCodeData} alt="QR Code" className="w-64 h-64" />
+              </div>
+            ) : (
+              <div className="w-64 h-64 flex items-center justify-center bg-gray-100 rounded-lg">
+                <span className="text-gray-500">Generating QR code...</span>
+              </div>
+            )}
+            <p className="text-sm text-center text-muted-foreground mt-4">
+              Scan this QR code to access the current page on another device
+            </p>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row sm:justify-between gap-2">
+            <Button 
+              variant="outline" 
+              className="sm:w-auto w-full"
+              onClick={() => {
+                if (qrCodeData) {
+                  // Import dynamically to avoid SSR issues
+                  import('@/lib/qrCode').then(({ downloadQRCode }) => {
+                    downloadQRCode(qrCodeData, 'jetai-qrcode.png');
+                  });
+                }
+              }}
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Download
+            </Button>
+            <Button 
+              type="button" 
+              className="sm:w-auto w-full"
+              onClick={() => setQrCodeModalOpen(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Floating chat button when chat is closed */}
       {!isOpen && (
         <motion.div 
@@ -271,6 +331,14 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({
                     onClick={handleQrScanClick}
                   >
                     <ScanLine size={16} />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8" 
+                    onClick={handleQrGenerateClick}
+                  >
+                    <QrCode size={16} />
                   </Button>
                 </div>
                 <div className="flex items-center gap-1">
@@ -469,6 +537,15 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({
                           >
                             <Camera size={16} />
                             <span>Camera</span>
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="flex items-center gap-2 justify-start"
+                            onClick={handleQrGenerateClick}
+                          >
+                            <QrCode size={16} />
+                            <span>Generate QR</span>
                           </Button>
                         </div>
                       </div>
