@@ -1617,6 +1617,12 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
               </div>
             </div>
           )}
+
+          {activeTab === 'visualitinerary' && (
+            <div className="h-full flex flex-col p-4 overflow-auto">
+              <CanvaVisualEngine />
+            </div>
+          )}
           
           {activeTab === 'bookings' && (
             <div className="p-4">
