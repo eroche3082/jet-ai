@@ -230,7 +230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   configureGeminiRoutes(app);
   
   // Configuramos la clave API para Google Cloud
-  configureApiKey(process.env.GOOGLE_CLOUD_API_KEY || 'AIzaSyByRQcsHT0AXxLsyPK2RrBZEwhe3T11q08');
+  configureApiKey(process.env.GOOGLE_CLOUD_API_KEY || 'AIzaSyBGWmVEy2zp6fpqaBkDOpV-Qj_FP6QkZj0');
   
   // Google Places API routes
   app.get('/api/places/autocomplete', async (req, res) => {

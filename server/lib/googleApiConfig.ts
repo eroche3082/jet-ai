@@ -30,7 +30,7 @@ import { Client as MapsClient } from '@googlemaps/google-maps-services-js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // API Key principal para servicios que la requieren directamente
-const GOOGLE_API_KEY = process.env.GOOGLE_CLOUD_API_KEY || 'AIzaSyByRQcsHT0AXxLsyPK2RrBZEwhe3T11q08';
+const GOOGLE_API_KEY = process.env.GOOGLE_CLOUD_API_KEY || 'AIzaSyBGWmVEy2zp6fpqaBkDOpV-Qj_FP6QkZj0';
 
 // Inicializar el cliente de Gemini (Generative Language API)
 const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
