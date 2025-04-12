@@ -28,6 +28,7 @@ import { configureRoutes as configureMemoryRoutes } from './api/memoryEnhancemen
 import { configureRoutes as configureGoogleApiRoutes } from './api/googleApiService';
 import { configureRoutes as configureGeminiRoutes } from './api/geminiService';
 import { configureApiKey } from './lib/googleApiConfig';
+import canvaRoutes from './api/canvaRoutes';
 
 // Configure session store
 const createSessionStore = () => {
@@ -231,6 +232,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Configuramos la clave API para Google Cloud
   configureApiKey(process.env.GOOGLE_CLOUD_API_KEY || 'AIzaSyBGWmVEy2zp6fpqaBkDOpV-Qj_FP6QkZj0');
+  
+  // Register Canva Visual Engine routes
+  app.use('/api/canva', canvaRoutes);
   
   // Google Places API routes
   app.get('/api/places/autocomplete', async (req, res) => {
