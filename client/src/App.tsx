@@ -36,7 +36,7 @@ import { getAffiliateId } from "@/lib/utils";
 import PartnerDashboard from "@/pages/partner/Dashboard";
 import PartnerSignup from "@/pages/partner/Signup";
 import { initializePWA } from '@/lib/pwa';
-import { AuthProvider } from '@/hooks/useAuth';
+import { AuthProvider } from '@/hooks/use-auth';
 
 function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -108,8 +108,12 @@ function App() {
   // Render application routes
   const renderRoutes = () => (
     <Switch>
-      {/* Main application routes */}
-      <Route path="/" component={Home} />
+      {/* Main application routes - ChatPage is now the primary interface */}
+      <Route path="/" component={ChatPage} />
+      
+      {/* Legacy home page is still accessible */}
+      <Route path="/legacy-home" component={Home} />
+      
       <Route path="/destinations" component={Destinations} />
       <Route path="/destinations/:id/:slug" component={DestinationDetail} />
       <Route path="/itineraries" component={Itineraries} />
@@ -130,7 +134,7 @@ function App() {
       {/* Tool routes */}
       <Route path="/camera" component={CameraPage} />
       <Route path="/qr-scanner" component={QRScannerPage} />
-      <Route path="/chat" component={ChatPage} />
+      <Route path="/chat" component={ChatPage} /> {/* Keep for compatibility */}
 
       {/* Travel features routes */}
       <Route path="/hotels" component={HotelsPage} />
@@ -177,14 +181,14 @@ function App() {
         {isMobile ? (
           <MobileLayout>
             {renderRoutes()}
-            {/* Universal chatbot for mobile */}
-            <UniversalChatbot />
+            {/* Don't show the universal chatbot on home or chat page */}
+            {location !== '/' && location !== '/chat' && <UniversalChatbot />}
           </MobileLayout>
         ) : (
           <Layout>
             {renderRoutes()}
-            {/* Universal chatbot for desktop */}
-            <UniversalChatbot />
+            {/* Don't show the universal chatbot on home or chat page */}
+            {location !== '/' && location !== '/chat' && <UniversalChatbot />}
           </Layout>
         )}
       </ThemeProvider>

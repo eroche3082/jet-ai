@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useState } from "react";
-import { User } from "@shared/schema";
+import type { User, UserPreferences } from "../../shared/schema";
 
 interface AuthContextType {
   user: User | null;
@@ -27,7 +27,7 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   // For testing purposes, we'll use a mock user
   const [authState] = useState<AuthContextType>({
-    user: mockUser,
+    user: null, // Guest mode, no authenticated user
     isLoading: false,
     error: null
   });

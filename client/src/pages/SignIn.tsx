@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { Link, useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/use-auth';
 
 // Validation schemas
 const loginSchema = z.object({
