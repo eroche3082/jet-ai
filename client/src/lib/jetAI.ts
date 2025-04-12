@@ -86,18 +86,118 @@ export interface JetAIValidations {
   GeminiAPIResponding: boolean;
 }
 
-export interface JetAIInitializeOptions {
-  mode: JetAIMode;
-  personality: JetAIPersonality;
+export interface AssistantProfileOptions {
+  name: string;
+  description: string;
   languages: JetAILanguage[];
-  startWith: string;
-  conversationFlow: any;
-  assistantPersonality: any;
-  features: JetAIFeatures;
-  interface: JetAIInterface;
-  validations: JetAIValidations;
-  testAfterInit: string[];
-  finalStep: string;
+  tone: string;
+  voiceEnabled: boolean;
+  avatar: string;
+  theme: string;
+}
+
+export interface ConversationFlowOptions {
+  mode: string;
+  entrySequence: string[];
+  multilingualPatterns: boolean;
+  profileExtraction: boolean;
+  emotionDetection: boolean;
+}
+
+export interface VoiceIntegration {
+  stt: string;
+  tts: string;
+  fallbackVoice: string;
+}
+
+export interface IntegrationsOptions {
+  flights: {
+    providers: string[];
+    fallback: string;
+  };
+  hotels: {
+    providers: string[];
+    fallback: string;
+  };
+  weather: {
+    primary: string;
+    fallback: string;
+  };
+  geolocation: {
+    primary: string;
+    fallback: string;
+  };
+  routes: {
+    primary: string;
+    fallback: string;
+  };
+  translation: string;
+  payment: string;
+  calendar: string;
+  voice: VoiceIntegration;
+  aiModels: {
+    default: string;
+    fallback: string;
+  };
+}
+
+export interface EmotionSupportOptions {
+  enabled: boolean;
+  suggestions: string[];
+  providers: string[];
+}
+
+export interface GamificationOptions {
+  points: boolean;
+  rewards: boolean;
+  JetMilesSystem: boolean;
+}
+
+export interface SystemModulesOptions {
+  itineraryGenerator: boolean;
+  travelMemory: boolean;
+  bookingEngine: boolean;
+  fallbackReporting: boolean;
+  exploreFeed: boolean;
+  emotionSupport: EmotionSupportOptions;
+  gamification: GamificationOptions;
+}
+
+export interface MonitoringOptions {
+  endpoint: string;
+  trackFallbackUsage: boolean;
+  logErrors: boolean;
+  alertAdminsOnFailure: boolean;
+}
+
+export interface UIOptions {
+  chatComponent: string;
+  avatarPanel: boolean;
+  floatingButton: boolean;
+  voiceControls: boolean;
+  mobileOptimized: boolean;
+  animatedUI: boolean;
+  multilingualUI: boolean;
+}
+
+export interface StartupOptions {
+  welcomeMessage: boolean;
+  checkEnvironment: boolean;
+  fallbackRecovery: boolean;
+  autoLanguageDetection: boolean;
+  offlineTipsIfDisconnected: boolean;
+}
+
+export interface JetAIInitializeOptions {
+  personality: string;
+  assistantProfile: AssistantProfileOptions;
+  conversationFlow: ConversationFlowOptions;
+  integrations: IntegrationsOptions;
+  systemModules: SystemModulesOptions;
+  monitoring: MonitoringOptions;
+  ui: UIOptions;
+  startup: StartupOptions;
+  tests: string[];
 }
 
 // Load content from a file (mock implementation)
@@ -169,63 +269,114 @@ export function initializeJetAI(options: JetAIInitializeOptions): JetAIState {
 
   // Set basic properties
   jetAIState.initialized = true;
-  jetAIState.mode = options.mode;
-  jetAIState.personality = options.personality;
-  jetAIState.languages = options.languages;
-  jetAIState.currentLanguage = options.languages[0];
-  jetAIState.startMessage = options.startWith;
+  jetAIState.mode = 'concierge'; // Default mode for the new structure
+  jetAIState.personality = options.personality as JetAIPersonality;
+  
+  // Set languages from assistant profile
+  if (options.assistantProfile && options.assistantProfile.languages) {
+    jetAIState.languages = options.assistantProfile.languages;
+    jetAIState.currentLanguage = options.assistantProfile.languages[0];
+  }
+  
+  // Set welcome message from conversation flow
+  if (options.conversationFlow && options.conversationFlow.entrySequence && options.conversationFlow.entrySequence.length > 0) {
+    jetAIState.startMessage = options.conversationFlow.entrySequence[0];
+  }
   
   // Set AI provider and model
-  if (options.features?.ai) {
-    jetAIState.aiProvider = options.features.ai.provider;
-    jetAIState.aiModel = options.features.ai.model;
+  if (options.integrations && options.integrations.aiModels) {
+    jetAIState.aiProvider = 'VertexAI'; // Default provider
+    jetAIState.aiModel = options.integrations.aiModels.default;
   }
   
   // Set voice settings
-  if (options.features?.voice) {
-    jetAIState.voiceEnabled = true;
-    jetAIState.voiceAutoplay = options.features.voice.autoSpeakResponses;
+  if (options.assistantProfile) {
+    jetAIState.voiceEnabled = options.assistantProfile.voiceEnabled;
+    jetAIState.voiceAutoplay = options.assistantProfile.voiceEnabled;
   }
 
-  // Load conversation flow
+  // Process conversation flow settings
   if (options.conversationFlow) {
-    console.log('Loading conversation flow');
-    // In a real implementation, this would initialize the conversation flow
+    console.log('Loading conversation flow settings');
+    
+    // Map the conversation flow to the features
+    const features: Partial<JetAIFeatures> = {
+      profileExtraction: {
+        extractor: null,
+        memory: options.conversationFlow.profileExtraction
+      },
+      ai: {
+        provider: 'VertexAI',
+        model: options.integrations?.aiModels?.default || 'gemini-1.5-flash',
+        chatEndpoint: '/api/chat/vertex',
+        stream: true,
+        emotionalTone: options.conversationFlow.emotionDetection,
+        sentimentAnalysis: options.conversationFlow.emotionDetection
+      }
+    };
+    
+    // Set up fallback services if provided
+    if (options.integrations) {
+      features.fallback = {
+        weather: [options.integrations.weather?.primary || 'GoogleWeatherAPI', options.integrations.weather?.fallback || 'OpenMeteo'],
+        geocoding: [options.integrations.geolocation?.primary || 'GoogleGeocoding', options.integrations.geolocation?.fallback || 'Nominatim'],
+        routing: [options.integrations.routes?.primary || 'GoogleRoutesAPI', options.integrations.routes?.fallback || 'OSRM'],
+        places: ['GooglePlaces', 'YelpAPI']
+      };
+    }
+    
+    // Set itinerary generator if enabled
+    if (options.systemModules && options.systemModules.itineraryGenerator) {
+      features.itinerary = {
+        generator: null,
+        autoGenerateAfterProfile: true
+      };
+    }
+    
+    jetAIState.features = features;
   }
 
-  // Load assistant personality
-  if (options.assistantPersonality) {
-    console.log('Loading assistant personality');
-    // In a real implementation, this would initialize the assistant personality
+  // Set up interface based on UI options
+  if (options.ui) {
+    const interfaceSettings: Partial<JetAIInterface> = {
+      avatar: {
+        enabled: options.ui.avatarPanel,
+        panel: 'left',
+        style: options.assistantProfile?.theme || 'Concierge AI',
+        memoryDisplay: true
+      },
+      chat: {
+        layout: '2-column',
+        suggestionButtons: true,
+        delayPerStage: 300,
+        colorTheme: options.assistantProfile?.theme?.includes('luxury') ? 'luxury' : 'standard'
+      },
+      floatingBubble: {
+        enabled: options.ui.floatingButton,
+        triggersFullScreen: true
+      }
+    };
+    
+    jetAIState.interface = interfaceSettings;
   }
-
-  // Setup features
-  jetAIState.features = options.features;
   
-  // Setup interface
-  jetAIState.interface = options.interface;
+  // Create initial system message with enhanced description
+  const systemContent = options.assistantProfile 
+    ? `You are ${options.assistantProfile.name}, ${options.assistantProfile.description}. Your tone is ${options.assistantProfile.tone}. Start the conversation with a friendly greeting and introduce yourself.`
+    : `You are JetAI in concierge mode with ${options.personality} personality. You are a travel assistant that helps users plan and enjoy their trips. Start the conversation with a friendly greeting and introduce yourself.`;
   
-  // Create initial system message
   jetAIState.systemMessages = [{
     id: 'system-1',
     role: 'system',
-    content: `You are JetAI in ${options.mode} mode with ${options.personality} personality. 
-    You are a travel assistant that helps users plan and enjoy their trips. 
-    Start the conversation with a friendly greeting and introduce yourself.`,
+    content: systemContent,
     timestamp: new Date(),
   }];
 
-  // Validate requirements
-  if (options.validations.GOOGLE_APPLICATION_CREDENTIALS === 'REQUIRED') {
-    console.log('Validating Google credentials');
-    // In a real implementation, this would check if credentials are valid
-  }
-
-  // Run tests after initialization
-  if (options.testAfterInit && options.testAfterInit.length > 0) {
-    console.log('Running post-initialization tests');
-    options.testAfterInit.forEach(test => {
-      console.log(`Test: ${test}`);
+  // Run tests if provided
+  if (options.tests && options.tests.length > 0) {
+    console.log('Setting up test cases for the chat system');
+    options.tests.forEach(test => {
+      console.log(`Test case: ${test}`);
       // In a real implementation, this would run the test
     });
   }
