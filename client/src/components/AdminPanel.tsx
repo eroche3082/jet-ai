@@ -12,14 +12,21 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { firestore } from '@/lib/firebase';
 import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
-import { Loader2, Download, Save, RefreshCw } from 'lucide-react';
+import { Loader2, Download, Save, RefreshCw, FileText, ListChecks } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import SystemDiagnosticReport from './SystemDiagnosticReport';
 
 // Define the phase structure type
 interface PhaseItem {
@@ -397,102 +404,129 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ open, onOpenChange }) => {
             <p className="text-muted-foreground">Loading phases data...</p>
           </div>
         ) : (
-          <>
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h3 className="text-lg font-medium">Overall Progress</h3>
-                <div className="w-full bg-secondary h-2 rounded-full mt-2">
-                  <div 
-                    className="bg-primary h-2 rounded-full" 
-                    style={{ width: `${calculateOverallProgress()}%` }}
-                  />
+          <Tabs defaultValue="phases">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="phases" className="flex items-center gap-1">
+                <ListChecks className="h-4 w-4" />
+                Phase Checklist
+              </TabsTrigger>
+              <TabsTrigger value="diagnostic" className="flex items-center gap-1">
+                <FileText className="h-4 w-4" />
+                System Diagnostic
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="phases" className="mt-0">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h3 className="text-lg font-medium">Overall Progress</h3>
+                  <div className="w-full bg-secondary h-2 rounded-full mt-2">
+                    <div 
+                      className="bg-primary h-2 rounded-full" 
+                      style={{ width: `${calculateOverallProgress()}%` }}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {calculateOverallProgress()}% complete
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {calculateOverallProgress()}% complete
-                </p>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={exportData}
+                  >
+                    <Download className="h-4 w-4 mr-1" />
+                    Export
+                  </Button>
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    onClick={savePhases}
+                    disabled={saving}
+                  >
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
+                    Save
+                  </Button>
+                </div>
               </div>
-              <div className="flex gap-2">
+
+              <Accordion type="multiple" defaultValue={['phase-0']} className="mb-6">
+                {phases.map((phase) => (
+                  <AccordionItem key={phase.id} value={phase.id} className="border rounded-md mb-4 pb-0">
+                    <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                      <div className="flex flex-1 items-center justify-between pr-4">
+                        <span className="font-medium text-left">{phase.title}</span>
+                        <StatusBadge status={phase.status} />
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 pb-4">
+                      <div className="space-y-4">
+                        {phase.items.map((item) => (
+                          <div key={item.id} className="flex items-start space-x-2">
+                            <Checkbox
+                              id={item.id}
+                              checked={item.completed}
+                              onCheckedChange={() => toggleItem(phase.id, item.id)}
+                              className="mt-1"
+                            />
+                            <label
+                              htmlFor={item.id}
+                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {item.label}
+                            </label>
+                          </div>
+                        ))}
+                        
+                        <div className="pt-2">
+                          <h4 className="text-sm font-medium mb-1">Notes</h4>
+                          <Textarea 
+                            placeholder="Add notes about this phase..."
+                            value={phase.notes}
+                            onChange={(e) => updateNotes(phase.id, e.target.value)}
+                            className="min-h-[80px]"
+                          />
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+
+              <div className="flex justify-between pt-4 border-t">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={resetData}
+                >
+                  <RefreshCw className="h-4 w-4 mr-1" />
+                  Reset to Default
+                </Button>
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={exportData}
+                  onClick={() => onOpenChange(false)}
                 >
-                  <Download className="h-4 w-4 mr-1" />
-                  Export
-                </Button>
-                <Button 
-                  variant="default" 
-                  size="sm" 
-                  onClick={savePhases}
-                  disabled={saving}
-                >
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
-                  Save
+                  Close Panel
                 </Button>
               </div>
-            </div>
+            </TabsContent>
 
-            <Accordion type="multiple" defaultValue={['phase-0']} className="mb-6">
-              {phases.map((phase) => (
-                <AccordionItem key={phase.id} value={phase.id} className="border rounded-md mb-4 pb-0">
-                  <AccordionTrigger className="px-4 py-3 hover:no-underline">
-                    <div className="flex flex-1 items-center justify-between pr-4">
-                      <span className="font-medium text-left">{phase.title}</span>
-                      <StatusBadge status={phase.status} />
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-4 pb-4">
-                    <div className="space-y-4">
-                      {phase.items.map((item) => (
-                        <div key={item.id} className="flex items-start space-x-2">
-                          <Checkbox
-                            id={item.id}
-                            checked={item.completed}
-                            onCheckedChange={() => toggleItem(phase.id, item.id)}
-                            className="mt-1"
-                          />
-                          <label
-                            htmlFor={item.id}
-                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            {item.label}
-                          </label>
-                        </div>
-                      ))}
-                      
-                      <div className="pt-2">
-                        <h4 className="text-sm font-medium mb-1">Notes</h4>
-                        <Textarea 
-                          placeholder="Add notes about this phase..."
-                          value={phase.notes}
-                          onChange={(e) => updateNotes(phase.id, e.target.value)}
-                          className="min-h-[80px]"
-                        />
-                      </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-
-            <div className="flex justify-between pt-4 border-t">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={resetData}
-              >
-                <RefreshCw className="h-4 w-4 mr-1" />
-                Reset to Default
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => onOpenChange(false)}
-              >
-                Close Panel
-              </Button>
-            </div>
-          </>
+            <TabsContent value="diagnostic" className="mt-0">
+              <SystemDiagnosticReport />
+              
+              <div className="flex justify-end pt-4 mt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => onOpenChange(false)}
+                >
+                  Close Panel
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
         )}
       </SheetContent>
     </Sheet>
