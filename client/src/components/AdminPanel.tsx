@@ -572,6 +572,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ open, onOpenChange }) => {
                 </Button>
               </div>
             </TabsContent>
+            
+            <TabsContent value="chat-flows" className="mt-0">
+              <ChatFlowsTracker />
+              
+              <div className="flex justify-end pt-4 mt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => onOpenChange(false)}
+                >
+                  Close Panel
+                </Button>
+              </div>
+            </TabsContent>
           </Tabs>
         )}
       </SheetContent>
