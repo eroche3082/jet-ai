@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clipboard, Download, RefreshCw } from 'lucide-react';
+import { Clipboard, Download, RefreshCw, Lock, Bell, MessageSquare, Upload, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { auth, firestore } from '@/lib/firebase';
-import { getDocs, collection, query, where } from 'firebase/firestore';
+import { getDocs, collection, query, where, doc, setDoc, serverTimestamp, addDoc } from 'firebase/firestore';
 
 // Phase item interface
 interface PhaseItem {
@@ -369,6 +369,131 @@ const SystemDiagnosticReport: React.FC = () => {
     });
   };
 
+  // Sync report to Firebase
+  const syncReportToFirebase = async () => {
+    try {
+      if (!firestore) {
+        toast({
+          title: 'Firebase not available',
+          description: 'Unable to sync report to Firebase',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Save report to Firebase
+      const reportDocRef = doc(firestore, 'systemReports', 'latest');
+      await setDoc(reportDocRef, {
+        ...systemReport, 
+        timestamp: serverTimestamp(),
+        status_percentage: systemStatus.percentage,
+        system_status: systemStatus.status.toUpperCase(),
+        status_reason: "The system is functional but several modules are still in progress. Core components are working but need optimization."
+      });
+
+      // Create report history entry
+      await addDoc(collection(firestore, 'systemReportHistory'), {
+        report: systemReport,
+        timestamp: serverTimestamp(),
+        status_percentage: systemStatus.percentage,
+        system_status: systemStatus.status.toUpperCase(),
+        status_reason: "The system is functional but several modules are still in progress. Core components are working but need optimization."
+      });
+
+      toast({
+        title: 'Report synced',
+        description: 'System diagnostic report has been synced to Firebase',
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error syncing report:', error);
+      toast({
+        title: 'Sync failed',
+        description: 'Failed to sync report to Firebase',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+
+  // Send notifications to development team
+  const triggerPhaseReminder = async () => {
+    try {
+      if (!firestore) {
+        toast({
+          title: 'Firebase not available',
+          description: 'Unable to send phase reminder',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Create notification
+      await addDoc(collection(firestore, 'notifications'), {
+        title: `PHASE ${systemReport.current_phase.current_phase.split(' – ')[0].split(' ')[1]} REMINDER`,
+        message: `Current focus: ${systemReport.current_phase.current_phase}\nNext phase: ${systemReport.current_phase.next_focus}\nPriority actions: ${systemReport.current_phase.priority_actions.join(', ')}`,
+        type: 'phase_reminder',
+        read: false,
+        timestamp: serverTimestamp(),
+      });
+
+      toast({
+        title: 'Reminder sent',
+        description: 'Phase reminder notification has been sent to the development team',
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error sending reminder:', error);
+      toast({
+        title: 'Reminder failed',
+        description: 'Failed to send phase reminder',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+
+  // Update chatbot to be phase-aware
+  const enableChatbotPhaseAwareness = async () => {
+    try {
+      if (!firestore) {
+        toast({
+          title: 'Firebase not available',
+          description: 'Unable to update chatbot phase awareness',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Update chatbot configuration
+      await setDoc(doc(firestore, 'chatbotConfig', 'phaseSettings'), {
+        isPhaseAware: true,
+        currentPhase: systemReport.current_phase.current_phase.split(' – ')[0].split(' ')[1],
+        currentPhaseDescription: systemReport.current_phase.current_phase.split(' – ')[1],
+        nextPhase: systemReport.current_phase.next_focus.split(' – ')[0].split(' ')[1],
+        phaseMessage: `I'm currently in ${systemReport.current_phase.current_phase} – still learning!`,
+        updatedAt: serverTimestamp(),
+      });
+
+      toast({
+        title: 'Chatbot updated',
+        description: 'Chatbot is now phase-aware and will inform users of its development stage',
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error updating chatbot:', error);
+      toast({
+        title: 'Update failed',
+        description: 'Failed to update chatbot phase awareness',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+
   // Render phase items
   const renderPhaseItems = (phase: Phase, phaseKey: string) => {
     return Object.entries(phase).map(([key, value]) => {
@@ -482,44 +607,95 @@ const SystemDiagnosticReport: React.FC = () => {
           })}
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between pt-2">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={copyReportToClipboard}
-          disabled={refreshing}
-        >
-          <Clipboard className="h-4 w-4 mr-1" />
-          {copied ? 'Copied!' : 'Copy Report'}
-        </Button>
-        <div className="flex gap-2">
+      <CardFooter className="flex flex-col space-y-3 pt-2">
+        <div className="flex justify-between w-full">
           <Button 
-            variant="outline" 
+            variant="ghost" 
             size="sm" 
-            onClick={downloadReportAsJSON}
+            onClick={copyReportToClipboard}
             disabled={refreshing}
           >
-            <Download className="h-4 w-4 mr-1" />
-            Download JSON
+            <Clipboard className="h-4 w-4 mr-1" />
+            {copied ? 'Copied!' : 'Copy Report'}
           </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={refreshReport}
-            disabled={refreshing}
-          >
-            {refreshing ? (
-              <>
-                <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
-                Updating...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="h-4 w-4 mr-1" />
-                Refresh Report
-              </>
-            )}
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={downloadReportAsJSON}
+              disabled={refreshing}
+            >
+              <Download className="h-4 w-4 mr-1" />
+              Download JSON
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={refreshReport}
+              disabled={refreshing}
+            >
+              {refreshing ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-1" />
+                  Refresh Report
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+        
+        {/* PHASE EXECUTION MODE Synchronization Buttons */}
+        <div className="w-full pt-2 border-t border-border/30">
+          <p className="text-xs font-medium text-muted-foreground mb-2">Phase Execution Mode:</p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={syncReportToFirebase}
+              disabled={refreshing}
+              className="text-xs"
+            >
+              <Upload className="h-3 w-3 mr-1" />
+              Sync to Firebase
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={triggerPhaseReminder}
+              disabled={refreshing}
+              className="text-xs"
+            >
+              <Bell className="h-3 w-3 mr-1" />
+              Send Phase Reminder
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={enableChatbotPhaseAwareness}
+              disabled={refreshing}
+              className="text-xs"
+            >
+              <MessageSquare className="h-3 w-3 mr-1" />
+              Enable Chatbot Phase Awareness
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={true}
+              className="text-xs text-muted-foreground"
+            >
+              <Clock className="h-3 w-3 mr-1" />
+              Auto-sync: Inactive
+            </Button>
+          </div>
         </div>
       </CardFooter>
     </Card>
