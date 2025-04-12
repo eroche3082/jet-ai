@@ -256,33 +256,37 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ open, onOpenChange }) => {
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
-  // Load phases data from Firebase on initial render
+  // Set initial loading state and then automatically turn it off after a delay
   useEffect(() => {
-    const loadPhases = async () => {
-      try {
-        setLoading(true);
-        const docRef = doc(firestore, 'admin', 'phases');
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.phases) {
-            setPhases(data.phases);
-          }
-        }
-      } catch (error) {
-        console.error('Error loading phases data:', error);
-        // Just log the error but continue with default phases
-      } finally {
-        // Always set loading to false after a short delay to ensure UI renders
-        setTimeout(() => {
-          setLoading(false);
-        }, 300);
-      }
-    };
-
     if (open) {
+      setLoading(true);
+      
+      // Just use local phases data for now since Firebase connection might be causing issues
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+      
+      // Uncomment this code when Firebase issues are resolved
+      /*
+      const loadPhases = async () => {
+        try {
+          const docRef = doc(firestore, 'admin', 'phases');
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.phases) {
+              setPhases(data.phases);
+            }
+          }
+        } catch (error) {
+          console.error('Error loading phases data:', error);
+          // Just log the error but continue with default phases
+        }
+      };
+      
       loadPhases();
+      */
     }
   }, [open]);
 

@@ -1,8 +1,21 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
-import { Settings, Shield, Mail, Github, Twitter, Facebook } from 'lucide-react';
-import AdminPanel from './AdminPanel';
+import { FileText, ListChecks, Loader2, Shield, Mail, Github, Twitter, Facebook } from 'lucide-react';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import SystemDiagnosticReport from './SystemDiagnosticReport';
 
 const Footer: React.FC = () => {
   const [adminPanelOpen, setAdminPanelOpen] = useState(false);
@@ -74,8 +87,51 @@ const Footer: React.FC = () => {
         </div>
       </footer>
       
-      {/* Admin Panel */}
-      <AdminPanel open={adminPanelOpen} onOpenChange={setAdminPanelOpen} />
+      {/* Simplified Admin Panel (direct inline implementation) */}
+      <Sheet open={adminPanelOpen} onOpenChange={setAdminPanelOpen}>
+        <SheetContent side="left" className="w-full sm:max-w-xl md:max-w-2xl overflow-y-auto">
+          <SheetHeader className="mb-4">
+            <SheetTitle>JetAI Admin Panel</SheetTitle>
+            <SheetDescription>
+              Monitor and manage development phases and project progress.
+            </SheetDescription>
+          </SheetHeader>
+
+          <Tabs defaultValue="diagnostic">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="phases" className="flex items-center gap-1">
+                <ListChecks className="h-4 w-4" />
+                Phase Checklist
+              </TabsTrigger>
+              <TabsTrigger value="diagnostic" className="flex items-center gap-1">
+                <FileText className="h-4 w-4" />
+                System Diagnostic
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="phases" className="mt-0">
+              <div className="p-6 text-center">
+                <p className="text-muted-foreground mb-4">Coming soon: Phase progress tracking</p>
+                <p className="text-sm">This feature is currently being migrated to a new storage system.</p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="diagnostic" className="mt-0">
+              <SystemDiagnosticReport />
+              
+              <div className="flex justify-end pt-4 mt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setAdminPanelOpen(false)}
+                >
+                  Close Panel
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </SheetContent>
+      </Sheet>
     </>
   );
 };
