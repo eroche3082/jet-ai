@@ -2,12 +2,32 @@
  * Canva Visual Engine API Routes
  * Handles API endpoints for Canva visual itinerary integration
  */
-
 import { Router, Request, Response } from 'express';
-import { generateTravelItineraryVisual, downloadDesignAsPdf, generateAIImage, TravelItineraryData } from '../lib/canvaService';
-import { storage } from '../storage';
+import { canvaService } from '../lib/canvaService';
 
 const router = Router();
+
+interface TravelItineraryData {
+  destination: string;
+  startDate: Date;
+  endDate: Date;
+  activities: {
+    day: number;
+    title: string;
+    description: string;
+    location?: string;
+  }[];
+  accommodation: {
+    name: string;
+    location: string;
+    imageUrl?: string;
+  };
+  travelStyle: string;
+  travelerName?: string;
+  budget?: string;
+  coverImageUrl?: string;
+  tripId?: number;
+}
 
 /**
  * Generate a visual travel itinerary with Canva
@@ -17,35 +37,25 @@ router.post('/generate-itinerary', async (req: Request, res: Response) => {
   try {
     const travelData: TravelItineraryData = req.body;
     
-    // Validate request data
-    if (!travelData.destination || !travelData.startDate || !travelData.endDate || !travelData.activities) {
+    // Simple validation
+    if (!travelData.destination || !travelData.activities || travelData.activities.length === 0) {
       return res.status(400).json({ 
-        error: 'Incomplete travel data. Required fields: destination, startDate, endDate, activities' 
+        error: 'Missing required fields: destination and at least one activity are required' 
       });
     }
-
-    // Generate visual itinerary with Canva
-    const result = await generateTravelItineraryVisual(travelData);
     
-    // If this is for a logged in user, save the design URL to their trip
-    if (req.user && req.body.tripId) {
-      try {
-        await storage.updateItinerary(parseInt(req.body.tripId), {
-          canvaDesignUrl: result.editUrl,
-          canvaDesignId: result.designId
-        });
-      } catch (err) {
-        console.error('Failed to save Canva design URL to trip:', err);
-        // Continue with the response even if saving fails
-      }
-    }
-
-    return res.status(200).json(result);
+    // Generate itinerary using Canva service
+    const result = await canvaService.generateTravelItineraryVisual(travelData);
+    
+    // Return design ID and view URL
+    res.status(200).json({
+      designId: result.designId,
+      viewUrl: result.viewUrl
+    });
   } catch (error) {
     console.error('Error generating visual itinerary:', error);
-    return res.status(500).json({ 
-      error: 'Failed to generate visual itinerary',
-      message: error instanceof Error ? error.message : 'Unknown error'
+    res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'Failed to generate visual itinerary' 
     });
   }
 });
@@ -62,18 +72,19 @@ router.get('/download-pdf/:designId', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Design ID is required' });
     }
     
-    const pdfBuffer = await downloadDesignAsPdf(designId);
+    // Get PDF buffer from Canva service
+    const pdfBuffer = await canvaService.downloadItineraryPdf(designId);
     
-    // Set headers for PDF download
+    // Set appropriate headers for PDF download
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="travel-itinerary-${designId}.pdf"`);
     
-    return res.send(pdfBuffer);
+    // Send the PDF buffer
+    res.send(pdfBuffer);
   } catch (error) {
-    console.error('Error downloading design as PDF:', error);
-    return res.status(500).json({ 
-      error: 'Failed to download design as PDF',
-      message: error instanceof Error ? error.message : 'Unknown error'
+    console.error('Error downloading PDF:', error);
+    res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'Failed to download PDF' 
     });
   }
 });
@@ -90,14 +101,14 @@ router.post('/generate-image', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Image prompt is required' });
     }
     
-    const imageUrl = await generateAIImage(prompt);
+    // Generate image using AI service
+    const imageUrl = await canvaService.generateAiImage(prompt);
     
-    return res.status(200).json({ imageUrl });
+    res.status(200).json({ imageUrl });
   } catch (error) {
     console.error('Error generating AI image:', error);
-    return res.status(500).json({ 
-      error: 'Failed to generate AI image',
-      message: error instanceof Error ? error.message : 'Unknown error'
+    res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'Failed to generate AI image' 
     });
   }
 });
