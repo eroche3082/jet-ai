@@ -1,160 +1,72 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getAffiliateId, getSubdomain } from '@/lib/utils';
-import { apiRequest } from '@/lib/queryClient';
+import { createContext, useContext, useEffect, useState } from "react";
 
-// Define theme interfaces
-export interface BrandTheme {
-  primaryColor: string;
-  borderRadius: string;
-  fontFamily: string;
-  logo: string;
-  name: string;
-  subdomain: string;
-}
+type Theme = "dark" | "light" | "system";
 
-interface ThemeContextType {
-  theme: BrandTheme;
-  affiliateId: string | null;
-  isCustomTheme: boolean;
-  setThemeOverride: (subdomain: string | null) => void;
-}
-
-// Default theme
-const defaultTheme: BrandTheme = {
-  primaryColor: '#3182ce',
-  borderRadius: '0.5rem',
-  fontFamily: 'Inter, system-ui, sans-serif',
-  logo: '/assets/logo.svg',
-  name: 'JetAI',
-  subdomain: 'app',
+type ThemeProviderProps = {
+  children: React.ReactNode;
+  defaultTheme?: Theme;
+  storageKey?: string;
 };
 
-const ThemeContext = createContext<ThemeContextType>({
-  theme: defaultTheme,
-  affiliateId: null,
-  isCustomTheme: false,
-  setThemeOverride: () => {},
-});
+type ThemeProviderState = {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+};
 
-export const useTheme = () => useContext(ThemeContext);
+const initialState: ThemeProviderState = {
+  theme: "system",
+  setTheme: () => null,
+};
 
-interface ThemeProviderProps {
-  children: React.ReactNode;
-}
+const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
-export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<BrandTheme>(defaultTheme);
-  const [affiliateId, setAffiliateId] = useState<string | null>(null);
-  const [themeOverride, setThemeOverride] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  // Fetch theme configuration based on subdomain
+export function ThemeProvider({
+  children,
+  defaultTheme = "system",
+  storageKey = "vite-ui-theme",
+  ...props
+}: ThemeProviderProps) {
+  const [theme, setTheme] = useState<Theme>(
+    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+  );
+
   useEffect(() => {
-    const fetchThemeConfig = async () => {
-      try {
-        // Get active subdomain, honor override if set
-        const subdomain = themeOverride || getSubdomain() || 'app';
-        
-        // In a real production app, we would make an API call to get the theme config
-        // For demo purposes, we'll use a simple mapping
-        const response = await apiRequest('GET', `/api/subdomain/config?subdomain=${subdomain}`);
-        
-        if (response.ok) {
-          const data = await response.json();
-          
-          // If we have a valid config, use it
-          if (data && data.config) {
-            const brandConfig = data.config;
-            
-            // Map the brand config to our theme format
-            const newTheme: BrandTheme = {
-              primaryColor: brandConfig.primaryColor || defaultTheme.primaryColor,
-              borderRadius: brandConfig.borderRadius || defaultTheme.borderRadius,
-              fontFamily: brandConfig.fontFamily || defaultTheme.fontFamily,
-              logo: brandConfig.logo || defaultTheme.logo,
-              name: brandConfig.name || defaultTheme.name,
-              subdomain: subdomain,
-            };
-            
-            setTheme(newTheme);
-            
-            // Apply theme to document
-            applyThemeToDocument(newTheme);
-          }
-        } else {
-          // Fallback to default theme
-          setTheme(defaultTheme);
-          applyThemeToDocument(defaultTheme);
-        }
-      } catch (error) {
-        console.error('Error fetching theme:', error);
-        setTheme(defaultTheme);
-        applyThemeToDocument(defaultTheme);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchThemeConfig();
-  }, [themeOverride]);
-  
-  // Track affiliate ID
-  useEffect(() => {
-    const currentAffiliateId = getAffiliateId();
-    setAffiliateId(currentAffiliateId);
-    
-    // Track affiliate visit if exists
-    if (currentAffiliateId) {
-      // In a real app, this would call an API to track the visit
-      console.log(`Tracking visit from affiliate: ${currentAffiliateId}`);
-      
-      // Store in localStorage with timestamp
-      const trackingData = {
-        id: currentAffiliateId,
-        timestamp: new Date().toISOString(),
-        isFirstVisit: !localStorage.getItem(`affiliate_visit_${currentAffiliateId}`)
-      };
-      
-      localStorage.setItem(`affiliate_visit_${currentAffiliateId}`, JSON.stringify(trackingData));
+    const root = window.document.documentElement;
+    root.classList.remove("light", "dark");
+
+    if (theme === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
+        ? "dark"
+        : "light";
+
+      root.classList.add(systemTheme);
+      return;
     }
-  }, []);
-  
-  // Apply theme to document
-  const applyThemeToDocument = (theme: BrandTheme) => {
-    const root = document.documentElement;
-    
-    // Set CSS variables for theme colors
-    root.style.setProperty('--primary', theme.primaryColor);
-    root.style.setProperty('--radius', theme.borderRadius);
-    
-    // Update title if custom subdomain
-    if (theme.subdomain !== 'app') {
-      document.title = `${theme.name} - Smart Travel Assistant`;
-      
-      // Update favicon if needed
-      const favicon = document.querySelector('link[rel="icon"]');
-      if (favicon && theme.logo) {
-        favicon.setAttribute('href', theme.logo);
-      }
-    }
-  };
-  
-  // Provide theme context to the app
-  const contextValue = {
+
+    root.classList.add(theme);
+  }, [theme]);
+
+  const value = {
     theme,
-    affiliateId,
-    isCustomTheme: theme.subdomain !== 'app',
-    setThemeOverride: (subdomain: string | null) => setThemeOverride(subdomain),
+    setTheme: (theme: Theme) => {
+      localStorage.setItem(storageKey, theme);
+      setTheme(theme);
+    },
   };
-  
-  // If still loading theme, render empty div to avoid flashing
-  if (isLoading) {
-    return null;
-  }
-  
+
   return (
-    <ThemeContext.Provider value={contextValue}>
+    <ThemeProviderContext.Provider {...props} value={value}>
       {children}
-    </ThemeContext.Provider>
+    </ThemeProviderContext.Provider>
   );
 }
+
+export const useTheme = () => {
+  const context = useContext(ThemeProviderContext);
+
+  if (context === undefined)
+    throw new Error("useTheme must be used within a ThemeProvider");
+
+  return context;
+};

@@ -1,39 +1,28 @@
-import { createContext, ReactNode, useContext, useState } from "react";
-import type { User, UserPreferences } from "../../shared/schema";
+import { createContext, ReactNode, useContext } from "react";
+import { User } from '../types/user';
 
-interface AuthContextType {
+type AuthContextType = {
   user: User | null;
   isLoading: boolean;
   error: Error | null;
-}
-
-// Mock user data for testing purposes
-const mockUser: User = {
-  id: 1,
-  username: 'test_user',
-  email: 'test@example.com',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  password: '', // We never expose the actual password
-  preferences: {
-    theme: 'light',
-    language: 'en',
-    notifications: true
-  }
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // For testing purposes, we'll use a mock user
-  const [authState] = useState<AuthContextType>({
-    user: null, // Guest mode, no authenticated user
-    isLoading: false,
-    error: null
-  });
+  // Mock implementation - in a real app, this would fetch the user from your API
+  const user = null;
+  const isLoading = false;
+  const error = null;
 
   return (
-    <AuthContext.Provider value={authState}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        error,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
