@@ -3,6 +3,21 @@
  * 
  * Este archivo centraliza la configuración y verificación de las APIs de Google Cloud
  * utilizadas en la aplicación JetAI.
+ * 
+ * API Key actualizada: AIzaSyBUYoJ-RndERrcY9qkjD-2YGGY5m3Mzc0U
+ * APIs activadas:
+ * - Generative Language API (Gemini)
+ * - Places API
+ * - Geocoding API
+ * - Maps APIs
+ * - Routes API
+ * - Cloud Translation API
+ * - Weather API
+ * - Vision AI API
+ * - Vertex AI API
+ * - Cloud Video Intelligence API
+ * - Text-to-Speech API
+ * - Servicios adicionales: Identity, Storage, etc.
  */
 
 import { VertexAI } from '@google-cloud/vertexai';
@@ -12,9 +27,13 @@ import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 import { VideoIntelligenceServiceClient } from '@google-cloud/video-intelligence';
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import { Client as MapsClient } from '@googlemaps/google-maps-services-js';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // API Key principal para servicios que la requieren directamente
-const GOOGLE_API_KEY = process.env.GOOGLE_CLOUD_API_KEY || '';
+const GOOGLE_API_KEY = process.env.GOOGLE_CLOUD_API_KEY || 'AIzaSyBUYoJ-RndERrcY9qkjD-2YGGY5m3Mzc0U';
+
+// Inicializar el cliente de Gemini (Generative Language API)
+const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
 
 // Interfaces para los clientes de APIs
 interface ApiClients {
@@ -25,6 +44,7 @@ interface ApiClients {
   videoIntelligence: VideoIntelligenceServiceClient | null;
   vertexAi: VertexAI | null;
   secretManager: SecretManagerServiceClient | null;
+  generativeAI: GoogleGenerativeAI | null;
 }
 
 // Almacenamiento de clientes de API
@@ -35,97 +55,100 @@ const apiClients: ApiClients = {
   maps: null,
   videoIntelligence: null,
   vertexAi: null,
-  secretManager: null
+  secretManager: null,
+  generativeAI: genAI
 };
 
 // Verificar si las variables de entorno están configuradas
 export const isKeyAvailable = (key: string): boolean => {
-  return !!process.env[key];
+  return !!process.env[key] || key === 'GOOGLE_CLOUD_API_KEY';
 };
 
 // Inicializar clientes de API con manejo de errores
 export const initializeApiClients = (): void => {
   try {
-    // Verificar credenciales de Google Cloud
-    const hasCredentialsFile = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-    if (!hasCredentialsFile) {
-      console.warn('La variable de entorno GOOGLE_APPLICATION_CREDENTIALS no está configurada.');
-      console.warn('Si quieres utilizar los servicios de Google Cloud, debes configurar esta variable.');
-    }
+    console.log('Inicializando APIs de Google Cloud con API key actualizada...');
 
-    // Inicializar Vision API
-    if (isKeyAvailable('GOOGLE_CLOUD_VISION_API_KEY')) {
-      try {
-        apiClients.vision = new ImageAnnotatorClient();
-        console.log('Cliente de Google Cloud Vision inicializado correctamente');
-      } catch (error) {
-        console.error('Error al inicializar Vision API:', error);
-      }
-    }
-
-    // Inicializar Translation API
-    if (isKeyAvailable('GOOGLE_TRANSLATE_API_KEY')) {
-      try {
-        apiClients.translation = new TranslationServiceClient();
-        console.log('Cliente de Google Cloud Translate inicializado correctamente');
-      } catch (error) {
-        console.error('Error al inicializar Translation API:', error);
-      }
-    }
-
-    // Inicializar Text-to-Speech API
-    if (isKeyAvailable('GOOGLE_TTS_API_KEY')) {
-      try {
-        apiClients.textToSpeech = new TextToSpeechClient();
-        console.log('Cliente de Google Cloud Text-to-Speech inicializado correctamente');
-      } catch (error) {
-        console.error('Error al inicializar Text-to-Speech API:', error);
-      }
-    }
-
-    // Inicializar Maps API
-    if (isKeyAvailable('GOOGLE_CLOUD_API_KEY')) {
-      try {
-        apiClients.maps = new MapsClient({});
-        console.log('Cliente de Google Maps inicializado correctamente');
-      } catch (error) {
-        console.error('Error al inicializar Maps API:', error);
-      }
-    }
-
-    // Inicializar Video Intelligence API
-    if (isKeyAvailable('GOOGLE_CLOUD_API_KEY')) {
-      try {
-        apiClients.videoIntelligence = new VideoIntelligenceServiceClient();
-        console.log('Cliente de Google Cloud Video Intelligence inicializado correctamente');
-      } catch (error) {
-        console.error('Error al inicializar Video Intelligence API:', error);
-      }
-    }
-
-    // Inicializar Vertex AI
-    if (isKeyAvailable('GOOGLE_CLOUD_API_KEY')) {
-      try {
-        apiClients.vertexAi = new VertexAI({
-          project: 'jetai-travel-companion',
-          location: 'us-central1',
-        });
-        console.log('Cliente de Google Vertex AI inicializado correctamente');
-      } catch (error) {
-        console.error('Error al inicializar Vertex AI:', error);
-      }
-    }
-
-    // Inicializar Secret Manager
+    // Inicializar Vision API (para análisis de imágenes)
     try {
-      apiClients.secretManager = new SecretManagerServiceClient();
-      console.log('Cliente de Secret Manager inicializado correctamente');
+      apiClients.vision = new ImageAnnotatorClient({
+        key: GOOGLE_API_KEY
+      });
+      console.log('✅ Cliente de Google Cloud Vision inicializado correctamente');
     } catch (error) {
-      console.error('Error al inicializar Secret Manager:', error);
+      console.error('❌ Error al inicializar Vision API:', error);
     }
+
+    // Inicializar Translation API (para traducciones multilingüe)
+    try {
+      apiClients.translation = new TranslationServiceClient({
+        key: GOOGLE_API_KEY
+      });
+      console.log('✅ Cliente de Google Cloud Translate inicializado correctamente');
+    } catch (error) {
+      console.error('❌ Error al inicializar Translation API:', error);
+    }
+
+    // Inicializar Text-to-Speech API (para síntesis de voz)
+    try {
+      apiClients.textToSpeech = new TextToSpeechClient({
+        key: GOOGLE_API_KEY
+      });
+      console.log('✅ Cliente de Google Cloud Text-to-Speech inicializado correctamente');
+    } catch (error) {
+      console.error('❌ Error al inicializar Text-to-Speech API:', error);
+    }
+
+    // Inicializar Maps API (para geocodificación, places, rutas)
+    try {
+      apiClients.maps = new MapsClient({});
+      console.log('✅ Cliente de Google Maps inicializado correctamente');
+    } catch (error) {
+      console.error('❌ Error al inicializar Maps API:', error);
+    }
+
+    // Inicializar Video Intelligence API (para análisis de videos)
+    try {
+      apiClients.videoIntelligence = new VideoIntelligenceServiceClient({
+        key: GOOGLE_API_KEY
+      });
+      console.log('✅ Cliente de Google Cloud Video Intelligence inicializado correctamente');
+    } catch (error) {
+      console.error('❌ Error al inicializar Video Intelligence API:', error);
+    }
+
+    // Inicializar Vertex AI (para modelos de IA avanzados)
+    try {
+      apiClients.vertexAi = new VertexAI({
+        project: 'jetai-travel-companion',
+        location: 'us-central1',
+      });
+      console.log('✅ Cliente de Google Vertex AI inicializado correctamente');
+    } catch (error) {
+      console.error('❌ Error al inicializar Vertex AI:', error);
+    }
+
+    // Inicializar Generative Language API (Gemini)
+    if (apiClients.generativeAI) {
+      console.log('✅ Cliente de Google Generative AI (Gemini) inicializado correctamente');
+    } else {
+      console.error('❌ Error al inicializar Generative AI (Gemini)');
+    }
+
+    // Inicializar Secret Manager (para gestión segura de secretos)
+    try {
+      apiClients.secretManager = new SecretManagerServiceClient({
+        key: GOOGLE_API_KEY
+      });
+      console.log('✅ Cliente de Secret Manager inicializado correctamente');
+    } catch (error) {
+      console.error('❌ Error al inicializar Secret Manager:', error);
+    }
+
+    console.log('🚀 Inicialización de APIs completada!');
 
   } catch (error) {
-    console.error('Error al inicializar clientes de API de Google Cloud:', error);
+    console.error('❌ Error al inicializar clientes de API de Google Cloud:', error);
   }
 };
 
@@ -137,6 +160,7 @@ export const getMapsClient = (): MapsClient | null => apiClients.maps;
 export const getVideoIntelligenceClient = (): VideoIntelligenceServiceClient | null => apiClients.videoIntelligence;
 export const getVertexAiClient = (): VertexAI | null => apiClients.vertexAi;
 export const getSecretManagerClient = (): SecretManagerServiceClient | null => apiClients.secretManager;
+export const getGenerativeAIClient = (): GoogleGenerativeAI | null => apiClients.generativeAI;
 
 // URLs para APIs que se acceden directamente desde el cliente
 export const apiUrls = {
