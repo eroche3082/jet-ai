@@ -413,10 +413,10 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
       .replace(/i would like to go to/i, '')
       .trim();
       
-    // Si el input es solo un saludo como "hey", no debemos tratarlo como destino
+    // If the input is just a greeting like "hey", we should not treat it as a destination
     if (cleanedInput.length < 5 && commonGreetings.some(greeting => cleanedInput.toLowerCase().includes(greeting))) {
-      console.log("Detectado posible saludo corto como destino:", cleanedInput);
-      return ""; // Indicar que no es un destino real
+      console.log("Detected possible short greeting as destination:", cleanedInput);
+      return ""; // Indicate that it's not a real destination
     }
       
     // If it's just a destination name, return it
@@ -612,34 +612,34 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
       const lowercaseInput = inputMessage.trim().toLowerCase();
       const greetings = ['hola', 'hello', 'hi', 'hey', 'buenos días', 'buenas', 'saludos'];
       
-      // Verificación estricta: es EXACTAMENTE un saludo o un saludo con puntuación
+      // Strict verification: it's EXACTLY a greeting or a greeting with punctuation
       const exactGreeting = greetings.some(greeting => 
         lowercaseInput === greeting || 
         lowercaseInput === `${greeting}!` || 
         lowercaseInput === `${greeting}.` ||
         lowercaseInput === `${greeting}?`);
       
-      // Verificación más flexible: incluye un saludo pero es corto (2 palabras máximo)
+      // More flexible verification: includes a greeting but is short (maximum 2 words)
       const hasGreeting = lowercaseInput.split(/\s+/).length <= 2 && 
                           greetings.some(greeting => lowercaseInput.includes(greeting));
       
-      console.log("Verificando saludo:", {inputMessage, exactGreeting, hasGreeting});
+      console.log("Verifying greeting:", {inputMessage, exactGreeting, hasGreeting});
                           
-      // Si es un saludo exacto o contiene un saludo, y ya comenzó la conversación
+      // If it's an exact greeting or contains a greeting, and the conversation has already started
       if ((exactGreeting || hasGreeting) && messages.length > 1) {
-        console.log("Detectado saludo en mensaje:", inputMessage);
+        console.log("Detected greeting in message:", inputMessage);
         
-        // Para saludos simples cuando la conversación ya comenzó, responder con un saludo amigable
-        let greetingResponse = `¡Hola de nuevo!`;
+        // For simple greetings when the conversation has already started, respond with a friendly greeting
+        let greetingResponse = `Hello again!`;
         
         if (travelMemory.destination && travelMemory.destination !== "") {
-          greetingResponse += ` Seguimos trabajando en tu viaje a ${travelMemory.destination}`;
+          greetingResponse += ` We're still working on your trip to ${travelMemory.destination}`;
         } else {
-          // Si no hay destino aún, mantener el flujo original
-          greetingResponse = "¡Hola! Para comenzar tu aventura, necesito saber - ¿a dónde te gustaría viajar?";
+          // If there's no destination yet, maintain the original flow
+          greetingResponse = "Hello! To start your adventure, I need to know - where would you like to travel?";
         }
         
-        greetingResponse += `. ¿En qué puedo ayudarte?`;
+        greetingResponse += `. How can I help you?`;
         
         // No procesamos el mensaje como parte del flujo, solo respondemos al saludo
         setMessages(prev => [...prev, { 
@@ -651,7 +651,7 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
         return;
       }
       
-      // Process the user response in the memory system (para mensajes que no son solo saludos)
+      // Process the user response in the memory system (for messages that are not just greetings)
       processUserResponse(inputMessage);
       
       // Generate the next AI response based on the conversational state
