@@ -12,12 +12,16 @@ import {
   X, 
   Volume2, 
   VolumeX, 
-  Camera
+  Camera,
+  Globe,
+  Languages
 } from 'lucide-react';
+import { generateQRCode } from '@/lib/qrCode';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { motion, AnimatePresence } from 'framer-motion';
 import AIChat from '@/components/AIChat';
 import TravelCockpit from '@/components/TravelCockpit';
@@ -40,6 +44,17 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({
   const [isMicActive, setIsMicActive] = useState(false);
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
   const [location] = useLocation();
+  const [currentLanguage, setCurrentLanguage] = useState('en');
+  const [qrCodeData, setQrCodeData] = useState<string | null>(null);
+  const [qrCodeModalOpen, setQrCodeModalOpen] = useState(false);
+  
+  // Available languages
+  const languages = [
+    { code: 'en', name: 'English' },
+    { code: 'es', name: 'Spanish' },
+    { code: 'fr', name: 'French' },
+    { code: 'pt', name: 'Portuguese' }
+  ];
   
   // Prevent scrolling when chat is open in maximized mode
   useEffect(() => {
@@ -299,6 +314,30 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({
                   <Button 
                     variant="ghost" 
                     size="icon" 
+                    className="h-8 w-8 relative group"
+                  >
+                    <Languages size={16} />
+                    <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-100 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300 z-50">
+                      <div className="py-1">
+                        {languages.map((lang) => (
+                          <button
+                            key={lang.code}
+                            className={`block w-full text-left px-4 py-2 text-sm ${
+                              currentLanguage === lang.code 
+                                ? 'bg-primary/10 text-primary' 
+                                : 'text-gray-700 hover:bg-gray-50'
+                            }`}
+                            onClick={() => setCurrentLanguage(lang.code)}
+                          >
+                            {lang.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
                     className="h-8 w-8" 
                     onClick={handleSettingsClick}
                   >
@@ -365,6 +404,26 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({
                             </Button>
                           </div>
                         </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <h4 className="font-medium">Language Settings</h4>
+                        <div className="grid grid-cols-2 gap-2">
+                          {languages.map((lang) => (
+                            <Button
+                              key={lang.code}
+                              variant={currentLanguage === lang.code ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setCurrentLanguage(lang.code)}
+                              className="flex items-center justify-center gap-1"
+                            >
+                              {lang.name}
+                            </Button>
+                          ))}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Select your preferred language for the chat interface
+                        </p>
                       </div>
                       
                       <div className="space-y-2">
