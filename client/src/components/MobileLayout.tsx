@@ -2,28 +2,18 @@ import { ReactNode, useState, useEffect } from 'react';
 import { useLocation, Link } from 'wouter';
 import { Home, Search, Map, User, Menu, X, MessageSquare, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import ChatBubble from './ChatBubble';
-import TravelCockpit from './TravelCockpit';
 import Layout from './Layout';
 
 interface MobileLayoutProps {
   children: ReactNode;
-  isChatOpen?: boolean;
-  onChatToggle?: (isOpen: boolean) => void;
 }
 
 export default function MobileLayout({ 
-  children, 
-  isChatOpen: externalChatOpen,
-  onChatToggle
+  children
 }: MobileLayoutProps) {
   const [location] = useLocation();
-  const [internalChatOpen, setInternalChatOpen] = useState(false);
   const [isPWA, setIsPWA] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
-  // Use either the internal or external chat state
-  const isChatOpen = externalChatOpen !== undefined ? externalChatOpen : internalChatOpen;
   
   // Detect if the app is running as a PWA
   useEffect(() => {
@@ -38,15 +28,6 @@ export default function MobileLayout({
     
     setIsPWA(isStandalone || isFromHomeScreen || forcePWA);
   }, []);
-  
-  const toggleChat = () => {
-    const newState = !isChatOpen;
-    if (onChatToggle) {
-      onChatToggle(newState);
-    } else {
-      setInternalChatOpen(newState);
-    }
-  };
   
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -138,27 +119,8 @@ export default function MobileLayout({
         {children}
       </main>
       
-      {/* AI Travel Cockpit - Commented out to prevent duplication with App.tsx
-      <TravelCockpit 
-        isOpen={isChatOpen} 
-        onClose={() => {
-          if (onChatToggle) {
-            onChatToggle(false);
-          } else {
-            setInternalChatOpen(false);
-          }
-        }} 
-      /> */}
-      
-      {/* Floating Chat Button (only in non-PWA mode) */}
-      {!isPWA && !isChatOpen && (
-        <div className="fixed bottom-6 right-6 z-20">
-          <ChatBubble onClick={toggleChat} />
-        </div>
-      )}
-      
       {/* Mobile Tab Bar Navigation for PWA */}
-      {isPWA && !isChatOpen && (
+      {isPWA && (
         <nav className="fixed bottom-0 left-0 right-0 z-30 bg-white border-t pb-safe-bottom">
           <div className="grid grid-cols-5 h-16">
             {NAVIGATION_ITEMS.map((item) => {
@@ -179,8 +141,8 @@ export default function MobileLayout({
             })}
             
             {/* Chat Button in the center */}
-            <button
-              onClick={toggleChat}
+            <Link
+              href="/chat"
               className="flex flex-col items-center justify-center space-y-1"
               aria-label="Open Travel Cockpit"
             >
@@ -188,7 +150,7 @@ export default function MobileLayout({
                 <MessageSquare className="h-5 w-5" />
               </div>
               <span className="text-xs">Travel Cockpit</span>
-            </button>
+            </Link>
           </div>
         </nav>
       )}

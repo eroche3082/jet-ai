@@ -17,6 +17,7 @@ import CameraPage from "@/pages/CameraPage";
 import QRScannerPage from "@/pages/QRScannerPage";
 import HotelsPage from "@/pages/HotelsPage";
 import FlightsPage from "@/pages/FlightsPage";
+import ChatPage from "@/pages/ChatPage";
 import PlannerPage from "@/pages/PlannerPage";
 import AudioToolsPage from "@/pages/AudioToolsPage";
 import BookingsPage from "@/pages/BookingsPage";
@@ -27,8 +28,7 @@ import TravelMemoryPage from "@/pages/TravelMemoryPage";
 import Layout from "@/components/Layout";
 import MobileLayout from "@/components/MobileLayout";
 import { useState, useEffect } from 'react';
-import ChatBubble from "@/components/ChatBubble";
-import AIChat from "@/components/AIChat";
+// Only use UniversalChatbot for all pages
 import TravelCockpit from "@/components/TravelCockpit";
 import UniversalChatbot from "@/components/UniversalChatbot";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -39,15 +39,10 @@ import { initializePWA } from '@/lib/pwa';
 import { AuthProvider } from '@/hooks/useAuth';
 
 function App() {
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isPWA, setIsPWA] = useState(false);
   const [location] = useLocation();
-
-  const toggleChat = () => {
-    setIsChatOpen(!isChatOpen);
-  };
 
   // Detect mobile devices and PWA mode
   useEffect(() => {
@@ -108,15 +103,7 @@ function App() {
       console.log(`Affiliate tracking: ${affiliateId}`);
       // In a real app, we would make an API call to record this
     }
-    
-    // Close chat on route change
-    const handleRouteChange = () => {
-      if (isChatOpen) setIsChatOpen(false);
-    };
-    
-    window.addEventListener('popstate', handleRouteChange);
-    return () => window.removeEventListener('popstate', handleRouteChange);
-  }, [isChatOpen]);
+  }, []);
 
   // Render application routes
   const renderRoutes = () => (
@@ -143,6 +130,7 @@ function App() {
       {/* Tool routes */}
       <Route path="/camera" component={CameraPage} />
       <Route path="/qr-scanner" component={QRScannerPage} />
+      <Route path="/chat" component={ChatPage} />
 
       {/* Travel features routes */}
       <Route path="/hotels" component={HotelsPage} />
@@ -187,10 +175,7 @@ function App() {
     <AuthProvider>
       <ThemeProvider>
         {isMobile ? (
-          <MobileLayout
-            isChatOpen={isChatOpen}
-            onChatToggle={setIsChatOpen}
-          >
+          <MobileLayout>
             {renderRoutes()}
             {/* Universal chatbot for mobile */}
             <UniversalChatbot />
