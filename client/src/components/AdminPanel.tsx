@@ -24,11 +24,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { firestore } from '@/lib/firebase';
 import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
-import { Loader2, Download, Save, RefreshCw, FileText, ListChecks, Table, Paintbrush } from 'lucide-react';
+import { Loader2, Download, Save, RefreshCw, FileText, ListChecks, Table, Paintbrush, MessageSquareText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SystemDiagnosticReport from './SystemDiagnosticReport';
 import TabStatusTracker from './TabStatusTracker';
 import VisualEnhancementsTracker from './VisualEnhancementsTracker';
+import ChatFlowsTracker from './ChatFlowsTracker';
 
 // Define the phase structure type
 interface PhaseItem {
@@ -410,7 +411,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ open, onOpenChange }) => {
           </div>
         ) : (
           <Tabs defaultValue="phases">
-            <TabsList className="grid w-full grid-cols-4 mb-6">
+            <TabsList className="grid w-full grid-cols-5 mb-6">
               <TabsTrigger value="phases" className="flex items-center gap-1">
                 <ListChecks className="h-4 w-4" />
                 Phase Checklist
@@ -426,6 +427,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ open, onOpenChange }) => {
               <TabsTrigger value="visual-enhancements" className="flex items-center gap-1">
                 <Paintbrush className="h-4 w-4" />
                 Visual Enhancements
+              </TabsTrigger>
+              <TabsTrigger value="chat-flows" className="flex items-center gap-1">
+                <MessageSquareText className="h-4 w-4" />
+                Chat Flows
               </TabsTrigger>
             </TabsList>
 

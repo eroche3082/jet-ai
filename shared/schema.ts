@@ -1,277 +1,100 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, json, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Users table
+// User preferences type
+export type UserPreferences = {
+  theme?: string;
+  language?: string;
+  notifications?: boolean;
+  interests?: string[];
+  dietaryRestrictions?: string[];
+  languages?: string[];
+  travelStyle?: string;
+  accommodationPreferences?: string[];
+  budget?: string;
+  accessibility?: string[];
+};
+
+// User table definition
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
+  email: text("email").unique(),
   password: text("password").notNull(),
-  email: text("email").notNull(),
-  fullName: text("full_name"),
-  avatarUrl: text("avatar_url"),
-  memberSince: timestamp("member_since").defaultNow(),
-  
-  // Authentication
-  googleId: text("google_id"),
-  lastLoginAt: timestamp("last_login_at"),
-  
-  // Subscription & Premium Features
-  membershipTier: text("membership_tier").default("free").notNull(),
-  isSubscribed: boolean("is_subscribed").default(false),
-  stripeCustomerId: text("stripe_customer_id"),
-  stripeSubscriptionId: text("stripe_subscription_id"),
-  subscriptionPlan: text("subscription_plan"),
-  subscriptionEndDate: timestamp("subscription_end_date"),
-  
-  // Usage limits
-  aiCreditsRemaining: integer("ai_credits_remaining").default(5).notNull(),
-  monthlySearches: integer("monthly_searches").default(0),
-  maxMonthlySearches: integer("max_monthly_searches").default(10),
-  
-  // Preferences & Settings
-  preferences: json("preferences").$type<Record<string, string>>(),
-  travelStyle: json("travel_style").$type<Record<string, number>>(), // For scoring different travel styles
-  
-  // Timestamps
+  preferences: json("preferences").$type<UserPreferences>(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Destinations table
-export const destinations = pgTable("destinations", {
+// Trip table definition (for itineraries)
+export const trips = pgTable("trips", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  country: text("country").notNull(),
-  description: text("description"),
-  imageUrl: text("image_url"),
-  rating: integer("rating"),
-  continent: text("continent"),
-  climate: text("climate"),
-  category: text("category"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-// Accommodations table
-export const accommodations = pgTable("accommodations", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  description: text("description"),
-  location: text("location").notNull(),
-  imageUrl: text("image_url"),
-  pricePerNight: integer("price_per_night").notNull(),
-  rating: integer("rating"),
-  amenities: json("amenities"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-// Experiences table
-export const experiences = pgTable("experiences", {
-  id: serial("id").primaryKey(),
+  userId: serial("user_id").references(() => users.id),
   title: text("title").notNull(),
-  location: text("location").notNull(),
-  country: text("country").notNull(),
-  duration: text("duration").notNull(),
   description: text("description"),
-  imageUrl: text("image_url"),
-  price: integer("price").notNull(),
-  category: text("category"),
-  rating: integer("rating"),
-  reviewCount: integer("review_count"),
-  difficulty: text("difficulty"),
-  groupSize: text("group_size"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-// Bookings table
-export const bookings = pgTable("bookings", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  type: text("type").notNull(), // "accommodation" or "experience"
-  itemId: integer("item_id").notNull(),
-  title: text("title").notNull(),
-  location: text("location").notNull(),
-  startDate: timestamp("start_date").notNull(),
-  endDate: timestamp("end_date").notNull(),
-  status: text("status").notNull(), // "upcoming", "completed", "canceled"
-  totalAmount: integer("total_amount").notNull(),
-  imageUrl: text("image_url"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-// Saved items table
-export const savedItems = pgTable("saved_items", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  type: text("type").notNull(), // "destination", "accommodation", or "experience"
-  itemId: integer("item_id").notNull(),
-  name: text("name").notNull(),
-  location: text("location").notNull(),
-  imageUrl: text("image_url"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-// Chat history table
-export const chatHistory = pgTable("chat_history", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  message: text("message").notNull(),
-  role: text("role").notNull(), // "user" or "assistant"
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-// Itineraries table for AI-generated travel plans
-export const itineraries = pgTable("itineraries", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  title: text("title").notNull(),
-  destination: text("destination").notNull(),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
-  totalDays: integer("total_days").notNull(),
-  budget: integer("budget"),
-  currency: text("currency").default("USD"),
-  travelStyle: text("travel_style"), // "luxury", "budget", "adventure", "cultural", etc.
-  statusComplete: boolean("status_complete").default(false),
-  content: json("content").$type<{
-    days: Array<{
-      day: number;
-      date?: string;
-      activities: Array<{
-        time: string;
-        title: string;
-        description: string;
-        location?: string;
-        coordinates?: { lat: number; lng: number };
-        duration?: number; // in minutes
-        cost?: number;
-        weatherForecast?: string;
-        transportMode?: string;
-        travelTime?: number; // in minutes from previous activity
-      }>;
-    }>;
-    notes?: string;
-    totalCost?: number;
-    recommendedAccommodations?: Array<{ id: number; name: string }>;
-  }>(),
-  isPublic: boolean("is_public").default(false),
-  isBookmarked: boolean("is_bookmarked").default(false),
+  destination: text("destination"),
+  itinerary: json("itinerary"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Schemas for insertion
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-  email: true,
-  fullName: true,
-  avatarUrl: true,
+// Expense table definition (for travel wallet)
+export const expenses = pgTable("expenses", {
+  id: serial("id").primaryKey(),
+  userId: serial("user_id").references(() => users.id),
+  tripId: serial("trip_id").references(() => trips.id),
+  amount: text("amount").notNull(),
+  currency: text("currency").notNull(),
+  category: text("category"),
+  description: text("description"),
+  date: timestamp("date").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertDestinationSchema = createInsertSchema(destinations).pick({
-  name: true,
-  country: true,
-  description: true,
-  imageUrl: true,
-  rating: true,
-  continent: true,
-  climate: true,
-  category: true,
+// Booking table definition
+export const bookings = pgTable("bookings", {
+  id: serial("id").primaryKey(),
+  userId: serial("user_id").references(() => users.id),
+  tripId: serial("trip_id").references(() => trips.id),
+  type: text("type").notNull(), // flight, hotel, activity
+  provider: text("provider"),
+  confirmationCode: text("confirmation_code"),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  details: json("details"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertAccommodationSchema = createInsertSchema(accommodations).pick({
-  name: true,
-  description: true,
-  location: true,
-  imageUrl: true,
-  pricePerNight: true,
-  rating: true,
-  amenities: true,
+// Chat message history
+export const chatMessages = pgTable("chat_messages", {
+  id: serial("id").primaryKey(),
+  userId: serial("user_id").references(() => users.id),
+  role: text("role").notNull(), // user or assistant
+  content: text("content").notNull(),
+  context: json("context"), // tab, flow, action data
+  timestamp: timestamp("timestamp").defaultNow(),
 });
 
-export const insertExperienceSchema = createInsertSchema(experiences).pick({
-  title: true,
-  location: true,
-  country: true,
-  duration: true,
-  description: true,
-  imageUrl: true,
-  price: true,
-  category: true,
-  rating: true,
-  reviewCount: true,
-  difficulty: true,
-  groupSize: true,
-});
+// Define the insert schemas using drizzle-zod
+export const insertUserSchema = createInsertSchema(users).omit({ id: true });
+export const insertTripSchema = createInsertSchema(trips).omit({ id: true });
+export const insertExpenseSchema = createInsertSchema(expenses).omit({ id: true });
+export const insertBookingSchema = createInsertSchema(bookings).omit({ id: true });
+export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({ id: true });
 
-export const insertBookingSchema = createInsertSchema(bookings).pick({
-  userId: true,
-  type: true,
-  itemId: true,
-  title: true,
-  location: true,
-  startDate: true,
-  endDate: true,
-  status: true,
-  totalAmount: true,
-  imageUrl: true,
-});
-
-export const insertSavedItemSchema = createInsertSchema(savedItems).pick({
-  userId: true,
-  type: true,
-  itemId: true,
-  name: true,
-  location: true,
-  imageUrl: true,
-});
-
-export const insertChatHistorySchema = createInsertSchema(chatHistory).pick({
-  userId: true,
-  message: true,
-  role: true,
-});
-
-export const insertItinerarySchema = createInsertSchema(itineraries).pick({
-  userId: true,
-  title: true,
-  destination: true,
-  startDate: true,
-  endDate: true,
-  totalDays: true,
-  budget: true,
-  currency: true,
-  travelStyle: true,
-  content: true,
-  isPublic: true,
-});
-
-// Type exports
-export type User = typeof users.$inferSelect;
+// Define the types using the schema
 export type InsertUser = z.infer<typeof insertUserSchema>;
-
-export type Destination = typeof destinations.$inferSelect;
-export type InsertDestination = z.infer<typeof insertDestinationSchema>;
-
-export type Accommodation = typeof accommodations.$inferSelect;
-export type InsertAccommodation = z.infer<typeof insertAccommodationSchema>;
-
-export type Experience = typeof experiences.$inferSelect;
-export type InsertExperience = z.infer<typeof insertExperienceSchema>;
-
-export type Booking = typeof bookings.$inferSelect;
+export type InsertTrip = z.infer<typeof insertTripSchema>;
+export type InsertExpense = z.infer<typeof insertExpenseSchema>;
 export type InsertBooking = z.infer<typeof insertBookingSchema>;
+export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 
-export type SavedItem = typeof savedItems.$inferSelect;
-export type InsertSavedItem = z.infer<typeof insertSavedItemSchema>;
-
-export type ChatHistory = typeof chatHistory.$inferSelect;
-export type InsertChatHistory = z.infer<typeof insertChatHistorySchema>;
-
-export type Itinerary = typeof itineraries.$inferSelect;
-export type InsertItinerary = z.infer<typeof insertItinerarySchema>;
+// Define the select types
+export type User = typeof users.$inferSelect;
+export type Trip = typeof trips.$inferSelect;
+export type Expense = typeof expenses.$inferSelect;
+export type Booking = typeof bookings.$inferSelect;
+export type ChatMessage = typeof chatMessages.$inferSelect;
