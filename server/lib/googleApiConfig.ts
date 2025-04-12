@@ -1,18 +1,18 @@
 /**
- * Configuración de APIs de Google Cloud para JetAI
+ * Google Cloud APIs Configuration for JetAI
  * 
- * Este archivo centraliza la configuración y verificación de las APIs de Google Cloud
- * utilizadas en la aplicación JetAI.
+ * This file centralizes the configuration and verification of Google Cloud APIs
+ * used in the JetAI application.
  * 
- * Sistema de API Keys por grupos:
- * GRUPO 1 (AIzaSyBUYoJ-RndERrcY9qkjD-2YGGY5m3Mzc0U): 
+ * API Keys system by groups:
+ * GROUP 1 (AIzaSyBUYoJ-RndERrcY9qkjD-2YGGY5m3Mzc0U): 
  * - Places API, Maps APIs, Weather API, Vision AI, Geocoding API
  * 
- * GRUPO 2 (AIzaSyByRQcsHT0AXxLsyPK2RrBZEwhe3T11q08):
+ * GROUP 2 (AIzaSyByRQcsHT0AXxLsyPK2RrBZEwhe3T11q08):
  * - Generative Language API, Vision AI, Cloud Storage, Translation, Text-to-Speech
  * - Cloud Video Intelligence, Vertex AI, Google Search Console
  * 
- * GRUPO 3 (AIzaSyBGWmVEy2zp6fpqaBkDOpV-Qj_FP6QkZj0):
+ * GROUP 3 (AIzaSyBGWmVEy2zp6fpqaBkDOpV-Qj_FP6QkZj0):
  * - Firebase APIs, Gemini for Google Cloud, Google Sheets, Calendar
  * - Routes API, Weather API, Time Zone API, Street View
  */
@@ -26,31 +26,31 @@ import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import { Client as MapsClient } from '@googlemaps/google-maps-services-js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// API Keys para cada grupo de servicios
+// API Keys for each service group
 const GOOGLE_KEYS = {
-  // Grupo 1: Maps, Places, Vision AI, Weather
+  // Group 1: Maps, Places, Vision AI, Weather
   MAPS: process.env.GOOGLE_GROUP1_API_KEY || 'AIzaSyBUYoJ-RndERrcY9qkjD-2YGGY5m3Mzc0U',
   
-  // Grupo 2: Generative AI, Storage, Translation, Text-to-Speech, Video Intelligence
+  // Group 2: Generative AI, Storage, Translation, Text-to-Speech, Video Intelligence
   AI: process.env.GOOGLE_GROUP2_API_KEY || 'AIzaSyByRQcsHT0AXxLsyPK2RrBZEwhe3T11q08',
   
-  // Grupo 3: Firebase, Gemini, Routes, Calendar, Sheets
+  // Group 3: Firebase, Gemini, Routes, Calendar, Sheets
   FIREBASE: process.env.GOOGLE_GROUP3_API_KEY || 'AIzaSyBGWmVEy2zp6fpqaBkDOpV-Qj_FP6QkZj0'
 };
 
-// API Key principal para fallback y compatibilidad
+// Main API Key for fallback and compatibility
 const GOOGLE_API_KEY = GOOGLE_KEYS.AI;
 
-// Inicializar el cliente de Gemini (Generative Language API)
-// Usamos API key del grupo 2 o 3 que tienen habilitado Generative Language API
+// Initialize the Gemini client (Generative Language API)
+// We use API key from group 2 or 3 which have Generative Language API enabled
 const genAI = new GoogleGenerativeAI(GOOGLE_KEYS.AI || GOOGLE_KEYS.FIREBASE);
 
-// IMPORTANTE: Modelos disponibles:
-// - models/gemini-1.5-flash-latest (rápido, eficiente)
-// - models/gemini-1.5-pro-latest (más potente, multimodal)
-// - gemini-pro (modelo antiguo fallback)
+// IMPORTANT: Available models:
+// - models/gemini-1.5-flash-latest (fast, efficient)
+// - models/gemini-1.5-pro-latest (more powerful, multimodal)
+// - gemini-pro (legacy fallback model)
 
-// Interfaces para los clientes de APIs
+// Interfaces for API clients
 interface ApiClients {
   vision: ImageAnnotatorClient | null;
   translation: TranslationServiceClient | null;
@@ -62,7 +62,7 @@ interface ApiClients {
   generativeAI: GoogleGenerativeAI | null;
 }
 
-// Almacenamiento de clientes de API
+// Storage for API clients
 const apiClients: ApiClients = {
   vision: null,
   translation: null,
@@ -74,111 +74,111 @@ const apiClients: ApiClients = {
   generativeAI: genAI
 };
 
-// Verificar si las variables de entorno están configuradas
+// Verify if environment variables are configured
 export const isKeyAvailable = (key: string): boolean => {
   return !!process.env[key] || key === 'GOOGLE_CLOUD_API_KEY';
 };
 
-// Inicializar clientes de API con manejo de errores y selección de API key apropiada
+// Initialize API clients with error handling and appropriate API key selection
 export const initializeApiClients = (): void => {
   try {
-    console.log('Inicializando APIs de Google Cloud con API keys específicas...');
+    console.log('Initializing Google Cloud APIs with specific API keys...');
 
-    // Inicializar Vision API (para análisis de imágenes) - Usa GRUPO 1 o 2
+    // Initialize Vision API (for image analysis) - Uses GROUP 1 or 2
     try {
       apiClients.vision = new ImageAnnotatorClient({
-        key: GOOGLE_KEYS.AI // Ambos grupos tienen Vision habilitado, usamos GRUPO 2
+        key: GOOGLE_KEYS.AI // Both groups have Vision enabled, we use GROUP 2
       });
-      console.log('✅ Cliente de Google Cloud Vision inicializado correctamente');
+      console.log('✅ Google Cloud Vision client initialized successfully');
     } catch (error) {
-      console.error('❌ Error al inicializar Vision API:', error);
+      console.error('❌ Error initializing Vision API:', error);
     }
 
-    // Inicializar Translation API (para traducciones multilingüe) - Usa GRUPO 2
+    // Initialize Translation API (for multilingual translations) - Uses GROUP 2
     try {
       apiClients.translation = new TranslationServiceClient({
         key: GOOGLE_KEYS.AI
       });
-      console.log('✅ Cliente de Google Cloud Translate inicializado correctamente');
+      console.log('✅ Google Cloud Translate client initialized successfully');
     } catch (error) {
-      console.error('❌ Error al inicializar Translation API:', error);
+      console.error('❌ Error initializing Translation API:', error);
     }
 
-    // Inicializar Text-to-Speech API (para síntesis de voz) - Usa GRUPO 2
+    // Initialize Text-to-Speech API (for voice synthesis) - Uses GROUP 2
     try {
       apiClients.textToSpeech = new TextToSpeechClient({
         key: GOOGLE_KEYS.AI
       });
-      console.log('✅ Cliente de Google Cloud Text-to-Speech inicializado correctamente');
+      console.log('✅ Google Cloud Text-to-Speech client initialized successfully');
     } catch (error) {
-      console.error('❌ Error al inicializar Text-to-Speech API:', error);
+      console.error('❌ Error initializing Text-to-Speech API:', error);
     }
 
-    // Inicializar Maps API (para geocodificación, places, rutas) - Usa GRUPO 1
+    // Initialize Maps API (for geocoding, places, routes) - Uses GROUP 1
     try {
-      // Maps API suele usar el key en cada solicitud, así que configuramos el cliente aquí
-      // pero enviamos la clave en cada solicitud
+      // Maps API typically uses the key in each request, so we configure the client here
+      // but send the key in each request
       apiClients.maps = new MapsClient({});
-      console.log('✅ Cliente de Google Maps inicializado correctamente');
+      console.log('✅ Google Maps client initialized successfully');
     } catch (error) {
-      console.error('❌ Error al inicializar Maps API:', error);
+      console.error('❌ Error initializing Maps API:', error);
     }
 
-    // Inicializar Video Intelligence API (para análisis de videos) - Usa GRUPO 2
+    // Initialize Video Intelligence API (for video analysis) - Uses GROUP 2
     try {
       apiClients.videoIntelligence = new VideoIntelligenceServiceClient({
         key: GOOGLE_KEYS.AI
       });
-      console.log('✅ Cliente de Google Cloud Video Intelligence inicializado correctamente');
+      console.log('✅ Google Cloud Video Intelligence client initialized successfully');
     } catch (error) {
-      console.error('❌ Error al inicializar Video Intelligence API:', error);
+      console.error('❌ Error initializing Video Intelligence API:', error);
     }
 
-    // Inicializar Vertex AI (para modelos de IA avanzados) - Usa GRUPO 2
+    // Initialize Vertex AI (for advanced AI models) - Uses GROUP 2
     try {
       apiClients.vertexAi = new VertexAI({
         project: 'jetai-travel-companion',
         location: 'us-central1',
       });
-      console.log('✅ Cliente de Google Vertex AI inicializado correctamente');
+      console.log('✅ Google Vertex AI client initialized successfully');
     } catch (error) {
-      console.error('❌ Error al inicializar Vertex AI:', error);
+      console.error('❌ Error initializing Vertex AI:', error);
     }
 
-    // Inicializar Generative Language API (Gemini) - Usa GRUPO 2 para LLM principal
-    // Nota: Ya se inicializó en la definición de genAI
+    // Initialize Generative Language API (Gemini) - Uses GROUP 2 for main LLM
+    // Note: Already initialized in the genAI definition
     if (apiClients.generativeAI) {
-      console.log('✅ Cliente de Google Generative AI (Gemini) inicializado correctamente');
+      console.log('✅ Google Generative AI (Gemini) client initialized successfully');
     } else {
-      console.error('❌ Error al inicializar Generative AI (Gemini)');
+      console.error('❌ Error initializing Generative AI (Gemini)');
       
-      // Intento de re-inicialización con otra clave si falló
+      // Attempt re-initialization with another key if it failed
       try {
         apiClients.generativeAI = new GoogleGenerativeAI(GOOGLE_KEYS.FIREBASE);
-        console.log('✅ Cliente de Google Generative AI (Gemini) inicializado con clave alternativa');
+        console.log('✅ Google Generative AI (Gemini) client initialized with alternative key');
       } catch (secondError) {
-        console.error('❌ Error al inicializar Generative AI (Gemini) con clave alternativa:', secondError);
+        console.error('❌ Error initializing Generative AI (Gemini) with alternative key:', secondError);
       }
     }
 
-    // Inicializar Secret Manager (para gestión segura de secretos) - Cualquier clave
+    // Initialize Secret Manager (for secure secrets management) - Any key
     try {
       apiClients.secretManager = new SecretManagerServiceClient({
         key: GOOGLE_KEYS.AI
       });
-      console.log('✅ Cliente de Secret Manager inicializado correctamente');
+      console.log('✅ Secret Manager client initialized successfully');
     } catch (error) {
-      console.error('❌ Error al inicializar Secret Manager:', error);
+      console.error('❌ Error initializing Secret Manager:', error);
     }
 
-    console.log('🚀 Inicialización de APIs completada!');
+    console.log('🚀 API initialization completed!');
 
   } catch (error) {
-    console.error('❌ Error al inicializar clientes de API de Google Cloud:', error);
+    console.error('❌ Error initializing Google Cloud API clients:', error);
   }
 };
 
-// Getters para acceder a los clientes de API
+// Getters to access API clients
 export const getVisionClient = (): ImageAnnotatorClient | null => apiClients.vision;
 export const getTranslationClient = (): TranslationServiceClient | null => apiClients.translation;
 export const getTextToSpeechClient = (): TextToSpeechClient | null => apiClients.textToSpeech;
@@ -188,7 +188,7 @@ export const getVertexAiClient = (): VertexAI | null => apiClients.vertexAi;
 export const getSecretManagerClient = (): SecretManagerServiceClient | null => apiClients.secretManager;
 export const getGenerativeAIClient = (): GoogleGenerativeAI | null => apiClients.generativeAI;
 
-// URLs para APIs que se acceden directamente desde el cliente
+// URLs for APIs that are accessed directly from the client
 export const apiUrls = {
   mapsJavascript: `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places,geometry,visualization`,
   mapsEmbed: `https://www.google.com/maps/embed/v1/place?key=${GOOGLE_API_KEY}&q=`,
@@ -201,25 +201,25 @@ export const apiUrls = {
   mapsStaticApi: `https://maps.googleapis.com/maps/api/staticmap?key=${GOOGLE_API_KEY}`
 };
 
-// Verificar si una API está disponible para su uso
+// Verify if an API is available for use
 export const isApiAvailable = (apiName: keyof typeof apiClients): boolean => {
   return apiClients[apiName] !== null;
 };
 
-// Inicializar todas las APIs al importar el módulo
+// Initialize all APIs when importing the module
 initializeApiClients();
 
-// Función para configurar la clave API explícitamente
+// Function to explicitly configure the API key
 export const configureApiKey = (apiKey: string): void => {
   if (!apiKey) {
-    console.error('No se ha proporcionado una clave API válida');
+    console.error('No valid API key has been provided');
     return;
   }
   
   process.env.GOOGLE_CLOUD_API_KEY = apiKey;
-  console.log('Clave API de Google Cloud configurada correctamente');
+  console.log('Google Cloud API key configured successfully');
   
-  // Reinicializar los clientes que dependen de la clave API
+  // Reinitialize clients that depend on the API key
   initializeApiClients();
 };
 
