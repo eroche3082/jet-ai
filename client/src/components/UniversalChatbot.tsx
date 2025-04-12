@@ -15,7 +15,9 @@ import {
   Camera,
   Globe,
   Languages,
-  Download
+  Download,
+  UserCircle2,
+  User
 } from 'lucide-react';
 import { generateQRCode } from '@/lib/qrCode';
 import { Button } from '@/components/ui/button';
@@ -26,7 +28,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { motion, AnimatePresence } from 'framer-motion';
 import AIChat from '@/components/AIChat';
 import TravelCockpit from '@/components/TravelCockpit';
+import OnboardingFlow from '@/components/OnboardingFlow';
 import { Link, useLocation } from 'wouter';
+import { useAuth } from '@/hooks/useAuth';
+import { sendVertexAIChatMessage } from '@/lib/vertexai';
+import { ChatMessage, saveChatMessage } from '@/lib/firebase';
+import { DEFAULT_SYSTEM_INSTRUCTIONS } from '@/lib/vertexai';
 
 interface UniversalChatbotProps {
   className?: string;
@@ -39,6 +46,10 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({
   defaultOpen = false,
   defaultMaximized = false 
 }) => {
+  // Auth state
+  const { currentUser, userProfile, hasCompletedOnboarding, completeOnboarding, isLoading, isProfileLoading } = useAuth();
+  
+  // UI state
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [isMaximized, setIsMaximized] = useState(defaultMaximized);
   const [activeTab, setActiveTab] = useState('chat');
@@ -48,6 +59,12 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({
   const [currentLanguage, setCurrentLanguage] = useState('en');
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
   const [qrCodeModalOpen, setQrCodeModalOpen] = useState(false);
+  
+  // Chat state
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   
   // Available languages
   const languages = [
