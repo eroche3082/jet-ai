@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Send, Mic, Image, MapPin, Calendar, Upload, Globe, RotateCcw } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { SendIcon, PaperclipIcon, Image as ImageIcon, Mic, RefreshCw } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 type MessageType = {
   id: string;
@@ -14,6 +14,9 @@ type MessageType = {
 };
 
 export default function AIChat() {
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const [inputValue, setInputValue] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const [messages, setMessages] = useState<MessageType[]>([
     {
       id: '1',
@@ -22,166 +25,170 @@ export default function AIChat() {
       timestamp: new Date(),
     },
   ]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
+  // Scroll to the bottom of the chat
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
-    
+  const handleSendMessage = () => {
+    if (!inputValue.trim()) return;
+
     // Add user message
     const userMessage: MessageType = {
       id: Date.now().toString(),
-      content: input,
+      content: inputValue,
       role: 'user',
       timestamp: new Date(),
     };
-    
     setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
-    
-    // Simulate AI response delay
+    setInputValue('');
+    setIsTyping(true);
+
+    // Simulate AI response after a delay
     setTimeout(() => {
-      // Generate a sample response based on keywords in the user message
-      let responseText = '';
-      const userInput = input.toLowerCase();
-      
-      if (userInput.includes('paris') || userInput.includes('france')) {
-        responseText = 'Paris is a wonderful destination! Known as the City of Light, it offers iconic landmarks like the Eiffel Tower, Louvre Museum, and Notre-Dame Cathedral. The best time to visit is during spring (April-June) or fall (September-October) when the weather is pleasant and there are fewer tourists.';
-      } else if (userInput.includes('budget') || userInput.includes('cheap')) {
-        responseText = 'For budget travel, consider destinations like Southeast Asia (Thailand, Vietnam), Eastern Europe (Poland, Hungary), or South America (Colombia, Peru). These offer great value for money with affordable accommodations, food, and activities.';
-      } else if (userInput.includes('flight') || userInput.includes('booking')) {
-        responseText = 'I can help you find flights! Generally, booking 1-3 months in advance often yields the best prices. Try to be flexible with your dates and consider mid-week departures for better deals. Would you like me to check specific routes for you?';
-      } else if (userInput.includes('itinerary') || userInput.includes('plan')) {
-        responseText = 'I\'d be happy to help create an itinerary! Please let me know your destination, travel dates, interests (e.g., history, food, nature), and any must-see attractions. I\'ll craft a personalized day-by-day plan for your trip.';
-      } else {
-        responseText = 'Thank you for your message! I can help with destination recommendations, flight and hotel bookings, itinerary planning, budget tips, and local insights. Could you provide more details about what you\'re looking for?';
-      }
-      
-      const aiResponse: MessageType = {
-        id: (Date.now() + 1).toString(),
-        content: responseText,
-        role: 'assistant',
-        timestamp: new Date(),
-      };
-      
-      setMessages((prev) => [...prev, aiResponse]);
-      setIsLoading(false);
-    }, 1500);
+      generateAIResponse(inputValue);
+    }, 1000);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+  const generateAIResponse = (userInput: string) => {
+    let aiResponse = '';
+
+    // Simple pattern matching for demo
+    if (userInput.toLowerCase().includes('paris')) {
+      aiResponse = "Paris is a wonderful destination! Here are some key attractions:\n\n* **Eiffel Tower** - The iconic symbol of Paris\n* **Louvre Museum** - Home to thousands of works of art including the Mona Lisa\n* **Notre-Dame Cathedral** - A medieval Catholic cathedral\n* **Montmartre** - A hill in Paris's 18th arrondissement, known for its artistic history\n\nThe best time to visit Paris is from April to June or October to early November when the weather is mild and crowds are smaller. Would you like me to suggest an itinerary for Paris?";
+    } else if (userInput.toLowerCase().includes('tokyo')) {
+      aiResponse = "Tokyo is an amazing blend of traditional and ultramodern! Some highlights:\n\n* **Tokyo Skytree** - A broadcasting and observation tower\n* **Meiji Shrine** - A Shinto shrine dedicated to Emperor Meiji\n* **Shibuya Crossing** - The famous pedestrian crossing\n* **Senso-ji Temple** - An ancient Buddhist temple\n\nThe best time to visit is March-April for cherry blossoms or October-November for autumn colors. Would you like recommendations for Japanese cuisine to try?";
+    } else if (userInput.toLowerCase().includes('budget') || userInput.toLowerCase().includes('cheap')) {
+      aiResponse = "Here are some budget-friendly travel tips:\n\n1. **Book flights in advance** - Aim for 1-3 months ahead for best prices\n2. **Travel during off-peak seasons** - You'll find lower rates and fewer crowds\n3. **Stay in hostels or use home-sharing services** - Save significantly on accommodation\n4. **Use public transportation** - Often much cheaper than taxis or car rentals\n5. **Eat like a local** - Street food and local markets offer authentic experiences at lower prices\n\nWould you like me to suggest some affordable destinations based on your current season?";
+    } else if (userInput.toLowerCase().includes('itinerary') || userInput.toLowerCase().includes('plan')) {
+      aiResponse = "I'd be happy to help you create an itinerary! To provide the most personalized plan, I'll need some information:\n\n1. What is your destination?\n2. How many days will you be traveling?\n3. What are your main interests? (e.g., history, food, outdoor activities, art)\n4. Are you traveling solo, as a couple, family, or group?\n5. Do you have a budget range in mind?\n\nOnce you provide these details, I can craft a day-by-day itinerary tailored to your preferences!";
+    } else {
+      aiResponse = "I'd be happy to help you plan your trip! To get started, I can suggest destinations based on your interests, create custom itineraries, find flights and accommodations, or recommend activities at your destination. What specific aspect of travel planning can I assist you with today?";
+    }
+
+    const assistantMessage: MessageType = {
+      id: (Date.now() + 1).toString(),
+      content: aiResponse,
+      role: 'assistant',
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, assistantMessage]);
+    setIsTyping(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
       handleSendMessage();
     }
   };
-  
+
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-4 border-b bg-white">
-        <h2 className="text-xl font-semibold">AI Travel Assistant</h2>
-        <p className="text-sm text-gray-500">Ask me anything about your travel plans</p>
+    <div className="flex flex-col h-[500px] max-h-[500px]">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
+            <div className={`flex gap-3 max-w-[80%] ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+              <Avatar className={message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}>
+                <AvatarFallback>{message.role === 'user' ? 'U' : 'AI'}</AvatarFallback>
+                {message.role === 'assistant' && (
+                  <AvatarImage src="/logo.png" alt="JetAI" />
+                )}
+              </Avatar>
+              <div className={`rounded-lg px-4 py-2 ${
+                message.role === 'user' 
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted'
+              }`}>
+                <ReactMarkdown className="prose prose-sm max-w-none">
+                  {message.content}
+                </ReactMarkdown>
+                <div className={`text-xs mt-1 ${
+                  message.role === 'user' 
+                    ? 'text-primary-foreground/70' 
+                    : 'text-muted-foreground'
+                }`}>
+                  {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+        
+        {isTyping && (
+          <div className="flex justify-start">
+            <div className="flex gap-3 max-w-[80%]">
+              <Avatar className="bg-muted">
+                <AvatarFallback>AI</AvatarFallback>
+                <AvatarImage src="/logo.png" alt="JetAI" />
+              </Avatar>
+              <div className="rounded-lg px-4 py-3 bg-muted">
+                <div className="flex space-x-2">
+                  <div className="h-2 w-2 rounded-full bg-neutral-400 animate-bounce"></div>
+                  <div className="h-2 w-2 rounded-full bg-neutral-400 animate-bounce delay-200"></div>
+                  <div className="h-2 w-2 rounded-full bg-neutral-400 animate-bounce delay-500"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
       </div>
       
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div className={`flex ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'} gap-3 max-w-[80%]`}>
-                <Avatar className={message.role === 'user' ? 'bg-primary/10' : 'bg-blue-100'}>
-                  <AvatarFallback>
-                    {message.role === 'user' ? 'U' : 'AI'}
-                  </AvatarFallback>
-                  {message.role === 'assistant' && (
-                    <AvatarImage src="https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=Jet+AI" />
-                  )}
-                </Avatar>
-                <Card className={`p-3 ${
-                  message.role === 'user' 
-                    ? 'bg-primary text-white' 
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
-                  <p>{message.content}</p>
-                  <div className={`text-xs mt-1 ${
-                    message.role === 'user' ? 'text-white/70' : 'text-gray-500'
-                  }`}>
-                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                </Card>
-              </div>
-            </div>
-          ))}
-          
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="flex flex-row gap-3 max-w-[80%]">
-                <Avatar className="bg-blue-100">
-                  <AvatarFallback>AI</AvatarFallback>
-                  <AvatarImage src="https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=Jet+AI" />
-                </Avatar>
-                <Card className="p-3 flex items-center bg-gray-100">
-                  <div className="flex space-x-1">
-                    <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                    <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                    <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '600ms' }}></div>
-                  </div>
-                </Card>
-              </div>
-            </div>
-          )}
-          
-          <div ref={messagesEndRef} />
-        </div>
-      </ScrollArea>
-      
-      <div className="p-3 border-t bg-white">
-        <div className="flex gap-2">
-          <Button size="icon" variant="outline">
-            <Mic className="h-5 w-5" />
-          </Button>
-          <Button size="icon" variant="outline">
-            <Image className="h-5 w-5" />
-          </Button>
-          <Button size="icon" variant="outline">
-            <MapPin className="h-5 w-5" />
-          </Button>
-          <Button size="icon" variant="outline">
-            <Calendar className="h-5 w-5" />
-          </Button>
-          <Button size="icon" variant="outline">
-            <Upload className="h-5 w-5" />
-          </Button>
-          <Button size="icon" variant="outline">
-            <Globe className="h-5 w-5" />
-          </Button>
-          <Button size="icon" variant="outline">
-            <RotateCcw className="h-5 w-5" />
-          </Button>
-        </div>
-        
-        <div className="flex gap-2 mt-3">
-          <Input
-            placeholder="Ask anything about travel planning..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            disabled={isLoading}
-            className="flex-1"
+      <div className="border-t p-4">
+        <div className="flex items-end gap-2">
+          <Textarea
+            placeholder="Ask me anything about your travel plans..."
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="min-h-[80px] resize-none"
           />
-          <Button disabled={isLoading} onClick={handleSendMessage}>
-            <Send className="h-5 w-5" />
+          <div className="flex flex-col gap-2">
+            <Button
+              size="icon"
+              variant="ghost"
+              type="button"
+              disabled={isTyping}
+            >
+              <PaperclipIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              type="button"
+              disabled={isTyping}
+            >
+              <ImageIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              type="button"
+              disabled={isTyping}
+            >
+              <Mic className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              type="submit"
+              onClick={handleSendMessage}
+              disabled={!inputValue.trim() || isTyping}
+            >
+              <SendIcon className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        <div className="flex justify-between mt-2 text-xs text-gray-500">
+          <div>Powered by Gemini AI with GPT-4o fallback</div>
+          <Button variant="ghost" size="sm" className="h-auto p-0">
+            <RefreshCw className="h-3 w-3 mr-1" />
+            <span>Reset Chat</span>
           </Button>
         </div>
       </div>
