@@ -198,6 +198,161 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({
       alert('Share this page: ' + window.location.href);
     }
   };
+  
+  // Function to handle sending a message to the AI
+  const handleSendMessage = async (messageText: string) => {
+    if (!messageText.trim()) return;
+    
+    if (!currentUser) {
+      // Show auth modal or redirect to login
+      alert('Please log in to chat with JetAI');
+      return;
+    }
+    
+    // Create user message
+    const userMessage: Omit<ChatMessage, 'id'> = {
+      uid: currentUser.uid,
+      content: messageText,
+      role: 'user',
+      timestamp: new Date()
+    };
+    
+    // Add user message to UI immediately
+    const userMessageWithTempId = { ...userMessage, id: `temp-${Date.now()}` };
+    setMessages([...messages, userMessageWithTempId]);
+    
+    // Save user message to Firebase
+    const messageId = await saveChatMessage(userMessage);
+    
+    // Update messages array with actual ID
+    setMessages(prevMessages => 
+      prevMessages.map(msg => 
+        msg.id === userMessageWithTempId.id ? { ...msg, id: messageId } : msg
+      )
+    );
+    
+    // Show typing indicator
+    setIsTyping(true);
+    
+    try {
+      // Prepare message history for AI, including system message if needed
+      const messageHistory = messages.slice(-10).map(msg => ({
+        role: msg.role,
+        content: msg.content,
+        id: msg.id,
+        uid: msg.uid,
+        timestamp: msg.timestamp
+      }));
+      
+      // Add a system message to the context if not already there
+      if (!messageHistory.some(msg => msg.role === 'system')) {
+        // Create a personalized system message if user profile exists
+        let systemInstruction = DEFAULT_SYSTEM_INSTRUCTIONS;
+        
+        if (userProfile) {
+          // Add user preferences to the system instructions
+          if (userProfile.travelPreferences) {
+            const prefs = userProfile.travelPreferences;
+            systemInstruction += `\n\nUser Profile Information:`;
+            
+            if (prefs.upcomingDestinations?.length) {
+              systemInstruction += `\n- Upcoming Destinations: ${prefs.upcomingDestinations.join(', ')}`;
+            }
+            
+            if (prefs.travelerType) {
+              systemInstruction += `\n- Traveler Type: ${prefs.travelerType}`;
+            }
+            
+            if (prefs.interests?.length) {
+              systemInstruction += `\n- Travel Interests: ${prefs.interests.join(', ')}`;
+            }
+            
+            if (prefs.budget) {
+              systemInstruction += `\n- Budget Level: ${prefs.budget}`;
+            }
+            
+            if (prefs.preferredAccommodation) {
+              systemInstruction += `\n- Preferred Accommodation: ${prefs.preferredAccommodation}`;
+            }
+          }
+          
+          systemInstruction += `\n\nUser Name: ${userProfile.name || 'Customer'}`;
+          systemInstruction += `\nMembership Level: ${userProfile.membership || 'basic'}`;
+        }
+        
+        // Add system message to history
+        messageHistory.unshift({
+          role: 'system',
+          content: systemInstruction,
+          id: 'system-context',
+          uid: '',
+          timestamp: null
+        });
+      }
+      
+      // Add the user's new message
+      messageHistory.push({
+        role: 'user',
+        content: messageText,
+        id: messageId || 'temp-user-message',
+        uid: currentUser.uid,
+        timestamp: new Date()
+      });
+      
+      // Get the AI response
+      const aiResponse = await sendVertexAIChatMessage(messageHistory);
+      
+      // Create assistant message
+      const assistantMessage: Omit<ChatMessage, 'id'> = {
+        uid: currentUser.uid,
+        content: aiResponse.text,
+        role: 'assistant',
+        timestamp: new Date(),
+        emotion: aiResponse.emotion || 'neutral'
+      };
+      
+      // Save assistant message to Firebase
+      const assistantMessageId = await saveChatMessage(assistantMessage);
+      
+      // Hide typing indicator
+      setIsTyping(false);
+      
+      // Add assistant message to UI
+      setMessages(prevMessages => [
+        ...prevMessages, 
+        { ...assistantMessage, id: assistantMessageId }
+      ]);
+      
+      // Speak response if voice is enabled
+      if (isVoiceEnabled && 'speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(aiResponse.text);
+        speechSynthesis.speak(utterance);
+      }
+    } catch (error) {
+      console.error('Error sending message to AI:', error);
+      
+      // Hide typing indicator
+      setIsTyping(false);
+      
+      // Add error message
+      const errorMessage: Omit<ChatMessage, 'id'> = {
+        uid: currentUser.uid,
+        content: "I'm sorry, I encountered an error processing your message. Please try again.",
+        role: 'assistant',
+        timestamp: new Date(),
+        emotion: 'confused'
+      };
+      
+      // Save error message to Firebase
+      const errorMessageId = await saveChatMessage(errorMessage);
+      
+      // Add error message to UI
+      setMessages(prevMessages => [
+        ...prevMessages, 
+        { ...errorMessage, id: errorMessageId }
+      ]);
+    }
+  };
 
   return (
     <>
@@ -438,12 +593,190 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({
                   onValueChange={setActiveTab} 
                   className="h-full flex flex-col"
                 >
+                  {/* Tab bar */}
+                  <TabsList className="px-2 pt-2 bg-transparent justify-start border-b rounded-none gap-4">
+                    <TabsTrigger value="chat" className="flex items-center gap-2">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.5997 2.37562 15.1116 3.04346 16.4525C3.22094 16.8088 3.28001 17.2161 3.17712 17.6006L2.58151 19.8267C2.32295 20.793 3.20701 21.677 4.17335 21.4185L6.39939 20.8229C6.78393 20.72 7.19121 20.7791 7.54753 20.9565C8.88837 21.6244 10.4003 22 12 22Z" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M8 12H8.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        <path d="M12 12H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        <path d="M16 12H16.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                      Chat
+                    </TabsTrigger>
+
+                    {!hasCompletedOnboarding && currentUser && (
+                      <TabsTrigger value="onboarding" className="flex items-center gap-2">
+                        <UserCircle2 size={16} />
+                        Profile Setup
+                      </TabsTrigger>
+                    )}
+                    
+                    <TabsTrigger value="settings" className="flex items-center gap-2">
+                      <Settings size={16} />
+                      Settings
+                    </TabsTrigger>
+                  </TabsList>
+
+                  {/* Chat content */}
                   <TabsContent value="chat" className="flex-1 overflow-hidden m-0 p-0 data-[state=active]:flex flex-col">
-                    <TravelCockpit 
-                      isOpen={true}
-                      onClose={() => setIsOpen(false)}
-                    />
+                    {/* Show welcome message for new users */}
+                    {!isLoading && currentUser && !hasCompletedOnboarding ? (
+                      <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-4 text-center">
+                        <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center">
+                          <Plane className="h-8 w-8 text-primary" />
+                        </div>
+                        <h3 className="text-xl font-medium">Welcome to JetAI!</h3>
+                        <p className="text-muted-foreground max-w-md">
+                          Let's set up your travel preferences to personalize your experience.
+                        </p>
+                        <Button onClick={() => setActiveTab('onboarding')}>
+                          Set Up Your Profile
+                        </Button>
+                      </div>
+                    ) : (
+                      // Regular chat interface
+                      <div className="flex-1 flex flex-col">
+                        {/* Messages container */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                          {/* System welcome message */}
+                          {messages.length === 0 && (
+                            <div className="flex gap-3">
+                              <div className="h-9 w-9 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.5997 2.37562 15.1116 3.04346 16.4525C3.22094 16.8088 3.28001 17.2161 3.17712 17.6006L2.58151 19.8267C2.32295 20.793 3.20701 21.677 4.17335 21.4185L6.39939 20.8229C6.78393 20.72 7.19121 20.7791 7.54753 20.9565C8.88837 21.6244 10.4003 22 12 22Z" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="1.5"/>
+                                  <path d="M8 12H8.01" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                                  <path d="M12 12H12.01" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                                  <path d="M16 12H16.01" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                                </svg>
+                              </div>
+                              <div className="flex-1 bg-muted p-3 rounded-lg rounded-tl-none">
+                                <p className="text-sm">
+                                  {userProfile?.name ? `Hello ${userProfile.name}! ` : "Hello! "}
+                                  I'm JetAI, your personal luxury travel assistant. I can help you find flights, hotels, and plan your perfect trip.
+                                </p>
+                                <p className="text-sm mt-2">
+                                  How can I assist you today?
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Message list */}
+                          {messages.map((message, index) => (
+                            <div key={message.id || index} className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : ''}`}>
+                              {message.role !== 'user' && (
+                                <div className="h-9 w-9 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.5997 2.37562 15.1116 3.04346 16.4525C3.22094 16.8088 3.28001 17.2161 3.17712 17.6006L2.58151 19.8267C2.32295 20.793 3.20701 21.677 4.17335 21.4185L6.39939 20.8229C6.78393 20.72 7.19121 20.7791 7.54753 20.9565C8.88837 21.6244 10.4003 22 12 22Z" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="1.5"/>
+                                    <path d="M8 12H8.01" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                                    <path d="M12 12H12.01" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                                    <path d="M16 12H16.01" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                                  </svg>
+                                </div>
+                              )}
+                              <div 
+                                className={`flex-1 p-3 rounded-lg ${
+                                  message.role === 'user'
+                                    ? 'bg-primary text-primary-foreground rounded-tr-none ml-12'
+                                    : 'bg-muted rounded-tl-none mr-12'
+                                }`}
+                              >
+                                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                              </div>
+                              {message.role === 'user' && (
+                                <div className="h-9 w-9 rounded-full bg-zinc-200 flex items-center justify-center flex-shrink-0">
+                                  <User size={18} className="text-zinc-600" />
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                          
+                          {/* Typing indicator */}
+                          {isTyping && (
+                            <div className="flex gap-3">
+                              <div className="h-9 w-9 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.5997 2.37562 15.1116 3.04346 16.4525C3.22094 16.8088 3.28001 17.2161 3.17712 17.6006L2.58151 19.8267C2.32295 20.793 3.20701 21.677 4.17335 21.4185L6.39939 20.8229C6.78393 20.72 7.19121 20.7791 7.54753 20.9565C8.88837 21.6244 10.4003 22 12 22Z" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="1.5"/>
+                                </svg>
+                              </div>
+                              <div className="flex-1 bg-muted p-3 rounded-lg rounded-tl-none">
+                                <div className="flex gap-1">
+                                  <div className="h-2 w-2 rounded-full bg-zinc-400 animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                                  <div className="h-2 w-2 rounded-full bg-zinc-400 animate-bounce" style={{ animationDelay: "300ms" }}></div>
+                                  <div className="h-2 w-2 rounded-full bg-zinc-400 animate-bounce" style={{ animationDelay: "600ms" }}></div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Input area */}
+                        <div className="p-3 border-t">
+                          <form 
+                            className="flex gap-2"
+                            onSubmit={(e) => {
+                              e.preventDefault();
+                              const input = e.currentTarget.elements.namedItem('message') as HTMLInputElement;
+                              const message = input.value.trim();
+                              
+                              if (message) {
+                                handleSendMessage(message);
+                                input.value = '';
+                              }
+                            }}
+                          >
+                            <input
+                              type="text"
+                              name="message"
+                              className="flex-1 px-3 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                              placeholder="Ask me anything about travel..."
+                            />
+                            <Button type="submit" size="icon">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </Button>
+                          </form>
+                        </div>
+                      </div>
+                    )}
                   </TabsContent>
+                  
+                  {/* Onboarding content */}
+                  {!isLoading && currentUser && !hasCompletedOnboarding && (
+                    <TabsContent value="onboarding" className="flex-1 overflow-auto m-0 p-4 data-[state=active]:flex flex-col">
+                      <OnboardingFlow 
+                        onComplete={(preferences) => {
+                          completeOnboarding(preferences);
+                          setActiveTab('chat');
+                          
+                          // Add welcome message
+                          const welcomeMsg: Omit<ChatMessage, 'id'> = {
+                            uid: currentUser.uid,
+                            content: `Thanks, ${preferences.upcomingDestinations && preferences.upcomingDestinations.length > 0 
+                              ? `I see you're interested in traveling to ${preferences.upcomingDestinations.join(', ')}. ` 
+                              : ''}I'll keep your preferences in mind when suggesting travel options. What can I help you with today?`,
+                            role: 'assistant',
+                            timestamp: new Date(),
+                            emotion: 'happy'
+                          };
+                          
+                          // Save message to Firebase
+                          saveChatMessage(welcomeMsg)
+                            .then(id => {
+                              if (id) {
+                                setMessages([
+                                  ...messages,
+                                  { ...welcomeMsg, id }
+                                ]);
+                              }
+                            });
+                        }}
+                      />
+                    </TabsContent>
+                  )}
                   
                   <TabsContent value="settings" className="flex-1 overflow-auto m-0 p-4">
                     <h3 className="font-semibold text-lg mb-4">Assistant Settings</h3>
