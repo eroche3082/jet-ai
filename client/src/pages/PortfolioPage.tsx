@@ -486,7 +486,7 @@ export default function PortfolioPage() {
                   
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
-                      <Calendar className="w-5 h-5 mr-2 text-gray-500" />
+                      <CalendarIcon className="w-5 h-5 mr-2 text-gray-500" />
                       <span>Longest Trip</span>
                     </div>
                     <span className="font-medium">21 days (Southeast Asia)</span>
