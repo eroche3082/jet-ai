@@ -4,6 +4,66 @@
  */
 
 import axios from 'axios';
+import Amadeus from 'amadeus';
+
+// Initialize Amadeus client with API key and secret
+let amadeusClient: Amadeus | null = null;
+try {
+  if (process.env.AMADEUS_API_KEY && process.env.AMADEUS_API_SECRET_KEY) {
+    amadeusClient = new Amadeus({
+      clientId: process.env.AMADEUS_API_KEY,
+      clientSecret: process.env.AMADEUS_API_SECRET_KEY
+    });
+    console.log('✅ Amadeus API client initialized successfully');
+  } else {
+    console.warn('⚠️ Amadeus API credentials not found');
+  }
+} catch (error) {
+  console.error('❌ Error initializing Amadeus client:', error);
+}
+
+// Initialize RapidAPI client configuration
+const rapidApiConfig = process.env.RAPIDAPI_KEY
+  ? {
+      headers: {
+        'x-rapidapi-key': process.env.RAPIDAPI_KEY,
+        'x-rapidapi-host': '',
+      }
+    }
+  : null;
+
+if (rapidApiConfig) {
+  console.log('✅ RapidAPI configuration initialized successfully');
+} else {
+  console.warn('⚠️ RapidAPI key not found');
+}
+
+/**
+ * Set RapidAPI host dynamically based on service
+ */
+function setRapidApiHost(service: string): string | null {
+  if (!rapidApiConfig) return null;
+  
+  switch (service) {
+    case 'tripadvisor':
+      rapidApiConfig.headers['x-rapidapi-host'] = 'tripadvisor16.p.rapidapi.com';
+      return 'tripadvisor16.p.rapidapi.com';
+    case 'booking':
+      rapidApiConfig.headers['x-rapidapi-host'] = 'booking-com15.p.rapidapi.com';
+      return 'booking-com15.p.rapidapi.com';
+    case 'airbnb':
+      rapidApiConfig.headers['x-rapidapi-host'] = 'airbnb19.p.rapidapi.com';
+      return 'airbnb19.p.rapidapi.com';
+    case 'googleflights':
+      rapidApiConfig.headers['x-rapidapi-host'] = 'google-flights2.p.rapidapi.com';
+      return 'google-flights2.p.rapidapi.com';
+    case 'aerodata': 
+      rapidApiConfig.headers['x-rapidapi-host'] = 'aerodatabox.p.rapidapi.com';
+      return 'aerodatabox.p.rapidapi.com';
+    default:
+      return null;
+  }
+}
 
 // Flight API integration
 /**
@@ -21,35 +81,163 @@ export async function searchFlights(params: {
   direct?: boolean;
 }) {
   try {
-    // Check if Skyscanner API key is available
-    if (process.env.SKYSCANNER_API_KEY) {
-      // Here we would make the actual API call to Skyscanner
-      const response = await axios.get('https://partners.api.skyscanner.net/apiservices/v3/flights/live/search/create', {
-        headers: {
-          'x-api-key': process.env.SKYSCANNER_API_KEY
-        },
-        params: {
-          origin: params.origin,
-          destination: params.destination,
+    // Try Amadeus first if available
+    if (amadeusClient) {
+      console.log('Searching flights with Amadeus API');
+      try {
+        const response = await amadeusClient.shopping.flightOffersSearch.get({
+          originLocationCode: params.origin,
+          destinationLocationCode: params.destination,
           departureDate: params.departureDate,
           returnDate: params.returnDate,
           adults: params.adults || 1,
-          cabinClass: params.cabinClass || 'economy'
-        }
-      });
-      
-      return response.data;
-    } else {
-      // If the API key is not available, use the sample flight data
-      console.log("No SKYSCANNER_API_KEY found, using internal flight data for:", params.origin, "to", params.destination);
-      const filteredFlights = generateFlightData(params);
-      return { flights: filteredFlights };
+          children: params.children,
+          infants: params.infants,
+          travelClass: mapCabinClass(params.cabinClass),
+          nonStop: params.direct,
+          currencyCode: 'USD',
+          max: 20
+        });
+        
+        return formatAmadeusFlights(response.data);
+      } catch (amadeusError) {
+        console.error("Error with Amadeus flight search:", amadeusError);
+        // Fall through to RapidAPI
+      }
     }
+    
+    // Try RapidAPI Google Flights as backup
+    if (rapidApiConfig) {
+      const host = setRapidApiHost('googleflights');
+      if (host) {
+        console.log('Falling back to RapidAPI Google Flights');
+        try {
+          const response = await axios.get(
+            `https://${host}/api/v1/search`, 
+            {
+              ...rapidApiConfig,
+              params: {
+                departureAirport: params.origin,
+                arrivalAirport: params.destination,
+                departureDate: params.departureDate,
+                returnDate: params.returnDate,
+                adults: params.adults || 1,
+                currency: 'USD',
+                cabinClass: params.cabinClass?.toLowerCase() || 'economy'
+              }
+            }
+          );
+          
+          return formatRapidApiFlights(response.data);
+        } catch (rapidApiError) {
+          console.error("Error with RapidAPI Google Flights:", rapidApiError);
+          // Fall through to sample data
+        }
+      }
+    }
+    
+    // If all APIs fail, use the sample flight data
+    console.log("All flight APIs failed, using internal flight data for:", params.origin, "to", params.destination);
+    const filteredFlights = generateFlightData(params);
+    return { flights: filteredFlights, source: 'fallback' };
   } catch (error) {
     console.error("Error searching flights:", error);
     // If there's an API error, fall back to sample data
     const filteredFlights = generateFlightData(params);
-    return { flights: filteredFlights };
+    return { flights: filteredFlights, source: 'fallback' };
+  }
+}
+
+/**
+ * Convert cabin class to Amadeus format
+ */
+function mapCabinClass(cabinClass?: string): string {
+  if (!cabinClass) return 'ECONOMY';
+  
+  const cabin = cabinClass.toLowerCase();
+  if (cabin.includes('business')) return 'BUSINESS';
+  if (cabin.includes('first')) return 'FIRST';
+  if (cabin.includes('premium') || cabin.includes('plus')) return 'PREMIUM_ECONOMY';
+  return 'ECONOMY';
+}
+
+/**
+ * Format Amadeus API flight response to a common format
+ */
+function formatAmadeusFlights(data: any): { flights: any[], source: string } {
+  try {
+    if (!data || !Array.isArray(data)) {
+      return { flights: [], source: 'amadeus' };
+    }
+    
+    const flights = data.map((offer: any) => {
+      const firstSegment = offer.itineraries[0].segments[0];
+      const lastSegment = offer.itineraries[0].segments[offer.itineraries[0].segments.length - 1];
+      
+      return {
+        id: offer.id,
+        airline: firstSegment.carrierCode,
+        airlineCode: firstSegment.carrierCode,
+        flightNumber: `${firstSegment.carrierCode}${firstSegment.number}`,
+        origin: firstSegment.departure.iataCode,
+        destination: lastSegment.arrival.iataCode,
+        departureTime: firstSegment.departure.at,
+        arrivalTime: lastSegment.arrival.at,
+        duration: offer.itineraries[0].duration ? parseInt(offer.itineraries[0].duration.replace('PT', '').replace('H', '').replace('M', '')) : 0,
+        stops: offer.itineraries[0].segments.length - 1,
+        price: parseFloat(offer.price.total),
+        currency: offer.price.currency,
+        deep_link: '', // Amadeus doesn't provide direct booking links
+        cabinClass: offer.travelerPricings[0].fareDetailsBySegment[0].cabin.toLowerCase(),
+        availableSeats: offer.numberOfBookableSeats || 1,
+        logoUrl: `https://www.gstatic.com/flights/airline_logos/70px/${firstSegment.carrierCode}.png`
+      };
+    });
+    
+    return { flights, source: 'amadeus' };
+  } catch (error) {
+    console.error('Error formatting Amadeus flights:', error);
+    return { flights: [], source: 'amadeus_error' };
+  }
+}
+
+/**
+ * Format RapidAPI flights response to a common format
+ */
+function formatRapidApiFlights(data: any): { flights: any[], source: string } {
+  try {
+    if (!data || !data.data || !Array.isArray(data.data.flightOffers)) {
+      return { flights: [], source: 'rapidapi' };
+    }
+    
+    const flights = data.data.flightOffers.map((offer: any) => {
+      const firstSegment = offer.segments[0];
+      const lastSegment = offer.segments[offer.segments.length - 1];
+      
+      return {
+        id: offer.id || `rapidapi-${Math.random().toString(36).substring(7)}`,
+        airline: firstSegment.airline.name,
+        airlineCode: firstSegment.airline.code,
+        flightNumber: firstSegment.flightNumber,
+        origin: firstSegment.departure.airport.code,
+        destination: lastSegment.arrival.airport.code,
+        departureTime: firstSegment.departure.time,
+        arrivalTime: lastSegment.arrival.time,
+        duration: offer.duration,
+        stops: offer.segments.length - 1,
+        price: offer.price.total,
+        currency: offer.price.currency,
+        deep_link: offer.deep_link || '',
+        cabinClass: offer.cabin.toLowerCase(),
+        availableSeats: offer.availableSeats || 1,
+        logoUrl: firstSegment.airline.logo || `https://www.gstatic.com/flights/airline_logos/70px/${firstSegment.airline.code}.png`
+      };
+    });
+    
+    return { flights, source: 'rapidapi' };
+  } catch (error) {
+    console.error('Error formatting RapidAPI flights:', error);
+    return { flights: [], source: 'rapidapi_error' };
   }
 }
 
@@ -58,37 +246,61 @@ export async function searchFlights(params: {
  */
 export async function getFlightById(flightId: string) {
   try {
-    if (process.env.SKYSCANNER_API_KEY) {
-      // Here we would make the actual API call to Skyscanner
-      const response = await axios.get(`https://partners.api.skyscanner.net/apiservices/v3/flights/${flightId}`, {
-        headers: {
-          'x-api-key': process.env.SKYSCANNER_API_KEY
+    // Try Amadeus first if available
+    if (amadeusClient) {
+      try {
+        const response = await amadeusClient.shopping.flightOffers.get(flightId);
+        if (response.data) {
+          return formatAmadeusFlights([response.data]);
         }
-      });
-      
-      return response.data;
-    } else {
-      // If no API key, find the flight in our sample data
-      console.log("No SKYSCANNER_API_KEY found, using internal flight data for ID:", flightId);
-      // Find flight by ID in the sampleFlights array
-      const flight = sampleFlights.find(f => f.id === flightId);
-      
-      if (!flight) {
-        throw new Error(`Flight with ID ${flightId} not found`);
+      } catch (amadeusError) {
+        console.error("Error with Amadeus flight details:", amadeusError);
+        // Fall through to RapidAPI
       }
-      
-      return flight;
     }
+    
+    // Try RapidAPI Google Flights as backup
+    if (rapidApiConfig) {
+      const host = setRapidApiHost('googleflights');
+      if (host) {
+        try {
+          const response = await axios.get(
+            `https://${host}/api/v1/flight_details`, 
+            {
+              ...rapidApiConfig,
+              params: { flightId }
+            }
+          );
+          
+          if (response.data && response.data.data) {
+            return formatRapidApiFlights(response.data);
+          }
+        } catch (rapidApiError) {
+          console.error("Error with RapidAPI Google Flights details:", rapidApiError);
+          // Fall through to sample data
+        }
+      }
+    }
+    
+    // If API calls fail, find the flight in our sample data
+    console.log("All flight APIs failed, using internal flight data for ID:", flightId);
+    const flight = sampleFlights.find(f => f.id === flightId);
+    
+    if (!flight) {
+      throw new Error(`Flight with ID ${flightId} not found in backup data`);
+    }
+    
+    return { flights: [flight], source: 'fallback' };
   } catch (error) {
     console.error("Error getting flight details:", error);
-    // If API error, try to find the flight in our sample data
+    // Final fallback
     const flight = sampleFlights.find(f => f.id === flightId);
       
     if (!flight) {
-      throw new Error(`Flight with ID ${flightId} not found`);
+      throw new Error(`Flight with ID ${flightId} not found in any data source`);
     }
     
-    return flight;
+    return { flights: [flight], source: 'fallback' };
   }
 }
 
@@ -356,7 +568,89 @@ function generateFlightData(params: {
   }
 }
 
-// Destination data
+// Destination data with real API integration
+export async function searchDestinations(location?: string, category?: string, limit?: number) {
+  try {
+    if (rapidApiConfig) {
+      // Try to search using TripAdvisor via RapidAPI
+      const host = setRapidApiHost('tripadvisor');
+      if (host) {
+        try {
+          console.log('Searching destinations with TripAdvisor API');
+          const searchTerm = location || '';
+          const response = await axios.get(
+            `https://${host}/api/v1/destinations/search`, 
+            {
+              ...rapidApiConfig,
+              params: {
+                query: searchTerm,
+                limit: limit || 10
+              }
+            }
+          );
+          
+          if (response.data && response.data.data && Array.isArray(response.data.data.destinations)) {
+            return {
+              destinations: response.data.data.destinations.map((item: any) => ({
+                id: item.locationId || item.id,
+                name: item.title || item.name,
+                country: item.secondaryText || '',
+                description: item.description || `Explore ${item.title || item.name}`,
+                imageUrl: item.imageUrl || '',
+                rating: item.rating || 4.5,
+                continent: item.continent || '',
+                climate: '',
+                category: category || 'City',
+                source: 'tripadvisor'
+              })),
+              source: 'tripadvisor'
+            };
+          }
+        } catch (error) {
+          console.error('Error fetching destinations from TripAdvisor:', error);
+          // Fall through to backup data
+        }
+      }
+    }
+    
+    // Use backup data if API fails
+    console.log('Using backup destination data');
+    let filteredDestinations = [...destinations];
+    
+    if (location) {
+      const searchTerm = location.toLowerCase();
+      filteredDestinations = filteredDestinations.filter(dest => 
+        dest.name.toLowerCase().includes(searchTerm) || 
+        dest.country.toLowerCase().includes(searchTerm) ||
+        dest.continent.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    if (category) {
+      const searchCategory = category.toLowerCase();
+      filteredDestinations = filteredDestinations.filter(dest => 
+        dest.category.toLowerCase().includes(searchCategory)
+      );
+    }
+    
+    if (limit && limit > 0) {
+      filteredDestinations = filteredDestinations.slice(0, limit);
+    }
+    
+    return { 
+      destinations: filteredDestinations,
+      source: 'fallback'
+    };
+  } catch (error) {
+    console.error('Error in searchDestinations:', error);
+    return { 
+      destinations: destinations.slice(0, 5), 
+      source: 'fallback_error'
+    };
+  }
+}
+
+// Backup destination data
 const destinations = [
   {
     id: '1',
