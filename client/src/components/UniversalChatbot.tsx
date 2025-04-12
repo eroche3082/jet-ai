@@ -17,7 +17,9 @@ import {
   Languages,
   Download,
   UserCircle2,
-  User
+  User,
+  Plane,
+  Send
 } from 'lucide-react';
 import { generateQRCode } from '@/lib/qrCode';
 import { Button } from '@/components/ui/button';
@@ -755,7 +757,7 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({
                           // Add welcome message
                           const welcomeMsg: Omit<ChatMessage, 'id'> = {
                             uid: currentUser.uid,
-                            content: `Thanks, ${preferences.upcomingDestinations && preferences.upcomingDestinations.length > 0 
+                            content: `Thanks, ${preferences && preferences.upcomingDestinations && preferences.upcomingDestinations.length > 0 
                               ? `I see you're interested in traveling to ${preferences.upcomingDestinations.join(', ')}. ` 
                               : ''}I'll keep your preferences in mind when suggesting travel options. What can I help you with today?`,
                             role: 'assistant',
