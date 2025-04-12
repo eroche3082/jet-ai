@@ -29,7 +29,7 @@ If you don't have specific information, acknowledge that and provide general adv
   
   // Add name-specific greeting
   if (profile.name) {
-    personalizedPrompt += `The user's name is ${profile.name}. Address them by name occasionally to personalize the conversation.\n`;
+    personalizedPrompt += `The user name is ${profile.name}. Address them by name occasionally to personalize the conversation.\n`;
   }
   
   // Add membership level context

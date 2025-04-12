@@ -758,8 +758,8 @@ const UniversalChatbot: React.FC<UniversalChatbotProps> = ({
                           const welcomeMsg: Omit<ChatMessage, 'id'> = {
                             uid: currentUser.uid,
                             content: `Thanks, ${preferences && preferences.upcomingDestinations && preferences.upcomingDestinations.length > 0 
-                              ? `I see you're interested in traveling to ${preferences.upcomingDestinations.join(', ')}. ` 
-                              : ''}I'll keep your preferences in mind when suggesting travel options. What can I help you with today?`,
+                              ? `I see you are interested in traveling to ${preferences.upcomingDestinations.join(', ')}. ` 
+                              : ''}I will keep your preferences in mind when suggesting travel options. What can I help you with today?`,
                             role: 'assistant',
                             timestamp: new Date(),
                             emotion: 'happy'
