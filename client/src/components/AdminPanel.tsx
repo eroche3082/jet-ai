@@ -24,9 +24,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { firestore } from '@/lib/firebase';
 import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
-import { Loader2, Download, Save, RefreshCw, FileText, ListChecks } from 'lucide-react';
+import { Loader2, Download, Save, RefreshCw, FileText, ListChecks, Table } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SystemDiagnosticReport from './SystemDiagnosticReport';
+import TabStatusTracker from './TabStatusTracker';
 
 // Define the phase structure type
 interface PhaseItem {
@@ -408,7 +409,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ open, onOpenChange }) => {
           </div>
         ) : (
           <Tabs defaultValue="phases">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsList className="grid w-full grid-cols-3 mb-6">
               <TabsTrigger value="phases" className="flex items-center gap-1">
                 <ListChecks className="h-4 w-4" />
                 Phase Checklist
@@ -416,6 +417,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ open, onOpenChange }) => {
               <TabsTrigger value="diagnostic" className="flex items-center gap-1">
                 <FileText className="h-4 w-4" />
                 System Diagnostic
+              </TabsTrigger>
+              <TabsTrigger value="tab-status" className="flex items-center gap-1">
+                <Table className="h-4 w-4" />
+                Tab Status
               </TabsTrigger>
             </TabsList>
 
@@ -518,6 +523,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ open, onOpenChange }) => {
 
             <TabsContent value="diagnostic" className="mt-0">
               <SystemDiagnosticReport />
+              
+              <div className="flex justify-end pt-4 mt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => onOpenChange(false)}
+                >
+                  Close Panel
+                </Button>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="tab-status" className="mt-0">
+              <TabStatusTracker />
               
               <div className="flex justify-end pt-4 mt-4 border-t">
                 <Button 
