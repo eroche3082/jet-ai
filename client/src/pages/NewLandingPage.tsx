@@ -37,7 +37,7 @@ export default function NewLandingPage() {
             <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-primary" stroke="currentColor" strokeWidth="2">
               <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" strokeLinejoin="round" strokeLinecap="round"/>
             </svg>
-            <span className="ml-2 text-xl font-bold">JetAI</span>
+            <span className="ml-2 text-xl font-bold">JET AI</span>
           </Link>
           
           <nav className="hidden md:flex space-x-8 items-center">
@@ -118,7 +118,7 @@ export default function NewLandingPage() {
       </div>
       
       {/* 20 Features Grid */}
-      <div className="py-16 bg-gray-50">
+      <div className="py-10 bg-gray-50">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
@@ -324,6 +324,130 @@ export default function NewLandingPage() {
         </div>
       </div>
       
+      {/* Travel Video Showcase */}
+      <div className="py-12 bg-gray-800 text-white">
+        <div className="container mx-auto px-6">
+          <h2 className="text-3xl font-bold text-center mb-8">Experience the World with JET AI</h2>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="col-span-2">
+              <div className="relative aspect-video rounded-lg overflow-hidden shadow-xl">
+                <iframe 
+                  width="100%" 
+                  height="100%" 
+                  src="https://www.youtube.com/embed/ixIzimI35SE?autoplay=0&rel=0&showinfo=0&controls=1" 
+                  title="Travel the world"
+                  className="absolute inset-0 w-full h-full"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+              <div className="mt-4 text-gray-300">
+                <h3 className="text-xl font-semibold mb-2">Discover breathtaking destinations</h3>
+                <p>Let JET AI guide you through unforgettable journeys to the world's most spectacular places.</p>
+              </div>
+            </div>
+            
+            <div className="flex flex-col gap-4">
+              <div className="rounded-lg overflow-hidden shadow-lg">
+                <img 
+                  src="https://images.unsplash.com/photo-1512100356356-de1b84283e18?q=80&w=1974&auto=format&fit=crop"
+                  alt="Santorini, Greece" 
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-4 bg-gray-700">
+                  <h3 className="font-semibold text-lg">Greece Getaways</h3>
+                  <p className="text-sm text-gray-300">Explore crystal-clear waters and ancient history</p>
+                </div>
+              </div>
+              
+              <div className="rounded-lg overflow-hidden shadow-lg">
+                <img 
+                  src="https://images.unsplash.com/photo-1465778893808-9b3d1b443be4?q=80&w=2075&auto=format&fit=crop"
+                  alt="Bali, Indonesia" 
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-4 bg-gray-700">
+                  <h3 className="font-semibold text-lg">Tropical Escapes</h3>
+                  <p className="text-sm text-gray-300">Find your paradise on secluded beaches</p>
+                </div>
+              </div>
+              
+              <div className="mt-auto">
+                <Button asChild className="w-full">
+                  <Link href="/destinations">
+                    Explore All Destinations
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="overflow-hidden rounded-lg shadow-lg group">
+              <div className="relative h-60">
+                <img 
+                  src="https://images.unsplash.com/photo-1605649487212-47bdab064df7?q=80&w=2070&auto=format&fit=crop" 
+                  alt="Travel Planning" 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                <div className="absolute bottom-4 left-4 text-white">
+                  <h3 className="font-bold text-lg">Trip Planning</h3>
+                  <p className="text-sm">Personalized itineraries</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="overflow-hidden rounded-lg shadow-lg group">
+              <div className="relative h-60">
+                <img 
+                  src="https://images.unsplash.com/photo-1530521954074-e64f6810b32d?q=80&w=2070&auto=format&fit=crop" 
+                  alt="Cultural Experiences" 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                <div className="absolute bottom-4 left-4 text-white">
+                  <h3 className="font-bold text-lg">Cultural Immersion</h3>
+                  <p className="text-sm">Authentic local experiences</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="overflow-hidden rounded-lg shadow-lg group">
+              <div className="relative h-60">
+                <img 
+                  src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=1988&auto=format&fit=crop" 
+                  alt="City Adventures" 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                <div className="absolute bottom-4 left-4 text-white">
+                  <h3 className="font-bold text-lg">City Explorations</h3>
+                  <p className="text-sm">Urban discoveries</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="overflow-hidden rounded-lg shadow-lg group">
+              <div className="relative h-60">
+                <img 
+                  src="https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?q=80&w=2070&auto=format&fit=crop" 
+                  alt="Wilderness Adventures" 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                <div className="absolute bottom-4 left-4 text-white">
+                  <h3 className="font-bold text-lg">Nature Retreats</h3>
+                  <p className="text-sm">Wilderness escapes</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       {/* Testimonials */}
       <div className="py-16 bg-white">
         <div className="container mx-auto px-6">
@@ -338,7 +462,7 @@ export default function NewLandingPage() {
                   <p className="text-sm text-gray-600">Travel Blogger</p>
                 </div>
               </div>
-              <p className="text-gray-700 italic">"JetAI transformed how I plan my trips. The AI assistant understood exactly what I wanted and created the perfect itinerary."</p>
+              <p className="text-gray-700 italic">"JET AI transformed how I plan my trips. The AI assistant understood exactly what I wanted and created the perfect itinerary."</p>
             </div>
             
             <div className="bg-gray-50 p-6 rounded-lg shadow-sm">
@@ -360,7 +484,7 @@ export default function NewLandingPage() {
                   <p className="text-sm text-gray-600">Family Vacationer</p>
                 </div>
               </div>
-              <p className="text-gray-700 italic">"Planning trips for the whole family used to be stressful. Now with JetAI, it's actually enjoyable! The personalized suggestions are spot on."</p>
+              <p className="text-gray-700 italic">"Planning trips for the whole family used to be stressful. Now with JET AI, it's actually enjoyable! The personalized suggestions are spot on."</p>
             </div>
           </div>
         </div>
@@ -395,7 +519,7 @@ export default function NewLandingPage() {
                 <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-primary" stroke="currentColor" strokeWidth="2">
                   <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" strokeLinejoin="round" strokeLinecap="round"/>
                 </svg>
-                <h3 className="font-bold text-xl ml-2">JetAI</h3>
+                <h3 className="font-bold text-xl ml-2">JET AI</h3>
               </div>
               <p className="text-gray-400">
                 Revolutionizing travel planning with artificial intelligence.
@@ -433,7 +557,7 @@ export default function NewLandingPage() {
           </div>
           
           <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">© 2025 JetAI. All rights reserved.</p>
+            <p className="text-gray-400 text-sm">© 2025 JET AI. All rights reserved.</p>
             <div className="flex space-x-4 mt-4 md:mt-0">
               <a href="#" className="text-gray-400 hover:text-white">
                 <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/></svg>
