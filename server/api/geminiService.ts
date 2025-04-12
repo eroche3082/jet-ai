@@ -47,8 +47,17 @@ export const generateChatResponse = async (req: Request, res: Response) => {
         systemPrompt = `Eres JetAI, un asistente de viajes inteligente, emocional y multilingüe. Tu objetivo es ayudar a los usuarios a planificar viajes, encontrar destinos, reservar vuelos y hoteles, y proporcionar información útil para sus viajes. Responde de manera amable, útil y concisa.`;
     }
     
-    // Obtener el modelo Gemini Pro
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // Intentar obtener el modelo Gemini 1.5 Pro con fallback a gemini-pro
+    let modelName = "gemini-1.5-pro";
+    let model;
+    
+    try {
+      model = genAI.getGenerativeModel({ model: modelName });
+    } catch (error) {
+      console.log('⚠️ Error al obtener el modelo gemini-1.5-pro, usando fallback a gemini-pro');
+      modelName = "gemini-pro";
+      model = genAI.getGenerativeModel({ model: modelName });
+    }
     
     // Crear chat con contexto del sistema
     const chat = model.startChat({
@@ -83,7 +92,7 @@ export const generateChatResponse = async (req: Request, res: Response) => {
     
     return res.status(200).json({
       text,
-      model: "gemini-pro",
+      model: modelName,
       usage: {
         promptTokens: prompt.length / 4, // Estimación aproximada
         completionTokens: text.length / 4, // Estimación aproximada
@@ -114,7 +123,7 @@ export const checkGeminiStatus = async (_req: Request, res: Response) => {
     }
     
     // Intenta hacer una solicitud simple para verificar la conexión
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
     const result = await model.generateContent("Hola");
     const response = await result.response;
     const text = response.text();
