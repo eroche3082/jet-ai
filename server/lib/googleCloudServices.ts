@@ -1,13 +1,13 @@
 /**
- * Servicios de Google Cloud
+ * Google Cloud Services
  * 
- * Este módulo proporciona funciones para interactuar con varios servicios de Google Cloud,
- * incluyendo:
- * - Google Cloud Vision para análisis de imágenes
- * - Google Cloud Translate para traducción de texto
- * - Google Cloud Text-to-Speech para generación de audio
- * - Google Cloud Storage para almacenamiento de archivos
- * - Google Maps para información de ubicaciones
+ * This module provides functions to interact with various Google Cloud services,
+ * including:
+ * - Google Cloud Vision for image analysis
+ * - Google Cloud Translate for text translation
+ * - Google Cloud Text-to-Speech for audio generation
+ * - Google Cloud Storage for file storage
+ * - Google Maps for location information
  */
 
 import { ImageAnnotatorClient } from '@google-cloud/vision';
@@ -20,120 +20,120 @@ import os from 'os';
 import { v4 as uuidv4 } from 'uuid';
 import { Client } from '@googlemaps/google-maps-services-js';
 
-// Inicializar clientes de Google Cloud
-// Establecer explícitamente la ruta del archivo de credenciales
+// Initialize Google Cloud clients
+// Explicitly set the path to the credentials file
 const credentialsPath = path.resolve(process.cwd(), 'google-credentials-global.json');
 if (fs.existsSync(credentialsPath)) {
   process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath;
-  console.log('Archivo de credenciales de Google Cloud configurado correctamente:', credentialsPath);
+  console.log('Google Cloud credentials file configured successfully:', credentialsPath);
 } else {
-  console.warn('Archivo de credenciales de Google Cloud no encontrado en:', credentialsPath);
-  console.warn('Si quieres utilizar los servicios de Google Cloud, debes proporcionar este archivo.');
+  console.warn('Google Cloud credentials file not found at:', credentialsPath);
+  console.warn('If you want to use Google Cloud services, you must provide this file.');
 }
 
-// Opciones de autenticación
+// Authentication options
 const isKeyAvailable = (key: string) => {
   return process.env[key] !== undefined;
 };
 
-// Inicializar clientes según las claves disponibles
+// Initialize clients based on available keys
 let visionClient: ImageAnnotatorClient | null = null;
 let translationClient: TranslationServiceClient | null = null;
 let textToSpeechClient: TextToSpeechClient | null = null;
 let storageClient: Storage | null = null;
 let mapsClient: Client | null = null;
 
-// Inicializar Vision API si hay credenciales o clave API
+// Initialize Vision API if credentials or API key are available
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS || isKeyAvailable('GOOGLE_CLOUD_VISION_API_KEY')) {
   try {
     visionClient = new ImageAnnotatorClient();
-    console.log('Cliente de Google Cloud Vision inicializado correctamente');
+    console.log('Google Cloud Vision client initialized successfully');
   } catch (error) {
-    console.error('Error inicializando el cliente de Google Cloud Vision:', error);
+    console.error('Error initializing Google Cloud Vision client:', error);
   }
 }
 
-// Inicializar Translation API si hay credenciales o clave API
+// Initialize Translation API if credentials or API key are available
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS || isKeyAvailable('GOOGLE_TRANSLATE_API_KEY')) {
   try {
     translationClient = new TranslationServiceClient();
-    console.log('Cliente de Google Cloud Translate inicializado correctamente');
+    console.log('Google Cloud Translate client initialized successfully');
   } catch (error) {
-    console.error('Error inicializando el cliente de Google Cloud Translate:', error);
+    console.error('Error initializing Google Cloud Translate client:', error);
   }
 }
 
-// Inicializar Text-to-Speech API si hay credenciales o clave API
+// Initialize Text-to-Speech API if credentials or API key are available
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS || isKeyAvailable('GOOGLE_TTS_API_KEY')) {
   try {
     textToSpeechClient = new TextToSpeechClient();
-    console.log('Cliente de Google Cloud Text-to-Speech inicializado correctamente');
+    console.log('Google Cloud Text-to-Speech client initialized successfully');
   } catch (error) {
-    console.error('Error inicializando el cliente de Google Cloud Text-to-Speech:', error);
+    console.error('Error initializing Google Cloud Text-to-Speech client:', error);
   }
 }
 
-// Inicializar Storage
+// Initialize Storage
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
   try {
     storageClient = new Storage();
-    console.log('Cliente de Google Cloud Storage inicializado correctamente');
+    console.log('Google Cloud Storage client initialized successfully');
   } catch (error) {
-    console.error('Error inicializando el cliente de Google Cloud Storage:', error);
+    console.error('Error initializing Google Cloud Storage client:', error);
   }
 }
 
-// Inicializar Google Maps
+// Initialize Google Maps
 if (isKeyAvailable('GOOGLE_CLOUD_API_KEY')) {
   try {
     mapsClient = new Client({});
-    console.log('Cliente de Google Maps inicializado correctamente');
+    console.log('Google Maps client initialized successfully');
   } catch (error) {
-    console.error('Error inicializando el cliente de Google Maps:', error);
+    console.error('Error initializing Google Maps client:', error);
   }
 }
 
-// Nombre del bucket predeterminado para almacenar archivos
+// Default bucket name for storing files
 const DEFAULT_BUCKET_NAME = 'jetai-travel-memories';
 
-// Funciones para verificar disponibilidad de servicios
+// Functions to verify service availability
 export const isVisionAvailable = () => visionClient !== null;
 export const isTranslationAvailable = () => translationClient !== null;
 export const isTextToSpeechAvailable = () => textToSpeechClient !== null;
 export const isStorageAvailable = () => storageClient !== null;
 export const isMapsAvailable = () => mapsClient !== null && isKeyAvailable('GOOGLE_CLOUD_API_KEY');
 
-// Función para analizar una imagen con Google Cloud Vision
+// Function to analyze an image with Google Cloud Vision
 export async function analyzeImage(imageBuffer: Buffer) {
   if (!visionClient) {
-    throw new Error('Google Cloud Vision no está disponible');
+    throw new Error('Google Cloud Vision is not available');
   }
 
   try {
-    // Analizar con múltiples funciones de Vision API
+    // Analyze with multiple Vision API functions
     const [labelResponse] = await visionClient.labelDetection(imageBuffer);
     const [textResponse] = await visionClient.textDetection(imageBuffer);
     const [landmarkResponse] = await visionClient.landmarkDetection(imageBuffer);
     const [faceResponse] = await visionClient.faceDetection(imageBuffer);
     const [localizationResponse] = await visionClient.imageProperties(imageBuffer);
 
-    // Procesamiento de etiquetas
+    // Process labels
     const labels = labelResponse.labelAnnotations || [];
 
-    // Procesamiento de texto
+    // Process text
     const fullText = textResponse.fullTextAnnotation?.text || '';
 
-    // Procesamiento de landmarks
+    // Process landmarks
     const landmarks = landmarkResponse.landmarkAnnotations || [];
 
-    // Procesamiento de rostros
+    // Process faces
     const faces = faceResponse.faceAnnotations || [];
 
-    // Procesamiento de propiedades de imagen (colores dominantes)
+    // Process image properties (dominant colors)
     const imageProperties = localizationResponse.imagePropertiesAnnotation;
     const dominantColors = imageProperties?.dominantColors?.colors || [];
 
-    // Organizar respuesta
+    // Organize response
     return {
       labels: labels.map(label => ({
         description: label.description,
@@ -160,19 +160,19 @@ export async function analyzeImage(imageBuffer: Buffer) {
       })),
     };
   } catch (error) {
-    console.error('Error al analizar la imagen:', error);
-    throw new Error(`Error al analizar la imagen: ${error}`);
+    console.error('Error analyzing the image:', error);
+    throw new Error(`Error analyzing the image: ${error}`);
   }
 }
 
-// Función para traducir texto con Google Cloud Translate
-export async function translateText(text: string, targetLanguage: string, sourceLang = 'es') {
+// Function to translate text with Google Cloud Translate
+export async function translateText(text: string, targetLanguage: string, sourceLang = 'en') {
   if (!translationClient) {
-    throw new Error('Google Cloud Translate no está disponible');
+    throw new Error('Google Cloud Translate is not available');
   }
 
   try {
-    // El ID del proyecto debe ser reemplazado con el ID real del proyecto de Google Cloud
+    // The project ID should be replaced with the real Google Cloud project ID
     const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID || 'jetai-travel-assistant';
     
     const request = {
@@ -183,10 +183,10 @@ export async function translateText(text: string, targetLanguage: string, source
       targetLanguageCode: targetLanguage,
     };
 
-    // Ejecutar traducción
+    // Execute translation
     const [response] = await translationClient.translateText(request);
     
-    // Procesar respuesta
+    // Process response
     const translatedText = response.translations && response.translations[0]?.translatedText 
       ? response.translations[0].translatedText
       : '';
@@ -200,24 +200,24 @@ export async function translateText(text: string, targetLanguage: string, source
       detectedLanguage,
     };
   } catch (error) {
-    console.error('Error al traducir texto:', error);
-    throw new Error(`Error al traducir texto: ${error}`);
+    console.error('Error translating text:', error);
+    throw new Error(`Error translating text: ${error}`);
   }
 }
 
-// Función para generar audio con Google Cloud Text-to-Speech
+// Function to generate audio with Google Cloud Text-to-Speech
 export async function generateAudio(
   text: string,
-  languageCode = 'es-ES',
-  voiceName = 'es-ES-Standard-A',
+  languageCode = 'en-US',
+  voiceName = 'en-US-Standard-A',
   ssmlGender = 'FEMALE'
 ) {
   if (!textToSpeechClient) {
-    throw new Error('Google Cloud Text-to-Speech no está disponible');
+    throw new Error('Google Cloud Text-to-Speech is not available');
   }
 
   try {
-    // Configuración de la solicitud
+    // Request configuration
     const request = {
       input: { text },
       voice: {
@@ -228,28 +228,28 @@ export async function generateAudio(
       audioConfig: { audioEncoding: 'MP3' as const },
     };
 
-    // Generar audio
+    // Generate audio
     const [response] = await textToSpeechClient.synthesizeSpeech(request);
     const audioContent = response.audioContent;
 
-    // Si está disponible Storage, guardamos el archivo
+    // If Storage is available, we save the file
     if (storageClient) {
       const bucket = storageClient.bucket(DEFAULT_BUCKET_NAME);
       
-      // Verificar si el bucket existe, si no, crearlo
+      // Check if the bucket exists, if not, create it
       const [exists] = await bucket.exists();
       if (!exists) {
         await bucket.create();
       }
       
-      // Crear un archivo temporal
+      // Create a temporary file
       const fileName = `audio-${uuidv4()}.mp3`;
       const tempLocalFile = path.join(os.tmpdir(), fileName);
       
-      // Guardar el audio en un archivo temporal
+      // Save the audio to a temporary file
       fs.writeFileSync(tempLocalFile, audioContent as Buffer);
       
-      // Subir el archivo a Google Cloud Storage
+      // Upload the file to Google Cloud Storage
       await bucket.upload(tempLocalFile, {
         destination: `audio/${fileName}`,
         metadata: {
@@ -257,14 +257,14 @@ export async function generateAudio(
         },
       });
       
-      // Obtener URL pública
+      // Get public URL
       const file = bucket.file(`audio/${fileName}`);
       const [url] = await file.getSignedUrl({
         action: 'read',
-        expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // Expira en 1 semana
+        expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // Expires in 1 week
       });
       
-      // Eliminar archivo temporal
+      // Delete temporary file
       fs.unlinkSync(tempLocalFile);
       
       return {
@@ -272,26 +272,26 @@ export async function generateAudio(
         audioContent: audioContent?.toString('base64'),
       };
     } else {
-      // Si no hay Storage, devolvemos el contenido en base64
+      // If there's no Storage, we return the content in base64
       return {
         audioContent: audioContent?.toString('base64'),
         audioUrl: null,
       };
     }
   } catch (error) {
-    console.error('Error al generar audio:', error);
-    throw new Error(`Error al generar audio: ${error}`);
+    console.error('Error generating audio:', error);
+    throw new Error(`Error generating audio: ${error}`);
   }
 }
 
-// Función para obtener información de una ubicación con Google Maps
+// Function to get information about a location with Google Maps
 export async function getLocationInfo(query: string) {
   if (!mapsClient || !isKeyAvailable('GOOGLE_CLOUD_API_KEY')) {
-    throw new Error('Google Maps API no está disponible');
+    throw new Error('Google Maps API is not available');
   }
 
   try {
-    // Geocodificar la ubicación
+    // Geocode the location
     const geocodeResponse = await mapsClient.geocode({
       params: {
         address: query,
@@ -303,10 +303,10 @@ export async function getLocationInfo(query: string) {
     const formattedAddress = geocodeResponse.data.results[0]?.formatted_address;
     
     if (!location) {
-      throw new Error('No se pudo encontrar la ubicación');
+      throw new Error('Could not find the location');
     }
     
-    // Obtener lugares cercanos
+    // Get nearby places
     const placesResponse = await mapsClient.placesNearby({
       params: {
         location,
@@ -316,10 +316,10 @@ export async function getLocationInfo(query: string) {
       },
     });
     
-    // Generar URL de mapa estático
+    // Generate static map URL
     const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${location.lat},${location.lng}&zoom=14&size=600x300&maptype=roadmap&markers=color:red%7C${location.lat},${location.lng}&key=${process.env.GOOGLE_CLOUD_API_KEY}`;
     
-    // Extraer y procesar atracciones cercanas
+    // Extract and process nearby attractions
     const nearbyAttractions = placesResponse.data.results.map(place => ({
       name: place.name,
       vicinity: place.vicinity,
@@ -336,33 +336,33 @@ export async function getLocationInfo(query: string) {
       staticMapUrl,
     };
   } catch (error) {
-    console.error('Error al obtener información de ubicación:', error);
-    throw new Error(`Error al obtener información de ubicación: ${error}`);
+    console.error('Error getting location information:', error);
+    throw new Error(`Error getting location information: ${error}`);
   }
 }
 
-// Función para almacenar un archivo en Google Cloud Storage
+// Function to store a file in Google Cloud Storage
 export async function storeFile(fileBuffer: Buffer, fileName: string, contentType: string) {
   if (!storageClient) {
-    throw new Error('Google Cloud Storage no está disponible');
+    throw new Error('Google Cloud Storage is not available');
   }
 
   try {
     const bucket = storageClient.bucket(DEFAULT_BUCKET_NAME);
     
-    // Verificar si el bucket existe, si no, crearlo
+    // Check if the bucket exists, if not, create it
     const [exists] = await bucket.exists();
     if (!exists) {
       await bucket.create();
     }
     
-    // Crear un archivo temporal
+    // Create a temporary file
     const tempLocalFile = path.join(os.tmpdir(), fileName);
     
-    // Guardar el buffer en un archivo temporal
+    // Save the buffer to a temporary file
     fs.writeFileSync(tempLocalFile, fileBuffer);
     
-    // Subir el archivo a Google Cloud Storage
+    // Upload the file to Google Cloud Storage
     await bucket.upload(tempLocalFile, {
       destination: `files/${fileName}`,
       metadata: {
@@ -370,14 +370,14 @@ export async function storeFile(fileBuffer: Buffer, fileName: string, contentTyp
       },
     });
     
-    // Obtener URL pública
+    // Get public URL
     const file = bucket.file(`files/${fileName}`);
     const [url] = await file.getSignedUrl({
       action: 'read',
-      expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // Expira en 1 semana
+      expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // Expires in 1 week
     });
     
-    // Eliminar archivo temporal
+    // Delete temporary file
     fs.unlinkSync(tempLocalFile);
     
     return {
@@ -386,12 +386,12 @@ export async function storeFile(fileBuffer: Buffer, fileName: string, contentTyp
       bucket: DEFAULT_BUCKET_NAME,
     };
   } catch (error) {
-    console.error('Error al almacenar archivo:', error);
-    throw new Error(`Error al almacenar archivo: ${error}`);
+    console.error('Error storing file:', error);
+    throw new Error(`Error storing file: ${error}`);
   }
 }
 
-// Interfaz pública del módulo
+// Public module interface
 export default {
   isVisionAvailable,
   isTranslationAvailable,
