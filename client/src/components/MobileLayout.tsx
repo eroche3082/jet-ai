@@ -3,6 +3,7 @@ import { useLocation, Link } from 'wouter';
 import { Home, Search, Map, User, Menu, X, MessageSquare, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Layout from './Layout';
+import Footer from './Footer';
 
 interface MobileLayoutProps {
   children: ReactNode;
@@ -154,6 +155,9 @@ export default function MobileLayout({
           </div>
         </nav>
       )}
+      
+      {/* Show Footer only in non-PWA mode */}
+      {!isPWA && <Footer />}
     </div>
   );
 }
