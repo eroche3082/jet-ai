@@ -28,9 +28,7 @@ import TravelMemoryPage from "@/pages/TravelMemoryPage";
 import Layout from "@/components/Layout";
 import MobileLayout from "@/components/MobileLayout";
 import { useState, useEffect } from 'react';
-// Only use UniversalChatbot for all pages
 import TravelCockpit from "@/components/TravelCockpit";
-import UniversalChatbot from "@/components/UniversalChatbot";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { getAffiliateId } from "@/lib/utils";
 import PartnerDashboard from "@/pages/partner/Dashboard";
@@ -177,14 +175,10 @@ function App() {
         {isMobile ? (
           <MobileLayout>
             {renderRoutes()}
-            {/* Universal chatbot for mobile */}
-            <UniversalChatbot />
           </MobileLayout>
         ) : (
           <Layout>
             {renderRoutes()}
-            {/* Universal chatbot for desktop */}
-            <UniversalChatbot />
           </Layout>
         )}
       </ThemeProvider>
