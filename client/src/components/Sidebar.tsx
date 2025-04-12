@@ -148,23 +148,23 @@ export default function Sidebar() {
         {navigationItems.map((section, sectionIndex) => (
           <div key={sectionIndex} className="mb-6">
             {section.items.map((item, itemIndex) => (
-              <Link key={itemIndex} href={item.href}>
-                <a
-                  className={cn(
-                    "flex items-center gap-3 px-6 py-3 text-sm font-medium transition-colors",
-                    location === item.href
-                      ? "bg-indigo-600 text-white"
-                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                  )}
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                  {item.badge && (
-                    <span className="ml-auto bg-indigo-500 text-xs px-2 py-1 rounded-full">
-                      {item.badge}
-                    </span>
-                  )}
-                </a>
+              <Link 
+                key={itemIndex} 
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-6 py-3 text-sm font-medium transition-colors",
+                  location === item.href
+                    ? "bg-indigo-600 text-white" 
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                )}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+                {item.badge && (
+                  <span className="ml-auto bg-indigo-500 text-xs px-2 py-1 rounded-full">
+                    {item.badge}
+                  </span>
+                )}
               </Link>
             ))}
           </div>
