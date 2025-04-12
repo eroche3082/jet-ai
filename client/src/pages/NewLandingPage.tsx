@@ -1,37 +1,67 @@
 import React from 'react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { 
+  Plane, 
+  Globe, 
+  Languages, 
+  HeartHandshake, 
+  Wallet, 
+  FileCheck,
+  BrainCircuit, 
+  PackageCheck, 
+  Cloud, 
+  Mountain, 
+  Stethoscope,
+  Bus, 
+  User, 
+  ShieldCheck, 
+  Leaf, 
+  Hotel, 
+  CalendarCheck, 
+  Clock,
+  BadgeDollarSign, 
+  PanelTopOpen,
+  SendIcon,
+  MessageSquare
+} from 'lucide-react';
 
 export default function NewLandingPage() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header Navigation */}
-      <header className="bg-white py-4 px-6 shadow-sm">
+      <header className="bg-gray-900 text-white py-4 px-6 shadow-md sticky top-0 z-50">
         <div className="container mx-auto flex justify-between items-center">
           <Link href="/" className="flex items-center">
-            <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-black" stroke="currentColor" strokeWidth="2">
+            <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-primary" stroke="currentColor" strokeWidth="2">
               <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" strokeLinejoin="round" strokeLinecap="round"/>
             </svg>
             <span className="ml-2 text-xl font-bold">JetAI</span>
           </Link>
           
           <nav className="hidden md:flex space-x-8 items-center">
-            <Link href="/" className="font-medium text-gray-900 hover:text-primary">Home</Link>
-            <Link href="/destinations" className="font-medium text-gray-900 hover:text-primary">Destinations</Link>
-            <Link href="/chat" className="font-medium text-gray-900 hover:text-primary">Chat</Link>
-            <Link href="/portfolio" className="font-medium text-gray-900 hover:text-primary">Travel Memories</Link>
-            <Link href="/about" className="font-medium text-gray-900 hover:text-primary">About</Link>
+            <Link href="/" className="font-medium text-gray-100 hover:text-primary">Home</Link>
+            <Link href="/destinations" className="font-medium text-gray-100 hover:text-primary">Destinations</Link>
+            <Link href="/chat" className="font-medium text-gray-100 hover:text-primary">
+              <div className="flex items-center gap-1">
+                <MessageSquare size={16} />
+                <span>Chat</span>
+              </div>
+            </Link>
+            <Link href="/portfolio" className="font-medium text-gray-100 hover:text-primary">Travel Memories</Link>
+            <Link href="/about" className="font-medium text-gray-100 hover:text-primary">About</Link>
           </nav>
           
           <div className="hidden md:block">
             <Link href="/login">
-              <Button variant="outline">Login</Button>
+              <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Login</Button>
             </Link>
           </div>
           
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <button className="flex items-center p-2 rounded-md">
+            <button className="flex items-center p-2 rounded-md text-white hover:bg-gray-800">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
               </svg>
@@ -41,17 +71,17 @@ export default function NewLandingPage() {
       </header>
       
       {/* Hero Section */}
-      <div 
-        className="relative flex-1 flex items-center"
-        style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1536669038623-a25133061709?q=80&w=2070&auto=format&fit=crop')",
-          backgroundSize: "cover",
-          backgroundPosition: "center"
-        }}
-      >
-        <div className="absolute inset-0 bg-black opacity-40"></div>
+      <div className="relative flex-1 flex items-center min-h-[80vh]">
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center"
+          style={{
+            backgroundImage: "url('https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2029&auto=format&fit=crop')",
+            backgroundPosition: "center"
+          }}
+        ></div>
+        <div className="absolute inset-0 bg-black opacity-50 z-10"></div>
         
-        <div className="container mx-auto px-6 relative z-10">
+        <div className="container mx-auto px-6 relative z-20">
           <div className="max-w-xl">
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
               Discover Your Perfect Journey with AI
@@ -61,9 +91,14 @@ export default function NewLandingPage() {
             </p>
             <div className="flex flex-wrap gap-4">
               <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-white">
-                <Link href="/chat">Chat with AI Assistant</Link>
+                <Link href="/chat">
+                  <div className="flex items-center gap-2">
+                    <SendIcon size={18} />
+                    <span>Chat with AI Assistant</span>
+                  </div>
+                </Link>
               </Button>
-              <Button asChild size="lg" variant="secondary">
+              <Button asChild size="lg" variant="outline" className="bg-white/10 text-white hover:bg-white/20">
                 <Link href="/destinations">Explore Destinations</Link>
               </Button>
             </div>
@@ -71,70 +106,282 @@ export default function NewLandingPage() {
         </div>
       </div>
       
-      {/* Features Section */}
-      <div className="py-20 bg-white">
+      {/* Features Title */}
+      <div className="bg-gradient-to-r from-primary/90 to-primary py-16 text-white">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-4xl font-bold mb-4">20 Smart Features for Intelligent Travel</h2>
+          <p className="text-xl max-w-3xl mx-auto">
+            Our AI-powered platform combines cutting-edge technology with expert travel knowledge
+            to revolutionize how you plan, experience, and remember your journeys.
+          </p>
+        </div>
+      </div>
+      
+      {/* 20 Features Grid */}
+      <div className="py-16 bg-gray-50">
         <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-bold text-center mb-16">Smart Features for Smart Travelers</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-            <div className="text-center">
-              <div className="bg-primary/10 p-4 rounded-full mx-auto w-20 h-20 flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" strokeLinejoin="round" strokeLinecap="round"/>
-                </svg>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <Plane className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Generative Smart Itinerary</h3>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Smart Itineraries</h3>
-              <p className="text-gray-600">Personalized travel plans based on your preferences and budget</p>
-            </div>
+              <p className="text-gray-600 flex-grow">Personalized itineraries based on preferences, time, and budget.</p>
+            </Card>
             
-            <div className="text-center">
-              <div className="bg-primary/10 p-4 rounded-full mx-auto w-20 h-20 flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <Globe className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Real-Time Flight Comparator</h3>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Accommodation Finder</h3>
-              <p className="text-gray-600">Find the perfect place to stay that matches your style and budget</p>
-            </div>
+              <p className="text-gray-600 flex-grow">Find flights with the best value for your money.</p>
+            </Card>
             
-            <div className="text-center">
-              <div className="bg-primary/10 p-4 rounded-full mx-auto w-20 h-20 flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <Languages className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Multilingual Translator</h3>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Real-time Assistance</h3>
-              <p className="text-gray-600">Get instant help and recommendations during your journey</p>
-            </div>
+              <p className="text-gray-600 flex-grow">Translate conversations and phrases across 30+ languages.</p>
+            </Card>
             
-            <div className="text-center">
-              <div className="bg-primary/10 p-4 rounded-full mx-auto w-20 h-20 flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <HeartHandshake className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Predictive Cultural Advisor</h3>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Travel Memory Keeper</h3>
-              <p className="text-gray-600">Organize and share your travel experiences with friends and family</p>
-            </div>
+              <p className="text-gray-600 flex-grow">Information about customs and etiquette at your destination.</p>
+            </Card>
+            
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <Wallet className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Automatic Budget Manager</h3>
+              </div>
+              <p className="text-gray-600 flex-grow">Monitor and suggest adjustments to your travel budget.</p>
+            </Card>
+            
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <FileCheck className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Travel Document Scanner</h3>
+              </div>
+              <p className="text-gray-600 flex-grow">Verify passports, visas, and travel documents.</p>
+            </Card>
+            
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <BrainCircuit className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Cross-Session Memory</h3>
+              </div>
+              <p className="text-gray-600 flex-grow">Remember previous conversations and preferences for consistent recommendations.</p>
+            </Card>
+            
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <PackageCheck className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Packing List Generator</h3>
+              </div>
+              <p className="text-gray-600 flex-grow">Luggage lists tailored to your destination and activities.</p>
+            </Card>
+            
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <Cloud className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Predictive Weather Alerts</h3>
+              </div>
+              <p className="text-gray-600 flex-grow">Anticipate and notify about adverse weather conditions.</p>
+            </Card>
+            
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <Mountain className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Visual Attraction Identifier</h3>
+              </div>
+              <p className="text-gray-600 flex-grow">Upload images to receive detailed information about landmarks.</p>
+            </Card>
+            
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <Stethoscope className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Medical Emergency Assistant</h3>
+              </div>
+              <p className="text-gray-600 flex-grow">Medical translations and location of nearby hospitals.</p>
+            </Card>
+            
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <Bus className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Transport Connection Optimizer</h3>
+              </div>
+              <p className="text-gray-600 flex-grow">Optimal transportation combinations for efficiency and savings.</p>
+            </Card>
+            
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <User className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Interest-Based Experience Filter</h3>
+              </div>
+              <p className="text-gray-600 flex-grow">Activities and experiences that match your interests.</p>
+            </Card>
+            
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <ShieldCheck className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Area Safety Verifier</h3>
+              </div>
+              <p className="text-gray-600 flex-grow">Safety assessment of different areas at your destination.</p>
+            </Card>
+            
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <Leaf className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">CO2 Compensation Calculator</h3>
+              </div>
+              <p className="text-gray-600 flex-grow">Estimate and offset the carbon footprint of your trip.</p>
+            </Card>
+            
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <Hotel className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Accommodation Comparator</h3>
+              </div>
+              <p className="text-gray-600 flex-grow">Analyze hotels, Airbnb, and more based on your preferences.</p>
+            </Card>
+            
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <CalendarCheck className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Booking Assistant</h3>
+              </div>
+              <p className="text-gray-600 flex-grow">Make reservations directly with automatic confirmation.</p>
+            </Card>
+            
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <Clock className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Layover Itinerary Generator</h3>
+              </div>
+              <p className="text-gray-600 flex-grow">Mini-itineraries to make the most of long airport layovers.</p>
+            </Card>
+            
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <BadgeDollarSign className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Flash Deals Detector</h3>
+              </div>
+              <p className="text-gray-600 flex-grow">Alerts about temporary deals that match your preferences.</p>
+            </Card>
+            
+            <Card className="p-6 border hover:shadow-lg transition-all hover:-translate-y-1 duration-300 h-full flex flex-col bg-white">
+              <div className="flex items-center mb-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <PanelTopOpen className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold ml-3">Destination Evaluator</h3>
+              </div>
+              <p className="text-gray-600 flex-grow">Compare destinations based on budget, weather, attractions, and safety.</p>
+            </Card>
           </div>
+        </div>
+      </div>
+      
+      {/* Testimonials */}
+      <div className="py-16 bg-white">
+        <div className="container mx-auto px-6">
+          <h2 className="text-3xl font-bold text-center mb-12">What Our Users Say</h2>
           
-          <div className="mt-16 text-center">
-            <Button asChild size="lg">
-              <Link href="/features">Explore All Features</Link>
-            </Button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-gray-50 p-6 rounded-lg shadow-sm">
+              <div className="flex items-center mb-4">
+                <div className="h-12 w-12 rounded-full bg-gray-300"></div>
+                <div className="ml-4">
+                  <h4 className="font-semibold">Sarah Johnson</h4>
+                  <p className="text-sm text-gray-600">Travel Blogger</p>
+                </div>
+              </div>
+              <p className="text-gray-700 italic">"JetAI transformed how I plan my trips. The AI assistant understood exactly what I wanted and created the perfect itinerary."</p>
+            </div>
+            
+            <div className="bg-gray-50 p-6 rounded-lg shadow-sm">
+              <div className="flex items-center mb-4">
+                <div className="h-12 w-12 rounded-full bg-gray-300"></div>
+                <div className="ml-4">
+                  <h4 className="font-semibold">Michael Chen</h4>
+                  <p className="text-sm text-gray-600">Business Traveler</p>
+                </div>
+              </div>
+              <p className="text-gray-700 italic">"The real-time flight comparator saved me hundreds of dollars. I also love how it suggests activities based on my interests."</p>
+            </div>
+            
+            <div className="bg-gray-50 p-6 rounded-lg shadow-sm">
+              <div className="flex items-center mb-4">
+                <div className="h-12 w-12 rounded-full bg-gray-300"></div>
+                <div className="ml-4">
+                  <h4 className="font-semibold">Emma Rodriguez</h4>
+                  <p className="text-sm text-gray-600">Family Vacationer</p>
+                </div>
+              </div>
+              <p className="text-gray-700 italic">"Planning trips for the whole family used to be stressful. Now with JetAI, it's actually enjoyable! The personalized suggestions are spot on."</p>
+            </div>
           </div>
         </div>
       </div>
       
       {/* Call to Action */}
-      <div className="py-16 bg-primary/10">
+      <div className="py-16 bg-gradient-to-r from-primary to-primary/80 text-white">
         <div className="container mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to Experience Smarter Travel?</h2>
-          <p className="text-xl max-w-2xl mx-auto mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Experience Smarter Travel?</h2>
+          <p className="text-xl mb-8 max-w-3xl mx-auto">
             Join thousands of travelers who have discovered the power of AI-assisted travel planning.
           </p>
-          <Button asChild size="lg">
-            <Link href="/login">Get Started Now</Link>
+          <Button 
+            asChild 
+            size="lg" 
+            variant="outline" 
+            className="bg-white text-primary border-white hover:bg-white/90 hover:text-primary"
+          >
+            <Link href="/login">
+              <span className="text-lg px-6">Get Started Now</span>
+            </Link>
           </Button>
         </div>
       </div>
@@ -144,7 +391,12 @@ export default function NewLandingPage() {
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="font-bold text-xl mb-4">JetAI</h3>
+              <div className="flex items-center mb-4">
+                <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-primary" stroke="currentColor" strokeWidth="2">
+                  <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" strokeLinejoin="round" strokeLinecap="round"/>
+                </svg>
+                <h3 className="font-bold text-xl ml-2">JetAI</h3>
+              </div>
               <p className="text-gray-400">
                 Revolutionizing travel planning with artificial intelligence.
               </p>
