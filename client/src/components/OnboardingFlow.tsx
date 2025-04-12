@@ -14,6 +14,20 @@ import { Heart, MapPin, Plane, Star, DollarSign, Hotel, Utensils, Camera, Langua
 // Types for onboarding steps
 export type OnboardingStep = 'name' | 'email' | 'destinations' | 'travelerType' | 'interests' | 'budget' | 'accommodation' | 'dietary' | 'languages' | 'complete';
 
+export type OnboardingData = {
+  name?: string;
+  email?: string;
+  travelPreferences?: {
+    upcomingDestinations?: string[];
+    travelerType?: string;
+    interests?: string[];
+    budget?: string;
+    preferredAccommodation?: string;
+    dietaryRestrictions?: string[];
+    languages?: string[];
+  };
+};
+
 interface OnboardingFlowProps {
   onComplete: (preferences: UserProfile['travelPreferences']) => void;
   initialStep?: OnboardingStep;
