@@ -49,7 +49,15 @@ export const generateChatResponse = async (req: Request, res: Response) => {
     
     // Intentar obtener el modelo Gemini utilizando la versión más reciente
     // Nombres actualizados: models/gemini-1.5-flash-latest, models/gemini-1.5-pro-latest
-    let modelName = "models/gemini-1.5-flash-latest";
+    
+    // Seleccionar modelo según el modo - para casos que requieran imagen o análisis más profundo
+    let modelName = "models/gemini-1.5-flash-latest"; // modelo rápido por defecto
+    
+    // Si se solicita un modo específico que requiere análisis de imagen o capacidades avanzadas
+    if (mode === 'vision' || mode === 'analyze' || mode === 'multimodal') {
+      modelName = "models/gemini-1.5-pro-latest"; // modelo más poderoso con capacidades multimodales
+    }
+    
     let model;
     
     try {
@@ -79,10 +87,14 @@ export const generateChatResponse = async (req: Request, res: Response) => {
           role: "model",
           parts: [{ text: "¡Hola! Soy JetAI, tu asistente personal de viajes. ¿En qué puedo ayudarte hoy?" }],
         },
-        ...context.map((msg: any) => ({
-          role: msg.role || "user",
-          parts: [{ text: msg.content || msg.text || "" }]
-        }))
+        ...context.map((msg: any) => {
+          // Mapear 'assistant' a 'model' para compatibilidad con la API de Gemini
+          const role = msg.role === 'assistant' ? 'model' : (msg.role || 'user');
+          return {
+            role: role,
+            parts: [{ text: msg.content || msg.text || "" }]
+          };
+        })
       ],
       generationConfig: {
         temperature: 0.7,
