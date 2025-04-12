@@ -26,6 +26,7 @@ import { generateUserItinerary } from './lib/itineraryGenerator';
 import { processConversation } from './lib/vertexAI';
 import { configureRoutes as configureMemoryRoutes } from './api/memoryEnhancementService';
 import { configureRoutes as configureGoogleApiRoutes } from './api/googleApiService';
+import { configureRoutes as configureGeminiRoutes } from './api/geminiService';
 import { configureApiKey } from './lib/googleApiConfig';
 
 // Configure session store
@@ -225,8 +226,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Registramos las rutas de las APIs de Google
   configureGoogleApiRoutes(app);
   
+  // Registramos las rutas del servicio Gemini
+  configureGeminiRoutes(app);
+  
   // Configuramos la clave API para Google Cloud
-  configureApiKey(process.env.GOOGLE_CLOUD_API_KEY || 'AIzaSyBUYoJ-RndERrcY9qkjD-2YGGY5m3Mzc0U');
+  configureApiKey(process.env.GOOGLE_CLOUD_API_KEY || 'AIzaSyByRQcsHT0AXxLsyPK2RrBZEwhe3T11q08');
   
   // Google Places API routes
   app.get('/api/places/autocomplete', async (req, res) => {

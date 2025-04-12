@@ -4,20 +4,20 @@
  * Este archivo centraliza la configuración y verificación de las APIs de Google Cloud
  * utilizadas en la aplicación JetAI.
  * 
- * API Key actualizada: AIzaSyBUYoJ-RndERrcY9qkjD-2YGGY5m3Mzc0U
+ * API Key actualizada: AIzaSyByRQcsHT0AXxLsyPK2RrBZEwhe3T11q08
  * APIs activadas:
  * - Generative Language API (Gemini)
- * - Places API
- * - Geocoding API
- * - Maps APIs
- * - Routes API
- * - Cloud Translation API
- * - Weather API
+ * - Cloud Storage API
+ * - IAM Service Account Credentials API
  * - Vision AI API
  * - Vertex AI API
+ * - Cloud Translation API
+ * - Cloud Text-to-Speech API
+ * - Google Calendar API
+ * - Google Maps APIs (Places, Geocoding, Routes)
  * - Cloud Video Intelligence API
- * - Text-to-Speech API
- * - Servicios adicionales: Identity, Storage, etc.
+ * - Firebase APIs (Hosting, Cloud Messaging, etc.)
+ * - Y muchas otras APIs adicionales de Google Cloud
  */
 
 import { VertexAI } from '@google-cloud/vertexai';
@@ -30,7 +30,7 @@ import { Client as MapsClient } from '@googlemaps/google-maps-services-js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // API Key principal para servicios que la requieren directamente
-const GOOGLE_API_KEY = process.env.GOOGLE_CLOUD_API_KEY || 'AIzaSyBUYoJ-RndERrcY9qkjD-2YGGY5m3Mzc0U';
+const GOOGLE_API_KEY = process.env.GOOGLE_CLOUD_API_KEY || 'AIzaSyByRQcsHT0AXxLsyPK2RrBZEwhe3T11q08';
 
 // Inicializar el cliente de Gemini (Generative Language API)
 const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
