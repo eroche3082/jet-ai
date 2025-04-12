@@ -11,103 +11,103 @@ import {
 
 const features = [
   {
-    title: "Itinerario Inteligente Generativo",
-    description: "Itinerarios personalizados según preferencias, tiempo y presupuesto.",
+    title: "Generative Smart Itinerary",
+    description: "Personalized itineraries based on preferences, time, and budget.",
     icon: <Plane className="h-8 w-8 text-primary" />
   },
   {
-    title: "Comparador de Vuelos en Tiempo Real",
-    description: "Encuentra vuelos con la mejor relación calidad-precio.",
+    title: "Real-Time Flight Comparator",
+    description: "Find flights with the best value for your money.",
     icon: <Globe className="h-8 w-8 text-primary" />
   },
   {
-    title: "Traductor Multilingüe Integrado",
-    description: "Traduce conversaciones y frases entre más de 30 idiomas.",
+    title: "Integrated Multilingual Translator",
+    description: "Translate conversations and phrases across 30+ languages.",
     icon: <Languages className="h-8 w-8 text-primary" />
   },
   {
-    title: "Asesor Cultural Predictivo",
-    description: "Información sobre costumbres y etiqueta de tu destino.",
+    title: "Predictive Cultural Advisor",
+    description: "Information about customs and etiquette at your destination.",
     icon: <HeartHandshake className="h-8 w-8 text-primary" />
   },
   {
-    title: "Gestor Automático de Presupuesto",
-    description: "Monitoriza y sugiere ajustes a tu presupuesto de viaje.",
+    title: "Automatic Budget Manager",
+    description: "Monitor and suggest adjustments to your travel budget.",
     icon: <Wallet className="h-8 w-8 text-primary" />
   },
   {
-    title: "Scanner de Documentos de Viaje",
-    description: "Verifica pasaportes, visas y documentos de viaje.",
+    title: "Travel Document Scanner",
+    description: "Verify passports, visas, and travel documents.",
     icon: <FileCheck className="h-8 w-8 text-primary" />
   },
   {
-    title: "Memoria Contextual entre Sesiones",
-    description: "Recuerda conversaciones previas y preferencias para recomendaciones consistentes.",
+    title: "Cross-Session Memory",
+    description: "Remember previous conversations and preferences for consistent recommendations.",
     icon: <BrainCircuit className="h-8 w-8 text-primary" />
   },
   {
-    title: "Generador de Packing List Personalizado",
-    description: "Listas de equipaje adaptadas a tu destino y actividades.",
+    title: "Personalized Packing List Generator",
+    description: "Luggage lists tailored to your destination and activities.",
     icon: <PackageCheck className="h-8 w-8 text-primary" />
   },
   {
-    title: "Alertas Predictivas de Clima",
-    description: "Anticipa y notifica sobre condiciones climáticas adversas.",
+    title: "Predictive Weather Alerts",
+    description: "Anticipate and notify about adverse weather conditions.",
     icon: <Cloud className="h-8 w-8 text-primary" />
   },
   {
-    title: "Identificador Visual de Atracciones",
-    description: "Sube imágenes para recibir información detallada sobre monumentos.",
+    title: "Visual Attraction Identifier",
+    description: "Upload images to receive detailed information about landmarks.",
     icon: <Mountain className="h-8 w-8 text-primary" />
   },
   {
-    title: "Asistente de Emergencias Médicas",
-    description: "Traducciones médicas y ubicación de hospitales cercanos.",
+    title: "Medical Emergency Assistant",
+    description: "Medical translations and location of nearby hospitals.",
     icon: <Stethoscope className="h-8 w-8 text-primary" />
   },
   {
-    title: "Optimizador de Conexiones de Transporte",
-    description: "Combinaciones óptimas de transporte para eficiencia y ahorro.",
+    title: "Transport Connection Optimizer",
+    description: "Optimal transportation combinations for efficiency and savings.",
     icon: <Bus className="h-8 w-8 text-primary" />
   },
   {
-    title: "Filtro de Experiencias por Intereses",
-    description: "Actividades y experiencias que coinciden con tus intereses.",
+    title: "Interest-Based Experience Filter",
+    description: "Activities and experiences that match your interests.",
     icon: <User className="h-8 w-8 text-primary" />
   },
   {
-    title: "Verificador de Seguridad de Zonas",
-    description: "Evaluación de seguridad de diferentes zonas en tu destino.",
+    title: "Area Safety Verifier",
+    description: "Safety assessment of different areas at your destination.",
     icon: <ShieldCheck className="h-8 w-8 text-primary" />
   },
   {
-    title: "Calculadora de Compensación de CO2",
-    description: "Estima y compensa la huella de carbono de tu viaje.",
+    title: "CO2 Compensation Calculator",
+    description: "Estimate and offset the carbon footprint of your trip.",
     icon: <Leaf className="h-8 w-8 text-primary" />
   },
   {
-    title: "Comparador de Opciones de Alojamiento",
-    description: "Analiza hoteles, Airbnb y más según tus preferencias.",
+    title: "Accommodation Options Comparator",
+    description: "Analyze hotels, Airbnb, and more based on your preferences.",
     icon: <Hotel className="h-8 w-8 text-primary" />
   },
   {
-    title: "Asistente de Reservas con Confirmación",
-    description: "Realiza reservas directamente con confirmación automática.",
+    title: "Booking Assistant with Confirmation",
+    description: "Make reservations directly with automatic confirmation.",
     icon: <CalendarCheck className="h-8 w-8 text-primary" />
   },
   {
-    title: "Generador de Itinerarios para Conexiones",
-    description: "Mini-itinerarios para aprovechar escalas largas en aeropuertos.",
+    title: "Layover Itinerary Generator",
+    description: "Mini-itineraries to make the most of long airport layovers.",
     icon: <Clock className="h-8 w-8 text-primary" />
   },
   {
-    title: "Detector de Ofertas Flash",
-    description: "Alertas sobre ofertas temporales que coinciden con tus preferencias.",
+    title: "Flash Deals Detector",
+    description: "Alerts about temporary deals that match your preferences.",
     icon: <BadgeDollarSign className="h-8 w-8 text-primary" />
   },
   {
-    title: "Evaluador Multicriterio de Destinos",
-    description: "Compara destinos según presupuesto, clima, atracciones y seguridad.",
+    title: "Multi-Criteria Destination Evaluator",
+    description: "Compare destinations based on budget, weather, attractions, and safety.",
     icon: <PanelTopOpen className="h-8 w-8 text-primary" />
   }
 ];
