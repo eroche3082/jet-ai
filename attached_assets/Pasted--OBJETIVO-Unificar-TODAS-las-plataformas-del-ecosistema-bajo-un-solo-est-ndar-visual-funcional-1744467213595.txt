@@ -1,0 +1,97 @@
+// ✅ OBJETIVO: Unificar TODAS las plataformas del ecosistema bajo un solo estándar visual, funcional y estructural
+// Modelo de referencia: CRYPTOBOT
+// Proyectos involucrados: ShopAI, JetAI, FitnessAI, SmartFinance, SportsAI, EduAI, FinanceAI
+
+// 1. REESTRUCTURAR LAYOUT GLOBAL DE CADA APP
+
+// A. Elimina cualquier sistema visual viejo o mal diseñado (layouts que se rompen, divs sueltos, doble chatbot, etc.)
+// B. Aplica la estructura del Layout principal basado en CryptoBot:
+//    - <SidePanel /> siempre visible y fijo a la izquierda
+//    - <TopNavBar /> fijo en la parte superior con logo, íconos y nombre de usuario
+//    - <MainPage /> con padding lateral que no choque con el SidePanel
+//    - Tamaño consistente en todas las plataformas (usar breakpoints de Tailwind o CSS grid)
+
+// C. Implementa un archivo `Layout.tsx` universal con esta estructura:
+// <Sidebar />
+// <TopNav />
+// <MainContent>{children}</MainContent>
+
+// 2. CHATBOT – UNIFICACIÓN TOTAL
+
+// A. Asegurar que **solo haya un Chatbot por aplicación**
+// B. Debe estar anclado en la parte inferior derecha
+// C. Debe tener:
+//    - Minimizar / Maximizar
+//    - Selector de modelo (Gemini / Claude / GPT)
+//    - Input claro, con icono de micrófono, imagen, y botón de enviar
+//    - Modo fullscreen estilo CryptoBot universal
+// D. Revisa que **no existan dos instancias del mismo componente** (como pasa en JetAI)
+
+// 3. MENÚ LATERAL – REORGANIZACIÓN Y NORMALIZACIÓN
+
+// A. Todos los elementos deben estar alineados igual en todas las apps
+// B. Cada menú debe tener:
+//    - Ícono (Lucide o HeroIcons)
+//    - Label claro
+//    - Margen izquierdo de 20px
+//    - No debe salirse del Viewport
+//    - Agrupaciones lógicas (ej. Separador entre usuario y admin)
+
+// 4. VERIFICAR TODOS LOS TABS Y PÁGINAS
+
+// A. Revisar uno por uno:
+//    - ¿Se carga el contenido?
+//    - ¿Está alineado?
+//    - ¿Hay scroll?
+//    - ¿Están los botones activos?
+//    - ¿Hay errores en consola?
+// B. Si el tab está vacío, debe decir:
+//    - “This feature is coming soon. Please check back later.”
+// C. Todos los botones deben tener feedback visual: hover, loading, error, success
+
+// 5. INTERFAZ RESPONSIVA
+
+// A. Todas las plataformas deben:
+//    - Funcionar en desktop, tablet y móvil
+//    - No tener elementos rotos ni desbordados
+//    - Ajustarse con `grid` y `flex` correctamente
+//    - Evitar paddings forzados o margenes negativos
+
+// 6. REVISAR CONEXIONES, LINKS Y FUNCIONES
+
+// A. Validar cada endpoint, cada botón y cada sección
+//    - ¿Funciona Product Search?
+//    - ¿Se abre la visualización AR?
+//    - ¿El chat responde?
+//    - ¿Funciona Stripe, Gemini, etc.?
+// B. Elimina cualquier consola.log suelta o código sin propósito
+
+// 7. ADMIN PANEL Y FOOTER
+
+// A. AdminPanel debe estar fijo en el menú (no flotando en esquinas)
+// B. El footer debe tener:
+//    - Marca (ej: © 2025 Shop AI. All rights reserved.)
+//    - Enlace a Términos y Política (aunque sea falso temporalmente)
+//    - Estilo sobrio como CryptoBot
+
+// 8. VALIDACIÓN FINAL – GLOBAL QA
+
+// A. Revisar que:
+//    - No hay doble chatbot
+//    - No hay tabs vacíos sin aviso
+//    - No hay rutas que den error 404
+//    - El Chat se abre completamente (como en CryptoBot)
+//    - SidePanel no tape el contenido en ningún tab
+// B. Cada app debe tener:
+//    - `Layout.tsx` global
+//    - `ChatbotWrapper.tsx` bien ubicado
+//    - `Sidebar.tsx` sin errores visuales
+
+// 9. COMPILAR Y PREPARAR DEPLOY DE CADA APP
+
+// - npm run build
+// - firebase deploy
+
+// 10. INFORME FINAL
+
+console.log("✅ Plataforma corregida, verificada y reestructurada al estándar CryptoBot. Lista para Fase 4 y producción.");
