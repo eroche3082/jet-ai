@@ -39,8 +39,6 @@ export const trips = pgTable("trips", {
   itinerary: json("itinerary"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-  canvaDesignUrl: text("canva_design_url"),
-  canvaDesignId: text("canva_design_id"),
 });
 
 // Expense table definition (for travel wallet)

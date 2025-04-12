@@ -2,118 +2,121 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 /**
- * Combines multiple class names using clsx and tailwind-merge
+ * Combines multiple class names and tailwind classes efficiently
  */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 /**
- * Formats a number as currency
+ * Extracts the subdomain from the current hostname
+ * Returns null if there's no subdomain (or if it's www)
+ */
+export function getSubdomain(): string | null {
+  // In development, we get the subdomain from localStorage if available for testing
+  if (process.env.NODE_ENV === 'development') {
+    const testSubdomain = localStorage.getItem('testSubdomain');
+    if (testSubdomain) return testSubdomain;
+  }
+  
+  // Extract the hostname parts
+  const hostname = window.location.hostname;
+  const parts = hostname.split('.');
+  
+  // Check if there's a subdomain
+  if (parts.length > 2) {
+    const subdomain = parts[0];
+    // Ignore www as it's not a real subdomain for our purposes
+    if (subdomain !== 'www') {
+      return subdomain;
+    }
+  }
+  
+  // If we're using a localhost domain with ports, check for subdomain format
+  if (hostname === 'localhost' || hostname.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+    // Check in query params for dev testing
+    const params = new URLSearchParams(window.location.search);
+    const subdomain = params.get('subdomain');
+    if (subdomain) return subdomain;
+  }
+  
+  return null;
+}
+
+/**
+ * Gets the affiliate ID from various sources
+ * Priority: URL params > cookies > localStorage
+ */
+export function getAffiliateId(): string | null {
+  // Check URL parameters first
+  const params = new URLSearchParams(window.location.search);
+  const refParam = params.get('ref');
+  if (refParam) {
+    // Store for future use
+    localStorage.setItem('affiliateId', refParam);
+    return refParam;
+  }
+  
+  // Check localStorage
+  const storedId = localStorage.getItem('affiliateId');
+  if (storedId) return storedId;
+  
+  // Check cookies (fallback)
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === 'affiliateId') {
+      return value;
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * Format a number as currency
+ * @param amount Number to format
+ * @param currency Currency code (default: USD)
+ * @param locale Locale for formatting (default: en-US)
+ * @param decimals Number of decimal places
  */
 export function formatCurrency(
-  amount: number,
-  currency = "USD",
-  locale = "en-US"
+  amount: number, 
+  currency = 'USD', 
+  locale = 'en-US', 
+  decimals?: number
 ): string {
   return new Intl.NumberFormat(locale, {
-    style: "currency",
+    style: 'currency',
     currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: typeof decimals === 'number' ? decimals : 2,
+    maximumFractionDigits: typeof decimals === 'number' ? decimals : 2,
   }).format(amount);
 }
 
 /**
- * Formats a large number with abbreviations (K, M, B, T)
+ * Clean and format a subdomain string
+ * Removes special characters, spaces, etc.
  */
-export function formatLargeNumber(num: number): string {
-  if (num < 1000) return num.toString();
-  
-  const abbreviations = ["", "K", "M", "B", "T"];
-  const tier = Math.floor(Math.log10(Math.abs(num)) / 3);
-  
-  if (tier >= abbreviations.length) return num.toString();
-  
-  const suffix = abbreviations[tier];
-  const scale = Math.pow(10, tier * 3);
-  const scaled = num / scale;
-  
-  return scaled.toFixed(1).replace(/\.0$/, "") + suffix;
+export function formatSubdomain(input: string): string {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9-]/g, '') // Only allow lowercase alphanumeric and dash
+    .replace(/^-+|-+$/g, ''); // Remove leading/trailing dashes
 }
 
 /**
- * Formats a percentage value
+ * Format a date to a readable string
  */
-export function formatPercentage(value: number, decimals = 2): string {
-  return `${value >= 0 ? "+" : ""}${value.toFixed(decimals)}%`;
-}
-
-/**
- * Truncates long text with ellipsis
- */
-export function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength) + "...";
-}
-
-/**
- * Generates a gradient class based on value change (positive/negative)
- */
-export function getChangeGradient(change: number): string {
-  return change >= 0
-    ? "bg-gradient-to-r from-green-500/20 to-green-500/5"
-    : "bg-gradient-to-r from-red-500/20 to-red-500/5";
-}
-
-/**
- * Get class name for positive/negative values
- */
-export function getChangeTextColor(change: number): string {
-  return change >= 0 ? "text-green-500" : "text-red-500";
-}
-
-/**
- * Format date to human readable string
- */
-export function formatDate(date: Date | string): string {
-  if (typeof date === "string") {
-    date = new Date(date);
-  }
+export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOptions): string {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
   
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
-/**
- * Format time ago (e.g., "2 hours ago")
- */
-export function timeAgo(date: Date | string): string {
-  const now = new Date();
-  const pastDate = typeof date === "string" ? new Date(date) : date;
+  const defaultOptions: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  };
   
-  const seconds = Math.floor((now.getTime() - pastDate.getTime()) / 1000);
-  
-  if (seconds < 60) return `${seconds}s ago`;
-  
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  
-  const weeks = Math.floor(days / 7);
-  if (weeks < 5) return `${weeks}w ago`;
-  
-  const months = Math.floor(days / 30);
-  if (months < 12) return `${months}mo ago`;
-  
-  const years = Math.floor(days / 365);
-  return `${years}y ago`;
+  return new Intl.DateTimeFormat('en-US', options || defaultOptions).format(dateObj);
 }

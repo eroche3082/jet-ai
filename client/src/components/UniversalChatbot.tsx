@@ -32,7 +32,7 @@ import AIChat from '@/components/AIChat';
 import TravelCockpit from '@/components/TravelCockpit';
 import OnboardingFlow from '@/components/OnboardingFlow';
 import { Link, useLocation } from 'wouter';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/hooks/useAuth';
 import { sendVertexAIChatMessage } from '@/lib/vertexai';
 import { ChatMessage, saveChatMessage } from '@/lib/firebase';
 import { DEFAULT_SYSTEM_INSTRUCTIONS } from '@/lib/vertexai';

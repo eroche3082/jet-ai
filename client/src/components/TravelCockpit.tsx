@@ -30,12 +30,10 @@ import {
   X,
   Image,
   Plane,
-  CalendarDays,
-  PaintBucket
+  CalendarDays
 } from 'lucide-react';
 import HotelSearchResults from './HotelSearchResults';
 import FlightSearchResults from './FlightSearchResults';
-import CanvaVisualEngine from './CanvaVisualEngine';
 import { HotelResult } from '../lib/hotels';
 import { FlightResult } from '../lib/flights';
 import { Badge } from '@/components/ui/badge';
@@ -986,7 +984,6 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
       case 'flights': return <Plane className="w-5 h-5" />;
       case 'itineraries': return <Map className="w-5 h-5" />;
       case 'planner': return <Briefcase className="w-5 h-5" />;
-      case 'visualitinerary': return <PaintBucket className="w-5 h-5" />;
       case 'audio': return <Headphones className="w-5 h-5" />;
       case 'camera': return <Camera className="w-5 h-5" />;
       case 'bookings': return <FileText className="w-5 h-5" />;
@@ -1067,10 +1064,6 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
       // Navigate to memories page
       window.location.href = '/memories';
       return;
-    } else if (tab === 'visualitinerary') {
-      // Visual Itinerary tab - loaded within the Travel Cockpit
-      setActiveTab(tab);
-      return;
     }
     
     // For other tabs, just update the active tab
@@ -1083,7 +1076,6 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
     hotels: 'Hotels',
     flights: 'Flights',
     planner: 'Planner',
-    visualitinerary: 'Visual Itinerary',
     audio: 'Audio',
     camera: 'Camera',
     bookings: 'Bookings',
@@ -1615,12 +1607,6 @@ export default function TravelCockpit({ isOpen, onClose }: TravelCockpitProps) {
               <div className="mt-6">
                 <Button size="lg" className="w-full">Start Planning New Trip</Button>
               </div>
-            </div>
-          )}
-
-          {activeTab === 'visualitinerary' && (
-            <div className="h-full flex flex-col p-4 overflow-auto">
-              <CanvaVisualEngine />
             </div>
           )}
           
