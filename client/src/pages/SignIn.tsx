@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/useAuth';
 
 // Validation schemas
 const loginSchema = z.object({
@@ -34,6 +35,14 @@ export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [_, setLocation] = useLocation();
+  const { currentUser, signIn, signUp, signInWithGoogle } = useAuth();
+  
+  // Redireccionar si el usuario ya está autenticado
+  useEffect(() => {
+    if (currentUser) {
+      setLocation('/dashboard');
+    }
+  }, [currentUser, setLocation]);
 
   // Login form
   const loginForm = useForm<LoginFormValues>({
@@ -60,17 +69,23 @@ export default function SignIn() {
   const onLoginSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      await apiRequest('POST', '/api/auth/login', data);
-      toast({
-        title: "Login successful",
-        description: "Welcome back to JetAI!",
-      });
-      setLocation('/dashboard');
-    } catch (error) {
+      // Usar la función de autenticación de Firebase
+      const user = await signIn(data.username, data.password);
+      
+      if (user) {
+        toast({
+          title: "Sesión iniciada",
+          description: "¡Bienvenido de nuevo a JetAI!",
+        });
+        setLocation('/dashboard');
+      } else {
+        throw new Error("Error al iniciar sesión");
+      }
+    } catch (error: any) {
       console.error('Login error:', error);
       toast({
-        title: "Login failed",
-        description: "Invalid username or password. Please try again.",
+        title: "Error de inicio de sesión",
+        description: error.message || "Usuario o contraseña inválidos. Por favor, inténtalo de nuevo.",
         variant: "destructive",
       });
     } finally {
@@ -81,26 +96,28 @@ export default function SignIn() {
   const onRegisterSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
     try {
-      await apiRequest('POST', '/api/auth/register', {
-        username: data.username,
-        email: data.email,
-        password: data.password,
-      });
-      toast({
-        title: "Registration successful",
-        description: "Your account has been created. Please log in.",
-      });
-      // Switch to login form after successful registration
-      setIsLogin(true);
-      loginForm.reset({
-        username: data.username,
-        password: '',
-      });
-    } catch (error) {
+      // Usar la función de registro de Firebase
+      const user = await signUp(data.email, data.password);
+      
+      if (user) {
+        // También podríamos actualizar el perfil con el nombre de usuario aquí
+        // await updateProfile(user, { displayName: data.username });
+        
+        toast({
+          title: "Registro exitoso",
+          description: "Tu cuenta ha sido creada. Bienvenido a JetAI.",
+        });
+        
+        // Redirigir al dashboard después de registrarse exitosamente
+        setLocation('/dashboard');
+      } else {
+        throw new Error("Error al crear la cuenta");
+      }
+    } catch (error: any) {
       console.error('Registration error:', error);
       toast({
-        title: "Registration failed",
-        description: "This username or email may already be in use.",
+        title: "Error de registro",
+        description: error.message || "Este correo electrónico ya puede estar en uso.",
         variant: "destructive",
       });
     } finally {

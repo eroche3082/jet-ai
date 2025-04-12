@@ -35,6 +35,7 @@ import { getAffiliateId } from "@/lib/utils";
 import PartnerDashboard from "@/pages/partner/Dashboard";
 import PartnerSignup from "@/pages/partner/Signup";
 import { initializePWA } from '@/lib/pwa';
+import { AuthProvider } from '@/hooks/useAuth';
 
 function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -182,31 +183,33 @@ function App() {
   );
 
   return (
-    <ThemeProvider>
-      {isMobile ? (
-        <MobileLayout
-          isChatOpen={isChatOpen}
-          onChatToggle={setIsChatOpen}
-        >
-          {renderRoutes()}
-        </MobileLayout>
-      ) : (
-        <Layout>
-          {renderRoutes()}
-          {/* Floating chat bubble (desktop only) */}
-          <div className="fixed bottom-6 right-6 z-50">
-            {isChatOpen ? (
-              <TravelCockpit 
-                isOpen={isChatOpen} 
-                onClose={() => setIsChatOpen(false)}
-              />
-            ) : (
-              <ChatBubble onClick={toggleChat} />
-            )}
-          </div>
-        </Layout>
-      )}
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        {isMobile ? (
+          <MobileLayout
+            isChatOpen={isChatOpen}
+            onChatToggle={setIsChatOpen}
+          >
+            {renderRoutes()}
+          </MobileLayout>
+        ) : (
+          <Layout>
+            {renderRoutes()}
+            {/* Floating chat bubble (desktop only) */}
+            <div className="fixed bottom-6 right-6 z-50">
+              {isChatOpen ? (
+                <TravelCockpit 
+                  isOpen={isChatOpen} 
+                  onClose={() => setIsChatOpen(false)}
+                />
+              ) : (
+                <ChatBubble onClick={toggleChat} />
+              )}
+            </div>
+          </Layout>
+        )}
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 
