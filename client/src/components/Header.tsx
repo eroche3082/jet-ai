@@ -224,7 +224,7 @@ export default function Header() {
                   className="block py-3 text-center font-serif font-medium text-white bg-[#4a89dc] hover:bg-[#3a79cc] rounded transition-colors duration-300 shadow-sm"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Sign In / Sign Up
+                  Log In / Sign Up
                 </Link>
               </div>
             )}

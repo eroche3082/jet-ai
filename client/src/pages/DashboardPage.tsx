@@ -73,23 +73,23 @@ export default function DashboardPage() {
         
         <div className="flex-1 overflow-y-auto py-4">
           <nav className="px-2 space-y-1">
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+            <Button variant="ghost" className="sidebar-link">
               <User className="mr-3 h-5 w-5" />
               Dashboard
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+            <Button variant="ghost" className="sidebar-link">
               <Plane className="mr-3 h-5 w-5" />
               Explore
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+            <Button variant="ghost" className="sidebar-link">
               <Luggage className="mr-3 h-5 w-5" />
               Trips
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+            <Button variant="ghost" className="sidebar-link">
               <MapPin className="mr-3 h-5 w-5" />
               Destinations
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+            <Button variant="ghost" className="sidebar-link">
               <Calendar className="mr-3 h-5 w-5" />
               Itineraries
             </Button>

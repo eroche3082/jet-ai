@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom Dashboard Sidebar styles */
+.sidebar-link {
+  @apply w-full justify-start text-white hover:bg-[#4a89dc]/20 hover:text-[#FFD700];
+}
+
 @keyframes pulse-soft {
   0% {
     box-shadow: 0 0 0 0 rgba(74, 137, 220, 0.4);
