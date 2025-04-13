@@ -400,43 +400,45 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
     } catch (error) {
       console.error('Error in AI processing:', error);
       
-      // Fallback to simple code generation
-      const code = generateUserCode(userData);
-      
-      // Update user data with code
-      setUserData((prev) => {
-        const updatedUserData = {
-          ...prev,
-          code: code,
+      // Use a single fallback code generation for everything
+      generateUserCode(userData).then(fallbackCode => {
+        // 1. Update user data
+        setUserData(prev => {
+          const updatedUserData = {
+            ...prev,
+            code: fallbackCode,
+            currentStep: prev.currentStep
+          };
+          
+          localStorage.setItem('jetai_user_data', JSON.stringify(updatedUserData));
+          localStorage.setItem('jetai_user_preferences', JSON.stringify(userData.preferences));
+          localStorage.setItem('jetai_user_code', fallbackCode);
+          
+          return updatedUserData;
+        });
+        
+        // 2. Show completion message
+        const fallbackMessage: MessageType = {
+          id: (Date.now() + 1).toString(),
+          content: `Thanks ${userData.name}! Your personalized JET AI code: ${fallbackCode}\n\nWe're preparing your custom dashboard...`,
+          role: 'assistant',
+          timestamp: new Date(),
+          code: fallbackCode,
         };
         
-        localStorage.setItem('jetai_user_data', JSON.stringify(updatedUserData));
-        return updatedUserData;
-      });
-      
-      // Show simple completion message
-      const fallbackMessage: MessageType = {
-        id: (Date.now() + 1).toString(),
-        content: `Thanks ${userData.name}! Your personalized JET AI code: ${code}\n\nWe're preparing your custom dashboard...`,
-        role: 'assistant',
-        timestamp: new Date(),
-        code: code,
-      };
-      
-      // Remove loading message and add fallback message
-      setMessages((prev) => [...prev.filter(m => !m.isLoading), fallbackMessage]);
-      
-      // Redirect after delay
-      setTimeout(() => {
-        console.log("Onboarding complete with fallback code:", code);
-        localStorage.setItem('jetai_user_preferences', JSON.stringify(userData.preferences));
-        localStorage.setItem('jetai_user_code', code);
+        // Remove loading message and add fallback message
+        setMessages(prev => [...prev.filter(m => !m.isLoading), fallbackMessage]);
         
-        onComplete({
-          ...userData,
-          code: code,
-        });
-      }, 2000);
+        // 3. Complete the onboarding after a delay
+        setTimeout(() => {
+          console.log("Onboarding complete with fallback code:", fallbackCode);
+          
+          onComplete({
+            ...userData,
+            code: fallbackCode,
+          });
+        }, 2000);
+      });
     } finally {
       setProcessingAI(false);
     }
