@@ -241,8 +241,42 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
           // Save final preferences before completion
           localStorage.setItem('jetai_user_preferences', JSON.stringify(userData.preferences));
           
-          // Call the completion handler
-          onComplete(userData);
+          // Generate user code based on preferences
+          import('@/lib/chatCodeGenerator').then(async ({ processWithAI, generateQRCode }) => {
+            try {
+              // Process the user data with AI to get categorization and code
+              const result = await processWithAI(userData);
+              
+              // Store the user code for future use
+              if (result.code) {
+                localStorage.setItem('jetai_user_code', result.code);
+                console.log("Generated user code:", result.code);
+                
+                // Attempt to generate QR code
+                const qrCode = await generateQRCode(result.code);
+                if (qrCode) {
+                  localStorage.setItem('jetai_user_qrcode', qrCode);
+                }
+                
+                // Add code information to final user data
+                userData.accessCode = result.code;
+                userData.userCategory = result.category;
+                
+                // Add a follow-up message about the generated code
+                const codeMessage = {
+                  type: 'assistant',
+                  content: `${result.summary} Your unique access code is: ${result.code}`,
+                  timestamp: new Date(),
+                };
+                setMessages((prev) => [...prev, codeMessage]);
+              }
+            } catch (error) {
+              console.error("Error generating user code:", error);
+            } finally {
+              // Call the completion handler with possibly updated userData
+              onComplete(userData);
+            }
+          });
         }, 2000);
       }, 1000);
     } else {
