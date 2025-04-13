@@ -266,8 +266,9 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
                 };
                 
                 // Add a follow-up message about the generated code
-                const codeMessage = {
-                  type: 'assistant',
+                const codeMessage: MessageType = {
+                  id: (Date.now() + 1).toString(),
+                  role: 'assistant',
                   content: `${result.summary} Your unique access code is: ${result.code}`,
                   timestamp: new Date(),
                 };
