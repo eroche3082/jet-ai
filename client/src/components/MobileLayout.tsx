@@ -4,6 +4,7 @@ import { Home, Search, Map, User, Menu, X, MessageSquare, Plus } from 'lucide-re
 import { cn } from '@/lib/utils';
 import Layout from './Layout';
 import Footer from './Footer';
+import FloatingChatButton from './FloatingChatButton';
 
 interface MobileLayoutProps {
   children: ReactNode;
@@ -158,6 +159,9 @@ export default function MobileLayout({
       
       {/* Show Footer only in non-PWA mode */}
       {!isPWA && <Footer />}
+      
+      {/* Floating Chat Button (not shown if in PWA mode since we have the tab bar) */}
+      {!isPWA && <FloatingChatButton />}
     </div>
   );
 }
