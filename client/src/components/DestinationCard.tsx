@@ -54,7 +54,7 @@ export default function DestinationCard({ id, name, country, description, imageU
               {description}
             </p>
             <div className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <span className="inline-block bg-primary/80 hover:bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full">
+              <span className="inline-block bg-[#3a55e7]/80 hover:bg-[#3a55e7] text-white text-xs font-semibold px-3 py-1 rounded-full">
                 Explore Details
               </span>
             </div>

@@ -230,7 +230,7 @@ export default function Destinations() {
                     onClick={() => setSelectedClimate(climate)}
                     className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
                       selectedClimate === climate 
-                        ? 'bg-primary text-white' 
+                        ? 'bg-[#3a55e7] hover:bg-[#2b3fbb] text-white' 
                         : 'bg-gray-100 text-dark hover:bg-gray-200'
                     }`}
                   >
@@ -250,7 +250,7 @@ export default function Destinations() {
                     onClick={() => setSelectedCategory(category)}
                     className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
                       selectedCategory === category 
-                        ? 'bg-primary text-white' 
+                        ? 'bg-[#3a55e7] hover:bg-[#2b3fbb] text-white' 
                         : 'bg-gray-100 text-dark hover:bg-gray-200'
                     }`}
                   >
@@ -302,7 +302,7 @@ export default function Destinations() {
                   setSelectedCategory('All');
                   setSearchQuery('');
                 }}
-                className="bg-primary hover:bg-primary/90 text-white font-accent font-medium px-5 py-2 rounded-full transition"
+                className="bg-[#3a55e7] hover:bg-[#2b3fbb] text-white font-accent font-medium px-5 py-2 rounded-full transition"
               >
                 Reset Filters
               </button>
