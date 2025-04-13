@@ -173,47 +173,48 @@ export default function Destinations() {
     <>
       {/* Page Header */}
       <div className="bg-[url('https://images.unsplash.com/photo-1488085061387-422e29b40080?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1931&q=80')] bg-cover bg-center relative py-20">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#ff6b35]/90 to-yellow-500/90 mix-blend-multiply"></div>
+        <div className="absolute inset-0 bg-[#050b17]/70"></div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="flex items-center justify-center mb-3">
-            <div className="bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full border border-white/30">
-              <span className="text-white font-bold tracking-wider text-sm">JET AI TRAVEL EXPERIENCES</span>
+          <div className="text-center">
+            <div className="inline-flex items-center px-4 py-1 border-l-2 border-[#4a89dc] bg-white/5 text-white text-sm font-serif mb-6 mx-auto">
+              <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5 mr-1.5 text-[#4a89dc]" stroke="currentColor" strokeWidth="2">
+                <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" strokeLinejoin="round" strokeLinecap="round"/>
+              </svg>
+              CURATED BY JET AI
             </div>
-          </div>
-          <h1 className="font-display text-5xl md:text-6xl font-extrabold text-white text-center mb-6 drop-shadow-md">
-            Discover Your Next Adventure
-          </h1>
-          <p className="text-xl text-white/90 text-center max-w-3xl mx-auto mb-10 drop-shadow">
-            Explore extraordinary destinations around the world, from hidden gems to iconic landmarks
-          </p>
-          
-          {/* Search Form */}
-          <div className="max-w-2xl mx-auto backdrop-blur-md bg-white/10 p-6 rounded-xl border border-white/20 shadow-xl">
-            <div className="flex items-center gap-2 mb-5">
-              <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <h2 className="text-white font-bold text-lg">Where do you want to explore?</h2>
-            </div>
+            <h1 className="text-5xl font-bold text-white mb-4 font-display">Explore <span className="text-[#4a89dc]">Destinations</span></h1>
+            <p className="text-xl text-white/90 max-w-3xl mx-auto mb-10 font-serif">
+              Discover your next adventure with our curated selection of exceptional destinations, each offering unique experiences.
+            </p>
             
-            <form onSubmit={handleSearch}>
-              <DestinationSearchInput 
-                value={searchQuery}
-                onChange={setSearchQuery}
-                onSelect={(place) => {
-                  setSearchQuery(place.description);
-                  toast({
-                    title: "Destination selected",
-                    description: `Showing results for ${place.mainText}, ${place.secondaryText || ''}`,
-                    variant: "default",
-                  });
-                }}
-                placeholder="Search for cities, countries, or landmarks..."
-                className="bg-white/90 backdrop-blur-md border-white/30 shadow-lg"
-              />
-            </form>
+            {/* Search Form */}
+            <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-xl">
+              <div className="flex items-center gap-2 mb-5">
+                <div className="h-10 w-10 rounded-full bg-[#4a89dc]/20 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#4a89dc]" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <h2 className="text-white font-serif font-medium text-lg">Where would you like to explore?</h2>
+              </div>
+              
+              <form onSubmit={handleSearch}>
+                <DestinationSearchInput 
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  onSelect={(place) => {
+                    setSearchQuery(place.description);
+                    toast({
+                      title: "Destination selected",
+                      description: `Showing results for ${place.mainText}, ${place.secondaryText || ''}`,
+                      variant: "default",
+                    });
+                  }}
+                  placeholder="Search for cities, countries, or landmarks..."
+                  className="bg-white/90 backdrop-blur-md border-[#4a89dc]/30 focus:border-[#4a89dc] shadow-lg font-serif"
+                />
+              </form>
+            </div>
           </div>
         </div>
       </div>
@@ -222,14 +223,23 @@ export default function Destinations() {
       <div className="bg-white border-b py-8 backdrop-blur-sm bg-opacity-90">
         <div className="container mx-auto px-4">
           <div className="mb-6">
-            <h2 className="text-center font-display text-2xl font-bold text-gray-800 mb-2">Customize Your Adventure</h2>
-            <p className="text-center text-gray-600 max-w-2xl mx-auto">Use these filters to discover the perfect destination for your next adventure</p>
+            <div className="text-center">
+              <div className="inline-flex items-center px-4 py-1 border-l-2 border-[#4a89dc] bg-[#4a89dc]/5 text-[#050b17] text-sm font-serif mb-3">
+                <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5 mr-1.5 text-[#4a89dc]" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path d="M9 22V12h6v10" />
+                </svg>
+                TAILOR YOUR JOURNEY
+              </div>
+            </div>
+            <h2 className="text-center font-display text-3xl font-bold text-[#050b17] mb-2">Customize Your Adventure</h2>
+            <p className="text-center text-gray-600 max-w-2xl mx-auto font-serif">Use these filters to discover the perfect destination for your next adventure</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Continent Filter */}
-            <div className="bg-gradient-to-br from-[#ff6b35]/5 to-transparent p-5 rounded-xl">
-              <h3 className="font-accent font-bold mb-3 flex items-center text-gray-800">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#ff6b35]" viewBox="0 0 20 20" fill="currentColor">
+            <div className="bg-gradient-to-br from-[#4a89dc]/5 to-transparent p-5 rounded-xl border border-[#4a89dc]/10">
+              <h3 className="font-serif font-medium mb-3 flex items-center text-[#050b17]">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#4a89dc]" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M4.083 9h1.946c.089-1.546.383-2.97.837-4.118A6.004 6.004 0 004.083 9zM10 2a8 8 0 100 16 8 8 0 000-16zm0 2c-.076 0-.232.032-.465.262-.238.234-.497.623-.737 1.182-.389.907-.673 2.142-.766 3.556h3.936c-.093-1.414-.377-2.649-.766-3.556-.24-.56-.5-.948-.737-1.182C10.232 4.032 10.076 4 10 4zm3.971 5c-.089-1.546-.383-2.97-.837-4.118A6.004 6.004 0 0115.917 9h-1.946zm-2.003 2H8.032c.093 1.414.377 2.649.766 3.556.24.56.5.948.737 1.182.233.23.389.262.465.262.076 0 .232-.032.465-.262.238-.234.498-.623.737-1.182.389-.907.673-2.142.766-3.556zm1.166 4.118c.454-1.147.748-2.572.837-4.118h1.946a6.004 6.004 0 01-2.783 4.118zm-6.268 0C6.412 13.97 6.118 12.546 6.03 11H4.083a6.004 6.004 0 002.783 4.118z" clipRule="evenodd" />
                 </svg>
                 Continent
@@ -239,10 +249,10 @@ export default function Destinations() {
                   <button 
                     key={continent}
                     onClick={() => setSelectedContinent(continent)}
-                    className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all duration-300 ${
+                    className={`px-4 py-1.5 rounded-full text-sm font-serif transition-all duration-300 ${
                       selectedContinent === continent 
-                        ? 'bg-[#ff6b35] hover:bg-[#e85a24] text-white shadow-md' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
+                        ? 'bg-[#4a89dc] hover:bg-[#3a79cc] text-white shadow-md' 
+                        : 'bg-[#050b17]/5 text-[#050b17] hover:bg-[#050b17]/10'
                     }`}
                   >
                     {continent}
@@ -252,9 +262,9 @@ export default function Destinations() {
             </div>
             
             {/* Climate Filter */}
-            <div className="bg-gradient-to-br from-yellow-500/5 to-transparent p-5 rounded-xl">
-              <h3 className="font-accent font-bold mb-3 flex items-center text-gray-800">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+            <div className="bg-gradient-to-br from-[#4a89dc]/5 to-transparent p-5 rounded-xl border border-[#4a89dc]/10">
+              <h3 className="font-serif font-medium mb-3 flex items-center text-[#050b17]">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#4a89dc]" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 2c1.105 0 2 .895 2 2s-.895 2-2 2-2-.895-2-2 .895-2 2-2zM6 9a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4zm-4 4a2 2 0 100 4 2 2 0 000-4z" />
                 </svg>
                 Climate
@@ -264,10 +274,10 @@ export default function Destinations() {
                   <button 
                     key={climate}
                     onClick={() => setSelectedClimate(climate)}
-                    className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all duration-300 ${
+                    className={`px-4 py-1.5 rounded-full text-sm font-serif transition-all duration-300 ${
                       selectedClimate === climate 
-                        ? 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-md' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
+                        ? 'bg-[#4a89dc] hover:bg-[#3a79cc] text-white shadow-md' 
+                        : 'bg-[#050b17]/5 text-[#050b17] hover:bg-[#050b17]/10'
                     }`}
                   >
                     {climate}
@@ -277,9 +287,9 @@ export default function Destinations() {
             </div>
             
             {/* Category Filter */}
-            <div className="bg-gradient-to-br from-emerald-500/5 to-transparent p-5 rounded-xl">
-              <h3 className="font-accent font-bold mb-3 flex items-center text-gray-800">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
+            <div className="bg-gradient-to-br from-[#4a89dc]/5 to-transparent p-5 rounded-xl border border-[#4a89dc]/10">
+              <h3 className="font-serif font-medium mb-3 flex items-center text-[#050b17]">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#4a89dc]" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
                 </svg>
                 Category
@@ -289,10 +299,10 @@ export default function Destinations() {
                   <button 
                     key={category}
                     onClick={() => setSelectedCategory(category)}
-                    className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all duration-300 ${
+                    className={`px-4 py-1.5 rounded-full text-sm font-serif transition-all duration-300 ${
                       selectedCategory === category 
-                        ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
+                        ? 'bg-[#4a89dc] hover:bg-[#3a79cc] text-white shadow-md' 
+                        : 'bg-[#050b17]/5 text-[#050b17] hover:bg-[#050b17]/10'
                     }`}
                   >
                     {category}
@@ -305,24 +315,29 @@ export default function Destinations() {
       </div>
       
       {/* Destinations Grid */}
-      <section className="py-16 bg-gradient-to-b from-white to-yellow-50">
+      <section className="py-16 bg-gradient-to-b from-white to-[#4a89dc]/5">
         <div className="container mx-auto px-4">
           {filteredDestinations.length > 0 ? (
             <>
-              <div className="mb-10 flex items-center justify-between">
-                <div>
-                  <span className="inline-block bg-[#ff6b35]/10 text-[#ff6b35] text-sm font-bold px-3 py-1 rounded-full mb-2">Discover</span>
-                  <h2 className="font-display text-3xl font-extrabold text-gray-800 flex items-center">
-                    {filteredDestinations.length} Amazing Destinations
+              <div className="mb-10 flex flex-col md:flex-row items-center justify-between">
+                <div className="text-center md:text-left mb-4 md:mb-0">
+                  <div className="inline-flex items-center px-4 py-1 border-l-2 border-[#4a89dc] bg-[#4a89dc]/5 text-[#050b17] text-sm font-serif mb-3">
+                    <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5 mr-1.5 text-[#4a89dc]" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 22V8l9-6 9 6v14h-7v-8h-4v8H3z" />
+                    </svg>
+                    FEATURED DESTINATIONS
+                  </div>
+                  <h2 className="font-display text-3xl font-bold text-[#050b17] flex items-center">
+                    {filteredDestinations.length} Amazing <span className="text-[#4a89dc] ml-2">Destinations</span>
                     <span className="ml-2 relative inline-flex">
-                      <span className="animate-ping absolute h-3 w-3 rounded-full bg-yellow-400 opacity-75"></span>
-                      <span className="relative rounded-full h-3 w-3 bg-yellow-500"></span>
+                      <span className="animate-ping absolute h-3 w-3 rounded-full bg-[#4a89dc] opacity-75"></span>
+                      <span className="relative rounded-full h-3 w-3 bg-[#4a89dc]"></span>
                     </span>
                   </h2>
                 </div>
                 <div className="hidden md:block">
-                  <span className="text-gray-500 text-sm">
-                    <span className="text-[#ff6b35] font-semibold">Pro tip:</span> Click on any destination for detailed adventures!
+                  <span className="text-gray-600 text-sm font-serif">
+                    <span className="text-[#4a89dc] font-medium">Pro tip:</span> Click on any destination for detailed adventures
                   </span>
                 </div>
               </div>
@@ -342,14 +357,14 @@ export default function Destinations() {
               </div>
             </>
           ) : (
-            <div className="text-center py-16 px-4 md:px-12 bg-white rounded-2xl shadow-sm border border-gray-100 max-w-3xl mx-auto">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-yellow-100 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="text-center py-16 px-4 md:px-12 bg-white rounded-lg shadow-sm border border-[#4a89dc]/10 max-w-3xl mx-auto">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-[#4a89dc]/10 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-[#4a89dc]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              <h3 className="font-display text-2xl font-bold mb-3 text-gray-800">Adventure Not Found!</h3>
-              <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg">Your dream destination might be hiding behind different filters. Try adjusting your search criteria or explore our trending adventures.</p>
+              <h3 className="font-display text-2xl font-bold mb-3 text-[#050b17]">Adventure Not Found!</h3>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg font-serif">Your dream destination might be hiding behind different filters. Try adjusting your search criteria or explore our trending adventures.</p>
               <button 
                 onClick={() => {
                   setSelectedContinent('All');
@@ -357,7 +372,7 @@ export default function Destinations() {
                   setSelectedCategory('All');
                   setSearchQuery('');
                 }}
-                className="bg-gradient-to-r from-[#ff6b35] to-yellow-500 hover:from-yellow-500 hover:to-[#ff6b35] text-white font-bold px-6 py-3 rounded-full shadow-lg transform transition-all duration-300 hover:scale-105"
+                className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white font-serif font-medium px-6 py-3 rounded shadow-lg transition-all duration-300"
               >
                 Reset Filters
               </button>
@@ -365,6 +380,25 @@ export default function Destinations() {
           )}
         </div>
       </section>
+      
+      {/* AI Assistant Button (Fixed position) - Bottom Left */}
+      <div className="fixed bottom-6 left-6 z-50 group">
+        <div className="absolute inset-0 rounded-full bg-[#4a89dc] animate-ping opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
+        <button 
+          onClick={() => {
+            // This will eventually open the chat dialog component
+            console.log('Opening AI chat dialog');
+            // Future implementation: setShowChatDialog(true);
+            window.location.href = '/chat';
+          }}
+          className="w-14 h-14 rounded-full flex items-center justify-center bg-[#4a89dc] hover:bg-[#050b17] text-white shadow-lg border border-white/10 transition-all duration-300"
+        >
+          <div className="absolute inset-0 rounded-full bg-[#4a89dc] animate-pulse opacity-30"></div>
+          <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6 text-white" stroke="currentColor" strokeWidth="2">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" strokeLinejoin="round" strokeLinecap="round"/>
+          </svg>
+        </button>
+      </div>
     </>
   );
 }

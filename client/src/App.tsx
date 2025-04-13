@@ -38,6 +38,7 @@ import { AuthProvider } from '@/hooks/use-auth';
 import LandingPage from "@/pages/LightLandingPage";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
+import BlogPage from "@/pages/BlogPage";
 import OnboardingPage from "@/pages/OnboardingPage";
 
 function App() {
@@ -165,7 +166,7 @@ function App() {
         </Route>
         <Route path="/membership" component={Membership} />
         <Route path="/pricing" component={PricingPlans} />
-        <Route path="/about" component={About} />
+        <Route path="/blog" component={BlogPage} />
         <Route path="/signin" component={SignIn} />
         <Route path="/checkout" component={Checkout} />
         
