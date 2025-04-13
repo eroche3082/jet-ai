@@ -162,6 +162,114 @@ export default function SimpleOnboardingChat({ onClose, onComplete }: SimpleOnbo
       setInputValue('');
       setIsTyping(true);
       
+      // Show budget preference question
+      setTimeout(() => {
+        const budgetQuestion: MessageType = {
+          id: (Date.now() + 1).toString(),
+          content: "What's your typical travel budget per day?",
+          role: 'ai',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          options: [
+            { id: 'budget', label: 'Budget (under $100/day)' },
+            { id: 'moderate', label: 'Moderate ($100-$300/day)' },
+            { id: 'premium', label: 'Premium ($300-$500/day)' },
+            { id: 'luxury', label: 'Luxury (over $500/day)' }
+          ]
+        };
+        
+        setMessages(prev => [...prev, budgetQuestion]);
+        setIsTyping(false);
+        setCurrentQuestion(3);
+      }, 800);
+      
+    } else if (currentQuestion === 3) {
+      // Budget preferences
+      setUserData(prev => ({
+        ...prev,
+        preferences: {
+          ...prev.preferences,
+          budget: inputValue
+        },
+        currentStep: prev.currentStep + 1,
+      }));
+      
+      // Clear input and show typing indicator
+      setInputValue('');
+      setIsTyping(true);
+      
+      // Show travel companions question
+      setTimeout(() => {
+        const companionsQuestion: MessageType = {
+          id: (Date.now() + 1).toString(),
+          content: "Who do you typically travel with?",
+          role: 'ai',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          options: [
+            { id: 'solo', label: 'Solo Travel' },
+            { id: 'partner', label: 'With Partner' },
+            { id: 'family', label: 'With Family' },
+            { id: 'friends', label: 'With Friends' },
+            { id: 'group', label: 'Group Tours' }
+          ]
+        };
+        
+        setMessages(prev => [...prev, companionsQuestion]);
+        setIsTyping(false);
+        setCurrentQuestion(4);
+      }, 800);
+      
+    } else if (currentQuestion === 4) {
+      // Travel companions preferences
+      setUserData(prev => ({
+        ...prev,
+        preferences: {
+          ...prev.preferences,
+          travelCompanions: inputValue
+        },
+        currentStep: prev.currentStep + 1,
+      }));
+      
+      // Clear input and show typing indicator
+      setInputValue('');
+      setIsTyping(true);
+      
+      // Show accommodation preferences question
+      setTimeout(() => {
+        const accommodationQuestion: MessageType = {
+          id: (Date.now() + 1).toString(),
+          content: "What types of accommodations do you prefer?",
+          role: 'ai',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          options: [
+            { id: 'luxury', label: 'Luxury Hotels & Resorts' },
+            { id: 'boutique', label: 'Boutique Hotels' },
+            { id: 'midrange', label: 'Mid-range Hotels' },
+            { id: 'vacation-rental', label: 'Vacation Rentals/Airbnb' },
+            { id: 'hostel', label: 'Hostels' },
+            { id: 'unique', label: 'Unique Stays (Treehouses, etc.)' }
+          ]
+        };
+        
+        setMessages(prev => [...prev, accommodationQuestion]);
+        setIsTyping(false);
+        setCurrentQuestion(5);
+      }, 800);
+      
+    } else if (currentQuestion === 5) {
+      // Accommodation preferences
+      setUserData(prev => ({
+        ...prev,
+        preferences: {
+          ...prev.preferences,
+          accommodation: inputValue
+        },
+        currentStep: prev.currentStep + 1,
+      }));
+      
+      // Clear input and show typing indicator
+      setInputValue('');
+      setIsTyping(true);
+      
       // Final message and completion
       setTimeout(() => {
         const thankYouMessage: MessageType = {
