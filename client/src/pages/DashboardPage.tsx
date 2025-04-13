@@ -1,273 +1,371 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import DashboardLayout from '@/components/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  BarChart,
-  AreaChart,
-  Bar,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
-import {
-  MapIcon,
-  CalendarIcon,
-  MessageSquareIcon,
-  PlaneIcon,
-  HotelIcon,
-  UserIcon,
-  CreditCardIcon
+import { 
+  Plane, Luggage, MapPin, Calendar, Hotel, Utensils, 
+  CreditCard, User, Settings, LogOut, Menu, X, MessageSquare 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from '@/hooks/use-auth';
 import AIChat from '@/components/AIChat';
 
-const data = [
-  { month: 'Jan', searches: 65, bookings: 28 },
-  { month: 'Feb', searches: 59, bookings: 25 },
-  { month: 'Mar', searches: 80, bookings: 40 },
-  { month: 'Apr', searches: 81, bookings: 35 },
-  { month: 'May', searches: 56, bookings: 28 },
-  { month: 'Jun', searches: 55, bookings: 30 },
-  { month: 'Jul', searches: 40, bookings: 20 },
-];
-
-const predictiveData = [
-  { month: 'Aug', searches: 65, bookings: 32 },
-  { month: 'Sep', searches: 75, bookings: 37 },
-  { month: 'Oct', searches: 85, bookings: 42 },
-  { month: 'Nov', searches: 70, bookings: 35 },
-  { month: 'Dec', searches: 90, bookings: 45 },
-];
-
-const upcomingTrips = [
-  {
-    id: 1,
-    destination: 'Paris, France',
-    startDate: '2025-05-15',
-    endDate: '2025-05-22',
-    status: 'Confirmed',
-    image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073&auto=format&fit=crop'
-  },
-  {
-    id: 2,
-    destination: 'Tokyo, Japan',
-    startDate: '2025-06-10',
-    endDate: '2025-06-18',
-    status: 'Planning',
-    image: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=2487&auto=format&fit=crop'
-  },
-];
-
 export default function DashboardPage() {
-  const [, navigate] = useLocation();
-  const [username, setUsername] = useState('');
-  const [isShowingAIChat, setIsShowingAIChat] = useState(false);
-
+  const { userProfile, logout } = useAuth();
+  const [, setLocation] = useLocation();
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  
+  // This would normally come from user preferences saved in database
+  // For now we're using sample data
+  const [recommendations, setRecommendations] = useState<any[]>([
+    {
+      id: '1',
+      title: 'Tokyo Cultural Tour',
+      description: 'Explore the vibrant culture of Tokyo with this 5-day guided tour',
+      image: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26',
+      tags: ['culture', 'city', 'food']
+    },
+    {
+      id: '2',
+      title: 'Paris Romance Package',
+      description: 'Experience the city of love with luxury accommodations and dining',
+      image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34',
+      tags: ['luxury', 'romance', 'city']
+    },
+    {
+      id: '3',
+      title: 'Bali Relaxation Retreat',
+      description: 'Unwind and rejuvenate with spa treatments and beach access',
+      image: 'https://images.unsplash.com/photo-1539367628448-4bc5c9d171c8',
+      tags: ['relaxation', 'beach', 'nature']
+    }
+  ]);
+  
+  // Simulate checking if user came from onboarding
+  const [isNewUser, setIsNewUser] = useState(true);
+  
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    if (!isLoggedIn) {
-      navigate('/login');
-      return;
-    }
+    // This would check if the user just completed onboarding
+    const timer = setTimeout(() => {
+      setIsNewUser(false);
+    }, 5000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
-    try {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      setUsername(user.username || 'Guest');
-    } catch (error) {
-      console.error('Error parsing user data:', error);
-    }
-  }, [navigate]);
-
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+  const toggleChat = () => {
+    setShowChat(prev => !prev);
   };
 
   return (
-    <DashboardLayout>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Welcome, {username}</h1>
-          <p className="text-gray-600">Here's an overview of your travel plans and insights</p>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar - Desktop */}
+      <div className="hidden md:flex w-64 flex-col bg-[#050b17] text-white">
+        <div className="p-4 border-b border-gray-800 flex items-center space-x-3">
+          <img src="/logo.png" alt="JET AI" className="h-8 w-8" />
+          <h1 className="text-xl font-bold">JET AI</h1>
         </div>
-        <Button 
-          size="lg" 
-          className="flex items-center gap-2 bg-[#3a55e7] hover:bg-[#2b3fbb]"
-          onClick={() => setIsShowingAIChat(!isShowingAIChat)}
-        >
-          <MessageSquareIcon size={18} />
-          <span>Ask AI Assistant</span>
+        
+        <div className="flex-1 overflow-y-auto py-4">
+          <nav className="px-2 space-y-1">
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <User className="mr-3 h-5 w-5" />
+              Dashboard
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <Plane className="mr-3 h-5 w-5" />
+              Explore
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <Luggage className="mr-3 h-5 w-5" />
+              Trips
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <MapPin className="mr-3 h-5 w-5" />
+              Destinations
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <Calendar className="mr-3 h-5 w-5" />
+              Itineraries
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <Hotel className="mr-3 h-5 w-5" />
+              Accommodations
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <Utensils className="mr-3 h-5 w-5" />
+              Dining
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <CreditCard className="mr-3 h-5 w-5" />
+              Budget
+            </Button>
+          </nav>
+        </div>
+        
+        <div className="p-4 border-t border-gray-800">
+          <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+            <Settings className="mr-3 h-5 w-5" />
+            Settings
+          </Button>
+          <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20" onClick={() => logout()}>
+            <LogOut className="mr-3 h-5 w-5" />
+            Logout
+          </Button>
+        </div>
+      </div>
+      
+      {/* Mobile Header */}
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-[#050b17] text-white z-10 p-4 flex justify-between items-center">
+        <div className="flex items-center space-x-3">
+          <img src="/logo.png" alt="JET AI" className="h-8 w-8" />
+          <h1 className="text-xl font-bold">JET AI</h1>
+        </div>
+        <Button variant="ghost" size="icon" onClick={() => setShowMobileMenu(!showMobileMenu)}>
+          {showMobileMenu ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </Button>
       </div>
-
-      {isShowingAIChat && (
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <AIChat />
-          </CardContent>
-        </Card>
+      
+      {/* Mobile Menu */}
+      {showMobileMenu && (
+        <div className="md:hidden fixed inset-0 bg-[#050b17] z-20 pt-16 px-4 py-6">
+          <nav className="space-y-4">
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <User className="mr-3 h-5 w-5" />
+              Dashboard
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <Plane className="mr-3 h-5 w-5" />
+              Explore
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <Luggage className="mr-3 h-5 w-5" />
+              Trips
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <MapPin className="mr-3 h-5 w-5" />
+              Destinations
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <Calendar className="mr-3 h-5 w-5" />
+              Itineraries
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <Hotel className="mr-3 h-5 w-5" />
+              Accommodations
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <Utensils className="mr-3 h-5 w-5" />
+              Dining
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <CreditCard className="mr-3 h-5 w-5" />
+              Budget
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <Settings className="mr-3 h-5 w-5" />
+              Settings
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20" onClick={() => logout()}>
+              <LogOut className="mr-3 h-5 w-5" />
+              Logout
+            </Button>
+          </nav>
+        </div>
       )}
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div className="space-y-0.5">
-              <CardTitle className="text-base">Total Itineraries</CardTitle>
-              <CardDescription>Created travel plans</CardDescription>
-            </div>
-            <MapIcon className="h-6 w-6 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">+2 from last month</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div className="space-y-0.5">
-              <CardTitle className="text-base">Upcoming Trips</CardTitle>
-              <CardDescription>Confirmed bookings</CardDescription>
-            </div>
-            <CalendarIcon className="h-6 w-6 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">3</div>
-            <p className="text-xs text-muted-foreground">Next: Paris, May 15</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div className="space-y-0.5">
-              <CardTitle className="text-base">AI Interactions</CardTitle>
-              <CardDescription>Chats with assistant</CardDescription>
-            </div>
-            <MessageSquareIcon className="h-6 w-6 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground">8 this week</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Travel Activity</CardTitle>
-            <CardDescription>Your searches and bookings over time</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={data}
-                  margin={{
-                    top: 20,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="searches" fill="#3a55e7" name="Searches" />
-                  <Bar dataKey="bookings" fill="#10b981" name="Bookings" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Predictive Trends</CardTitle>
-            <CardDescription>AI-generated forecast for your travel patterns</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={[...data, ...predictiveData]}
-                  margin={{
-                    top: 20,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Area 
-                    type="monotone" 
-                    dataKey="searches" 
-                    stroke="#3a55e7" 
-                    fill="#3a55e7" 
-                    fillOpacity={0.2}
-                    name="Searches"
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="bookings" 
-                    stroke="#10b981" 
-                    fill="#10b981"
-                    fillOpacity={0.2}
-                    name="Bookings"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Upcoming Trips</CardTitle>
-          <CardDescription>Your scheduled and planned travel</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {upcomingTrips.map((trip) => (
-              <Card key={trip.id} className="overflow-hidden h-full border shadow-sm">
-                <div 
-                  className="h-40 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${trip.image})` }}
-                />
-                <CardContent className="p-4">
-                  <h3 className="font-semibold text-lg mb-2">{trip.destination}</h3>
-                  <div className="flex items-center text-sm text-gray-600 mb-2">
-                    <CalendarIcon size={14} className="mr-1" />
-                    <span>
-                      {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
-                    </span>
+      
+      {/* Main Content */}
+      <div className="flex-1 overflow-y-auto md:ml-0 pt-16 md:pt-0">
+        <div className="container mx-auto px-4 py-6">
+          {/* Welcome Banner */}
+          {isNewUser && (
+            <Card className="mb-6 bg-[#4a89dc]/10 border-[#4a89dc]">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-12 w-12 border-2 border-[#4a89dc]">
+                    <AvatarFallback className="bg-[#4a89dc] text-white">
+                      {userProfile?.name ? userProfile.name.charAt(0) : 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h2 className="text-2xl font-bold">Welcome to JET AI, {userProfile?.name || 'Traveler'}!</h2>
+                    <p className="text-gray-600">Your personalized travel dashboard is ready. Explore your custom recommendations below.</p>
                   </div>
-                  <div className="flex justify-between items-center mt-4">
-                    <span 
-                      className={`
-                        px-2 py-1 rounded-full text-xs font-medium 
-                        ${trip.status === 'Confirmed' ? 'bg-green-100 text-green-800' : 'bg-[#ebeffe] text-[#3a55e7]'}
-                      `}
-                    >
-                      {trip.status}
-                    </span>
-                    <Button size="sm" variant="outline">View Details</Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {/* Travel Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <Card>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Destinations Visited</p>
+                  <p className="text-2xl font-bold">12</p>
+                </div>
+                <MapPin className="h-8 w-8 text-[#4a89dc]" />
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Upcoming Trips</p>
+                  <p className="text-2xl font-bold">2</p>
+                </div>
+                <Plane className="h-8 w-8 text-[#4a89dc]" />
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Budget Status</p>
+                  <p className="text-2xl font-bold">$2,450</p>
+                </div>
+                <CreditCard className="h-8 w-8 text-[#4a89dc]" />
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Travel Points</p>
+                  <p className="text-2xl font-bold">3,280</p>
+                </div>
+                <Award className="h-8 w-8 text-[#4a89dc]" />
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Personalized Recommendations */}
+          <h2 className="text-2xl font-bold mb-4">Your Personalized Recommendations</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {recommendations.map((rec) => (
+              <Card key={rec.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="h-48 overflow-hidden">
+                  <img
+                    src={rec.image}
+                    alt={rec.title}
+                    className="w-full h-full object-cover transition-transform hover:scale-105"
+                  />
+                </div>
+                <CardHeader className="p-4">
+                  <CardTitle>{rec.title}</CardTitle>
+                  <CardDescription>{rec.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {rec.tags.map((tag: string) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-1 bg-[#4a89dc]/10 text-[#4a89dc] text-xs rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
                   </div>
+                  <Button className="w-full bg-[#4a89dc] hover:bg-[#3a79cc] text-white">
+                    View Details
+                  </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
-        </CardContent>
-      </Card>
-    </DashboardLayout>
+          
+          {/* Travel Calendar */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Upcoming Travel</CardTitle>
+              <CardDescription>Your scheduled trips for the next 3 months</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center p-3 border rounded-lg">
+                  <div className="p-3 bg-[#4a89dc]/10 rounded-md mr-4">
+                    <Calendar className="h-6 w-6 text-[#4a89dc]" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold">Weekend in Paris</h3>
+                    <p className="text-gray-500 text-sm">May 15 - May 18, 2025</p>
+                  </div>
+                  <Button variant="outline" className="ml-auto">View</Button>
+                </div>
+                
+                <div className="flex items-center p-3 border rounded-lg">
+                  <div className="p-3 bg-[#4a89dc]/10 rounded-md mr-4">
+                    <Calendar className="h-6 w-6 text-[#4a89dc]" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold">Tokyo Adventure</h3>
+                    <p className="text-gray-500 text-sm">June 10 - June 20, 2025</p>
+                  </div>
+                  <Button variant="outline" className="ml-auto">View</Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Travel Tips */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Travel Tips For You</CardTitle>
+              <CardDescription>Based on your preferences and upcoming trips</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="p-4 border rounded-lg">
+                  <h3 className="font-semibold mb-2">Best Time to Visit Japan</h3>
+                  <p className="text-gray-600">Spring (March to May) and fall (September to November) are considered the best times to visit Japan when the weather is mild and the landscape is painted in vibrant colors.</p>
+                </div>
+                
+                <div className="p-4 border rounded-lg">
+                  <h3 className="font-semibold mb-2">Paris Local Transport Tips</h3>
+                  <p className="text-gray-600">Purchase a Paris Visite travel pass for unlimited travel on the metro, RER, buses, and trams. It's cost-effective if you plan to use public transport frequently.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+      
+      {/* Chat Button */}
+      <Button
+        className="fixed bottom-6 right-6 rounded-full h-14 w-14 bg-[#4a89dc] hover:bg-[#3a79cc] text-white shadow-lg"
+        onClick={toggleChat}
+      >
+        <MessageSquare className="h-6 w-6" />
+      </Button>
+      
+      {/* Chat Panel */}
+      {showChat && (
+        <div className="fixed bottom-24 right-6 w-96 h-[500px] shadow-xl rounded-lg overflow-hidden z-50">
+          <AIChat />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Fix missing component
+function Award(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="8" r="6" />
+      <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
+    </svg>
   );
 }

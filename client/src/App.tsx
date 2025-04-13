@@ -34,10 +34,11 @@ import { getAffiliateId } from "@/lib/utils";
 import PartnerDashboard from "@/pages/partner/Dashboard";
 import PartnerSignup from "@/pages/partner/Signup";
 import { initializePWA } from '@/lib/pwa';
-import { AuthProvider } from '@/hooks/useAuth';
+import { AuthProvider } from '@/hooks/use-auth';
 import LandingPage from "@/pages/LightLandingPage";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
+import OnboardingPage from "@/pages/OnboardingPage";
 
 function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -62,11 +63,12 @@ function App() {
     // PWA detection
     const checkPWA = () => {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-      const isFromHomeScreen = window.navigator.standalone; // iOS Safari
+      // Check for iOS standalone mode (add type assertion for TypeScript)
+      const isFromHomeScreen = (window.navigator as any).standalone === true;
       const urlParams = new URLSearchParams(window.location.search);
       const forcePWA = urlParams.get('pwa') === 'true';
       
-      setIsPWA(isStandalone || !!isFromHomeScreen || forcePWA);
+      setIsPWA(isStandalone || isFromHomeScreen || forcePWA);
     };
     
     // Initialize PWA features
@@ -151,6 +153,7 @@ function App() {
         {/* New unified structure routes */}
         <Route path="/" component={LandingPage} />
         <Route path="/login" component={LoginPage} />
+        <Route path="/onboarding" component={OnboardingPage} />
         <Route path="/dashboard" component={DashboardPage} />
         
         {/* Main application routes */}
@@ -215,9 +218,9 @@ function App() {
     );
   };
 
-  // Don't use Layout for landing page, login page or status pages
+  // Don't use Layout for landing page, login page, onboarding or status pages
   const shouldUseLayout = () => {
-    return !['/login', '/'].includes(location) && !location.startsWith('/status/');
+    return !['/login', '/', '/onboarding'].includes(location) && !location.startsWith('/status/');
   };
 
   return (

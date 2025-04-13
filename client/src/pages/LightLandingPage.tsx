@@ -56,6 +56,11 @@ export default function LightLandingPage() {
             </div>
             
             <div className="flex items-center space-x-4">
+              <Link href="/onboarding">
+                <Button className="bg-[#4a89dc] text-white hover:bg-[#3a79cc] border-none transition-all duration-300 font-serif rounded">
+                  Get Started
+                </Button>
+              </Link>
               <Link href="/login">
                 <Button variant="outline" className="bg-white text-[#050b17] hover:bg-[#4a89dc] hover:text-white border-none transition-all duration-300 font-serif rounded">
                   Sign In
@@ -91,14 +96,23 @@ export default function LightLandingPage() {
               JET AI harmonizes sophisticated artificial intelligence with refined travel expertise to curate your ideal journey.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-5">
-              <Link href="/destinations" className="inline-flex items-center bg-[#4a89dc] hover:bg-[#3a79cc] text-white font-serif font-medium px-6 py-3 rounded-md transition shadow-lg">
+              <Link href="/onboarding" className="inline-flex items-center bg-[#4a89dc] hover:bg-[#3a79cc] text-white font-serif font-medium px-6 py-3 rounded-md transition shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 mr-2">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Create My Profile
+              </Link>
+              <Link href="/destinations" className="inline-flex items-center bg-transparent border border-white/30 hover:border-white/50 text-white font-serif font-medium px-6 py-3 rounded-md transition">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 mr-2">
                   <circle cx="12" cy="12" r="10"></circle>
                   <polygon points="10 8 16 12 10 16 10 8"></polygon>
                 </svg>
                 Explore Destinations
               </Link>
-              <Link href="/chat" className="inline-flex items-center bg-transparent border border-white/30 hover:border-white/50 text-white font-serif font-medium px-6 py-3 rounded-md transition">
+              <Link href="/chat" className="hidden sm:inline-flex items-center bg-transparent border border-white/30 hover:border-white/50 text-white font-serif font-medium px-6 py-3 rounded-md transition">
                 Start Planning
               </Link>
             </div>

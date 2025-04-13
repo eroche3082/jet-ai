@@ -88,7 +88,10 @@ export default function LoginPage() {
           <CardFooter className="flex flex-col space-y-4">
             <div className="text-sm text-center text-gray-500">
               <span>Don't have an account? </span>
-              <a href="#" className="text-primary hover:underline">
+              <a 
+                onClick={() => navigate('/onboarding')} 
+                className="text-primary hover:underline cursor-pointer"
+              >
                 Sign up
               </a>
             </div>
