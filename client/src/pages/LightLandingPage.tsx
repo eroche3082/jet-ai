@@ -48,7 +48,7 @@ export default function LightLandingPage() {
             
             <div className="flex items-center space-x-4">
               <Link href="/login">
-                <Button variant="outline" className="border-[#4e6af9] text-white hover:bg-[#4e6af9] hover:text-white">
+                <Button variant="outline" className="border-[#3a55e7] text-white hover:bg-[#3a55e7] hover:text-white">
                   Sign In
                 </Button>
               </Link>
@@ -68,7 +68,7 @@ export default function LightLandingPage() {
             <h1 className="text-5xl font-bold text-white mb-4">Discover Your Next Adventure with AI</h1>
             <p className="text-xl text-white mb-8">Let JET AI be your personal travel companion. Find destinations, plan itineraries, and experience the world like never before.</p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-              <Button size="lg" className="bg-[#4e6af9] hover:bg-[#3a55e7] text-white">
+              <Button size="lg" className="bg-[#3a55e7] hover:bg-[#2b3fbb] text-white">
                 <Link href="/destinations">Explore Destinations</Link>
               </Button>
               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-[#4e6af9]">
@@ -125,7 +125,7 @@ export default function LightLandingPage() {
                     </div>
                   </div>
                   <div className="flex items-end">
-                    <Button type="submit" className="w-full bg-[#4e6af9] hover:bg-[#3a55e7]">
+                    <Button type="submit" className="w-full bg-[#3a55e7] hover:bg-[#2b3fbb]">
                       <Search className="mr-2 h-5 w-5" /> Search
                     </Button>
                   </div>
@@ -187,7 +187,7 @@ export default function LightLandingPage() {
                   <p className="text-green-600 font-semibold">$1,200</p>
                 </div>
                 <p className="text-gray-600 mb-4">Experience the perfect blend of tranquil beaches, lush rice terraces, and vibrant cultural rituals on this magical island.</p>
-                <Button className="w-full bg-[#4e6af9] hover:bg-[#3a55e7]">View Details</Button>
+                <Button className="w-full bg-[#3a55e7] hover:bg-[#2b3fbb]">View Details</Button>
               </div>
             </div>
             
@@ -228,7 +228,7 @@ export default function LightLandingPage() {
                   <p className="text-green-600 font-semibold">$950</p>
                 </div>
                 <p className="text-gray-600 mb-4">Navigate through the romantic canals of this unique city built on water, with its architectural marvels and timeless charm.</p>
-                <Button className="w-full bg-[#4e6af9] hover:bg-[#3a55e7]">View Details</Button>
+                <Button className="w-full bg-[#3a55e7] hover:bg-[#2b3fbb]">View Details</Button>
               </div>
             </div>
             
@@ -269,7 +269,7 @@ export default function LightLandingPage() {
                   <p className="text-green-600 font-semibold">$1,450</p>
                 </div>
                 <p className="text-gray-600 mb-4">Step back in time in Japan's former capital with its thousands of classical Buddhist temples, gardens, and traditional wooden houses.</p>
-                <Button className="w-full bg-[#4e6af9] hover:bg-[#3a55e7]">View Details</Button>
+                <Button className="w-full bg-[#3a55e7] hover:bg-[#2b3fbb]">View Details</Button>
               </div>
             </div>
           </div>
