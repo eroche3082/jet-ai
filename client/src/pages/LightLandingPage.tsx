@@ -69,12 +69,12 @@ export default function LightLandingPage() {
         </div>
       </header>
       
-      {/* Hero Section */}
-      <section className="relative bg-cover bg-center h-[650px]" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1771&q=80')" }}>
-        <div className="absolute inset-0 bg-gradient-to-t from-marni-black/80 via-marni-dark/50 to-transparent"></div>
+      {/* Hero Section - Bridge Inspired */}
+      <section className="relative bg-cover bg-center h-[650px]" style={{ backgroundImage: "url('/img/tokyo_hero.jpg')" }}>
+        <div className="absolute inset-0 bg-gradient-to-t from-marni-black/80 via-marni-dark/60 to-marni-dark/30"></div>
         <div className="container mx-auto px-6 h-full flex flex-col justify-center relative z-10">
           <div className="max-w-2xl">
-            <div className="bg-marni-darkgray/30 backdrop-blur-sm px-4 py-1 inline-flex items-center mb-6 border-l-2 border-marni-accent">
+            <div className="bg-marni-dark/40 backdrop-blur-sm px-4 py-1 inline-flex items-center mb-6 border-l-2 border-marni-accent">
               <span className="text-white/90 text-sm font-serif tracking-wide">INTELLIGENT TRAVEL PLANNING</span>
             </div>
             <h1 className="text-5xl md:text-6xl font-display text-white mb-6 leading-tight drop-shadow-md">
@@ -83,17 +83,32 @@ export default function LightLandingPage() {
             <p className="text-xl text-white/90 mb-10 max-w-xl leading-relaxed drop-shadow-sm font-serif">
               JET AI harmonizes sophisticated artificial intelligence with refined travel expertise to curate your ideal journey.
             </p>
-            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-              <Button size="lg" className="bg-marni-accent text-white hover:bg-marni-accent/90 transition-all duration-300 shadow-lg hover:shadow-xl px-8 font-medium">
+            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-5">
+              <Button size="lg" className="bg-marni-accent text-white hover:bg-white hover:text-marni-dark transition-all duration-300 shadow-lg hover:shadow-xl px-8 font-medium">
                 <Link href="/destinations" className="flex items-center">
                   <Compass className="mr-2 h-5 w-5" /> Explore Destinations
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+              <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 hover:border-white transition-all duration-300">
                 <Link href="/chat" className="flex items-center">
-                  <Sparkles className="mr-2 h-5 w-5" /> Consult AI Assistant
+                  <BookOpen className="mr-2 h-5 w-5" /> Discover Services
                 </Link>
               </Button>
+            </div>
+            
+            <div className="flex justify-start items-center space-x-10 text-white/90 font-serif mt-10">
+              <div className="flex items-center group">
+                <div className="h-9 w-9 rounded-full bg-marni-accent/20 flex items-center justify-center mr-3 group-hover:bg-marni-accent/30 transition-all duration-300">
+                  <Star className="h-4 w-4 text-marni-accent" />
+                </div>
+                <span>AI-Powered Precision</span>
+              </div>
+              <div className="flex items-center group">
+                <div className="h-9 w-9 rounded-full bg-marni-accent/20 flex items-center justify-center mr-3 group-hover:bg-marni-accent/30 transition-all duration-300">
+                  <Heart className="h-4 w-4 text-marni-accent" />
+                </div>
+                <span>Bespoke Experiences</span>
+              </div>
             </div>
           </div>
         </div>
