@@ -291,15 +291,44 @@ export default function TravelCommunityPage() {
         const data = await response.json();
         if (data.posts && data.posts.length > 0) {
           // If we have real posts from API, use them
-          setPosts(data.posts.map((post: any) => ({
-            ...post,
-            createdAt: new Date(post.createdAt)
-          })));
+          const formattedPosts = data.posts.map((post: any) => ({
+            id: post.id,
+            author: {
+              id: post.authorId?.toString() || 'anonymous',
+              name: post.authorName || 'Anonymous Traveler',
+              avatar: post.authorAvatar || '/avatars/default.jpg',
+              location: post.authorLocation || 'World Traveler'
+            },
+            content: post.content,
+            images: post.images || [],
+            location: {
+              name: post.location?.name || 'Unknown Location',
+              coordinates: post.location?.coordinates || { lat: 0, lng: 0 }
+            },
+            tags: post.tags || [],
+            likes: post.likes || 0,
+            comments: post.comments || 0,
+            isLiked: post.isLiked || false,
+            createdAt: new Date(post.createdAt || Date.now())
+          }));
+          
+          setPosts(formattedPosts);
+          console.log('Loaded posts from API:', formattedPosts);
+        } else {
+          console.log('No posts found from API, using sample data');
+          // Keep using sample posts if API returns empty
         }
+      } else {
+        throw new Error(`Error fetching posts: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
       // Keep using sample posts if API fails
+      toast({
+        title: "Couldn't load latest posts",
+        description: "We're using sample content until the connection is restored.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }

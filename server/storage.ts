@@ -737,6 +737,106 @@ export class MemStorage implements IStorage {
   async bookmarkItinerary(id: number, isBookmarked: boolean): Promise<Itinerary | undefined> {
     return this.updateItinerary(id, { isBookmarked });
   }
+
+  // Community Posts
+  private communityPosts: Map<string, any> = new Map();
+  private communityLikes: Map<string, Set<number>> = new Map();
+  private communityComments: Map<string, any[]> = new Map();
+  private journeyCodeMap: Map<string, string[]> = new Map();
+  
+  async getCommunityPosts(): Promise<any[]> {
+    return Array.from(this.communityPosts.values())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getCommunityPostById(id: string): Promise<any | undefined> {
+    return this.communityPosts.get(id);
+  }
+
+  async createCommunityPost(post: any): Promise<any> {
+    const id = `post_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const newPost = {
+      id,
+      ...post,
+      likes: 0,
+      comments: 0,
+      isLiked: false
+    };
+    
+    this.communityPosts.set(id, newPost);
+    this.communityLikes.set(id, new Set());
+    this.communityComments.set(id, []);
+    
+    // Store journey code mapping
+    if (post.journeyCode) {
+      const posts = this.journeyCodeMap.get(post.journeyCode) || [];
+      this.journeyCodeMap.set(post.journeyCode, [...posts, id]);
+    }
+    
+    return newPost;
+  }
+
+  async likeCommunityPost(postId: string, userId: number): Promise<{ action: 'added' | 'removed', likeCount: number } | undefined> {
+    const post = this.communityPosts.get(postId);
+    if (!post) return undefined;
+    
+    const likes = this.communityLikes.get(postId) || new Set();
+    let action: 'added' | 'removed';
+    
+    if (likes.has(userId)) {
+      likes.delete(userId);
+      action = 'removed';
+    } else {
+      likes.add(userId);
+      action = 'added';
+    }
+    
+    this.communityLikes.set(postId, likes);
+    
+    const likeCount = likes.size;
+    post.likes = likeCount;
+    this.communityPosts.set(postId, post);
+    
+    return { action, likeCount };
+  }
+
+  async addCommunityPostComment(comment: any): Promise<any> {
+    const { postId } = comment;
+    const post = this.communityPosts.get(postId);
+    if (!post) throw new Error('Post not found');
+    
+    const id = `comment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const newComment = {
+      id,
+      ...comment
+    };
+    
+    const comments = this.communityComments.get(postId) || [];
+    comments.push(newComment);
+    this.communityComments.set(postId, comments);
+    
+    // Update comment count on post
+    post.comments = comments.length;
+    this.communityPosts.set(postId, post);
+    
+    return newComment;
+  }
+
+  async getCommunityPostComments(postId: string): Promise<any[]> {
+    return this.communityComments.get(postId) || [];
+  }
+
+  async getCommunityPostsByJourneyCode(journeyCode: string): Promise<any[]> {
+    const postIds = this.journeyCodeMap.get(journeyCode) || [];
+    const posts = [];
+    
+    for (const id of postIds) {
+      const post = this.communityPosts.get(id);
+      if (post) posts.push(post);
+    }
+    
+    return posts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
 }
 
 export const storage = new MemStorage();
