@@ -500,12 +500,13 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
                 <div className="prose prose-sm max-w-none dark:prose-invert">
                   {message.content}
                 </div>
-                <div className={`text-xs mt-1 ${
+                <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-between'} items-center text-xs mt-1 ${
                   message.role === 'user' 
                     ? 'text-white/70' 
                     : 'text-[#050b17]/70'
                 }`}>
-                  {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {message.role === 'assistant' && <span className="bg-[#4a89dc]/10 px-2 py-0.5 rounded text-[#050b17]/80 text-xs">vertex-flash-ai</span>}
+                  <span>{message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
               </div>
             </div>
