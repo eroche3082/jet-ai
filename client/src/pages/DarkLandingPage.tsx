@@ -31,15 +31,15 @@ export default function DarkLandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-950 text-white">
+    <div className="min-h-screen flex flex-col bg-black text-white">
       {/* Header Navigation */}
-      <header className="bg-gray-900 border-b border-gray-800 py-4 px-6 sticky top-0 z-50">
+      <header className="bg-black py-4 px-6 sticky top-0 z-50">
         <div className="container mx-auto flex justify-between items-center">
           <Link href="/" className="flex items-center">
             <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-primary" stroke="currentColor" strokeWidth="2">
               <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" strokeLinejoin="round" strokeLinecap="round"/>
             </svg>
-            <span className="ml-2 text-xl font-bold">JET AI</span>
+            <span className="ml-2 text-xl font-bold text-white uppercase tracking-wider">JET AI</span>
           </Link>
           
           <nav className="hidden md:flex space-x-8 items-center">
@@ -57,7 +57,7 @@ export default function DarkLandingPage() {
           
           <div className="hidden md:block">
             <Link href="/login">
-              <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Login</Button>
+              <Button className="bg-white text-black hover:bg-gray-100 font-medium">Login</Button>
             </Link>
           </div>
           
@@ -89,7 +89,7 @@ export default function DarkLandingPage() {
               <Link href="/about" className="py-2 text-gray-300 hover:text-primary">About</Link>
               <div className="pt-4 border-t border-gray-800">
                 <Link href="/login">
-                  <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white">
+                  <Button className="w-full bg-white text-black hover:bg-gray-100 font-medium">
                     Login
                   </Button>
                 </Link>
@@ -100,11 +100,11 @@ export default function DarkLandingPage() {
       </header>
       
       {/* Hero Section */}
-      <div className="relative flex-1 flex items-center min-h-[80vh] bg-gray-950">
+      <div className="relative flex-1 flex items-center min-h-[80vh] bg-black">
         <div 
-          className="absolute inset-0 z-0 bg-cover bg-center opacity-30"
+          className="absolute inset-0 z-0 bg-cover bg-center opacity-20"
           style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1540395425275-77278ce9e0df?q=80&w=2069&auto=format&fit=crop')",
+            backgroundImage: "url('https://images.unsplash.com/photo-1608023141638-6bc2c175d130?q=80&w=2070&auto=format&fit=crop')",
             backgroundPosition: "center"
           }}
         ></div>
@@ -118,7 +118,7 @@ export default function DarkLandingPage() {
               Let our intelligent travel assistant create personalized itineraries based on your preferences and travel style.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-white">
+              <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-white font-medium">
                 <Link href="/chat">
                   <div className="flex items-center gap-2">
                     <SendIcon size={18} />
@@ -126,8 +126,10 @@ export default function DarkLandingPage() {
                   </div>
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-gray-600 text-white hover:bg-gray-800">
-                <Link href="/destinations">Explore Destinations</Link>
+              <Button asChild size="lg" variant="outline" className="border-gray-400 text-white hover:bg-gray-800 font-medium">
+                <Link href="/destinations">
+                  <span className="text-white">Explore Destinations</span>
+                </Link>
               </Button>
             </div>
           </div>
@@ -135,7 +137,7 @@ export default function DarkLandingPage() {
       </div>
       
       {/* Features Title */}
-      <div className="bg-gray-900 py-16 text-white">
+      <div className="bg-black py-16 text-white">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-4xl font-bold mb-4">20 Smart Features for Intelligent Travel</h2>
           <p className="text-xl max-w-3xl mx-auto text-gray-300">
@@ -146,11 +148,11 @@ export default function DarkLandingPage() {
       </div>
       
       {/* 20 Features Grid */}
-      <div className="py-12 bg-gray-950">
+      <div className="py-12 bg-black">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Feature 1 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <Plane className="h-6 w-6 text-primary" />
@@ -161,7 +163,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 2 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <Globe className="h-6 w-6 text-primary" />
@@ -172,7 +174,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 3 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <Languages className="h-6 w-6 text-primary" />
@@ -183,7 +185,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 4 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <HeartHandshake className="h-6 w-6 text-primary" />
@@ -194,7 +196,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 5 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <Wallet className="h-6 w-6 text-primary" />
@@ -205,7 +207,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 6 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <FileCheck className="h-6 w-6 text-primary" />
@@ -216,7 +218,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 7 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <BrainCircuit className="h-6 w-6 text-primary" />
@@ -227,7 +229,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 8 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <PackageCheck className="h-6 w-6 text-primary" />
@@ -238,7 +240,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 9 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <Cloud className="h-6 w-6 text-primary" />
@@ -249,7 +251,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 10 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <Mountain className="h-6 w-6 text-primary" />
@@ -260,7 +262,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 11 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <Stethoscope className="h-6 w-6 text-primary" />
@@ -271,7 +273,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 12 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <Plane className="h-6 w-6 text-primary" />
@@ -282,7 +284,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 13 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <User className="h-6 w-6 text-primary" />
@@ -293,7 +295,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 14 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <ShieldCheck className="h-6 w-6 text-primary" />
@@ -304,7 +306,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 15 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <Leaf className="h-6 w-6 text-primary" />
@@ -315,7 +317,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 16 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <Hotel className="h-6 w-6 text-primary" />
@@ -326,7 +328,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 17 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <CalendarCheck className="h-6 w-6 text-primary" />
@@ -337,7 +339,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 18 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <Clock className="h-6 w-6 text-primary" />
@@ -348,7 +350,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 19 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <BadgeDollarSign className="h-6 w-6 text-primary" />
@@ -359,7 +361,7 @@ export default function DarkLandingPage() {
             </div>
             
             {/* Feature 20 */}
-            <div className="bg-gray-800 p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <div className="bg-black p-6 rounded-md flex flex-col group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border border-gray-800">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center">
                   <PanelTopOpen className="h-6 w-6 text-primary" />
@@ -373,7 +375,7 @@ export default function DarkLandingPage() {
       </div>
       
       {/* Experience the World Section */}
-      <div className="py-20 bg-gray-900">
+      <div className="py-20 bg-black">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl font-bold text-center mb-12">Experience the World with JET AI</h2>
           
@@ -484,7 +486,7 @@ export default function DarkLandingPage() {
       </div>
       
       {/* Photo Gallery Grid */}
-      <div className="py-12 bg-gray-950">
+      <div className="py-12 bg-black">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="overflow-hidden rounded-lg shadow-lg group">
@@ -551,12 +553,12 @@ export default function DarkLandingPage() {
       </div>
       
       {/* Testimonials */}
-      <div className="py-20 bg-gray-800">
+      <div className="py-20 bg-black">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl font-bold text-center mb-16 text-white">What Our Users Say</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            <div className="bg-gray-900 shadow-lg p-8 rounded-lg">
+            <div className="bg-black shadow-lg p-8 rounded-lg border border-gray-800">
               <div className="flex items-center justify-center mb-8">
                 <div className="h-20 w-20 rounded-full overflow-hidden border-2 border-primary">
                   <img 
@@ -573,7 +575,7 @@ export default function DarkLandingPage() {
               </div>
             </div>
             
-            <div className="bg-gray-900 shadow-lg p-8 rounded-lg">
+            <div className="bg-black shadow-lg p-8 rounded-lg border border-gray-800">
               <div className="flex items-center justify-center mb-8">
                 <div className="h-20 w-20 rounded-full overflow-hidden border-2 border-primary">
                   <img 
@@ -590,7 +592,7 @@ export default function DarkLandingPage() {
               </div>
             </div>
             
-            <div className="bg-gray-900 shadow-lg p-8 rounded-lg">
+            <div className="bg-black shadow-lg p-8 rounded-lg border border-gray-800">
               <div className="flex items-center justify-center mb-8">
                 <div className="h-20 w-20 rounded-full overflow-hidden border-2 border-primary">
                   <img 
@@ -611,17 +613,16 @@ export default function DarkLandingPage() {
       </div>
       
       {/* Call to Action */}
-      <div className="py-16 bg-gradient-to-r from-primary to-primary/80 text-white">
+      <div className="py-16 bg-black text-white">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Experience Smarter Travel?</h2>
-          <p className="text-xl mb-8 max-w-3xl mx-auto">
+          <p className="text-xl mb-8 max-w-3xl mx-auto text-gray-300">
             Join thousands of travelers who have discovered the power of AI-assisted travel planning.
           </p>
           <Button 
             asChild 
             size="lg" 
-            variant="outline" 
-            className="bg-white text-primary border-white hover:bg-white/90 hover:text-primary"
+            className="bg-white text-primary border-white hover:bg-white/90 hover:text-primary font-medium"
           >
             <Link href="/login">
               <span className="text-lg px-6">Get Started Now</span>
@@ -631,7 +632,7 @@ export default function DarkLandingPage() {
       </div>
       
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 border-t border-gray-800">
+      <footer className="bg-black text-white py-12">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -639,7 +640,7 @@ export default function DarkLandingPage() {
                 <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-primary" stroke="currentColor" strokeWidth="2">
                   <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" strokeLinejoin="round" strokeLinecap="round"/>
                 </svg>
-                <h3 className="font-bold text-xl ml-2">JET AI</h3>
+                <h3 className="font-bold text-xl ml-2 uppercase tracking-wider">JET AI</h3>
               </div>
               <p className="text-gray-400">
                 Revolutionizing travel planning with artificial intelligence.
@@ -676,7 +677,7 @@ export default function DarkLandingPage() {
             </div>
           </div>
           
-          <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+          <div className="mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">© 2025 JET AI. All rights reserved.</p>
             <div className="flex space-x-4 mt-4 md:mt-0">
               <a href="#" className="text-gray-400 hover:text-white">
