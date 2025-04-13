@@ -259,8 +259,11 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
                 }
                 
                 // Add code information to final user data
-                userData.accessCode = result.code;
-                userData.userCategory = result.category;
+                const updatedUserData = {
+                  ...userData,
+                  code: result.code,
+                  category: result.category
+                };
                 
                 // Add a follow-up message about the generated code
                 const codeMessage = {

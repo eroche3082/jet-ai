@@ -42,6 +42,7 @@ import BlogPage from "@/pages/BlogPage";
 import OnboardingPage from "@/pages/OnboardingPage";
 import FeaturesPage from "@/pages/FeaturesPage";
 import LanguageLearningPage from "@/pages/LanguageLearningPage";
+import AdminPage from "@/pages/AdminPage";
 
 function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -199,6 +200,7 @@ function App() {
         <Route path="/suggestions" component={SuggestionsPage} />
         <Route path="/memories" component={TravelMemoryPage} />
         <Route path="/language-learning" component={LanguageLearningPage} />
+        <Route path="/admin" component={AdminPage} />
         
         {/* Partner/Affiliate routes */}
         <Route path="/partner/dashboard" component={PartnerDashboard} />
