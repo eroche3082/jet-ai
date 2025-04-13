@@ -4,7 +4,6 @@ import Destinations from "@/pages/Destinations";
 import DestinationDetail from "@/pages/DestinationDetail";
 import Itineraries from "@/pages/Itineraries";
 import ItineraryView from "@/pages/ItineraryView";
-import About from "@/pages/About";
 import SignIn from "@/pages/SignIn";
 import Dashboard from "@/pages/Dashboard";
 import Checkout from "@/pages/Checkout";
@@ -40,6 +39,7 @@ import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
 import BlogPage from "@/pages/BlogPage";
 import OnboardingPage from "@/pages/OnboardingPage";
+import FeaturesPage from "@/pages/FeaturesPage";
 
 function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -167,6 +167,7 @@ function App() {
         <Route path="/membership" component={Membership} />
         <Route path="/pricing" component={PricingPlans} />
         <Route path="/blog" component={BlogPage} />
+        <Route path="/features" component={FeaturesPage} />
         <Route path="/signin" component={SignIn} />
         <Route path="/checkout" component={Checkout} />
         

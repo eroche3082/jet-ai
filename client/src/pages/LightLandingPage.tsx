@@ -51,10 +51,10 @@ export default function LightLandingPage() {
               <Link href="/" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">Home</Link>
               <Link href="/destinations" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">Destinations</Link>
               <Link href="/blog" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">Travel Blog</Link>
-              <Link href="/chat" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">
+              <Link href="/features" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">
                 <div className="flex items-center space-x-1">
-                  <MessageSquare className="h-4 w-4" />
-                  <span>AI Assistant</span>
+                  <Sparkles className="h-4 w-4" />
+                  <span>AI Features</span>
                 </div>
               </Link>
             </div>
