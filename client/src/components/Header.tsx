@@ -41,8 +41,7 @@ export default function Header() {
     { title: 'Home', path: '/' },
     { title: 'Destinations', path: '/destinations' },
     { title: 'Travel Blog', path: '/blog' },
-    { title: 'About Us', path: '/about' },
-    { title: 'AI Assistant', path: '/chat' }
+    { title: 'AI Assistant', path: '/features' }
   ];
   
   return (
