@@ -63,25 +63,71 @@ export default function About() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative py-20 bg-marni-dark/10">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center px-4 py-1 border-l-2 border-marni-accent bg-marni-dark/5 text-marni-dark text-sm font-serif mb-3">
-              <span className="text-marni-accent">ABOUT</span> JET AI
+      <section className="relative py-24 bg-[#050b17] overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/img/jet_hero.jpg" 
+            alt="Luxury Private Jet" 
+            className="w-full h-full object-cover opacity-20"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#050b17] via-[#050b17]/90 to-[#050b17]/80"></div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-3xl mx-auto">
+            <div className="inline-flex items-center px-4 py-1 border-l-2 border-[#4a89dc] bg-white/5 text-white text-sm font-serif mb-3">
+              INTELLIGENT TRAVEL PLANNING
             </div>
-            <h1 className="font-display text-4xl md:text-5xl font-bold text-marni-dark mb-6">
-              Redefining Travel Planning with AI
+            <h1 className="font-display text-4xl md:text-5xl font-bold text-white mb-4">
+              Journey Beyond <span className="text-[#4a89dc]">Boundaries</span>
             </h1>
-            <p className="text-lg text-marni-dark/70 mb-8 font-serif">
-              JET AI combines cutting-edge artificial intelligence with deep travel expertise to create
-              personalized experiences that match your unique preferences, budget, and travel style.
+            <p className="text-lg text-white/80 mb-8 font-serif">
+              JET AI harmonizes sophisticated artificial intelligence with 
+              refined travel expertise to curate your ideal journey.
             </p>
-            <Link 
-              href="/destinations" 
-              className="inline-block bg-marni-accent hover:bg-marni-accent/90 text-white font-serif font-medium px-8 py-3 rounded transition shadow-md"
-            >
-              Start Exploring
-            </Link>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                href="/destinations" 
+                className="inline-flex items-center bg-[#4a89dc] hover:bg-[#3a79cc] text-white font-serif font-medium px-6 py-3 rounded-md transition shadow-lg"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 mr-2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                </svg>
+                Explore Destinations
+              </Link>
+              <Link 
+                href="/chat" 
+                className="inline-flex items-center bg-transparent border border-white/30 hover:border-white/50 text-white font-serif font-medium px-6 py-3 rounded-md transition"
+              >
+                Start Planning
+              </Link>
+            </div>
+            
+            <div className="mt-16 grid grid-cols-2 gap-8">
+              <div className="flex items-center">
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mr-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-[#4a89dc]">
+                    <path d="M12 2v20M2 12h20"></path>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-white font-serif">AI-Powered Precision</h3>
+                </div>
+              </div>
+              <div className="flex items-center">
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mr-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-[#4a89dc]">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 16v-4M12 8h.01"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-white font-serif">Bespoke Experiences</h3>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
