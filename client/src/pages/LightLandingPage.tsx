@@ -71,10 +71,10 @@ export default function LightLandingPage() {
       
       {/* Hero Section - Bridge Inspired */}
       <section className="relative bg-cover bg-center h-[650px]" style={{ 
-        backgroundImage: `url('https://source.unsplash.com/random/1920x1080/?private+jet')`, 
-        backgroundPosition: 'center 20%',
+        backgroundImage: `url('/img/jet_hero_2.jpg')`, 
+        backgroundPosition: 'center 40%',
       }}>
-        <div className="absolute inset-0 bg-gradient-to-t from-marni-black/90 via-marni-dark/60 to-marni-dark/30"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-marni-black/80 via-marni-dark/60 to-marni-dark/30"></div>
         <div className="container mx-auto px-6 h-full flex flex-col justify-center relative z-10">
           <div className="max-w-2xl">
             <div className="bg-marni-dark/40 backdrop-blur-sm px-4 py-1 inline-flex items-center mb-6 border-l-2 border-marni-accent">
