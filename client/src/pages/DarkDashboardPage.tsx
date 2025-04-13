@@ -389,12 +389,42 @@ export default function DarkDashboardPage() {
                 </div>
                 <h3 className="text-xl font-medium mb-2">Start a conversation</h3>
                 <p className="text-gray-400 mb-6">Chat with JET AI to plan your next adventure</p>
-                <Button 
-                  onClick={() => setShowChat(true)}
-                  className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white mx-auto"
-                >
-                  Open Chat
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button 
+                    onClick={() => setShowChat(true)}
+                    className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white"
+                  >
+                    Open Chat
+                  </Button>
+                  
+                  {/* Test codes button - for demonstration purposes */}
+                  <Button 
+                    onClick={() => {
+                      const codeTypes = [
+                        { code: 'TRAVEL-VIP-FR-2025', category: 'Luxury Traveler with French proficiency' },
+                        { code: 'TRAVEL-ADV-ES-2025', category: 'Adventure Seeker with Spanish proficiency' },
+                        { code: 'TRAVEL-BIZ-JP-2025', category: 'Business Traveler with Japanese proficiency' },
+                        { code: 'TRAVEL-FAM-IT-2025', category: 'Family Explorer with Italian proficiency' },
+                        { code: 'TRAVEL-BEG-2025', category: 'Travel Beginner' }
+                      ];
+                      
+                      const selectedType = codeTypes[Math.floor(Math.random() * codeTypes.length)];
+                      
+                      setUserCode(selectedType.code);
+                      setUserCategory(selectedType.category);
+                      localStorage.setItem('jetai_user_code', selectedType.code);
+                      
+                      toast({
+                        title: 'Test Code Generated',
+                        description: `Your access code: ${selectedType.code}`
+                      });
+                    }}
+                    variant="outline"
+                    className="border-[#4a89dc] text-[#4a89dc] hover:bg-[#4a89dc]/10"
+                  >
+                    Generate Test Code
+                  </Button>
+                </div>
               </div>
             )}
             
@@ -427,7 +457,102 @@ export default function DarkDashboardPage() {
               </div>
               
               {activeTab === 'journey' && (
-                <div className="space-y-4">
+                <div className="space-y-6">
+                  {/* Access Code Summary */}
+                  <div className="p-5 border border-[#4a89dc]/50 rounded-lg bg-gradient-to-r from-[#050b17] to-[#0a1a35]">
+                    <h3 className="text-lg font-medium mb-1 text-[#4a89dc]">Your JET AI Journey</h3>
+                    <p className="text-sm text-gray-300 mb-3">
+                      Based on your preferences and access code, we've customized your travel experience.
+                    </p>
+                    
+                    <div className="bg-[#050b17]/70 p-4 rounded-md border border-[#4a89dc]/20 mb-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                        <div>
+                          <div className="text-xs text-gray-400">ACCESS CODE</div>
+                          <div className="text-xl font-mono font-bold">{userCode || 'TRAVEL-BEG-0000'}</div>
+                          <div className="text-xs text-gray-400 mt-1">TRAVELER TYPE</div>
+                          <div className="text-md font-medium">{userCategory || 'Standard Traveler'}</div>
+                        </div>
+                        
+                        <div className="mt-3 sm:mt-0">
+                          <div className="mb-1 text-xs text-gray-400">SHARE YOUR CODE</div>
+                          <div className="flex gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="text-xs border-[#4a89dc] text-[#4a89dc] hover:bg-[#4a89dc]/10"
+                              onClick={() => {
+                                if (userCode) {
+                                  navigator.clipboard.writeText(userCode);
+                                  toast({ title: "Code copied to clipboard" });
+                                }
+                              }}
+                            >
+                              Copy Code
+                            </Button>
+                            
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="text-xs border-[#4a89dc] text-[#4a89dc] hover:bg-[#4a89dc]/10"
+                              onClick={async () => {
+                                if (userCode && !qrCodeUrl) {
+                                  const newQrCode = await generateQRCode(userCode);
+                                  setQrCodeUrl(newQrCode);
+                                  toast({ title: "QR code generated" });
+                                }
+                              }}
+                            >
+                              Show QR
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <h4 className="text-sm font-medium text-gray-300 mb-2">Unlocked Features</h4>
+                    
+                    <ul className="pl-1 space-y-2">
+                      <li className="flex items-start">
+                        <div className="mr-2 text-green-400 mt-0.5">✓</div>
+                        <div>
+                          <div className="text-sm font-medium">Travel Planning</div>
+                          <div className="text-xs text-gray-400">Plan your trips with our AI assistant</div>
+                        </div>
+                      </li>
+                      <li className="flex items-start">
+                        <div className="mr-2 text-green-400 mt-0.5">✓</div>
+                        <div>
+                          <div className="text-sm font-medium">Destination Research</div>
+                          <div className="text-xs text-gray-400">Access detailed information for any location</div>
+                        </div>
+                      </li>
+                      {userCode && userCode.includes('-VIP') && (
+                        <li className="flex items-start">
+                          <div className="mr-2 text-green-400 mt-0.5">✓</div>
+                          <div>
+                            <div className="text-sm font-medium">VIP Concierge Services</div>
+                            <div className="text-xs text-gray-400">Exclusive travel arrangements and recommendations</div>
+                          </div>
+                        </li>
+                      )}
+                      {userCode && (userCode.includes('-FR') || userCode.includes('-ES') || userCode.includes('-DE') || 
+                                   userCode.includes('-IT') || userCode.includes('-JP') || userCode.includes('-CN') || 
+                                   userCode.includes('-PT') || userCode.includes('-RU') || userCode.includes('-AR') || 
+                                   userCode.includes('-KR')) && (
+                        <li className="flex items-start">
+                          <div className="mr-2 text-green-400 mt-0.5">✓</div>
+                          <div>
+                            <div className="text-sm font-medium">Language Learning</div>
+                            <div className="text-xs text-gray-400">Personalized language lessons for your travels</div>
+                          </div>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                  
+                  <h3 className="text-lg font-medium mt-6">Your Journey Progress</h3>
+                  
                   {/* Level 1 - Always unlocked */}
                   <div className="p-3 border border-[#4a89dc]/30 rounded-lg bg-[#050b17]">
                     <div className="flex justify-between items-center">
@@ -482,25 +607,31 @@ export default function DarkDashboardPage() {
                     </div>
                   </div>
                   
-                  {/* Level 4 - Locked, requires upgrade */}
-                  <div className="p-3 border border-gray-800 rounded-lg bg-[#050b17]/50">
+                  {/* Level 4 - Conditionally unlocked for VIP codes */}
+                  <div className={`p-3 border ${userCode && userCode.includes('-VIP') ? 'border-[#4a89dc]/30 bg-[#050b17]' : 'border-gray-800 bg-[#050b17]/50'} rounded-lg`}>
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center mr-3">
-                          <span className="font-bold text-gray-400">4</span>
+                        <div className={`w-10 h-10 rounded-full ${userCode && userCode.includes('-VIP') ? 'bg-[#4a89dc]' : 'bg-gray-800'} flex items-center justify-center mr-3`}>
+                          <span className={`font-bold ${userCode && userCode.includes('-VIP') ? 'text-white' : 'text-gray-400'}`}>4</span>
                         </div>
                         <div>
-                          <h4 className="font-medium text-gray-400">Pioneer</h4>
-                          <p className="text-xs text-gray-500">Premium content access</p>
+                          <h4 className={`font-medium ${userCode && userCode.includes('-VIP') ? 'text-white' : 'text-gray-400'}`}>Pioneer</h4>
+                          <p className={`text-xs ${userCode && userCode.includes('-VIP') ? 'text-gray-400' : 'text-gray-500'}`}>Premium content access</p>
                         </div>
                       </div>
-                      <Button variant="outline" className="text-xs h-8 border-[#4a89dc] text-[#4a89dc] hover:bg-[#4a89dc]/10">
-                        Upgrade
-                      </Button>
+                      {userCode && userCode.includes('-VIP') ? (
+                        <div className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
+                          Unlocked
+                        </div>
+                      ) : (
+                        <Button variant="outline" className="text-xs h-8 border-[#4a89dc] text-[#4a89dc] hover:bg-[#4a89dc]/10">
+                          Upgrade
+                        </Button>
+                      )}
                     </div>
                   </div>
                   
-                  {/* Level 5 - Locked, requires upgrade */}
+                  {/* Level 5 - Always locked, VIP upgrade required */}
                   <div className="p-3 border border-gray-800 rounded-lg bg-[#050b17]/50">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
