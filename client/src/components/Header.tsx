@@ -130,7 +130,7 @@ export default function Header() {
               </div>
             ) : (
               <Link 
-                href="/signin" 
+                href="/login" 
                 className="font-serif font-medium text-white bg-[#4a89dc] hover:bg-[#3a79cc] px-5 py-2 rounded transition-colors duration-300 shadow-sm"
               >
                 Sign In
@@ -220,7 +220,7 @@ export default function Header() {
             ) : (
               <div className="py-4">
                 <Link
-                  href="/signin"
+                  href="/login"
                   className="block py-3 text-center font-serif font-medium text-white bg-[#4a89dc] hover:bg-[#3a79cc] rounded transition-colors duration-300 shadow-sm"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >

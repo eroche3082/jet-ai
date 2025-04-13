@@ -170,7 +170,12 @@ function App() {
         <Route path="/pricing" component={PricingPlans} />
         <Route path="/blog" component={BlogPage} />
         <Route path="/features" component={FeaturesPage} />
-        <Route path="/signin" component={SignIn} />
+        <Route path="/signin">
+          {() => {
+            window.location.href = '/login';
+            return null;
+          }}
+        </Route>
         <Route path="/checkout" component={Checkout} />
         
         {/* AI Assistant routes */}
