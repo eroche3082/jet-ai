@@ -200,22 +200,26 @@ export default function About() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {teamMembers.map((member) => (
-              <div key={member.id} className="bg-light rounded-xl overflow-hidden shadow-sm">
+              <div key={member.id} className="bg-white rounded-lg overflow-hidden shadow-sm border border-marni-dark/5">
                 <img 
                   src={member.imageUrl} 
                   alt={member.name} 
                   className="w-full h-64 object-cover"
                 />
                 <div className="p-6">
-                  <h3 className="font-display font-bold text-dark text-xl mb-1">{member.name}</h3>
-                  <p className="text-primary font-accent font-medium mb-3">{member.role}</p>
-                  <p className="text-dark/70 text-sm">{member.bio}</p>
+                  <h3 className="font-display font-bold text-marni-dark text-xl mb-1">{member.name}</h3>
+                  <p className="text-marni-accent font-serif font-medium mb-3">{member.role}</p>
+                  <p className="text-marni-dark/70 text-sm font-serif">{member.bio}</p>
                   <div className="flex mt-4 space-x-3">
-                    <a href="#" className="text-dark/50 hover:text-primary transition">
-                      <i className="fab fa-linkedin"></i>
+                    <a href="#" className="text-marni-dark/50 hover:text-marni-accent transition-colors duration-300">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z" />
+                      </svg>
                     </a>
-                    <a href="#" className="text-dark/50 hover:text-primary transition">
-                      <i className="fab fa-twitter"></i>
+                    <a href="#" className="text-marni-dark/50 hover:text-marni-accent transition-colors duration-300">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                      </svg>
                     </a>
                   </div>
                 </div>
@@ -226,12 +230,15 @@ export default function About() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-16 bg-gradient-to-br from-primary/5 to-secondary/5">
+      <section className="py-16 bg-gradient-to-br from-marni-dark/5 to-marni-accent/5">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="font-display text-3xl font-bold text-dark mb-4">What Our Users Say</h2>
-            <p className="text-lg text-dark/70 max-w-2xl mx-auto">
-              Hear from travelers who have experienced the JetAI difference.
+            <div className="inline-flex items-center px-4 py-1 border-l-2 border-marni-accent bg-marni-dark/5 text-marni-dark text-sm font-serif mb-4">
+              TESTIMONIALS
+            </div>
+            <h2 className="font-display text-3xl font-bold text-marni-dark mb-4">What Our Clients Say</h2>
+            <p className="text-lg text-marni-dark/70 max-w-2xl mx-auto font-serif">
+              Hear from travelers who have experienced the JET AI difference.
             </p>
           </div>
           
@@ -255,101 +262,115 @@ export default function About() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
-              <h2 className="font-display text-3xl font-bold text-dark mb-6">Get in Touch</h2>
-              <p className="text-dark/70 mb-8">
-                Have questions about JetAI or need assistance with your travel plans? Our team is here to help!
+              <div className="inline-flex items-center px-4 py-1 border-l-2 border-marni-accent bg-marni-dark/5 text-marni-dark text-sm font-serif mb-4">
+                CONTACT US
+              </div>
+              <h2 className="font-display text-3xl font-bold text-marni-dark mb-6">Get in Touch</h2>
+              <p className="text-marni-dark/70 mb-8 font-serif">
+                Have questions about JET AI or need assistance with your travel plans? Our team is here to help!
               </p>
               
               <div className="space-y-6">
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mr-4">
-                    <i className="fas fa-map-marker-alt text-primary"></i>
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-marni-accent/10 flex items-center justify-center mr-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-marni-accent">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
                   </div>
                   <div>
-                    <h3 className="font-accent font-semibold text-dark mb-1">Location</h3>
-                    <p className="text-dark/70">123 Travel Street, Global City, Earth</p>
+                    <h3 className="font-display font-medium text-marni-dark mb-1">Location</h3>
+                    <p className="text-marni-dark/70 font-serif">123 Travel Street, Global City, Earth</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mr-4">
-                    <i className="fas fa-envelope text-primary"></i>
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-marni-accent/10 flex items-center justify-center mr-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-marni-accent">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                      <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
                   </div>
                   <div>
-                    <h3 className="font-accent font-semibold text-dark mb-1">Email</h3>
-                    <p className="text-dark/70">hello@jetai.travel</p>
+                    <h3 className="font-display font-medium text-marni-dark mb-1">Email</h3>
+                    <p className="text-marni-dark/70 font-serif">hello@jetai.travel</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mr-4">
-                    <i className="fas fa-phone-alt text-primary"></i>
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-marni-accent/10 flex items-center justify-center mr-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-marni-accent">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
                   </div>
                   <div>
-                    <h3 className="font-accent font-semibold text-dark mb-1">Phone</h3>
-                    <p className="text-dark/70">+1 (555) 123-4567</p>
+                    <h3 className="font-display font-medium text-marni-dark mb-1">Phone</h3>
+                    <p className="text-marni-dark/70 font-serif">+1 (555) 123-4567</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mr-4">
-                    <i className="fas fa-clock text-primary"></i>
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-marni-accent/10 flex items-center justify-center mr-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-marni-accent">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
                   </div>
                   <div>
-                    <h3 className="font-accent font-semibold text-dark mb-1">Business Hours</h3>
-                    <p className="text-dark/70">Monday - Friday: 9am - 6pm EST</p>
+                    <h3 className="font-display font-medium text-marni-dark mb-1">Business Hours</h3>
+                    <p className="text-marni-dark/70 font-serif">Monday - Friday: 9am - 6pm EST</p>
                   </div>
                 </div>
               </div>
             </div>
             
-            <div className="bg-light p-8 rounded-xl shadow-sm">
-              <h3 className="font-display text-xl font-bold text-dark mb-6">Send Us a Message</h3>
+            <div className="bg-white p-8 rounded-lg shadow-sm border border-marni-dark/10">
+              <h3 className="font-display text-xl font-bold text-marni-dark mb-6">Send Us a Message</h3>
               <form>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-dark/70 mb-1">Name</label>
+                    <label htmlFor="name" className="block text-sm font-medium text-marni-dark/70 mb-1 font-serif">Name</label>
                     <input 
                       type="text" 
                       id="name" 
-                      className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-primary"
+                      className="w-full px-4 py-2 rounded border border-marni-dark/20 focus:outline-none focus:border-marni-accent focus:ring-1 focus:ring-marni-accent/20"
                       placeholder="Your name"
                     />
                   </div>
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-dark/70 mb-1">Email</label>
+                    <label htmlFor="email" className="block text-sm font-medium text-marni-dark/70 mb-1 font-serif">Email</label>
                     <input 
                       type="email" 
                       id="email" 
-                      className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-primary"
+                      className="w-full px-4 py-2 rounded border border-marni-dark/20 focus:outline-none focus:border-marni-accent focus:ring-1 focus:ring-marni-accent/20"
                       placeholder="Your email"
                     />
                   </div>
                 </div>
                 
                 <div className="mb-4">
-                  <label htmlFor="subject" className="block text-sm font-medium text-dark/70 mb-1">Subject</label>
+                  <label htmlFor="subject" className="block text-sm font-medium text-marni-dark/70 mb-1 font-serif">Subject</label>
                   <input 
                     type="text" 
                     id="subject" 
-                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-primary"
+                    className="w-full px-4 py-2 rounded border border-marni-dark/20 focus:outline-none focus:border-marni-accent focus:ring-1 focus:ring-marni-accent/20"
                     placeholder="Subject"
                   />
                 </div>
                 
                 <div className="mb-6">
-                  <label htmlFor="message" className="block text-sm font-medium text-dark/70 mb-1">Message</label>
+                  <label htmlFor="message" className="block text-sm font-medium text-marni-dark/70 mb-1 font-serif">Message</label>
                   <textarea 
                     id="message" 
                     rows={5}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-primary"
+                    className="w-full px-4 py-2 rounded border border-marni-dark/20 focus:outline-none focus:border-marni-accent focus:ring-1 focus:ring-marni-accent/20"
                     placeholder="How can we help you?"
                   ></textarea>
                 </div>
                 
                 <button
                   type="submit"
-                  className="w-full bg-primary hover:bg-primary/90 text-white font-accent font-semibold px-6 py-3 rounded-full transition"
+                  className="w-full bg-marni-dark hover:bg-marni-accent text-white font-serif font-medium py-3 rounded shadow-sm hover:shadow transition-all duration-300"
                 >
                   Send Message
                 </button>
