@@ -1,98 +1,120 @@
-// AI Processing Service for onboarding preference analysis
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
-// Categories for user classification
-const TRAVELER_CATEGORIES = [
-  { level: 'VIP', description: 'Luxury traveler with a taste for premium experiences and exclusive destinations.' },
-  { level: 'Explorer', description: 'Curious traveler seeking authentic cultural experiences and hidden gems.' },
-  { level: 'Adventurer', description: 'Thrill-seeking explorer who craves active, outdoorsy experiences.' },
-  { level: 'Culturist', description: 'Culture-focused traveler with a passion for history, arts, and local traditions.' },
-  { level: 'Relaxer', description: 'Leisure-oriented traveler who prioritizes comfort and relaxation.' },
-  { level: 'Globetrotter', description: 'Experienced world traveler with diverse interests and preferences.' },
-  { level: 'Families', description: 'Family-oriented traveler who values kid-friendly activities and accommodations.' },
-  { level: 'Digital Nomad', description: 'Remote worker combining travel with professional responsibilities.' },
-  { level: 'Budget Master', description: 'Value-focused traveler who excels at maximizing experiences on minimal spending.' },
-  { level: 'Gourmand', description: 'Food-centric traveler exploring the world through its culinary treasures.' }
-];
+type UserData = {
+  name: string;
+  email: string;
+  preferences: Record<string, any>;
+};
 
-/**
- * Generate a unique code based on user data
- */
-export function generateUserCode(userData: any): string {
-  // Platform prefix
-  const prefix = 'JET';
-  
-  // Determine user level based on preferences
-  const userCategory = categorizeUser(userData);
-  
-  // Extract first three letters of the level
-  const levelCode = userCategory.level.substring(0, 3).toUpperCase();
-  
-  // Generate a random 4-digit number
-  const randomNum = Math.floor(1000 + Math.random() * 9000);
-  
-  // Combine to create the unique code
-  return `${prefix}-${levelCode}-${randomNum}`;
-}
+type AIResponse = {
+  code: string;
+  category: string;
+  summary: string;
+};
 
-/**
- * Categorize the user based on their preferences
- */
-function categorizeUser(userData: any): { level: string; description: string } {
-  // Skip categorization if preferences are empty
-  if (!userData.preferences || Object.keys(userData.preferences).length === 0) {
-    return TRAVELER_CATEGORIES[1]; // Default to Explorer
-  }
-  
-  // Calculate a deterministic index based on user data to ensure consistency
-  const nameHash = userData.name.length;
-  const emailHash = userData.email.split('@')[0].length;
-  const prefCount = Object.keys(userData.preferences).length;
-  
-  // Use a deterministic formula to pick a category
-  const index = (nameHash + emailHash + prefCount) % TRAVELER_CATEGORIES.length;
-  
-  return TRAVELER_CATEGORIES[index];
-}
+// Map of travel types to traveler categories
+const TRAVELER_CATEGORIES: Record<string, string> = {
+  'Luxury Travel': 'Luxury Traveler',
+  'Adventure Travel': 'Adventure Seeker',
+  'Business Travel': 'Business Traveler',
+  'Family Travel': 'Family Explorer',
+  'Solo Travel': 'Solo Explorer',
+  'Budget Travel': 'Value Seeker',
+  'Cultural Travel': 'Cultural Enthusiast',
+  'Eco Travel': 'Eco-Conscious Traveler'
+};
+
+// Map of travel types to code prefixes
+const CODE_PREFIXES: Record<string, string> = {
+  'Luxury Travel': 'VIP',
+  'Adventure Travel': 'ADV',
+  'Business Travel': 'BIZ',
+  'Family Travel': 'FAM',
+  'Solo Travel': 'SOLO',
+  'Budget Travel': 'ECO',
+  'Cultural Travel': 'CULT',
+  'Eco Travel': 'GREEN'
+};
 
 /**
- * Analyze user preferences and generate a traveler category and code
+ * AI Analysis of User Preferences
+ * 
+ * This function analyzes the user's travel preferences and categorizes them,
+ * providing a custom travel profile with personalized suggestions.
  */
-export const analyzePreferences = async (req: Request, res: Response) => {
+export async function analyzePreferences(req: Request, res: Response) {
   try {
-    const userData = req.body;
+    const userData: UserData = req.body;
     
-    if (!userData || !userData.name || !userData.email) {
-      return res.status(400).json({
-        error: 'Invalid user data provided'
-      });
+    if (!userData || !userData.preferences) {
+      return res.status(400).json({ error: 'Invalid user data provided' });
     }
     
-    // For now, use rule-based categorization as a fallback
-    const category = categorizeUser(userData);
-    const code = generateUserCode(userData);
+    // Extract key preferences
+    const travelTypes = userData.preferences.travelTypes || [];
+    const budget = userData.preferences.budget || 'Medium';
+    const companions = userData.preferences.travelCompanions || 'Solo';
     
-    // Store the user preferences in a leads database (future enhancement)
-    // This would connect to a CRM or internal leads system
-    console.log('New user onboarded:', {
-      name: userData.name,
-      email: userData.email,
+    // Determine primary travel type
+    let primaryType = 'Standard Travel';
+    let category = 'Standard Traveler';
+    let prefix = 'STD';
+    
+    // Find the first matching travel type in our category map
+    for (const type of travelTypes) {
+      if (TRAVELER_CATEGORIES[type]) {
+        primaryType = type;
+        category = TRAVELER_CATEGORIES[type];
+        prefix = CODE_PREFIXES[type] || 'STD';
+        break;
+      }
+    }
+    
+    // Generate a unique code
+    const random = Math.floor(1000 + Math.random() * 9000);
+    const code = `JET-${prefix}-${random}`;
+    
+    // Generate a personalized summary based on preferences
+    let summary = `As a ${category}, you'll receive tailored recommendations for your travel style. `;
+    
+    // Add budget context
+    if (budget.includes('Luxury')) {
+      summary += "We'll focus on premium experiences, exclusive accommodations, and high-end dining options. ";
+    } else if (budget.includes('Budget')) {
+      summary += "We'll help you find the best value accommodations, affordable dining options, and free activities. ";
+    } else {
+      summary += "We'll balance quality and value in our recommendations for accommodations and activities. ";
+    }
+    
+    // Add travel companion context
+    if (companions.includes('Family')) {
+      summary += "Your recommendations will include family-friendly destinations, activities for all ages, and suitable accommodations. ";
+    } else if (companions.includes('Friends')) {
+      summary += "Your recommendations will focus on social experiences, group-friendly accommodations, and activities to enjoy together. ";
+    } else if (companions.includes('Partner')) {
+      summary += "Your recommendations will include romantic destinations, couples activities, and intimate dining experiences. ";
+    } else {
+      summary += "Your recommendations will include solo-friendly destinations, social opportunities, and safety-focused advice. ";
+    }
+    
+    // Complete the summary
+    summary += "Your JET AI dashboard is now ready with personalized recommendations just for you.";
+    
+    // Prepare response object
+    const response: AIResponse = {
       code,
-      category: category.level,
-      preferences: userData.preferences,
-      timestamp: new Date().toISOString()
-    });
+      category,
+      summary
+    };
     
-    return res.status(200).json({
-      category: category.level,
-      code,
-      summary: category.description
-    });
-    
+    return res.status(200).json(response);
   } catch (error) {
-    console.error('Error in preference analysis:', error);
-    return res.status(500).json({
-      error: 'Server error during preference analysis'
+    console.error("Error in AI preference analysis:", error);
+    return res.status(500).json({ 
+      error: "Failed to analyze preferences",
+      code: "JET-ERR-500",
+      category: "Standard Traveler",
+      summary: "We experienced an error analyzing your preferences. A default profile has been created for you."
     });
   }
-};
+}
