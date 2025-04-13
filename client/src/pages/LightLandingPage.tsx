@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { 
   ArrowRight,
+  BookOpen,
   Brain,
   Calendar, 
   ChevronRight,
@@ -33,34 +34,34 @@ export default function LightLandingPage() {
   return (
     <div className="bg-white text-gray-800 min-h-screen">
       {/* Fixed Header */}
-      <header className="sticky top-0 z-50 bg-gradient-to-r from-[#ff6b35]/95 to-orange-600/95 backdrop-blur-sm text-white shadow-lg">
+      <header className="sticky top-0 z-50 bg-marni-dark text-white shadow-sm border-b border-marni-gray">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center mb-0 group">
-              <svg viewBox="0 0 24 24" fill="none" className="h-9 w-9 text-white drop-shadow-md transition-transform duration-300 group-hover:scale-110" stroke="currentColor" strokeWidth="2">
+              <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-white transition-transform duration-300 group-hover:scale-110" stroke="currentColor" strokeWidth="2">
                 <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" strokeLinejoin="round" strokeLinecap="round"/>
               </svg>
               <div className="ml-2">
-                <h1 className="font-bold text-2xl tracking-tight">JET AI</h1>
-                <div className="text-xs text-white/70 -mt-1 font-medium">TRAVEL COMPANION</div>
+                <h1 className="font-display text-2xl tracking-tight">JET AI</h1>
+                <div className="text-xs text-white/70 -mt-1 font-serif">TRAVEL COMPANION</div>
               </div>
             </div>
             
-            <div className="hidden md:flex space-x-1">
-              <Link href="/" className="px-4 py-2 rounded-full text-white hover:bg-white/10 transition-colors">Home</Link>
-              <Link href="/destinations" className="px-4 py-2 rounded-full text-white hover:bg-white/10 transition-colors">Destinations</Link>
-              <Link href="/blog" className="px-4 py-2 rounded-full text-white hover:bg-white/10 transition-colors">Travel Blog</Link>
-              <Link href="/about" className="px-4 py-2 rounded-full text-white hover:bg-white/10 transition-colors">About Us</Link>
-              <Link href="/chat" className="px-4 py-2 rounded-full text-white hover:bg-white/10 transition-colors">AI Assistant</Link>
+            <div className="hidden md:flex space-x-2">
+              <Link href="/" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-sans">Home</Link>
+              <Link href="/destinations" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-sans">Destinations</Link>
+              <Link href="/blog" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-sans">Travel Blog</Link>
+              <Link href="/about" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-sans">About Us</Link>
+              <Link href="/chat" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-sans">AI Assistant</Link>
             </div>
             
             <div className="flex items-center space-x-4">
               <Link href="/login">
-                <Button variant="outline" className="border-white text-white hover:bg-white hover:text-[#ff6b35] transition-all duration-300 font-medium">
+                <Button variant="outline" className="border-marni-lightgray text-white hover:bg-marni-accent hover:text-white hover:border-marni-accent transition-all duration-300 font-sans">
                   Sign In
                 </Button>
               </Link>
-              <button className="md:hidden text-white hover:bg-white/10 p-2 rounded-full transition-colors">
+              <button className="md:hidden text-white hover:bg-marni-gray p-2 transition-colors">
                 <Menu className="h-6 w-6" />
               </button>
             </div>
@@ -69,29 +70,28 @@ export default function LightLandingPage() {
       </header>
       
       {/* Hero Section */}
-      <section className="relative bg-cover bg-center h-[650px]" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1517400508447-f8dd518b86db?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1771&q=80')" }}>
-        <div className="absolute inset-0 bg-gradient-to-br from-[#ff6b35]/80 via-[#ff6b35]/30 to-transparent"></div>
+      <section className="relative bg-cover bg-center h-[650px]" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1771&q=80')" }}>
+        <div className="absolute inset-0 bg-gradient-to-t from-marni-black/80 via-marni-dark/50 to-transparent"></div>
         <div className="container mx-auto px-6 h-full flex flex-col justify-center relative z-10">
           <div className="max-w-2xl">
-            <div className="bg-white/10 backdrop-blur-sm px-5 py-1 rounded-full inline-flex items-center mb-6 border border-white/20">
-              <div className="h-2.5 w-2.5 rounded-full bg-white/80 mr-2 animate-pulse"></div>
-              <span className="text-white/90 text-sm font-medium tracking-wide">AI-POWERED ADVENTURE PLANNING</span>
+            <div className="bg-marni-darkgray/30 backdrop-blur-sm px-4 py-1 inline-flex items-center mb-6 border-l-2 border-marni-accent">
+              <span className="text-white/90 text-sm font-serif tracking-wide">INTELLIGENT TRAVEL PLANNING</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-md">
-              Discover the World <span className="text-yellow-400">Your Way</span>
+            <h1 className="text-5xl md:text-6xl font-display text-white mb-6 leading-tight drop-shadow-md">
+              Journey Beyond <span className="text-marni-accent">Boundaries</span>
             </h1>
-            <p className="text-xl text-white/90 mb-10 max-w-xl leading-relaxed drop-shadow-sm">
-              JET AI combines cutting-edge artificial intelligence with seasoned travel expertise to craft your perfect adventure.
+            <p className="text-xl text-white/90 mb-10 max-w-xl leading-relaxed drop-shadow-sm font-serif">
+              JET AI harmonizes sophisticated artificial intelligence with refined travel expertise to curate your ideal journey.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-              <Button size="lg" className="bg-white text-[#ff6b35] hover:bg-yellow-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 rounded-full px-8 font-bold">
+              <Button size="lg" className="bg-marni-accent text-white hover:bg-marni-accent/90 transition-all duration-300 shadow-lg hover:shadow-xl px-8 font-medium">
                 <Link href="/destinations" className="flex items-center">
                   <Compass className="mr-2 h-5 w-5" /> Explore Destinations
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/20 rounded-full px-8">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
                 <Link href="/chat" className="flex items-center">
-                  <Sparkles className="mr-2 h-5 w-5" /> Talk to AI Assistant
+                  <Sparkles className="mr-2 h-5 w-5" /> Consult AI Assistant
                 </Link>
               </Button>
             </div>
@@ -101,18 +101,18 @@ export default function LightLandingPage() {
         {/* Search Box */}
         <div className="absolute bottom-0 left-0 right-0 transform translate-y-1/2">
           <div className="container mx-auto px-6">
-            <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 p-6 md:p-8">
+            <div className="bg-white/95 backdrop-blur-lg shadow-md border border-gray-100 p-6 md:p-8">
               <div className="md:max-w-4xl mx-auto">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-bold text-gray-800 flex items-center">
-                    <div className="mr-3 p-2 rounded-full bg-[#ff6b35]/10 text-[#ff6b35]">
+                  <h3 className="text-xl font-display text-marni-dark flex items-center">
+                    <div className="mr-3 p-2 rounded-full bg-marni-dark/5 text-marni-accent">
                       <Plane className="h-5 w-5" />
                     </div>
-                    Plan Your Dream Trip
+                    Plan Your Journey
                   </h3>
                   <div className="hidden md:block">
-                    <span className="text-gray-500 text-sm">
-                      <span className="text-[#ff6b35] font-semibold">Tip:</span> Try searching by activity type like "beaches" or "hiking"
+                    <span className="text-gray-500 text-sm font-serif">
+                      <span className="text-marni-accent font-medium">Tip:</span> Try searching by experience like "cultural" or "relaxation"
                     </span>
                   </div>
                 </div>
@@ -145,47 +145,47 @@ export default function LightLandingPage() {
                 }}>
                   <div className="grid grid-cols-1 md:grid-cols-8 gap-4 md:gap-6">
                     <div className="md:col-span-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                        <Globe className="h-4 w-4 mr-1.5 text-[#ff6b35]" />
+                      <label className="block text-sm font-medium text-marni-dark mb-2 flex items-center font-serif">
+                        <Globe className="h-4 w-4 mr-1.5 text-marni-accent" />
                         Destination
                       </label>
                       <div className="relative group">
                         <Input 
                           name="destination" 
                           placeholder="Where do you want to go?" 
-                          className="pl-11 py-6 rounded-xl border-gray-200 focus:border-[#ff6b35] focus:ring-[#ff6b35]/10 shadow-sm group-hover:border-[#ff6b35]/50 transition-all" 
+                          className="pl-11 py-5 border-gray-200 focus:border-marni-accent focus:ring-marni-accent/10 shadow-sm group-hover:border-marni-accent/50 transition-all font-sans" 
                           required 
                         />
-                        <Map className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 group-hover:text-[#ff6b35] transition-colors" />
+                        <Map className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 group-hover:text-marni-accent transition-colors" />
                       </div>
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                        <Calendar className="h-4 w-4 mr-1.5 text-[#ff6b35]" />
+                      <label className="block text-sm font-medium text-marni-dark mb-2 flex items-center font-serif">
+                        <Calendar className="h-4 w-4 mr-1.5 text-marni-accent" />
                         Travel Date
                       </label>
                       <div className="relative group">
                         <Input 
                           name="date" 
                           type="date" 
-                          className="pl-11 py-6 rounded-xl border-gray-200 focus:border-[#ff6b35] focus:ring-[#ff6b35]/10 shadow-sm group-hover:border-[#ff6b35]/50 transition-all" 
+                          className="pl-11 py-5 border-gray-200 focus:border-marni-accent focus:ring-marni-accent/10 shadow-sm group-hover:border-marni-accent/50 transition-all font-sans" 
                           required 
                         />
-                        <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 group-hover:text-[#ff6b35] transition-colors" />
+                        <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 group-hover:text-marni-accent transition-colors" />
                       </div>
                     </div>
                     <div className="md:col-span-2 flex items-end">
                       <Button 
                         type="submit" 
-                        className="w-full py-6 rounded-xl bg-gradient-to-r from-[#ff6b35] to-orange-500 hover:from-orange-500 hover:to-[#ff6b35] text-white font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] duration-300"
+                        className="w-full py-5 bg-marni-dark hover:bg-marni-accent text-white font-medium shadow-md hover:shadow-lg transition-all duration-300"
                       >
-                        <Search className="mr-2 h-5 w-5" /> Find Adventures
+                        <Search className="mr-2 h-5 w-5" /> Find Journeys
                       </Button>
                     </div>
                   </div>
                   <div className="mt-4 text-center">
-                    <span className="text-xs text-gray-500">
-                      Powered by <span className="font-semibold">JET AI</span> technology for the best travel recommendations
+                    <span className="text-xs text-gray-500 font-serif">
+                      Powered by <span className="font-semibold">JET AI</span> technology for personalized travel recommendations
                     </span>
                   </div>
                 </form>
@@ -196,34 +196,34 @@ export default function LightLandingPage() {
       </section>
       
       {/* Featured Destinations */}
-      <section className="py-24 bg-gradient-to-b from-white to-gray-50/80">
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center mb-14">
             <div className="text-center md:text-left">
-              <div className="inline-flex items-center px-4 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-sm font-semibold mb-3">
-                <Star className="h-3.5 w-3.5 mr-1.5 fill-[#ff6b35]" /> 
-                TOP-RATED DESTINATIONS
+              <div className="inline-flex items-center px-4 py-1 border-l-2 border-marni-accent bg-marni-dark/5 text-marni-dark text-sm font-serif mb-3">
+                <Star className="h-3.5 w-3.5 mr-1.5 text-marni-accent" /> 
+                CURATED DESTINATIONS
               </div>
-              <h2 className="text-4xl font-bold mb-3 font-display">Trending Adventures</h2>
-              <p className="text-gray-600 max-w-xl">Discover destinations that are captivating travelers worldwide, curated by our AI technology and verified by traveler experiences</p>
+              <h2 className="text-4xl mb-3 font-display text-marni-dark">Exceptional Journeys</h2>
+              <p className="text-gray-600 max-w-xl font-serif">Discover carefully selected destinations that promise transformative experiences, curated by our AI technology and endorsed by discerning travelers</p>
             </div>
-            <Link href="/destinations" className="flex items-center text-[#ff6b35] font-bold mt-6 md:mt-0 px-5 py-2.5 rounded-full border-2 border-[#ff6b35]/20 hover:bg-[#ff6b35]/5 hover:border-[#ff6b35]/30 transition-all duration-300">
+            <Link href="/destinations" className="flex items-center text-marni-accent font-medium mt-6 md:mt-0 px-5 py-2.5 border-b border-marni-accent/30 hover:border-marni-accent transition-all duration-200">
               View all destinations <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Destination Card 1 */}
-            <div className="bg-white rounded-xl overflow-hidden shadow-lg group hover:shadow-xl transform transition-all duration-300 hover:-translate-y-2">
+            <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transform transition-all duration-300">
               <div className="relative h-64 overflow-hidden">
                 <img 
                   src="https://images.unsplash.com/photo-1542259009477-d625272157b7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80" 
                   alt="Bali, Indonesia" 
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute top-4 right-4">
-                  <div className="bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-bold text-white">
-                    TOP TRENDING
+                  <div className="bg-marni-dark/20 backdrop-blur-sm px-3 py-1 text-xs font-medium text-white border-l border-marni-accent">
+                    TRENDING
                   </div>
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
@@ -231,27 +231,27 @@ export default function LightLandingPage() {
                   <div className="flex items-center text-white mb-1">
                     <div className="flex">
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <svg key={star} viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
+                        <svg key={star} viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-marni-accent">
                           <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                         </svg>
                       ))}
                     </div>
-                    <span className="ml-1 text-sm">(256 reviews)</span>
+                    <span className="ml-1 text-sm font-sans">(256 reviews)</span>
                   </div>
-                  <h3 className="text-white text-xl font-bold">Bali, Indonesia</h3>
+                  <h3 className="text-white text-xl font-display">Bali, Indonesia</h3>
                 </div>
               </div>
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex flex-wrap gap-1.5">
-                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">Beach</span>
-                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">Culture</span>
-                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">Nature</span>
+                    <span className="px-2 py-1 bg-marni-dark/5 text-marni-accent text-xs font-serif">Beach</span>
+                    <span className="px-2 py-1 bg-marni-dark/5 text-marni-accent text-xs font-serif">Culture</span>
+                    <span className="px-2 py-1 bg-marni-dark/5 text-marni-accent text-xs font-serif">Nature</span>
                   </div>
-                  <p className="text-[#ff6b35] font-bold text-lg">$1,200</p>
+                  <p className="text-marni-accent font-medium text-lg">$1,200</p>
                 </div>
-                <p className="text-gray-600 mb-4">Experience the perfect blend of tranquil beaches, lush rice terraces, and vibrant cultural rituals on this magical island.</p>
-                <Button className="w-full bg-gradient-to-r from-[#ff6b35] to-orange-500 hover:from-orange-500 hover:to-[#ff6b35] text-white font-semibold rounded-xl py-2.5 shadow-md hover:shadow-lg transform transition-all duration-300 hover:scale-[1.02]">
+                <p className="text-gray-600 mb-5 font-serif">Experience the perfect blend of tranquil beaches, lush rice terraces, and vibrant cultural rituals on this magical island.</p>
+                <Button className="w-full bg-marni-dark hover:bg-marni-accent text-white font-medium py-2.5 shadow-sm hover:shadow-md transition-all duration-300">
                   <Link href="/destinations/bali" className="flex items-center justify-center">
                     <Compass className="mr-2 h-4 w-4" /> Explore Bali
                   </Link>
@@ -260,39 +260,39 @@ export default function LightLandingPage() {
             </div>
             
             {/* Destination Card 2 */}
-            <div className="bg-white rounded-xl overflow-hidden shadow-lg group hover:shadow-xl transform transition-all duration-300 hover:-translate-y-2">
+            <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transform transition-all duration-300">
               <div className="relative h-64 overflow-hidden">
                 <img 
                   src="https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1830&q=80" 
                   alt="Venice, Italy" 
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
                 <div className="absolute bottom-4 left-4 right-4">
                   <div className="flex items-center text-white mb-1">
                     <div className="flex">
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <svg key={star} viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
+                        <svg key={star} viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-marni-accent">
                           <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                         </svg>
                       ))}
                     </div>
-                    <span className="ml-1 text-sm">(189 reviews)</span>
+                    <span className="ml-1 text-sm font-sans">(189 reviews)</span>
                   </div>
-                  <h3 className="text-white text-xl font-bold">Venice, Italy</h3>
+                  <h3 className="text-white text-xl font-display">Venice, Italy</h3>
                 </div>
               </div>
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex flex-wrap gap-1.5">
-                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">Historic</span>
-                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">Romantic</span>
-                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">City</span>
+                    <span className="px-2 py-1 bg-marni-dark/5 text-marni-accent text-xs font-serif">Historic</span>
+                    <span className="px-2 py-1 bg-marni-dark/5 text-marni-accent text-xs font-serif">Romantic</span>
+                    <span className="px-2 py-1 bg-marni-dark/5 text-marni-accent text-xs font-serif">City</span>
                   </div>
-                  <p className="text-[#ff6b35] font-bold text-lg">$950</p>
+                  <p className="text-marni-accent font-medium text-lg">$950</p>
                 </div>
-                <p className="text-gray-600 mb-4">Navigate through the romantic canals of this unique city built on water, with its architectural marvels and timeless charm.</p>
-                <Button className="w-full bg-gradient-to-r from-[#ff6b35] to-orange-500 hover:from-orange-500 hover:to-[#ff6b35] text-white font-semibold rounded-xl py-2.5 shadow-md hover:shadow-lg transform transition-all duration-300 hover:scale-[1.02]">
+                <p className="text-gray-600 mb-5 font-serif">Navigate through the romantic canals of this unique city built on water, with its architectural marvels and timeless charm.</p>
+                <Button className="w-full bg-marni-dark hover:bg-marni-accent text-white font-medium py-2.5 shadow-sm hover:shadow-md transition-all duration-300">
                   <Link href="/destinations/venice" className="flex items-center justify-center">
                     <Map className="mr-2 h-4 w-4" /> Explore Venice
                   </Link>
@@ -301,15 +301,15 @@ export default function LightLandingPage() {
             </div>
             
             {/* Destination Card 3 */}
-            <div className="bg-white rounded-xl overflow-hidden shadow-lg group hover:shadow-xl transform transition-all duration-300 hover:-translate-y-2">
+            <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transform transition-all duration-300">
               <div className="relative h-64 overflow-hidden">
                 <img 
                   src="https://images.unsplash.com/photo-1532236204992-f5e85c024202?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1822&q=80" 
                   alt="Kyoto, Japan" 
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute top-4 right-4">
-                  <div className="bg-yellow-400/90 rounded-full px-3 py-1 text-xs font-bold text-white">
+                  <div className="bg-marni-dark/20 backdrop-blur-sm px-3 py-1 text-xs font-medium text-white border-l border-marni-accent">
                     BEST VALUE
                   </div>
                 </div>
@@ -318,27 +318,27 @@ export default function LightLandingPage() {
                   <div className="flex items-center text-white mb-1">
                     <div className="flex">
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <svg key={star} viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
+                        <svg key={star} viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-marni-accent">
                           <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                         </svg>
                       ))}
                     </div>
-                    <span className="ml-1 text-sm">(221 reviews)</span>
+                    <span className="ml-1 text-sm font-sans">(221 reviews)</span>
                   </div>
-                  <h3 className="text-white text-xl font-bold">Kyoto, Japan</h3>
+                  <h3 className="text-white text-xl font-display">Kyoto, Japan</h3>
                 </div>
               </div>
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex flex-wrap gap-1.5">
-                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">Cultural</span>
-                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">Historic</span>
-                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">Temples</span>
+                    <span className="px-2 py-1 bg-marni-dark/5 text-marni-accent text-xs font-serif">Cultural</span>
+                    <span className="px-2 py-1 bg-marni-dark/5 text-marni-accent text-xs font-serif">Historic</span>
+                    <span className="px-2 py-1 bg-marni-dark/5 text-marni-accent text-xs font-serif">Temples</span>
                   </div>
-                  <p className="text-[#ff6b35] font-bold text-lg">$1,450</p>
+                  <p className="text-marni-accent font-medium text-lg">$1,450</p>
                 </div>
-                <p className="text-gray-600 mb-4">Step back in time in Japan's former capital with its thousands of classical Buddhist temples, gardens, and traditional wooden houses.</p>
-                <Button className="w-full bg-gradient-to-r from-[#ff6b35] to-orange-500 hover:from-orange-500 hover:to-[#ff6b35] text-white font-semibold rounded-xl py-2.5 shadow-md hover:shadow-lg transform transition-all duration-300 hover:scale-[1.02]">
+                <p className="text-gray-600 mb-5 font-serif">Step back in time in Japan's former capital with its thousands of classical Buddhist temples, gardens, and traditional wooden houses.</p>
+                <Button className="w-full bg-marni-dark hover:bg-marni-accent text-white font-medium py-2.5 shadow-sm hover:shadow-md transition-all duration-300">
                   <Link href="/destinations/kyoto" className="flex items-center justify-center">
                     <Globe className="mr-2 h-4 w-4" /> Explore Kyoto
                   </Link>
@@ -350,62 +350,62 @@ export default function LightLandingPage() {
       </section>
       
       {/* AI Features */}
-      <section className="py-24 relative overflow-hidden">
+      <section className="py-24 relative overflow-hidden bg-marni-dark/5">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1488085061387-422e29b40080?ixlib=rb-1.2.1&auto=format&fit=crop&w=1489&q=80')] bg-cover bg-center opacity-5"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-gray-50/90"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-transparent to-white/80"></div>
         
         <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center px-4 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-sm font-semibold mb-3">
-              <Sparkles className="h-3.5 w-3.5 mr-1.5" /> 
-              AI-POWERED EXPERIENCES
+            <div className="inline-flex items-center px-4 py-1 border-l-2 border-marni-accent bg-marni-dark/5 text-marni-dark text-sm font-serif mb-3">
+              <Sparkles className="h-3.5 w-3.5 mr-1.5 text-marni-accent" /> 
+              ARTIFICIAL INTELLIGENCE
             </div>
-            <h2 className="text-4xl font-bold mb-5 font-display">Smart Travel Technology</h2>
-            <p className="text-gray-600 max-w-3xl mx-auto text-lg">JET AI combines cutting-edge artificial intelligence with deep travel expertise to create personalized adventures tailored just for you.</p>
+            <h2 className="text-4xl mb-5 font-display text-marni-dark">Intelligent Travel Technology</h2>
+            <p className="text-gray-600 max-w-3xl mx-auto text-lg font-serif">JET AI artfully combines sophisticated artificial intelligence with refined travel expertise to design personalized journeys that align with your distinctive preferences.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Feature 1 */}
-            <div className="bg-white p-8 rounded-2xl text-center shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#ff6b35]/20 group">
-              <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center bg-[#ff6b35]/10 rounded-2xl text-[#ff6b35] transform transition-transform group-hover:scale-110 duration-300">
+            <div className="bg-white p-8 text-center shadow-sm hover:shadow transition-all duration-300 border-b border-marni-accent/20 hover:border-marni-accent group">
+              <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center bg-marni-dark/5 text-marni-accent transform transition-transform group-hover:scale-105 duration-300">
                 <Brain className="h-10 w-10" />
               </div>
-              <h3 className="text-xl font-bold mb-3 group-hover:text-[#ff6b35] transition-colors">Smart Recommendations</h3>
-              <p className="text-gray-600">Personalized destination suggestions based on your unique preferences, budget, and travel style.</p>
+              <h3 className="text-xl font-display mb-3 group-hover:text-marni-accent transition-colors">Curated Recommendations</h3>
+              <p className="text-gray-600 font-serif">Personalized destination selections tailored to your distinctive tastes, financial parameters, and travel preferences.</p>
             </div>
             
             {/* Feature 2 */}
-            <div className="bg-white p-8 rounded-2xl text-center shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#ff6b35]/20 group">
-              <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center bg-[#ff6b35]/10 rounded-2xl text-[#ff6b35] transform transition-transform group-hover:scale-110 duration-300">
+            <div className="bg-white p-8 text-center shadow-sm hover:shadow transition-all duration-300 border-b border-marni-accent/20 hover:border-marni-accent group">
+              <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center bg-marni-dark/5 text-marni-accent transform transition-transform group-hover:scale-105 duration-300">
                 <MapIcon className="h-10 w-10" />
               </div>
-              <h3 className="text-xl font-bold mb-3 group-hover:text-[#ff6b35] transition-colors">Dynamic Itineraries</h3>
-              <p className="text-gray-600">Custom travel plans that adapt to your interests, available time, and unexpected opportunities along the way.</p>
+              <h3 className="text-xl font-display mb-3 group-hover:text-marni-accent transition-colors">Elegant Itineraries</h3>
+              <p className="text-gray-600 font-serif">Meticulously crafted travel plans that gracefully adapt to your interests, time constraints, and unexpected discoveries.</p>
             </div>
             
             {/* Feature 3 */}
-            <div className="bg-white p-8 rounded-2xl text-center shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#ff6b35]/20 group">
-              <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center bg-[#ff6b35]/10 rounded-2xl text-[#ff6b35] transform transition-transform group-hover:scale-110 duration-300">
+            <div className="bg-white p-8 text-center shadow-sm hover:shadow transition-all duration-300 border-b border-marni-accent/20 hover:border-marni-accent group">
+              <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center bg-marni-dark/5 text-marni-accent transform transition-transform group-hover:scale-105 duration-300">
                 <Languages className="h-10 w-10" />
               </div>
-              <h3 className="text-xl font-bold mb-3 group-hover:text-[#ff6b35] transition-colors">Universal Translator</h3>
-              <p className="text-gray-600">Break down language barriers with real-time translation in over 100 languages for smooth global communication.</p>
+              <h3 className="text-xl font-display mb-3 group-hover:text-marni-accent transition-colors">Language Intelligence</h3>
+              <p className="text-gray-600 font-serif">Dissolve communication barriers with precise translation in over 100 languages for seamless cultural engagement.</p>
             </div>
             
             {/* Feature 4 */}
-            <div className="bg-white p-8 rounded-2xl text-center shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#ff6b35]/20 group">
-              <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center bg-[#ff6b35]/10 rounded-2xl text-[#ff6b35] transform transition-transform group-hover:scale-110 duration-300">
+            <div className="bg-white p-8 text-center shadow-sm hover:shadow transition-all duration-300 border-b border-marni-accent/20 hover:border-marni-accent group">
+              <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center bg-marni-dark/5 text-marni-accent transform transition-transform group-hover:scale-105 duration-300">
                 <DollarSign className="h-10 w-10" />
               </div>
-              <h3 className="text-xl font-bold mb-3 group-hover:text-[#ff6b35] transition-colors">Smart Deals Finder</h3>
-              <p className="text-gray-600">Our AI continuously searches for the best flight, hotel, and experience deals to maximize your travel budget.</p>
+              <h3 className="text-xl font-display mb-3 group-hover:text-marni-accent transition-colors">Value Optimization</h3>
+              <p className="text-gray-600 font-serif">Our intelligent system continually evaluates flight, accommodation, and experience options to optimize the value of your investment.</p>
             </div>
           </div>
 
           <div className="mt-16 text-center">
-            <Button className="bg-gradient-to-r from-[#ff6b35] to-orange-500 hover:from-orange-500 hover:to-[#ff6b35] text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <Button className="bg-marni-dark hover:bg-marni-accent text-white font-medium py-3 px-8 shadow-sm hover:shadow transition-all duration-300">
               <Link href="/chat" className="flex items-center">
-                <MessageCircle className="mr-2 h-5 w-5" /> Try JET AI Assistant Now
+                <MessageCircle className="mr-2 h-5 w-5" /> Experience JET AI Assistant
               </Link>
             </Button>
           </div>
@@ -413,85 +413,89 @@ export default function LightLandingPage() {
       </section>
       
       {/* Travel Blog Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-white border-t border-gray-100">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center mb-12">
-            <div>
-              <h2 className="text-3xl font-bold mb-2">Latest from Our Travel Blog</h2>
-              <p className="text-gray-600">Insights, tips, and stories from around the world</p>
+            <div className="text-center md:text-left">
+              <div className="inline-flex items-center px-4 py-1 border-l-2 border-marni-accent bg-marni-dark/5 text-marni-dark text-sm font-serif mb-3">
+                <BookOpen className="h-3.5 w-3.5 mr-1.5 text-marni-accent" /> 
+                TRAVEL JOURNAL
+              </div>
+              <h2 className="text-4xl mb-3 font-display text-marni-dark">From Our Travel Journal</h2>
+              <p className="text-gray-600 font-serif">Curated insights, reflections, and narratives from seasoned travelers</p>
             </div>
-            <Link href="/blog" className="flex items-center text-[#3a55e7] font-medium mt-4 md:mt-0 hover:underline">
-              Read all articles <ArrowRight className="ml-2 h-4 w-4" />
+            <Link href="/blog" className="flex items-center text-marni-accent font-medium mt-6 md:mt-0 border-b border-marni-accent/30 hover:border-marni-accent transition-all duration-200">
+              Explore all journal entries <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Blog Post 1 */}
-            <div className="bg-white rounded-lg overflow-hidden shadow-md">
-              <div className="relative h-48 overflow-hidden">
+            <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="relative h-60 overflow-hidden">
                 <img 
                   src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80" 
                   alt="Hidden Gems in Paris" 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                 />
-                <div className="absolute top-4 left-4 bg-[#3a55e7] text-white text-xs font-bold uppercase px-3 py-1 rounded">
+                <div className="absolute top-4 left-0 bg-marni-dark/80 text-white text-xs font-serif uppercase px-3 py-1">
                   City Guide
                 </div>
               </div>
               <div className="p-6">
-                <div className="flex items-center text-gray-500 text-sm mb-3">
-                  <Calendar className="h-4 w-4 mr-2" />
+                <div className="flex items-center text-gray-500 text-sm mb-3 font-serif">
+                  <Calendar className="h-4 w-4 mr-2 text-marni-accent" />
                   April 10, 2025
                 </div>
-                <h3 className="text-xl font-bold mb-3">10 Hidden Gems in Paris You Need to Visit</h3>
-                <p className="text-gray-600 mb-4">Discover the lesser-known spots in Paris that most tourists miss but locals love.</p>
-                <Link href="/blog/1" className="text-[#3a55e7] font-medium hover:underline">Read More</Link>
+                <h3 className="text-xl font-display mb-3 text-marni-dark">10 Hidden Gems in Paris You Need to Visit</h3>
+                <p className="text-gray-600 mb-4 font-serif">Discover the lesser-known spots in Paris that most tourists miss but locals cherish.</p>
+                <Link href="/blog/1" className="text-marni-accent font-medium hover:text-marni-dark transition-colors duration-200 font-serif">Read More</Link>
               </div>
             </div>
             
             {/* Blog Post 2 */}
-            <div className="bg-white rounded-lg overflow-hidden shadow-md">
-              <div className="relative h-48 overflow-hidden">
+            <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="relative h-60 overflow-hidden">
                 <img 
                   src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
                   alt="Food Adventures in Thailand" 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                 />
-                <div className="absolute top-4 left-4 bg-[#3a55e7] text-white text-xs font-bold uppercase px-3 py-1 rounded">
-                  Food
+                <div className="absolute top-4 left-0 bg-marni-dark/80 text-white text-xs font-serif uppercase px-3 py-1">
+                  Culinary Journey
                 </div>
               </div>
               <div className="p-6">
-                <div className="flex items-center text-gray-500 text-sm mb-3">
-                  <Calendar className="h-4 w-4 mr-2" />
+                <div className="flex items-center text-gray-500 text-sm mb-3 font-serif">
+                  <Calendar className="h-4 w-4 mr-2 text-marni-accent" />
                   April 5, 2025
                 </div>
-                <h3 className="text-xl font-bold mb-3">Ultimate Food Adventures in Thailand's Street Markets</h3>
-                <p className="text-gray-600 mb-4">From spicy curries to sweet mango sticky rice, these Thai street foods are a must-try.</p>
-                <Link href="/blog/2" className="text-[#3a55e7] font-medium hover:underline">Read More</Link>
+                <h3 className="text-xl font-display mb-3 text-marni-dark">Thailand's Street Markets: A Culinary Exploration</h3>
+                <p className="text-gray-600 mb-4 font-serif">From aromatic curries to delicate mango with sticky rice, a journey through Thailand's vibrant street food culture.</p>
+                <Link href="/blog/2" className="text-marni-accent font-medium hover:text-marni-dark transition-colors duration-200 font-serif">Read More</Link>
               </div>
             </div>
             
             {/* Blog Post 3 */}
-            <div className="bg-white rounded-lg overflow-hidden shadow-md">
-              <div className="relative h-48 overflow-hidden">
+            <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="relative h-60 overflow-hidden">
                 <img 
                   src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
                   alt="Solo Travel" 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                 />
-                <div className="absolute top-4 left-4 bg-[#3a55e7] text-white text-xs font-bold uppercase px-3 py-1 rounded">
-                  Tips
+                <div className="absolute top-4 left-0 bg-marni-dark/80 text-white text-xs font-serif uppercase px-3 py-1">
+                  Travel Philosophy
                 </div>
               </div>
               <div className="p-6">
-                <div className="flex items-center text-gray-500 text-sm mb-3">
-                  <Calendar className="h-4 w-4 mr-2" />
+                <div className="flex items-center text-gray-500 text-sm mb-3 font-serif">
+                  <Calendar className="h-4 w-4 mr-2 text-marni-accent" />
                   March 29, 2025
                 </div>
-                <h3 className="text-xl font-bold mb-3">Solo Travel: How to Make the Most of Your Adventure</h3>
-                <p className="text-gray-600 mb-4">Expert advice on planning, staying safe, and creating meaningful experiences while traveling alone.</p>
-                <Link href="/blog/3" className="text-[#3a55e7] font-medium hover:underline">Read More</Link>
+                <h3 className="text-xl font-display mb-3 text-marni-dark">The Art of Solo Travel: Embracing Solitude</h3>
+                <p className="text-gray-600 mb-4 font-serif">Insightful reflections on planning, personal safety, and creating meaningful connections while traveling alone.</p>
+                <Link href="/blog/3" className="text-marni-accent font-medium hover:text-marni-dark transition-colors duration-200 font-serif">Read More</Link>
               </div>
             </div>
           </div>
@@ -499,26 +503,31 @@ export default function LightLandingPage() {
       </section>
       
       {/* Testimonials */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-6">
+      <section className="py-20 bg-marni-dark/5 relative">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1488085061387-422e29b40080?ixlib=rb-1.2.1&auto=format&fit=crop&w=1489&q=80')] bg-cover bg-center opacity-3"></div>
+        <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">What Our Travelers Say</h2>
-            <p className="text-gray-600 max-w-3xl mx-auto">Real experiences from travelers who planned their trips with JET AI</p>
+            <div className="inline-flex items-center px-4 py-1 border-l-2 border-marni-accent bg-marni-dark/5 text-marni-dark text-sm font-serif mb-3">
+              <MessageSquare className="h-3.5 w-3.5 mr-1.5 text-marni-accent" /> 
+              TRAVELER EXPERIENCES
+            </div>
+            <h2 className="text-4xl mb-3 font-display text-marni-dark">Distinguished Perspectives</h2>
+            <p className="text-gray-600 max-w-3xl mx-auto font-serif">Authentic reflections from discerning travelers who entrusted their journey planning to JET AI</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Testimonial 1 */}
-            <div className="bg-gray-50 p-8 rounded-lg shadow-md">
-              <div className="flex items-center text-yellow-400 mb-6">
+            <div className="bg-white p-8 shadow-sm hover:shadow-md transition-all duration-300 border-t border-marni-accent/20">
+              <div className="flex items-center text-marni-accent mb-6">
                 <Star className="fill-current h-5 w-5" />
                 <Star className="fill-current h-5 w-5" />
                 <Star className="fill-current h-5 w-5" />
                 <Star className="fill-current h-5 w-5" />
                 <Star className="fill-current h-5 w-5" />
               </div>
-              <p className="text-gray-700 mb-6 italic">"JET AI completely transformed my vacation planning. The personalized itinerary saved me hours of research and helped me discover places I would never have found on my own!"</p>
+              <p className="text-gray-700 mb-6 font-serif">"JET AI transformed my approach to vacation planning. The personalized itinerary eliminated hours of research and revealed hidden destinations I would never have discovered through conventional means."</p>
               <div className="flex items-center">
-                <div className="h-12 w-12 rounded-full overflow-hidden mr-4">
+                <div className="h-12 w-12 overflow-hidden mr-4 border border-gray-100">
                   <img 
                     src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop" 
                     alt="Sarah Johnson" 
@@ -526,24 +535,24 @@ export default function LightLandingPage() {
                   />
                 </div>
                 <div>
-                  <h4 className="font-semibold">Sarah Johnson</h4>
-                  <p className="text-sm text-gray-600">Travel Blogger</p>
+                  <h4 className="font-display text-marni-dark">Sarah Johnson</h4>
+                  <p className="text-sm text-gray-600 font-serif">Travel Journalist</p>
                 </div>
               </div>
             </div>
             
             {/* Testimonial 2 */}
-            <div className="bg-gray-50 p-8 rounded-lg shadow-md">
-              <div className="flex items-center text-yellow-400 mb-6">
+            <div className="bg-white p-8 shadow-sm hover:shadow-md transition-all duration-300 border-t border-marni-accent/20">
+              <div className="flex items-center text-marni-accent mb-6">
                 <Star className="fill-current h-5 w-5" />
                 <Star className="fill-current h-5 w-5" />
                 <Star className="fill-current h-5 w-5" />
                 <Star className="fill-current h-5 w-5" />
                 <Star className="fill-current h-5 w-5" />
               </div>
-              <p className="text-gray-700 mb-6 italic">"As a business traveler, JET AI has been invaluable. The real-time flight comparator saved me hundreds of dollars, and the AI assistant helped me navigate language barriers effortlessly."</p>
+              <p className="text-gray-700 mb-6 font-serif">"For the discerning business traveler, JET AI is indispensable. The sophisticated flight comparison system generated substantial savings, while the AI assistant elegantly resolved language complexities."</p>
               <div className="flex items-center">
-                <div className="h-12 w-12 rounded-full overflow-hidden mr-4">
+                <div className="h-12 w-12 overflow-hidden mr-4 border border-gray-100">
                   <img 
                     src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop" 
                     alt="Michael Chen" 
@@ -551,24 +560,24 @@ export default function LightLandingPage() {
                   />
                 </div>
                 <div>
-                  <h4 className="font-semibold">Michael Chen</h4>
-                  <p className="text-sm text-gray-600">Business Traveler</p>
+                  <h4 className="font-display text-marni-dark">Michael Chen</h4>
+                  <p className="text-sm text-gray-600 font-serif">Executive Traveler</p>
                 </div>
               </div>
             </div>
             
             {/* Testimonial 3 */}
-            <div className="bg-gray-50 p-8 rounded-lg shadow-md">
-              <div className="flex items-center text-yellow-400 mb-6">
+            <div className="bg-white p-8 shadow-sm hover:shadow-md transition-all duration-300 border-t border-marni-accent/20">
+              <div className="flex items-center text-marni-accent mb-6">
                 <Star className="fill-current h-5 w-5" />
                 <Star className="fill-current h-5 w-5" />
                 <Star className="fill-current h-5 w-5" />
                 <Star className="fill-current h-5 w-5" />
                 <Star className="fill-current h-5 w-5" />
               </div>
-              <p className="text-gray-700 mb-6 italic">"Planning trips for the whole family used to be stressful. Now with JET AI, it's actually enjoyable! The personalized suggestions for kid-friendly activities were spot on. We had our best vacation ever!"</p>
+              <p className="text-gray-700 mb-6 font-serif">"Coordinating multi-generational family travel once presented significant challenges. JET AI has transformed this into a refined experience. Their curated recommendations for family-appropriate activities proved impeccable."</p>
               <div className="flex items-center">
-                <div className="h-12 w-12 rounded-full overflow-hidden mr-4">
+                <div className="h-12 w-12 overflow-hidden mr-4 border border-gray-100">
                   <img 
                     src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1976&auto=format&fit=crop" 
                     alt="Emma Rodriguez" 
@@ -576,8 +585,8 @@ export default function LightLandingPage() {
                   />
                 </div>
                 <div>
-                  <h4 className="font-semibold">Emma Rodriguez</h4>
-                  <p className="text-sm text-gray-600">Family Vacationer</p>
+                  <h4 className="font-display text-marni-dark">Emma Rodriguez</h4>
+                  <p className="text-sm text-gray-600 font-serif">Family Travel Coordinator</p>
                 </div>
               </div>
             </div>
@@ -586,11 +595,15 @@ export default function LightLandingPage() {
       </section>
       
       {/* Pricing Plans */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-white border-t border-gray-100">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Choose Your Travel Plan</h2>
-            <p className="text-gray-600 max-w-3xl mx-auto">Select the perfect plan to enhance your travel experience with JET AI</p>
+            <div className="inline-flex items-center px-4 py-1 border-l-2 border-marni-accent bg-marni-dark/5 text-marni-dark text-sm font-serif mb-3">
+              <DollarSign className="h-3.5 w-3.5 mr-1.5 text-marni-accent" /> 
+              MEMBERSHIP OPTIONS
+            </div>
+            <h2 className="text-4xl mb-3 font-display text-marni-dark">Select Your Travel Experience</h2>
+            <p className="text-gray-600 max-w-3xl mx-auto font-serif">Choose the optimal tier to elevate your journey planning with JET AI's sophisticated features</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

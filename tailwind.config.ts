@@ -7,8 +7,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
+        sans: ["Lato", "Helvetica", "Arial", "sans-serif"],
         display: ["Playfair Display", "serif"],
+        serif: ["Merriweather", "Georgia", "serif"],
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -31,6 +32,14 @@ export default {
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        marni: {
+          black: "#000000",
+          dark: "#101020",
+          darkgray: "#242430",
+          gray: "#3a3a3b",
+          lightgray: "#868791",
+          accent: "#21759b",
+        },
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
