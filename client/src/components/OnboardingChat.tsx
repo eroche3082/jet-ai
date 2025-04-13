@@ -427,6 +427,36 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
           localStorage.setItem('jetai_user_code', aiResult.code);
           localStorage.setItem('jetai_user_category', aiResult.category);
           
+          // Send welcome email notification if email is provided
+          if (userData.email) {
+            try {
+              // Call the notification API to send welcome email
+              fetch('/api/notifications/send-welcome', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  email: userData.email,
+                  name: userData.name || 'Traveler',
+                  code: aiResult.code,
+                  category: aiResult.category,
+                  preferences: userData.preferences
+                }),
+              })
+              .then(response => response.json())
+              .then(data => {
+                console.log('Welcome email sent:', data);
+              })
+              .catch(error => {
+                console.error('Error sending welcome email:', error);
+              });
+            } catch (emailError) {
+              console.error('Error with welcome email notification:', emailError);
+              // Continue with onboarding process even if email fails
+            }
+          }
+          
           onComplete({
             ...userData,
             code: aiResult.code,
@@ -451,6 +481,36 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
           localStorage.setItem('jetai_user_data', JSON.stringify(updatedUserData));
           localStorage.setItem('jetai_user_preferences', JSON.stringify(userData.preferences));
           localStorage.setItem('jetai_user_code', fallbackCode);
+          
+          // Send welcome email notification if email is provided (fallback path)
+          if (userData.email) {
+            try {
+              // Call the notification API to send welcome email
+              fetch('/api/notifications/send-welcome', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  email: userData.email,
+                  name: userData.name || 'Traveler',
+                  code: fallbackCode,
+                  category: 'Standard Traveler', // Default category for fallback
+                  preferences: userData.preferences
+                }),
+              })
+              .then(response => response.json())
+              .then(data => {
+                console.log('Welcome email sent (fallback):', data);
+              })
+              .catch(error => {
+                console.error('Error sending welcome email (fallback):', error);
+              });
+            } catch (emailError) {
+              console.error('Error with welcome email notification (fallback):', emailError);
+              // Continue with onboarding process even if email fails
+            }
+          }
           
           return updatedUserData;
         });

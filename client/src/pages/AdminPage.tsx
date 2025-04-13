@@ -31,7 +31,10 @@ import {
   Filter, 
   LogOut,
   Shield,
-  Code 
+  Code,
+  Mail,
+  SendIcon,
+  Info 
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 
@@ -371,6 +374,10 @@ export default function AdminPage() {
             <TabsTrigger value="codes" className="data-[state=active]:bg-[#4a89dc] data-[state=active]:text-white">
               <Code className="h-4 w-4 mr-2" />
               Access Codes
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="data-[state=active]:bg-[#4a89dc] data-[state=active]:text-white">
+              <Mail className="h-4 w-4 mr-2" />
+              Notifications
             </TabsTrigger>
           </TabsList>
           
