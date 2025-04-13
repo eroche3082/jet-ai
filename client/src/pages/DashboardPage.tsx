@@ -93,17 +93,25 @@ export default function DashboardPage() {
               <Calendar className="mr-3 h-5 w-5" />
               Itineraries
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+            <Button variant="ghost" className="sidebar-link">
               <Hotel className="mr-3 h-5 w-5" />
               Accommodations
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+            <Button variant="ghost" className="sidebar-link">
               <Utensils className="mr-3 h-5 w-5" />
               Dining
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+            <Button variant="ghost" className="sidebar-link">
               <CreditCard className="mr-3 h-5 w-5" />
               Budget
+            </Button>
+            <Button variant="ghost" className="sidebar-link">
+              <Share2 className="mr-3 h-5 w-5" />
+              Social Media Hub
+            </Button>
+            <Button variant="ghost" className="sidebar-link">
+              <Award className="mr-3 h-5 w-5" />
+              Rewards & Loyalty
             </Button>
           </nav>
         </div>
@@ -166,6 +174,14 @@ export default function DashboardPage() {
             <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
               <CreditCard className="mr-3 h-5 w-5" />
               Budget
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <Share2 className="mr-3 h-5 w-5" />
+              Social Media Hub
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+              <Award className="mr-3 h-5 w-5" />
+              Rewards & Loyalty
             </Button>
             <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
               <Settings className="mr-3 h-5 w-5" />
