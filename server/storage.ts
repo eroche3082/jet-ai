@@ -46,6 +46,15 @@ export interface IStorage {
   deleteItinerary(id: number): Promise<boolean>;
   shareItinerary(id: number, isPublic: boolean): Promise<Itinerary | undefined>;
   bookmarkItinerary(id: number, isBookmarked: boolean): Promise<Itinerary | undefined>;
+  
+  // Community Posts
+  getCommunityPosts(): Promise<any[]>;
+  getCommunityPostById(id: string): Promise<any | undefined>;
+  createCommunityPost(post: any): Promise<any>;
+  likeCommunityPost(postId: string, userId: number): Promise<{ action: 'added' | 'removed', likeCount: number } | undefined>;
+  addCommunityPostComment(comment: any): Promise<any>;
+  getCommunityPostComments(postId: string): Promise<any[]>;
+  getCommunityPostsByJourneyCode(journeyCode: string): Promise<any[]>;
 }
 
 // In-memory storage implementation

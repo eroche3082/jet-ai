@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
-import { MapPinIcon, HeartIcon, MessageSquareIcon, ShareIcon, GlobeIcon, UserIcon } from 'lucide-react';
+import { MapPinIcon, HeartIcon, MessageSquareIcon, ShareIcon, GlobeIcon, UserIcon, Loader2 } from 'lucide-react';
 import { 
   Card, 
   CardContent, 
@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
+import { CreateTravelStoryModal } from '@/components/CreateTravelStoryModal';
 
 // Interface for community post type
 interface CommunityPost {
@@ -276,10 +277,44 @@ export default function TravelCommunityPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
   
-  const handleCreatePost = () => {
+  const [posts, setPosts] = useState<CommunityPost[]>(SAMPLE_POSTS);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const fetchPosts = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/community/posts', {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.posts && data.posts.length > 0) {
+          // If we have real posts from API, use them
+          setPosts(data.posts.map((post: any) => ({
+            ...post,
+            createdAt: new Date(post.createdAt)
+          })));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      // Keep using sample posts if API fails
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+  
+  const handlePostSuccess = () => {
+    // Refresh posts after a new one is created
+    fetchPosts();
     toast({
-      title: "Coming Soon",
-      description: "Create post functionality will be available soon!",
+      title: "Story Shared!",
+      description: "Your travel story has been shared with the community.",
     });
   };
   
@@ -352,16 +387,32 @@ export default function TravelCommunityPage() {
               </TabsList>
             </Tabs>
             
-            <Button className="bg-[#4a89dc] hover:bg-[#3a79cc]" onClick={handleCreatePost}>
-              Share Experience
-            </Button>
+            <CreateTravelStoryModal onSuccess={handlePostSuccess} />
           </div>
           
           {/* Posts */}
           <div className="space-y-2">
-            {SAMPLE_POSTS.map(post => (
-              <CommunityPostCard key={post.id} post={post} />
-            ))}
+            {isLoading ? (
+              <div className="flex flex-col items-center py-8">
+                <Loader2 className="w-8 h-8 animate-spin text-[#4a89dc] mb-4" />
+                <p className="text-muted-foreground">Loading travel stories...</p>
+              </div>
+            ) : posts.length > 0 ? (
+              posts.map(post => (
+                <CommunityPostCard key={post.id} post={post} />
+              ))
+            ) : (
+              <div className="text-center py-8 border rounded-lg bg-gray-50">
+                <div className="mx-auto h-12 w-12 text-muted-foreground mb-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium mb-1">No stories yet</h3>
+                <p className="text-muted-foreground mb-4">Be the first to share your travel experience!</p>
+                <CreateTravelStoryModal onSuccess={handlePostSuccess} />
+              </div>
+            )}
           </div>
           
           <div className="mt-8 flex justify-center">

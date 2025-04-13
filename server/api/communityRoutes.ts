@@ -1,219 +1,226 @@
-import { Router } from 'express';
+import express from 'express';
+import { randomUUID } from 'crypto';
 import multer from 'multer';
-import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
+import { storage } from '../storage';
 
-// Firebase imports
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, where } from 'firebase/firestore';
+const router = express.Router();
+
+// Configure Firebase storage
 import { firebaseApp } from '../lib/firebase';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+const firebaseStorage = getStorage(firebaseApp);
 
-const router = Router();
-const storage = getStorage(firebaseApp);
-const firestore = getFirestore(firebaseApp);
-
-// Configure multer for temporary file storage
+// Configure multer for file uploads
 const upload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => {
-      // Create temp directory if it doesn't exist
-      const tempDir = path.join(__dirname, '../../temp_uploads');
-      if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true });
-      }
-      cb(null, tempDir);
-    },
-    filename: (req, file, cb) => {
-      const uniqueFileName = `${Date.now()}-${uuidv4()}${path.extname(file.originalname)}`;
-      cb(null, uniqueFileName);
-    }
-  }),
+  storage: multer.memoryStorage(),
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fileSize: 10 * 1024 * 1024, // 10MB file size limit
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/quicktime'];
-    if (allowedTypes.includes(file.mimetype)) {
+    // Accept images and videos only
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only JPEG, PNG, GIF, and MP4 files are allowed.') as any);
+      cb(new Error('Only images and videos are allowed'));
     }
-  }
+  },
 });
 
-// Get community posts with pagination
+// Utility function to ensure public uploads directory exists
+const ensureUploadsDir = () => {
+  const uploadsDir = path.join(__dirname, '../../public/uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+  return uploadsDir;
+};
+
+// Authentication middleware
+const ensureAuthenticated = (req: any, res: any, next: any) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.status(401).json({ message: "Unauthorized" });
+};
+
+// Get all community posts
 router.get('/posts', async (req, res) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const pageSize = parseInt(req.query.pageSize as string) || 10;
-    
-    const postsQuery = query(
-      collection(firestore, 'communityPosts'),
-      orderBy('createdAt', 'desc'),
-      limit(pageSize)
-    );
-    
-    const postsSnapshot = await getDocs(postsQuery);
-    const posts = postsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    
-    res.json({
-      posts,
-      page,
-      pageSize,
-      hasMore: posts.length === pageSize
-    });
+    const posts = await storage.getCommunityPosts();
+    res.json({ posts });
   } catch (error) {
     console.error('Error fetching community posts:', error);
-    res.status(500).json({ error: 'Failed to fetch community posts' });
+    res.status(500).json({ message: 'Error fetching community posts' });
   }
 });
 
-// Get posts by tag
-router.get('/posts/tag/:tag', async (req, res) => {
+// Get a single post by ID
+router.get('/posts/:id', async (req, res) => {
   try {
-    const { tag } = req.params;
-    const page = parseInt(req.query.page as string) || 1;
-    const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const postId = req.params.id;
+    const post = await storage.getCommunityPostById(postId);
     
-    const postsQuery = query(
-      collection(firestore, 'communityPosts'),
-      where('tags', 'array-contains', tag),
-      orderBy('createdAt', 'desc'),
-      limit(pageSize)
-    );
-    
-    const postsSnapshot = await getDocs(postsQuery);
-    const posts = postsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    
-    res.json({
-      posts,
-      page,
-      pageSize,
-      hasMore: posts.length === pageSize
-    });
-  } catch (error) {
-    console.error('Error fetching posts by tag:', error);
-    res.status(500).json({ error: 'Failed to fetch posts by tag' });
-  }
-});
-
-// Create a new community post with image/video upload
-router.post('/posts', upload.array('media', 5), async (req, res) => {
-  try {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ error: 'You must be logged in to create a post' });
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
     }
     
+    res.json({ post });
+  } catch (error) {
+    console.error('Error fetching community post:', error);
+    res.status(500).json({ message: 'Error fetching community post' });
+  }
+});
+
+// Create a new post (with media upload)
+router.post('/posts', ensureAuthenticated, upload.array('media', 5), async (req, res) => {
+  try {
     const { content, location, locationCoordinates, tags } = req.body;
     const files = req.files as Express.Multer.File[];
-    const mediaUrls = [];
+    
+    if (!content) {
+      return res.status(400).json({ message: 'Content is required' });
+    }
+    
+    const user = req.user;
+    
+    // Generate a unique journey code for this post
+    const journeyCode = `JT${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
     
     // Upload files to Firebase Storage
-    if (files && files.length > 0) {
+    const mediaUrls = [];
+    
+    try {
+      // Upload to Firebase if available
       for (const file of files) {
-        const fileBuffer = fs.readFileSync(file.path);
         const fileExtension = path.extname(file.originalname);
-        const fileName = `community/${Date.now()}-${uuidv4()}${fileExtension}`;
-        const storageRef = ref(storage, fileName);
+        const fileName = `${randomUUID()}${fileExtension}`;
+        const storageRef = ref(firebaseStorage, `community/${fileName}`);
         
-        await uploadBytes(storageRef, fileBuffer);
+        await uploadBytes(storageRef, file.buffer);
         const downloadUrl = await getDownloadURL(storageRef);
-        mediaUrls.push({
-          url: downloadUrl,
-          type: file.mimetype.startsWith('image/') ? 'image' : 'video'
-        });
+        mediaUrls.push(downloadUrl);
+      }
+    } catch (uploadError) {
+      console.error('Firebase upload error:', uploadError);
+      
+      // Fallback to local storage
+      const uploadsDir = ensureUploadsDir();
+      
+      for (const file of files) {
+        const fileExtension = path.extname(file.originalname);
+        const fileName = `${randomUUID()}${fileExtension}`;
+        const filePath = path.join(uploadsDir, fileName);
         
-        // Remove temp file
-        fs.unlinkSync(file.path);
+        fs.writeFileSync(filePath, file.buffer);
+        const fileUrl = `/uploads/${fileName}`;
+        mediaUrls.push(fileUrl);
       }
     }
     
-    // Generate a unique journey code for this post
-    const journeyCode = `JET-${Math.floor(Math.random() * 900 + 100)}-${Math.floor(Math.random() * 900 + 100)}`;
-    
-    // Create post document in Firestore
-    const postData = {
-      author: {
-        id: req.user.id,
-        name: req.user.username,
-        location: req.user.preferences?.location || 'Unknown',
-        avatar: req.user.preferences?.avatar || '/avatars/default.jpg'
-      },
+    // Parse the tags and location coordinates from JSON strings
+    const parsedTags = tags ? JSON.parse(tags) : [];
+    const parsedCoordinates = locationCoordinates ? JSON.parse(locationCoordinates) : { lat: 0, lng: 0 };
+
+    // Create the post in our storage
+    const post = await storage.createCommunityPost({
+      authorId: user.id,
       content,
-      media: mediaUrls,
+      images: mediaUrls,
       location: {
-        name: location,
-        coordinates: locationCoordinates ? JSON.parse(locationCoordinates) : null
+        name: location || 'Unknown Location',
+        coordinates: parsedCoordinates
       },
-      tags: tags ? JSON.parse(tags) : [],
-      likes: 0,
-      comments: 0,
+      tags: parsedTags,
       journeyCode,
-      createdAt: new Date()
-    };
-    
-    const docRef = await addDoc(collection(firestore, 'communityPosts'), postData);
+      createdAt: new Date(),
+    });
     
     res.status(201).json({
-      id: docRef.id,
-      ...postData,
-      message: 'Post created successfully'
+      message: 'Post created successfully',
+      postId: post.id,
+      journeyCode,
     });
   } catch (error) {
     console.error('Error creating community post:', error);
-    res.status(500).json({ error: 'Failed to create community post' });
+    res.status(500).json({ message: 'Error creating community post' });
   }
 });
 
-// Get user's posts
-router.get('/posts/user', async (req, res) => {
+// Like a post
+router.post('/posts/:id/like', ensureAuthenticated, async (req, res) => {
   try {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ error: 'You must be logged in to view your posts' });
+    const postId = req.params.id;
+    const user = req.user;
+    
+    const result = await storage.likeCommunityPost(postId, user.id);
+    
+    if (!result) {
+      return res.status(404).json({ message: 'Post not found' });
     }
     
-    const postsQuery = query(
-      collection(firestore, 'communityPosts'),
-      where('author.id', '==', req.user.id),
-      orderBy('createdAt', 'desc')
-    );
+    res.json({ 
+      message: result.action === 'added' ? 'Post liked' : 'Post unliked',
+      likeCount: result.likeCount 
+    });
+  } catch (error) {
+    console.error('Error liking community post:', error);
+    res.status(500).json({ message: 'Error liking community post' });
+  }
+});
+
+// Add a comment to a post
+router.post('/posts/:id/comments', ensureAuthenticated, async (req, res) => {
+  try {
+    const { content } = req.body;
+    const postId = req.params.id;
+    const user = req.user;
     
-    const postsSnapshot = await getDocs(postsQuery);
-    const posts = postsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    if (!content) {
+      return res.status(400).json({ message: 'Comment content is required' });
+    }
+    
+    const comment = await storage.addCommunityPostComment({
+      postId,
+      authorId: user.id,
+      content,
+      createdAt: new Date(),
+    });
+    
+    res.status(201).json({ 
+      message: 'Comment added successfully',
+      comment
+    });
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    res.status(500).json({ message: 'Error adding comment' });
+  }
+});
+
+// Get comments for a post
+router.get('/posts/:id/comments', async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const comments = await storage.getCommunityPostComments(postId);
+    
+    res.json({ comments });
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    res.status(500).json({ message: 'Error fetching comments' });
+  }
+});
+
+// Get posts by journey code
+router.get('/journey/:code', async (req, res) => {
+  try {
+    const journeyCode = req.params.code;
+    const posts = await storage.getCommunityPostsByJourneyCode(journeyCode);
     
     res.json({ posts });
   } catch (error) {
-    console.error('Error fetching user posts:', error);
-    res.status(500).json({ error: 'Failed to fetch user posts' });
-  }
-});
-
-// Like/unlike a post
-router.post('/posts/:id/like', async (req, res) => {
-  try {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ error: 'You must be logged in to like a post' });
-    }
-    
-    const { id } = req.params;
-    
-    // This is simplified for now - in a real app, we'd use transactions to update the like count
-    // and maintain a separate collection of user likes
-    
-    res.json({ message: 'Post liked successfully' });
-  } catch (error) {
-    console.error('Error liking post:', error);
-    res.status(500).json({ error: 'Failed to like post' });
+    console.error('Error fetching journey posts:', error);
+    res.status(500).json({ message: 'Error fetching journey posts' });
   }
 });
 
