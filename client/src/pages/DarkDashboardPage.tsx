@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import SimpleOnboardingChat from '@/components/SimpleOnboardingChat';
+import { generateQRCode } from '@/lib/chatCodeGenerator';
 
 export default function DarkDashboardPage() {
   const [showChat, setShowChat] = useState(true);
@@ -23,9 +24,19 @@ export default function DarkDashboardPage() {
   }>();
   const [userCode, setUserCode] = useState<string>('');
   const [userCategory, setUserCategory] = useState<string>('');
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'journey' | 'insights' | 'activity'>('journey');
   const { toast } = useToast();
   
   useEffect(() => {
+    // Debug localStorage contents for troubleshooting
+    console.log('localStorage contents:', {
+      user: localStorage.getItem('jetai_user'),
+      code: localStorage.getItem('jetai_user_code'),
+      preferences: localStorage.getItem('jetai_user_preferences'),
+      category: localStorage.getItem('jetai_user_category')
+    });
+    
     // Check if we have user data from localStorage
     const savedUserData = localStorage.getItem('jetai_user');
     if (savedUserData) {
@@ -39,7 +50,45 @@ export default function DarkDashboardPage() {
     // Get user code if available
     const savedCode = localStorage.getItem('jetai_user_code');
     if (savedCode) {
+      console.log('Found user code:', savedCode);
       setUserCode(savedCode);
+      
+      // Generate QR code for the user code
+      const generateCode = async () => {
+        try {
+          console.log('Generating QR code for:', savedCode);
+          const qrCode = await generateQRCode(savedCode);
+          if (qrCode) {
+            console.log('QR code generated successfully');
+            setQrCodeUrl(qrCode);
+          } else {
+            console.warn('QR code generation returned null');
+          }
+        } catch (error) {
+          console.error('Error generating QR code:', error);
+        }
+      };
+      
+      generateCode();
+    } else {
+      // If no code found, generate a temporary one for testing
+      console.log('No user code found, using fallback');
+      const tempCode = 'JET-ADV-1234';
+      setUserCode(tempCode);
+      localStorage.setItem('jetai_user_code', tempCode);
+      
+      const generateCode = async () => {
+        try {
+          const qrCode = await generateQRCode(tempCode);
+          if (qrCode) {
+            setQrCodeUrl(qrCode);
+          }
+        } catch (error) {
+          console.error('Error generating QR code:', error);
+        }
+      };
+      
+      generateCode();
     }
     
     // Check for user category from preferences analysis
@@ -47,6 +96,8 @@ export default function DarkDashboardPage() {
     if (savedPreferences) {
       try {
         const preferences = JSON.parse(savedPreferences);
+        console.log('Found user preferences:', preferences);
+        
         if (preferences.travelTypes && preferences.travelTypes.length > 0) {
           // Map travel type to category
           const typeToCategory: Record<string, string> = {
@@ -57,15 +108,28 @@ export default function DarkDashboardPage() {
             'Solo Travel': 'Solo Explorer',
             'Budget Travel': 'Value Seeker',
             'Cultural Travel': 'Cultural Enthusiast',
-            'Eco Travel': 'Eco-Conscious Traveler'
+            'Eco Travel': 'Eco-Conscious Traveler',
+            'Adventure & Outdoors': 'Adventure Seeker'
           };
           
           const primaryType = preferences.travelTypes[0];
-          setUserCategory(typeToCategory[primaryType] || 'Traveler');
+          const category = typeToCategory[primaryType] || 'Traveler';
+          console.log('Setting user category to:', category);
+          setUserCategory(category);
         }
       } catch (e) {
         console.error('Error parsing user preferences:', e);
       }
+    } else {
+      // Default category if no preferences found
+      setUserCategory('Explorer');
+    }
+    
+    // Check for saved user category directly
+    const savedCategory = localStorage.getItem('jetai_user_category');
+    if (savedCategory) {
+      console.log('Found directly saved category:', savedCategory);
+      setUserCategory(savedCategory);
     }
   }, []);
   
@@ -169,10 +233,13 @@ export default function DarkDashboardPage() {
               <div className="mt-6 md:mt-0 flex flex-col items-center">
                 <div className="text-sm text-gray-400 mb-2">Scan or share your unique code</div>
                 <div className="h-24 w-24 bg-white rounded-lg p-1.5 flex items-center justify-center">
-                  {/* Placeholder for QR code that would be generated from the user code */}
-                  <div className="text-xs text-gray-400 text-center">
-                    QR Code<br/>coming soon
-                  </div>
+                  {qrCodeUrl ? (
+                    <img src={qrCodeUrl} alt="QR Code" className="w-full h-auto" />
+                  ) : (
+                    <div className="text-xs text-gray-400 text-center">
+                      Generating<br/>QR Code...
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -319,106 +386,151 @@ export default function DarkDashboardPage() {
               </div>
             )}
             
-            {/* Your Journey Tab */}
+            {/* User Journey Tabs */}
             <div className="mt-6 bg-[#0a1021] border border-gray-800 rounded-lg p-4">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-medium text-lg">Your Journey</h3>
+                <div className="flex space-x-4">
+                  <button 
+                    onClick={() => setActiveTab('journey')}
+                    className={`font-medium text-lg pb-1 border-b-2 ${activeTab === 'journey' ? 'text-[#4a89dc] border-[#4a89dc]' : 'text-gray-400 border-transparent hover:text-white'}`}
+                  >
+                    Your Journey
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('insights')}
+                    className={`font-medium text-lg pb-1 border-b-2 ${activeTab === 'insights' ? 'text-[#4a89dc] border-[#4a89dc]' : 'text-gray-400 border-transparent hover:text-white'}`}
+                  >
+                    Insights
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('activity')}
+                    className={`font-medium text-lg pb-1 border-b-2 ${activeTab === 'activity' ? 'text-[#4a89dc] border-[#4a89dc]' : 'text-gray-400 border-transparent hover:text-white'}`}
+                  >
+                    Activity
+                  </button>
+                </div>
                 <Button variant="ghost" className="text-sm text-[#4a89dc] hover:text-[#3a79cc]">
                   View All
                 </Button>
               </div>
               
-              <div className="space-y-4">
-                {/* Level 1 - Always unlocked */}
-                <div className="p-3 border border-[#4a89dc]/30 rounded-lg bg-[#050b17]">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-[#4a89dc] flex items-center justify-center mr-3">
-                        <span className="font-bold text-white">1</span>
+              {activeTab === 'journey' && (
+                <div className="space-y-4">
+                  {/* Level 1 - Always unlocked */}
+                  <div className="p-3 border border-[#4a89dc]/30 rounded-lg bg-[#050b17]">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 rounded-full bg-[#4a89dc] flex items-center justify-center mr-3">
+                          <span className="font-bold text-white">1</span>
+                        </div>
+                        <div>
+                          <h4 className="font-medium">Explorer</h4>
+                          <p className="text-xs text-gray-400">Basic travel features</p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-medium">Explorer</h4>
-                        <p className="text-xs text-gray-400">Basic travel features</p>
+                      <div className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
+                        Unlocked
                       </div>
                     </div>
-                    <div className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
-                      Unlocked
+                  </div>
+                  
+                  {/* Level 2 - Always unlocked */}
+                  <div className="p-3 border border-[#4a89dc]/30 rounded-lg bg-[#050b17]">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 rounded-full bg-[#4a89dc] flex items-center justify-center mr-3">
+                          <span className="font-bold text-white">2</span>
+                        </div>
+                        <div>
+                          <h4 className="font-medium">Globetrotter</h4>
+                          <p className="text-xs text-gray-400">Personalized recommendations</p>
+                        </div>
+                      </div>
+                      <div className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
+                        Unlocked
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Level 3 - Always unlocked */}
+                  <div className="p-3 border border-[#4a89dc]/30 rounded-lg bg-[#050b17]">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 rounded-full bg-[#4a89dc] flex items-center justify-center mr-3">
+                          <span className="font-bold text-white">3</span>
+                        </div>
+                        <div>
+                          <h4 className="font-medium">Voyager</h4>
+                          <p className="text-xs text-gray-400">AI travel planning</p>
+                        </div>
+                      </div>
+                      <div className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
+                        Unlocked
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Level 4 - Locked, requires upgrade */}
+                  <div className="p-3 border border-gray-800 rounded-lg bg-[#050b17]/50">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center mr-3">
+                          <span className="font-bold text-gray-400">4</span>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-400">Pioneer</h4>
+                          <p className="text-xs text-gray-500">Premium content access</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" className="text-xs h-8 border-[#4a89dc] text-[#4a89dc] hover:bg-[#4a89dc]/10">
+                        Upgrade
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Level 5 - Locked, requires upgrade */}
+                  <div className="p-3 border border-gray-800 rounded-lg bg-[#050b17]/50">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center mr-3">
+                          <span className="font-bold text-gray-400">5</span>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-400">Connoisseur</h4>
+                          <p className="text-xs text-gray-500">Exclusive concierge services</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" className="text-xs h-8 border-[#4a89dc] text-[#4a89dc] hover:bg-[#4a89dc]/10">
+                        Upgrade
+                      </Button>
                     </div>
                   </div>
                 </div>
-                
-                {/* Level 2 - Always unlocked */}
-                <div className="p-3 border border-[#4a89dc]/30 rounded-lg bg-[#050b17]">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-[#4a89dc] flex items-center justify-center mr-3">
-                        <span className="font-bold text-white">2</span>
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Globetrotter</h4>
-                        <p className="text-xs text-gray-400">Personalized recommendations</p>
-                      </div>
-                    </div>
-                    <div className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
-                      Unlocked
-                    </div>
+              )}
+              
+              {activeTab === 'insights' && (
+                <div className="py-8 text-center">
+                  <div className="mb-4">
+                    <BarChart4 className="h-12 w-12 mx-auto text-gray-600" />
                   </div>
+                  <h3 className="text-lg font-medium mb-2">Travel Insights Coming Soon</h3>
+                  <p className="text-gray-500 max-w-md mx-auto">
+                    Complete your profile and make a few searches to unlock personalized travel analytics and insights.
+                  </p>
                 </div>
-                
-                {/* Level 3 - Always unlocked */}
-                <div className="p-3 border border-[#4a89dc]/30 rounded-lg bg-[#050b17]">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-[#4a89dc] flex items-center justify-center mr-3">
-                        <span className="font-bold text-white">3</span>
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Voyager</h4>
-                        <p className="text-xs text-gray-400">AI travel planning</p>
-                      </div>
-                    </div>
-                    <div className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
-                      Unlocked
-                    </div>
+              )}
+              
+              {activeTab === 'activity' && (
+                <div className="py-8 text-center">
+                  <div className="mb-4">
+                    <FileText className="h-12 w-12 mx-auto text-gray-600" />
                   </div>
+                  <h3 className="text-lg font-medium mb-2">No Recent Activity</h3>
+                  <p className="text-gray-500 max-w-md mx-auto">
+                    Your recent searches, bookings, and interactions will appear here. Start exploring to see your activity.
+                  </p>
                 </div>
-                
-                {/* Level 4 - Locked, requires upgrade */}
-                <div className="p-3 border border-gray-800 rounded-lg bg-[#050b17]/50">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center mr-3">
-                        <span className="font-bold text-gray-400">4</span>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-gray-400">Pioneer</h4>
-                        <p className="text-xs text-gray-500">Premium content access</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" className="text-xs h-8 border-[#4a89dc] text-[#4a89dc] hover:bg-[#4a89dc]/10">
-                      Upgrade
-                    </Button>
-                  </div>
-                </div>
-                
-                {/* Level 5 - Locked, requires upgrade */}
-                <div className="p-3 border border-gray-800 rounded-lg bg-[#050b17]/50">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center mr-3">
-                        <span className="font-bold text-gray-400">5</span>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-gray-400">Connoisseur</h4>
-                        <p className="text-xs text-gray-500">Exclusive concierge services</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" className="text-xs h-8 border-[#4a89dc] text-[#4a89dc] hover:bg-[#4a89dc]/10">
-                      Upgrade
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
