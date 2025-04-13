@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { generateSocialPost } from '../vertex/generateSocialPost';
+import { generateSocialContent } from '../vertex/generateSocialPost';
 
 const router = Router();
 
@@ -12,12 +12,18 @@ router.post('/generate-social-post', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     
-    const result = await generateSocialPost({
+    const prompt = `Create a social media post for ${platform} about ${keywords.join(', ')} using a ${tone} tone.`;
+    const includeHashtags = true;
+    const mediaCount = mediaType === 'image' ? 1 : 0;
+    
+    const result = await generateSocialContent(
+      prompt,
       mediaType,
+      platform,
       tone,
-      keywords,
-      platform
-    });
+      includeHashtags,
+      mediaCount
+    );
     
     res.json(result);
   } catch (error) {

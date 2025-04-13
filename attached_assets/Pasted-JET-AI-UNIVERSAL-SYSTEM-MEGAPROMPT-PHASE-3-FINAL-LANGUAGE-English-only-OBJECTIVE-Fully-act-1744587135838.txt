@@ -1,0 +1,293 @@
+JET AI – UNIVERSAL SYSTEM MEGAPROMPT (PHASE 3 FINAL)
+✅ LANGUAGE: English only
+✅ OBJECTIVE: Fully activate Jet AI as an AI-powered travel companion with smart itinerary generation, community features, content creation, and universal code-based access.
+
+📌 PHASE 1 – HOMEPAGE STRUCTURE
+Main Menu Tabs
+
+✅ Home
+
+✅ Destinations
+
+✅ Travel Blog
+
+✅ AI Features
+
+✅ Dashboard
+
+✅ Travel Community
+
+✅ Premium Plans
+
+✅ Explore Experiences
+
+✅ Logout (only visible when logged in)
+
+⚠️ Add if missing: “Social Hub” tab for content creation and portfolio sharing
+
+Hero Section
+
+Headline: "Your AI Travel Companion Awaits"
+
+Subheadline: "Plan trips, share stories, and explore the world—smarter"
+
+CTA: “Get Started” → Triggers onboarding flow
+
+✅ Responsive design
+
+⚠️ Add background travel video or slider for engagement
+
+Features Block – Must Display 20 Features
+
+Smart itinerary planning
+
+AI travel budget planner
+
+Visa requirement advisor
+
+Trip health score
+
+Destination recommendations
+
+Local activity suggestions
+
+Weather & climate assistant
+
+Language & culture guide
+
+Currency conversion
+
+Travel insurance integration
+
+Smart packing lists
+
+Group coordination
+
+Trip reminders
+
+Real-time flight alerts
+
+Virtual passport wallet
+
+QR-based boarding sync
+
+Access Code Unlock System
+
+Travel Dashboard
+
+Travel Story Portfolio
+
+VR destination preview
+
+📌 PHASE 2 – ONBOARDING CHATBOT & CODE SYSTEM
+ChatBot (Bottom-right floating icon only)
+
+On all public pages
+
+Starts immediately after click
+
+Gemini Flash via Vertex AI connected
+
+English responses with optional Google Translate API for language toggle
+
+Clean, simple UI – 10-question flow
+
+10-Step Onboarding Flow
+
+What’s your name?
+
+What’s your email?
+
+What type of traveler are you? (Adventure / Luxury / Budget / Family / Solo)
+
+How many countries have you visited?
+
+Preferred travel style? (Planned / Spontaneous / Mixed)
+
+Do you want local recommendations?
+
+Preferred trip duration?
+
+Interests: Food / Museums / Nightlife / Nature / Shopping / Relaxation
+
+Travel frequency?
+
+Social profile: Would you like to build a public travel profile?
+
+Access Code System
+
+Format: TRAVEL-[TYPE]-[LANG]-XXXX
+
+Example: TRAVEL-LUXURY-ENG-9823
+
+Show QR code
+
+Send onboarding summary via SendGrid email
+
+Save user info in Firebase or Firestore
+
+📌 PHASE 3 – DASHBOARD FUNCTIONALITY
+User Dashboard Tabs
+
+Home (trip summary + progress path)
+
+My Journeys (trip history & future)
+
+Itineraries
+
+Accommodations
+
+Dining
+
+Transportation
+
+Social Portfolio
+
+Travel Community
+
+Travel Awards
+
+Code Status
+
+Settings
+
+My Journey Tab
+
+Show level-based unlocks (Beginner, Explorer, Adventurer, Global Nomad, VIP Jetsetter)
+
+Timeline-style visual progress
+
+Ability to upgrade via QR Code or Stripe
+
+Travel Awards Tab
+
+User connects existing rewards: Delta, American Airlines, Hotels.com, Cruise lines
+
+Displays point balance and usage history
+
+Suggests best usage for points in upcoming trips
+
+📌 PHASE 4 – SOCIAL MEDIA & CONTENT SYSTEM
+Social Portfolio Tab
+
+Upload images and videos from trips
+
+Auto-generate captions and hashtags using Gemini AI
+
+Connected to:
+
+TikTok
+
+YouTube Shorts
+
+Instagram Reels
+
+Facebook Posts
+
+Pinterest
+
+Travel Story Generator
+
+Use trip metadata to auto-generate a “Trip Recap Post”
+
+User can choose "Reel", "Story", or "Text Post"
+
+Share to multiple platforms from Jet AI dashboard
+
+Suggested thumbnails and AI-designed cover templates
+
+Content Assistant
+
+Prompts user to upload clips
+
+Automatically suggests audio, transitions, captions
+
+Integrated export to TikTok or IG Reels
+
+📌 PHASE 5 – PAYMENTS & PREMIUM ACCESS
+Stripe Integration
+
+Stripe payment triggers premium code unlock
+
+Pricing tiers:
+
+Basic (free)
+
+Explorer
+
+Nomad Pro
+
+VIP Jetsetter
+
+Code-Based Unlocking
+
+Users enter code to reveal advanced tabs:
+
+AI Travel Assistant
+
+VR Destinations
+
+Concierge Support
+
+Exclusive Partnerships
+
+📌 PHASE 6 – ADMIN PANEL
+Route: /admin
+
+Login: admin / admin123456
+
+Functions:
+
+View all registered users
+
+Codes generated per category
+
+Trip summaries
+
+Conversion tracking
+
+Sent email records
+
+Stripe payments
+
+Dashboard usage analytics
+
+📌 PHASE 7 – SMART INNOVATIONS
+🌐 Live Booking Suggestions via Kayak/Amadeus
+
+🎟️ Event Tickets for Concerts & Local Activities
+
+🎒 Smart Packing AI Checklist Generator
+
+📸 AI Photo Album Generator Post-Trip
+
+🧳 Multi-Trip Timeline View
+
+🗺️ Map of all destinations visited
+
+💬 Social Commenting System under posts
+
+📱 QR Code access on mobile for quick login
+
+✅ FINAL CHECKLIST
+ Homepage sections validated
+
+ Chatbot active + onboarding flow
+
+ Code generation and QR active
+
+ Dashboard personalizes based on code
+
+ Travel portfolio and post generator live
+
+ Travel awards & points tab present
+
+ Stripe working for upgrades
+
+ Admin page enabled
+
+ All menus, tabs, and translations working
+
+ Gemini Flash & Translate API connected
+
+ All images and buttons responsive

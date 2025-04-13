@@ -1,5 +1,41 @@
 import { users, type User, type InsertUser } from "@shared/schema";
-import type { Booking, Destination, SavedItem, Itinerary, InsertItinerary } from "@shared/schema";
+import type { Booking } from "@shared/schema";
+
+// Define interface for social posts
+export interface SocialPost {
+  id: string;
+  userId: number;
+  content: string;
+  hashtags: string[];
+  mediaUrls: string[];
+  platform: string;
+  postType: string;
+  status: 'draft' | 'published' | 'scheduled';
+  publishedAt?: string;
+  scheduledFor?: string;
+  likes: number;
+  comments: number;
+  shares: number;
+  analytics?: {
+    impressions: number;
+    engagement: number;
+    clicks: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InsertSocialPost {
+  userId: number;
+  content: string;
+  hashtags: string[];
+  mediaUrls: string[];
+  platform: string;
+  postType: string;
+  status: 'draft' | 'published' | 'scheduled';
+  publishedAt?: string;
+  scheduledFor?: string;
+}
 
 // Storage interface with all required methods
 export interface IStorage {
@@ -20,8 +56,13 @@ export interface IStorage {
   // User profiles
   getUserProfile(userId: number): Promise<any | undefined>;
   getUserBookings(userId: number): Promise<Booking[]>;
-  getUserSavedItems(userId: number): Promise<SavedItem[]>;
-  getUserItineraries(userId: number): Promise<Itinerary[]>;
+  
+  // Social Media functionality
+  getSocialPostsByUserId(userId: number): Promise<SocialPost[]>;
+  getSocialPostById(id: string): Promise<SocialPost | undefined>;
+  createSocialPost(post: InsertSocialPost): Promise<SocialPost>;
+  updateSocialPost(id: string, data: Partial<SocialPost>): Promise<SocialPost | undefined>;
+  deleteSocialPost(id: string): Promise<boolean>;
   
   // Destinations
   getDestinations(filters?: any): Promise<Destination[]>;
@@ -62,10 +103,12 @@ export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private userProfiles: Map<number, any>;
   private bookings: Map<number, Booking>;
-  private savedItems: Map<number, SavedItem[]>;
-  private destinations: Map<string, Destination>;
+  private savedItems: Map<number, any[]>;
+  private destinations: Map<string, any>;
   private chatHistory: Map<number, any[]>;
-  private itineraries: Map<number, Itinerary>;
+  private itineraries: Map<number, any>;
+  private socialPosts: Map<string, SocialPost>;
+  private communityPosts: Map<string, any>;
   currentId: number;
 
   constructor() {
@@ -76,6 +119,8 @@ export class MemStorage implements IStorage {
     this.destinations = new Map();
     this.chatHistory = new Map();
     this.itineraries = new Map();
+    this.socialPosts = new Map();
+    this.communityPosts = new Map();
     this.currentId = 1;
     
     // Initialize with a demo user
