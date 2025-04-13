@@ -406,7 +406,7 @@ export default function DarkLandingPage() {
                   alt="Santorini, Greece" 
                   className="w-full h-48 object-cover"
                 />
-                <div className="p-4 bg-gray-800">
+                <div className="p-4 bg-black border-t border-gray-800">
                   <h3 className="font-semibold text-lg text-white">Greece Getaways</h3>
                   <p className="text-sm text-gray-400">Explore crystal-clear waters and ancient history</p>
                 </div>
@@ -418,7 +418,7 @@ export default function DarkLandingPage() {
                   alt="Tropical beaches" 
                   className="w-full h-48 object-cover"
                 />
-                <div className="p-4 bg-gray-800">
+                <div className="p-4 bg-black border-t border-gray-800">
                   <h3 className="font-semibold text-lg text-white">Tropical Escapes</h3>
                   <p className="text-sm text-gray-400">Find your paradise on secluded beaches</p>
                 </div>
@@ -443,7 +443,7 @@ export default function DarkLandingPage() {
                   alt="The Alps" 
                   className="w-full h-24 object-cover"
                 />
-                <div className="p-3 bg-gray-800">
+                <div className="p-3 bg-black border-t border-gray-700">
                   <p className="text-sm font-medium text-center">The Alps</p>
                 </div>
               </div>
@@ -454,7 +454,7 @@ export default function DarkLandingPage() {
                   alt="Paris" 
                   className="w-full h-24 object-cover"
                 />
-                <div className="p-3 bg-gray-800">
+                <div className="p-3 bg-black border-t border-gray-700">
                   <p className="text-sm font-medium text-center">Paris</p>
                 </div>
               </div>
@@ -465,7 +465,7 @@ export default function DarkLandingPage() {
                   alt="Cities Top 100" 
                   className="w-full h-24 object-cover"
                 />
-                <div className="p-3 bg-gray-800">
+                <div className="p-3 bg-black border-t border-gray-700">
                   <p className="text-sm font-medium text-center">Cities Top 100</p>
                 </div>
               </div>
@@ -476,7 +476,7 @@ export default function DarkLandingPage() {
                   alt="World Tour" 
                   className="w-full h-24 object-cover"
                 />
-                <div className="p-3 bg-gray-800">
+                <div className="p-3 bg-black border-t border-gray-700">
                   <p className="text-sm font-medium text-center">World Tour</p>
                 </div>
               </div>
