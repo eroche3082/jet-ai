@@ -33,7 +33,7 @@ import {
   Shield,
   Code,
   Mail,
-  SendIcon,
+  Send as SendIcon,
   Info 
 } from 'lucide-react';
 import { useLocation } from 'wouter';
