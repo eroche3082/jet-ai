@@ -28,31 +28,31 @@ export default function LightLandingPage() {
   return (
     <div className="bg-white text-gray-800 min-h-screen">
       {/* Fixed Header */}
-      <header className="sticky top-0 z-50 bg-white shadow-md">
+      <header className="sticky top-0 z-50 bg-gray-900 text-white shadow-md">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center mb-0">
               <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-[#4e6af9]" stroke="currentColor" strokeWidth="2">
                 <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" strokeLinejoin="round" strokeLinecap="round"/>
               </svg>
-              <h1 className="font-bold text-2xl">JET AI</h1>
+              <h1 className="font-bold text-xl ml-2">JET AI</h1>
             </div>
             
-            <div className="hidden md:flex space-x-8 text-gray-700">
-              <Link href="/" className="font-medium hover:text-[#4e6af9] transition-colors">Home</Link>
-              <Link href="/destinations" className="font-medium hover:text-[#4e6af9] transition-colors">Destinations</Link>
-              <Link href="/blog" className="font-medium hover:text-[#4e6af9] transition-colors">Blog</Link>
-              <Link href="/about" className="font-medium hover:text-[#4e6af9] transition-colors">About</Link>
-              <Link href="/chat" className="font-medium hover:text-[#4e6af9] transition-colors">AI Assistant</Link>
+            <div className="hidden md:flex space-x-8">
+              <Link href="/" className="text-gray-400 hover:text-white transition-colors">Home</Link>
+              <Link href="/destinations" className="text-gray-400 hover:text-white transition-colors">Destinations</Link>
+              <Link href="/blog" className="text-gray-400 hover:text-white transition-colors">Travel Blog</Link>
+              <Link href="/about" className="text-gray-400 hover:text-white transition-colors">About Us</Link>
+              <Link href="/chat" className="text-gray-400 hover:text-white transition-colors">AI Assistant</Link>
             </div>
             
             <div className="flex items-center space-x-4">
               <Link href="/login">
-                <Button variant="outline" className="border-[#4e6af9] text-[#4e6af9] hover:bg-[#4e6af9] hover:text-white">
+                <Button variant="outline" className="border-[#4e6af9] text-white hover:bg-[#4e6af9] hover:text-white">
                   Sign In
                 </Button>
               </Link>
-              <button className="md:hidden">
+              <button className="md:hidden text-white">
                 <Menu className="h-6 w-6" />
               </button>
             </div>
