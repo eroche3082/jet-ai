@@ -1,0 +1,134 @@
+MEGAPROMPT – JET AI (Travel Companion)
+Plataforma: Viajes personalizados con asistencia de inteligencia artificial
+
+SECTION 1: FRONTEND STRUCTURE & INTERFACE VERIFICATION
+NO CAMBIAR EL FRONTEND ACTUAL
+
+El diseño visual actual (tipografía, botones, animaciones y estética dark-luxury) está aprobado. NO modificar ni reemplazar ningún layout visual.
+
+No se deben agregar nuevos elementos gráficos ni secciones innecesarias sin aprobación.
+
+VERIFICACIÓN DE BOTONES DEL MENÚ SUPERIOR Asegurar que los siguientes links estén completamente activos:
+
+Home
+
+Destinations
+
+Travel Blog
+
+AI Features
+
+Sign In → Debe llevar al login (con el flujo de Dashboard ya existente)
+
+SOLO UN CHATBOT ACTIVO
+
+El único chatbot permitido debe estar en la esquina inferior derecha.
+
+No debe haber ningún botón de “Create My Profile”, “Setup Wizard” o “Onboarding Box”.
+
+Todo el flujo comienza exclusivamente desde el ícono del chatbot (estilo burbuja flotante).
+
+SECTION 2: CHATBOT FLOW (ONBOARDING PREGUNTAS)
+FLUJO INICIAL
+
+Pregunta 1: What’s your name?
+
+Pregunta 2: What’s your email?
+
+Estas dos se almacenan en la base de datos de leads y deben mostrarse en el panel de administración.
+
+PREGUNTAS 3–12 (Multiple Selection - Travel Preferences)
+A continuación, una estructura exacta para la recopilación de datos para personalización de dashboard:
+
+Pregunta	Opciones
+What kind of travel experience do you enjoy? | Adventure, Luxury, Wellness, Cultural, Nature, Budget |
+
+What’s your preferred travel style? | Solo, Family, Couple, Group |
+
+What type of destinations do you prefer? | Cities, Beaches, Mountains, Islands, Historical Sites |
+
+What’s your budget range per trip? | <$500, $500–$1000, $1000–$3000, $3000+ |
+
+What’s your most common travel duration? | Weekend, 1 week, 2 weeks, 1 month |
+
+Do you prefer domestic or international travel? | Domestic, International, Both |
+
+Which services would you like help with? | Flights, Hotels, Local Tours, Events, Currency Exchange |
+
+Are you interested in Smart Travel Deals? | Yes (Email), Yes (Text), No |
+
+Would you like to integrate your calendar for automatic itinerary planning? | Yes, No |
+
+Are you open to surprise destination recommendations? | Yes, No, Maybe
+
+Cierre del flujo:
+
+Mostrar mensaje: “Your Jet AI Travel Dashboard is ready!”
+
+Botón: Login to Dashboard
+
+Esto redirige al login ya existente.
+
+SECTION 3: DASHBOARD PERSONALIZATION
+NO CREAR NUEVO DASHBOARD
+
+Utilizar el dashboard de viaje ya construido como base.
+
+Añadir una nueva pestaña llamada "AI Journey Planner" dentro del mismo panel lateral.
+
+Este tab debe mostrar:
+
+Resumen de las respuestas del onboarding
+
+Recomendaciones inteligentes de destinos
+
+Sugerencias de vuelos y hospedajes
+
+Opción para descargar itinerario o sincronizar con Google Calendar
+
+FUNCIONES DE AI
+
+El dashboard debe estar conectado a Gemini AI para:
+
+Generar rutas de viaje dinámicas
+
+Personalizar experiencias sugeridas
+
+Activar recordatorios, sincronización de vuelos y hoteles
+
+SECTION 4: ADMIN PANEL + DATA SYNC
+Capturar nombre, email y preferencias en el Admin Panel centralizado.
+
+Generar una lista con:
+
+Nuevos leads
+
+Preferencias más comunes
+
+Usuarios activos
+
+Esto también debe alimentar el sistema de newsletters y promociones personalizadas (puede conectarse a Mailchimp o Firebase Email API).
+
+SECTION 5: VERIFICACIONES Y REPORTE FINAL
+El equipo técnico debe entregar:
+
+REPORTE FUNCIONAL DE JET AI
+
+✅ Confirmación de que todos los botones están activos
+
+✅ Chatbot aparece como ícono en la esquina inferior derecha
+
+✅ Flujo de 12 preguntas implementado correctamente
+
+✅ Datos almacenados en Firebase y visibles en Admin Panel
+
+✅ Dashboard ya existente extendido con pestaña de AI personalizada
+
+LISTA DE PENDIENTES Y SUGERENCIAS
+
+Incluir mejoras sugeridas
+
+Notificar si alguna función está incompleta o rota
+
+Indicar si hay algo que requiera integración adicional
+
