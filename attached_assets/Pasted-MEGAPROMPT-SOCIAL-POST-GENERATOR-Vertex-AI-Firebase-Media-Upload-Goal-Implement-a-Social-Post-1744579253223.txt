@@ -1,0 +1,135 @@
+MEGAPROMPT — SOCIAL POST GENERATOR (Vertex AI + Firebase Media Upload)
+Goal:
+Implement a Social Post Generator inside the JetAI platform (under the new Social Media Hub tab). The system should allow users to:
+
+Upload photos or videos
+
+Generate content (story, post, caption, hashtags) with Vertex AI
+
+Schedule or publish to their linked social platforms
+
+Save the result in Firestore + Firebase Storage
+
+Functional Flow
+1. UI Components
+Create a new component: SocialPostGenerator.tsx
+
+Inputs:
+
+Upload media (image or video)
+
+Select type of post: Story / Carousel / Reel / Regular Post
+
+Select tone: Luxury / Adventure / Relaxed / Informative / Vlog
+
+Text box (optional): User description or keywords
+
+Select platforms: Instagram / TikTok / Facebook / Pinterest / YouTube
+
+Date & Time picker (for scheduling)
+
+Output:
+
+AI-generated caption (editable)
+
+Hashtags
+
+Recommended time to post
+
+Preview post + Download option
+
+2. Integration with Vertex AI
+Create /server/vertex/generateSocialPost.ts
+
+ts
+Copiar
+Editar
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+export async function generateSocialPost({ mediaType, tone, keywords, platform }: any) {
+  const genAI = new GoogleGenerativeAI(process.env.VERTEX_API_KEY);
+  const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+
+  const prompt = `
+    Create a ${mediaType} social media post for ${platform}.
+    Tone: ${tone}.
+    Keywords: ${keywords}.
+    Return: caption + hashtags + posting tip.
+  `;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+  return text;
+}
+3. Firebase Upload Setup
+Firebase Storage path: users/{userId}/social-media/{filename}
+
+Create uploadMediaToFirebase.ts:
+
+ts
+Copiar
+Editar
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "../firebaseConfig";
+
+export async function uploadMedia(file: File, userId: string) {
+  const path = `users/${userId}/social-media/${file.name}`;
+  const fileRef = ref(storage, path);
+  await uploadBytes(fileRef, file);
+  return await getDownloadURL(fileRef);
+}
+4. Saving the Post in Firestore
+Firestore collection: social_posts
+
+Each document includes:
+
+ts
+Copiar
+Editar
+{
+  userId: string,
+  mediaUrl: string,
+  caption: string,
+  hashtags: string[],
+  platform: string[],
+  type: "Story" | "Reel" | "Post",
+  tone: string,
+  createdAt: Timestamp,
+  scheduledFor: Timestamp,
+  status: "Draft" | "Scheduled" | "Posted"
+}
+5. Post Preview UI
+Component: PostPreview.tsx
+
+Displays:
+
+Uploaded media
+
+Generated caption
+
+Hashtags
+
+Share/Copy/Download/Save options
+
+Admin Panel View (Optional for Tracking)
+Allow Admin to see:
+
+Number of posts created by user
+
+Scheduled posts across platforms
+
+Engagement simulation (optional AI metric)
+
+To-Do Summary
+ Build SocialPostGenerator.tsx UI with form controls
+
+ Implement Vertex AI function to generate captions
+
+ Upload media to Firebase Storage and get URL
+
+ Store final post in Firestore with scheduling info
+
+ Add preview component with options to edit/save/share
+
+ Create Admin view for social content activity
+

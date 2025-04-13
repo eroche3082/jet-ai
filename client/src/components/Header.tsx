@@ -133,7 +133,7 @@ export default function Header() {
                 href="/login" 
                 className="font-serif font-medium text-white bg-[#4a89dc] hover:bg-[#3a79cc] px-5 py-2 rounded transition-colors duration-300 shadow-sm"
               >
-                Sign In
+                Log In
               </Link>
             )}
           </nav>
