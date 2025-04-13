@@ -5,14 +5,16 @@ import { getAuth, GoogleAuthProvider, createUserWithEmailAndPassword, signInWith
 import { getStorage } from "firebase/storage";
 import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, serverTimestamp, query, where, orderBy, limit, getDocs } from "firebase/firestore";
 
-// Firebase configuration with Firebase API Key from Group 3
+// Firebase configuration with environment variables
+const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID || "jetai-travel-companion";
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyBGWmVEy2zp6fpqaBkDOpV-Qj_FP6QkZj0",
-  authDomain: "erudite-creek-431302-q3.firebaseapp.com",
-  projectId: "erudite-creek-431302-q3",
-  storageBucket: "erudite-creek-431302-q3.firebasestorage.app",
+  authDomain: `${projectId}.firebaseapp.com`,
+  projectId: projectId,
+  storageBucket: `${projectId}.appspot.com`,
   messagingSenderId: "744217150021",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:744217150021:web:c3310bd6d4e10f237c192c",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:744217150021:web:803371f49c503bb17c192c",
   measurementId: "G-J42ZMB67JH"
 };
 
