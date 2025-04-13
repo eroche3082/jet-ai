@@ -193,25 +193,31 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
     setMessages((prev) => [...prev, userMessage]);
     
     // Update user data with preferences
-    setUserData((prev) => ({
-      ...prev,
-      preferences: {
-        ...prev.preferences,
-        [currentStep.id]: message.userSelections,
-      },
-      currentStep: prev.currentStep + 1,
-    }));
+    setUserData((prev) => {
+      // Save current progress to local storage for persistence
+      const updatedUserData = {
+        ...prev,
+        preferences: {
+          ...prev.preferences,
+          [currentStep.id]: message.userSelections,
+        },
+        currentStep: prev.currentStep + 1,
+      };
+      
+      localStorage.setItem('jetai_onboarding_progress', JSON.stringify(updatedUserData));
+      return updatedUserData;
+    });
     
     setIsTyping(true);
     setProgress((userData.currentStep + 1) / totalSteps * 100);
     
-    // Check if we've reached the end of onboarding
-    if (currentStepIndex >= onboardingSteps.length - 1) {
+    // Check if we've reached the end of onboarding (use a safer comparison)
+    if (currentStepIndex + 1 >= onboardingSteps.length) {
       // Final message
       setTimeout(() => {
         const finalMessage: MessageType = {
           id: (Date.now() + 1).toString(),
-          content: `Thanks ${userData.name}! Your custom travel dashboard is now being prepared...`,
+          content: `Thanks ${userData.name}! Your custom travel dashboard is now being prepared with your preferences for ${Object.keys(userData.preferences).length} categories.`,
           role: 'assistant',
           timestamp: new Date(),
         };
@@ -221,6 +227,13 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
         
         // Complete onboarding after showing final message
         setTimeout(() => {
+          // Log completion for debugging
+          console.log("Onboarding complete with user data:", userData);
+          
+          // Save final preferences before completion
+          localStorage.setItem('jetai_user_preferences', JSON.stringify(userData.preferences));
+          
+          // Call the completion handler
           onComplete(userData);
         }, 2000);
       }, 1000);
@@ -228,6 +241,12 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
       // Move to next question
       setTimeout(() => {
         const nextStep = onboardingSteps[currentStepIndex + 1];
+        console.log(`Moving to step ${currentStepIndex + 1}: ${nextStep.title}`);
+        
+        // Determine the proper response type based on the step type
+        const responseType = nextStep.type === 'destination-input' 
+          ? 'text' 
+          : (nextStep.type === 'radio' || nextStep.type === 'multiselect' ? 'multiselect' : 'text');
         
         const assistantMessage: MessageType = {
           id: (Date.now() + 1).toString(),
@@ -235,7 +254,7 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
           role: 'assistant',
           timestamp: new Date(),
           expectsResponse: true,
-          responseType: 'multiselect',
+          responseType: responseType,
           options: nextStep.options,
           userSelections: [],
         };
@@ -244,6 +263,99 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
         setIsTyping(false);
       }, 1000);
     }
+  };
+
+  // Handle destination input
+  const handleDestinationSubmit = () => {
+    if (!inputValue.trim()) return;
+    
+    // Current step in the onboarding flow
+    const currentStepIndex = userData.currentStep - 2; // Adjust for name and email steps
+    const currentStep = onboardingSteps[currentStepIndex];
+    
+    // Add user message
+    const userMessage: MessageType = {
+      id: Date.now().toString(),
+      content: inputValue,
+      role: 'user',
+      timestamp: new Date(),
+    };
+    
+    setMessages((prev) => [...prev, userMessage]);
+    
+    // Update user data
+    setUserData((prev) => {
+      const destinations = inputValue.split(',').map(d => d.trim());
+      const updatedUserData = {
+        ...prev,
+        preferences: {
+          ...prev.preferences,
+          [currentStep.id]: destinations,
+        },
+        currentStep: prev.currentStep + 1,
+      };
+      
+      localStorage.setItem('jetai_onboarding_progress', JSON.stringify(updatedUserData));
+      return updatedUserData;
+    });
+    
+    setInputValue('');
+    setIsTyping(true);
+    setProgress((userData.currentStep + 1) / totalSteps * 100);
+    
+    // Check if we've reached the end of onboarding (use a safer comparison)
+    if (currentStepIndex + 1 >= onboardingSteps.length) {
+      handleFinalStep();
+    } else {
+      moveToNextStep(currentStepIndex);
+    }
+  };
+  
+  const handleFinalStep = () => {
+    setTimeout(() => {
+      const finalMessage: MessageType = {
+        id: (Date.now() + 1).toString(),
+        content: `Thanks ${userData.name}! Your custom travel dashboard is now being prepared with your preferences for ${Object.keys(userData.preferences).length} categories.`,
+        role: 'assistant',
+        timestamp: new Date(),
+      };
+      
+      setMessages((prev) => [...prev, finalMessage]);
+      setIsTyping(false);
+      
+      // Complete onboarding after showing final message
+      setTimeout(() => {
+        console.log("Onboarding complete with user data:", userData);
+        localStorage.setItem('jetai_user_preferences', JSON.stringify(userData.preferences));
+        onComplete(userData);
+      }, 2000);
+    }, 1000);
+  };
+  
+  const moveToNextStep = (currentStepIndex: number) => {
+    setTimeout(() => {
+      const nextStep = onboardingSteps[currentStepIndex + 1];
+      console.log(`Moving to step ${currentStepIndex + 1}: ${nextStep.title}`);
+      
+      // Determine the proper response type based on the step type
+      const responseType = nextStep.type === 'destination-input' 
+        ? 'destination' 
+        : (nextStep.type === 'radio' || nextStep.type === 'multiselect' ? 'multiselect' : 'text');
+      
+      const assistantMessage: MessageType = {
+        id: (Date.now() + 1).toString(),
+        content: nextStep.title + (nextStep.description ? `\n\n${nextStep.description}` : ''),
+        role: 'assistant',
+        timestamp: new Date(),
+        expectsResponse: true,
+        responseType: responseType,
+        options: nextStep.options,
+        userSelections: [],
+      };
+      
+      setMessages((prev) => [...prev, assistantMessage]);
+      setIsTyping(false);
+    }, 1000);
   };
 
   const renderInputArea = () => {
@@ -265,6 +377,27 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
             <Button
               className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white"
               onClick={handleNameSubmit}
+              disabled={!inputValue.trim() || isTyping}
+            >
+              Continue
+              <ArrowRightCircle className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        );
+        
+      case 'destination':
+        return (
+          <div className="flex items-end gap-2">
+            <Input
+              placeholder="Enter destinations (separate with commas)"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleDestinationSubmit()}
+              className="flex-1"
+            />
+            <Button
+              className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white"
+              onClick={handleDestinationSubmit}
               disabled={!inputValue.trim() || isTyping}
             >
               Continue
@@ -302,10 +435,10 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
               {lastMessage.options?.map((option) => (
                 <div
                   key={option.id}
-                  className={`flex items-center p-3 rounded-md cursor-pointer hover:bg-muted border-2 ${
+                  className={`flex items-center p-3 rounded-md cursor-pointer border-2 ${
                     lastMessage.userSelections?.includes(option.id)
-                      ? 'border-[#4a89dc] bg-[#4a89dc]/10'
-                      : 'border-muted'
+                      ? 'border-[#4a89dc] bg-[#4a89dc]/10 text-[#050b17] font-medium'
+                      : 'border-gray-300 hover:border-[#4a89dc]/50 text-gray-700'
                   }`}
                   onClick={() => toggleSelection(lastMessage.id, option.id)}
                 >
