@@ -10,7 +10,8 @@ import {
   travelSearchExperiences, 
   travelSearchAccommodations,
   searchFlights,
-  getFlightById
+  getFlightById,
+  searchDestinations
 } from "./lib/travelApi";
 import { verifyApiIntegrations, suggestNextApiConnections } from './lib/apiVerification';
 import { verifyAllApis, generateApiActivationInstructions } from './lib/apiVerificationService';
@@ -888,6 +889,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error searching experiences:", error);
       res.status(500).json({ message: "Error searching experiences" });
+    }
+  });
+  
+  // Search destinations endpoint to support the landing page search box
+  app.post("/api/search/destinations", async (req, res) => {
+    try {
+      const { destination, date, useGemini, useRapidAPI } = req.body;
+      
+      if (!destination) {
+        return res.status(400).json({ message: "Destination is required" });
+      }
+      
+      console.log(`Searching for destinations: ${destination}, date: ${date}`);
+      
+      // Search for destinations using the existing API
+      const searchResults = await searchDestinations(destination);
+      
+      // Track the search in analytics if applicable
+      // ...
+      
+      // Return search results
+      res.json({ 
+        success: true, 
+        results: searchResults.destinations,
+        source: searchResults.source,
+        query: {
+          destination,
+          date
+        }
+      });
+    } catch (error) {
+      console.error("Error searching destinations:", error);
+      res.status(500).json({ 
+        message: "Error searching destinations",
+        error: error.message
+      });
     }
   });
   

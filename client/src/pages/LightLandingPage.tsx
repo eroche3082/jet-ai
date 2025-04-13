@@ -82,27 +82,55 @@ export default function LightLandingPage() {
         <div className="absolute bottom-0 left-0 right-0 transform translate-y-1/2">
           <div className="container mx-auto px-6">
             <div className="bg-white rounded-lg shadow-lg p-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Destination</label>
-                  <div className="relative">
-                    <Input placeholder="Where do you want to go?" className="pl-10" />
-                    <Map className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <form onSubmit={(e) => { 
+                e.preventDefault();
+                const destination = (e.currentTarget.elements.namedItem('destination') as HTMLInputElement).value;
+                const date = (e.currentTarget.elements.namedItem('date') as HTMLInputElement).value;
+                
+                // API integration - making search request to server endpoints
+                fetch('/api/search/destinations', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ 
+                    destination, 
+                    date,
+                    useGemini: true,
+                    useRapidAPI: true
+                  })
+                })
+                .then(res => {
+                  if (res.ok) {
+                    window.location.href = `/destinations?q=${encodeURIComponent(destination)}&date=${encodeURIComponent(date)}`;
+                  } else {
+                    console.error('Search error:', res.statusText);
+                  }
+                })
+                .catch(err => {
+                  console.error('API error:', err);
+                });
+              }}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Destination</label>
+                    <div className="relative">
+                      <Input name="destination" placeholder="Where do you want to go?" className="pl-10" required />
+                      <Map className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Travel Date</label>
+                    <div className="relative">
+                      <Input name="date" type="date" className="pl-10" required />
+                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    </div>
+                  </div>
+                  <div className="flex items-end">
+                    <Button type="submit" className="w-full bg-[#4e6af9] hover:bg-[#3a55e7]">
+                      <Search className="mr-2 h-5 w-5" /> Search
+                    </Button>
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Travel Date</label>
-                  <div className="relative">
-                    <Input type="date" className="pl-10" />
-                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  </div>
-                </div>
-                <div className="flex items-end">
-                  <Button className="w-full bg-[#4e6af9] hover:bg-[#3a55e7]">
-                    <Search className="mr-2 h-5 w-5" /> Search
-                  </Button>
-                </div>
-              </div>
+              </form>
             </div>
           </div>
         </div>
@@ -667,23 +695,7 @@ export default function LightLandingPage() {
         </div>
       </section>
       
-      {/* Call to Action */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Experience Smarter Travel?</h2>
-          <p className="text-gray-700 max-w-3xl mx-auto mb-8">
-            Join thousands of travelers who have discovered the power of AI-assisted travel planning with JET AI.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg" className="bg-[#4e6af9] hover:bg-[#3a55e7] text-white px-8">
-              <Link href="/signup">Sign Up for Free</Link>
-            </Button>
-            <Button size="lg" variant="outline" className="border-[#4e6af9] text-[#4e6af9] hover:bg-[#4e6af9] hover:text-white px-8">
-              <Link href="/chat">Try AI Assistant</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+
       
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
@@ -762,6 +774,14 @@ export default function LightLandingPage() {
           </div>
         </div>
       </footer>
+      {/* AI Assistant Button (Fixed position) */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Link href="/chat">
+          <Button className="w-14 h-14 rounded-full flex items-center justify-center bg-[#4e6af9] hover:bg-[#3a55e7] shadow-lg">
+            <MessageSquare className="h-6 w-6 text-white" />
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 }
