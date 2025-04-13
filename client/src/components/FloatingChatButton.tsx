@@ -48,6 +48,16 @@ export default function FloatingChatButton() {
           uid: user.uid
         }));
         
+        // Store user code if available (essential for journey tracking)
+        if (userData.code) {
+          localStorage.setItem('jetai_user_code', userData.code);
+        }
+        
+        // Store user preferences for category determination
+        if (userData.preferences) {
+          localStorage.setItem('jetai_user_preferences', JSON.stringify(userData.preferences));
+        }
+        
         // Set logged in state
         localStorage.setItem('isLoggedIn', 'true');
         
@@ -79,6 +89,16 @@ export default function FloatingChatButton() {
             name: userData.name,
             email: userData.email
           }));
+          
+          // Store user code if available (essential for journey tracking)
+          if (userData.code) {
+            localStorage.setItem('jetai_user_code', userData.code);
+          }
+          
+          // Store user preferences for category determination
+          if (userData.preferences) {
+            localStorage.setItem('jetai_user_preferences', JSON.stringify(userData.preferences));
+          }
           
           localStorage.setItem('isLoggedIn', 'true');
           setLocation('/dashboard');

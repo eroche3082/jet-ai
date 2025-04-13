@@ -12,11 +12,18 @@ import {
   Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import SimpleOnboardingChat from '@/components/SimpleOnboardingChat';
 
 export default function DarkDashboardPage() {
   const [showChat, setShowChat] = useState(true);
-  const [userData, setUserData] = useState<{ name: string; email: string }>();
+  const [userData, setUserData] = useState<{ 
+    name: string; 
+    email: string;
+  }>();
+  const [userCode, setUserCode] = useState<string>('');
+  const [userCategory, setUserCategory] = useState<string>('');
+  const { toast } = useToast();
   
   useEffect(() => {
     // Check if we have user data from localStorage
@@ -26,6 +33,38 @@ export default function DarkDashboardPage() {
         setUserData(JSON.parse(savedUserData));
       } catch (e) {
         console.error('Error parsing user data:', e);
+      }
+    }
+    
+    // Get user code if available
+    const savedCode = localStorage.getItem('jetai_user_code');
+    if (savedCode) {
+      setUserCode(savedCode);
+    }
+    
+    // Check for user category from preferences analysis
+    const savedPreferences = localStorage.getItem('jetai_user_preferences');
+    if (savedPreferences) {
+      try {
+        const preferences = JSON.parse(savedPreferences);
+        if (preferences.travelTypes && preferences.travelTypes.length > 0) {
+          // Map travel type to category
+          const typeToCategory: Record<string, string> = {
+            'Luxury Travel': 'Luxury Traveler',
+            'Adventure Travel': 'Adventure Seeker',
+            'Business Travel': 'Business Traveler',
+            'Family Travel': 'Family Explorer',
+            'Solo Travel': 'Solo Explorer',
+            'Budget Travel': 'Value Seeker',
+            'Cultural Travel': 'Cultural Enthusiast',
+            'Eco Travel': 'Eco-Conscious Traveler'
+          };
+          
+          const primaryType = preferences.travelTypes[0];
+          setUserCategory(typeToCategory[primaryType] || 'Traveler');
+        }
+      } catch (e) {
+        console.error('Error parsing user preferences:', e);
       }
     }
   }, []);
@@ -101,6 +140,45 @@ export default function DarkDashboardPage() {
       
       {/* Main content */}
       <main className="container mx-auto px-4 py-12">
+        {/* User code card - prominently displayed at the top */}
+        {userCode && (
+          <div className="mb-10 bg-gradient-to-r from-[#050b17] to-[#0a1021] border border-[#4a89dc]/30 rounded-lg p-6 shadow-lg">
+            <div className="flex flex-col md:flex-row items-center justify-between">
+              <div>
+                <div className="text-sm text-[#4a89dc] mb-1">YOUR PERSONAL JET AI CODE</div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl md:text-3xl font-mono font-bold">{userCode}</h2>
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(userCode);
+                      toast({ title: "Code copied to clipboard" });
+                    }}
+                    className="p-1.5 rounded-md bg-[#4a89dc]/10 hover:bg-[#4a89dc]/20 text-[#4a89dc]"
+                    aria-label="Copy code"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                  </button>
+                </div>
+                <div className="mt-1 text-sm text-gray-400">
+                  {userCategory ? `Category: ${userCategory}` : 'Standard Traveler'}
+                </div>
+              </div>
+              
+              <div className="mt-6 md:mt-0 flex flex-col items-center">
+                <div className="text-sm text-gray-400 mb-2">Scan or share your unique code</div>
+                <div className="h-24 w-24 bg-white rounded-lg p-1.5 flex items-center justify-center">
+                  {/* Placeholder for QR code that would be generated from the user code */}
+                  <div className="text-xs text-gray-400 text-center">
+                    QR Code<br/>coming soon
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className="flex flex-col lg:flex-row lg:items-start lg:space-x-10">
           {/* Left column */}
           <div className="lg:w-1/2 mb-10 lg:mb-0">
@@ -241,10 +319,106 @@ export default function DarkDashboardPage() {
               </div>
             )}
             
-            {/* Optional additional card */}
+            {/* Your Journey Tab */}
             <div className="mt-6 bg-[#0a1021] border border-gray-800 rounded-lg p-4">
-              <h3 className="font-medium mb-2">Travel Recommendations</h3>
-              <p className="text-sm text-gray-400">Complete the onboarding chat to get personalized destinations and experiences tailored just for you.</p>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-medium text-lg">Your Journey</h3>
+                <Button variant="ghost" className="text-sm text-[#4a89dc] hover:text-[#3a79cc]">
+                  View All
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                {/* Level 1 - Always unlocked */}
+                <div className="p-3 border border-[#4a89dc]/30 rounded-lg bg-[#050b17]">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-[#4a89dc] flex items-center justify-center mr-3">
+                        <span className="font-bold text-white">1</span>
+                      </div>
+                      <div>
+                        <h4 className="font-medium">Explorer</h4>
+                        <p className="text-xs text-gray-400">Basic travel features</p>
+                      </div>
+                    </div>
+                    <div className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
+                      Unlocked
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Level 2 - Always unlocked */}
+                <div className="p-3 border border-[#4a89dc]/30 rounded-lg bg-[#050b17]">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-[#4a89dc] flex items-center justify-center mr-3">
+                        <span className="font-bold text-white">2</span>
+                      </div>
+                      <div>
+                        <h4 className="font-medium">Globetrotter</h4>
+                        <p className="text-xs text-gray-400">Personalized recommendations</p>
+                      </div>
+                    </div>
+                    <div className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
+                      Unlocked
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Level 3 - Always unlocked */}
+                <div className="p-3 border border-[#4a89dc]/30 rounded-lg bg-[#050b17]">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-[#4a89dc] flex items-center justify-center mr-3">
+                        <span className="font-bold text-white">3</span>
+                      </div>
+                      <div>
+                        <h4 className="font-medium">Voyager</h4>
+                        <p className="text-xs text-gray-400">AI travel planning</p>
+                      </div>
+                    </div>
+                    <div className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
+                      Unlocked
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Level 4 - Locked, requires upgrade */}
+                <div className="p-3 border border-gray-800 rounded-lg bg-[#050b17]/50">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center mr-3">
+                        <span className="font-bold text-gray-400">4</span>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-400">Pioneer</h4>
+                        <p className="text-xs text-gray-500">Premium content access</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" className="text-xs h-8 border-[#4a89dc] text-[#4a89dc] hover:bg-[#4a89dc]/10">
+                      Upgrade
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* Level 5 - Locked, requires upgrade */}
+                <div className="p-3 border border-gray-800 rounded-lg bg-[#050b17]/50">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center mr-3">
+                        <span className="font-bold text-gray-400">5</span>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-400">Connoisseur</h4>
+                        <p className="text-xs text-gray-500">Exclusive concierge services</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" className="text-xs h-8 border-[#4a89dc] text-[#4a89dc] hover:bg-[#4a89dc]/10">
+                      Upgrade
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
