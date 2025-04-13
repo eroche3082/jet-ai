@@ -1002,10 +1002,10 @@ export default function LightLandingPage() {
           onComplete={(userData: any) => {
             console.log("Onboarding complete with user data:", userData);
             setShowChat(false);
-            // Store user data and redirect to dashboard
+            // Store user data and redirect to the chat demo page
             localStorage.setItem('jetai_user', JSON.stringify(userData));
             localStorage.setItem('isLoggedIn', 'true');
-            window.location.href = '/dashboard';
+            window.location.href = '/chat-demo';
           }}
         />
       )}

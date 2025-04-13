@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowRightCircle, X, MessageSquare } from 'lucide-react';
+import { ArrowRightCircle, X, MessageSquare, Check } from 'lucide-react';
 import { onboardingSteps } from '@/lib/onboardingFlow';
 
 type MessageType = {
   id: string;
   content: string;
   role: 'user' | 'ai';
+  timestamp?: string;
   options?: Array<{
     id: string;
     label: string;
@@ -31,13 +32,9 @@ export default function SimpleOnboardingChat({ onClose, onComplete }: SimpleOnbo
   const [messages, setMessages] = useState<MessageType[]>([
     {
       id: '1',
-      content: "Hi there! Welcome to JET AI. I'll help you personalize your travel experience with a few questions.",
+      content: "Hi there! Welcome to JET AI. I'm your travel AI Assistant. Let's personalize your experience.",
       role: 'ai',
-    },
-    {
-      id: '2',
-      content: "What's your name?",
-      role: 'ai',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
   
@@ -66,6 +63,7 @@ export default function SimpleOnboardingChat({ onClose, onComplete }: SimpleOnbo
       id: Date.now().toString(),
       content: inputValue,
       role: 'user',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
     
     setMessages(prev => [...prev, userMessage]);
@@ -89,6 +87,7 @@ export default function SimpleOnboardingChat({ onClose, onComplete }: SimpleOnbo
           id: (Date.now() + 1).toString(),
           content: "Great to meet you! What's your email address?",
           role: 'ai',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         
         setMessages(prev => [...prev, nextQuestion]);
@@ -105,6 +104,7 @@ export default function SimpleOnboardingChat({ onClose, onComplete }: SimpleOnbo
             id: (Date.now() + 1).toString(),
             content: "That doesn't look like a valid email. Please try again.",
             role: 'ai',
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           };
           
           setMessages(prev => [...prev, errorMessage]);
@@ -131,6 +131,7 @@ export default function SimpleOnboardingChat({ onClose, onComplete }: SimpleOnbo
           id: (Date.now() + 1).toString(),
           content: "What type of travel experiences do you prefer?",
           role: 'ai',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           options: [
             { id: 'adventure', label: 'Adventure & Outdoors' },
             { id: 'cultural', label: 'Cultural & Historical' },
@@ -167,6 +168,7 @@ export default function SimpleOnboardingChat({ onClose, onComplete }: SimpleOnbo
           id: (Date.now() + 1).toString(),
           content: `Thanks for sharing that with me! I'll personalize your JET AI experience based on your preferences.`,
           role: 'ai',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         
         setMessages(prev => [...prev, thankYouMessage]);
@@ -200,24 +202,24 @@ export default function SimpleOnboardingChat({ onClose, onComplete }: SimpleOnbo
   
   return (
     <div 
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 transition-opacity duration-300 ${
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40 transition-opacity duration-300 ${
         isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}
     >
       <div 
-        className={`bg-white rounded-lg shadow-xl w-full max-w-md transition-all duration-300 transform ${
-          isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
+        className={`bg-white rounded-lg shadow-xl w-full max-w-lg transition-all duration-300 transform overflow-hidden ${
+          isOpen ? 'scale-100' : 'scale-95'
         }`}
       >
         {/* Header */}
-        <div className="bg-[#050b17] text-white p-4 rounded-t-lg flex justify-between items-center">
+        <div className="bg-[#050b17] text-white p-3 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className="bg-[#4a89dc]/20 p-2 rounded-full">
-              <MessageSquare className="h-5 w-5 text-[#4a89dc]" />
+            <div className="bg-white rounded-full h-8 w-8 flex items-center justify-center">
+              <MessageSquare className="h-4 w-4 text-[#050b17]" />
             </div>
             <div>
-              <div className="font-display text-lg">JET AI</div>
-              <div className="text-xs text-white/70 -mt-1 font-serif">PERSONALIZATION</div>
+              <div className="font-medium">JET AI Onboarding</div>
+              <div className="text-xs text-white/70 -mt-0.5">Personalizing your travel experience</div>
             </div>
           </div>
           <button onClick={handleClose} className="text-white/70 hover:text-white transition-colors">
@@ -226,54 +228,64 @@ export default function SimpleOnboardingChat({ onClose, onComplete }: SimpleOnbo
         </div>
         
         {/* Chat Messages */}
-        <div className="p-4 max-h-[400px] overflow-y-auto">
+        <div className="p-4 h-[350px] overflow-y-auto bg-gray-50">
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`mb-3 ${message.role === 'user' ? 'text-right' : ''}`}
+              className="mb-4"
             >
-              <div
-                className={`inline-block rounded-lg px-4 py-2 max-w-[85%] ${
-                  message.role === 'user'
-                    ? 'bg-[#4a89dc] text-white'
-                    : 'bg-[#f0f4f9] text-[#050b17]'
-                }`}
-              >
-                {message.content}
+              <div className="flex items-start">
+                {message.role === 'ai' && (
+                  <div className="mr-2 bg-gray-200 rounded-full h-8 w-8 flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="font-medium text-sm">AI</span>
+                  </div>
+                )}
+                <div className={`flex-1 ${message.role === 'user' ? 'pl-10' : ''}`}>
+                  <div
+                    className={`rounded-lg px-4 py-3 inline-block ${
+                      message.role === 'user'
+                        ? 'bg-[#4a89dc] text-white ml-auto'
+                        : 'bg-white text-[#050b17] border border-gray-200'
+                    } ${message.role === 'user' ? 'float-right' : ''}`}
+                  >
+                    {message.content}
+                  </div>
+                  
+                  {/* Display time for messages */}
+                  <div className={`text-xs text-gray-500 mt-1 clear-both ${message.role === 'user' ? 'text-right' : ''}`}>
+                    {message.timestamp}
+                  </div>
+                  
+                  {/* Options for multiple choice questions */}
+                  {message.options && (
+                    <div className="mt-3 grid grid-cols-2 gap-2 clear-both">
+                      {message.options.map((option) => (
+                        <button
+                          key={option.id}
+                          className="text-left px-3 py-2 bg-white border border-gray-200 rounded hover:bg-[#4a89dc]/5 hover:border-[#4a89dc] transition-colors"
+                          onClick={() => handleOptionSelect(option.id, option.label)}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-              
-              {/* Display time for user messages */}
-              {message.role === 'user' && (
-                <div className="text-xs text-gray-500 mt-1">
-                  {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </div>
-              )}
-              
-              {/* Options for multiple choice questions */}
-              {message.options && (
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  {message.options.map((option) => (
-                    <button
-                      key={option.id}
-                      className="text-left px-3 py-2 border border-[#4a89dc]/30 rounded-md hover:bg-[#4a89dc]/10 hover:border-[#4a89dc] transition-colors"
-                      onClick={() => handleOptionSelect(option.id, option.label)}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
           ))}
           
           {/* Typing indicator */}
           {isTyping && (
-            <div className="flex items-center mb-3">
-              <div className="bg-[#f0f4f9] text-[#050b17] rounded-lg px-4 py-2 inline-block">
+            <div className="flex items-start mb-4">
+              <div className="mr-2 bg-gray-200 rounded-full h-8 w-8 flex items-center justify-center flex-shrink-0 mt-1">
+                <span className="font-medium text-sm">AI</span>
+              </div>
+              <div className="bg-white text-[#050b17] border border-gray-200 rounded-lg px-4 py-2 inline-block">
                 <div className="flex space-x-1.5">
-                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
                 </div>
               </div>
             </div>
@@ -283,31 +295,27 @@ export default function SimpleOnboardingChat({ onClose, onComplete }: SimpleOnbo
         </div>
         
         {/* Input Area */}
-        {currentQuestion < 2 && (
-          <div className="p-4 border-t">
-            <div className="flex gap-2">
-              <Input
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleUserInput()}
-                placeholder={currentQuestion === 0 ? "Enter your name..." : "Enter your email..."}
-                className="flex-1"
-                disabled={isTyping}
-              />
-              <Button
-                onClick={handleUserInput}
-                disabled={!inputValue.trim() || isTyping}
-                className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white"
-              >
-                <ArrowRightCircle className="h-5 w-5" />
-              </Button>
-            </div>
+        <div className="p-4 border-t border-gray-200 bg-white">
+          <div className="flex gap-2">
+            <Input
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleUserInput()}
+              placeholder={currentQuestion === 0 ? "Enter your name..." : currentQuestion === 1 ? "Enter your email..." : "Type your message..."}
+              className="flex-1 border-gray-200 focus:border-[#4a89dc] focus:ring-[#4a89dc]/10"
+              disabled={isTyping}
+            />
+            <Button
+              onClick={handleUserInput}
+              disabled={!inputValue.trim() || isTyping}
+              className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white rounded-full h-10 w-10 p-0 flex items-center justify-center"
+            >
+              <ArrowRightCircle className="h-5 w-5" />
+            </Button>
           </div>
-        )}
-        
-        {/* Footer */}
-        <div className="p-3 text-center text-xs text-gray-500 border-t">
-          Your responses help us personalize your travel experience
+          <div className="text-center text-xs text-gray-500 mt-2">
+            Your responses help us personalize your travel experience
+          </div>
         </div>
       </div>
     </div>
