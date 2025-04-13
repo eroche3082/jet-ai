@@ -608,169 +608,175 @@ export default function LightLandingPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Basic Plan */}
-            <div className="bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl">
-              <div className="p-6 border-b">
-                <h3 className="text-2xl font-bold text-center mb-2">Free</h3>
+            <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 relative">
+              <div className="p-8 border-b border-gray-100">
+                <h3 className="text-2xl font-display text-center mb-2 text-marni-dark">Voyager</h3>
                 <div className="text-center mb-4">
-                  <span className="text-4xl font-bold">$0</span>
-                  <span className="text-gray-600">/month</span>
+                  <span className="text-4xl font-display text-marni-dark">$0</span>
+                  <span className="text-gray-600 font-serif">/month</span>
                 </div>
-                <p className="text-gray-600 text-center">Perfect for casual travelers</p>
+                <p className="text-gray-600 text-center font-serif">For casual exploration</p>
               </div>
-              <div className="p-6">
-                <ul className="space-y-4">
+              <div className="p-8">
+                <ul className="space-y-5 font-serif text-marni-dark/90">
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-[#3a55e7] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-marni-accent mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span>Basic destination search</span>
+                    <span>Essential destination search</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-[#3a55e7] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-marni-accent mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>5 AI assistant queries per day</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-[#3a55e7] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-marni-accent mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span>Standard itinerary builder</span>
+                    <span>Standard itinerary framework</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-[#3a55e7] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-marni-accent mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span>Community forum access</span>
+                    <span>Traveler community access</span>
                   </li>
-                  <li className="flex items-start text-gray-500">
-                    <svg className="h-5 w-5 text-gray-400 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <li className="flex items-start text-gray-400">
+                    <svg className="h-5 w-5 text-gray-300 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                     <span>Advanced flight comparisons</span>
                   </li>
-                  <li className="flex items-start text-gray-500">
-                    <svg className="h-5 w-5 text-gray-400 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <li className="flex items-start text-gray-400">
+                    <svg className="h-5 w-5 text-gray-300 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                     <span>Real-time language translation</span>
                   </li>
                 </ul>
                 <div className="mt-8">
-                  <Button className="w-full bg-[#3a55e7] hover:bg-[#2b3fbb]">Get Started</Button>
+                  <Button className="w-full bg-marni-dark hover:bg-marni-accent text-white font-medium transition-colors duration-300">
+                    Begin Your Journey
+                  </Button>
                 </div>
               </div>
             </div>
             
             {/* Premium Plan */}
-            <div className="bg-white rounded-lg overflow-hidden shadow-2xl transition-all duration-300 hover:shadow-xl transform scale-105 border-2 border-[#3a55e7]">
-              <div className="p-1 bg-[#3a55e7]">
-                <p className="text-white text-center text-sm font-semibold uppercase">Most Popular</p>
+            <div className="bg-white overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 border-t border-marni-accent relative">
+              <div className="absolute top-0 right-0 bg-marni-accent text-white text-xs py-1 px-3 font-medium">
+                <span>DISTINGUISHED CHOICE</span>
               </div>
-              <div className="p-6 border-b">
-                <h3 className="text-2xl font-bold text-center mb-2">Premium</h3>
+              <div className="p-8 border-b border-gray-100">
+                <h3 className="text-2xl font-display text-center mb-2 text-marni-dark">Connoisseur</h3>
                 <div className="text-center mb-4">
-                  <span className="text-4xl font-bold">$9.99</span>
-                  <span className="text-gray-600">/month</span>
+                  <span className="text-4xl font-display text-marni-dark">$9.99</span>
+                  <span className="text-gray-600 font-serif">/month</span>
                 </div>
-                <p className="text-gray-600 text-center">For frequent travelers</p>
+                <p className="text-gray-600 text-center font-serif">For discerning travelers</p>
               </div>
-              <div className="p-6">
-                <ul className="space-y-4">
+              <div className="p-8">
+                <ul className="space-y-5 font-serif text-marni-dark/90">
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-[#3a55e7] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-marni-accent mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span>Everything in Free plan</span>
+                    <span>All Voyager tier features</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-[#3a55e7] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-marni-accent mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>Unlimited AI assistant queries</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-[#3a55e7] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-marni-accent mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span>Advanced flight & hotel comparisons</span>
+                    <span>Enhanced flight & accommodation analysis</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-[#3a55e7] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-marni-accent mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>Real-time language translation</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-[#3a55e7] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-marni-accent mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span>Custom itinerary creation</span>
+                    <span>Bespoke itinerary curation</span>
                   </li>
-                  <li className="flex items-start text-gray-500">
-                    <svg className="h-5 w-5 text-gray-400 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <li className="flex items-start text-gray-400">
+                    <svg className="h-5 w-5 text-gray-300 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
-                    <span>Priority customer support</span>
+                    <span>Dedicated concierge assistance</span>
                   </li>
                 </ul>
                 <div className="mt-8">
-                  <Button className="w-full bg-[#3a55e7] hover:bg-[#2b3fbb]">Subscribe Now</Button>
+                  <Button className="w-full bg-marni-accent hover:bg-marni-dark text-white font-medium transition-colors duration-300">
+                    Elevate Your Experience
+                  </Button>
                 </div>
               </div>
             </div>
             
             {/* Business Plan */}
-            <div className="bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl">
-              <div className="p-6 border-b">
-                <h3 className="text-2xl font-bold text-center mb-2">Business</h3>
+            <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 relative">
+              <div className="p-8 border-b border-gray-100">
+                <h3 className="text-2xl font-display text-center mb-2 text-marni-dark">Luminary</h3>
                 <div className="text-center mb-4">
-                  <span className="text-4xl font-bold">$29.99</span>
-                  <span className="text-gray-600">/month</span>
+                  <span className="text-4xl font-display text-marni-dark">$29.99</span>
+                  <span className="text-gray-600 font-serif">/month</span>
                 </div>
-                <p className="text-gray-600 text-center">For business travelers & groups</p>
+                <p className="text-gray-600 text-center font-serif">For distinguished groups & executives</p>
               </div>
-              <div className="p-6">
-                <ul className="space-y-4">
+              <div className="p-8">
+                <ul className="space-y-5 font-serif text-marni-dark/90">
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-[#3a55e7] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-marni-accent mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span>Everything in Premium plan</span>
+                    <span>All Connoisseur tier privileges</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-[#3a55e7] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-marni-accent mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span>Multi-user accounts (up to 5)</span>
+                    <span>Multi-member access (up to 5 profiles)</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-[#3a55e7] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-marni-accent mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span>Group itinerary coordination</span>
+                    <span>Collective itinerary orchestration</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-[#3a55e7] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-marni-accent mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span>Business expense tracking</span>
+                    <span>Sophisticated expense management</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-[#3a55e7] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-marni-accent mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span>Priority customer support</span>
+                    <span>Priority concierge assistance</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-[#3a55e7] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-marni-accent mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span>API access for customizations</span>
+                    <span>Personal account consultant</span>
                   </li>
                 </ul>
                 <div className="mt-8">
-                  <Button className="w-full bg-[#3a55e7] hover:bg-[#2b3fbb]">Contact Sales</Button>
+                  <Button className="w-full bg-marni-dark hover:bg-marni-accent text-white font-medium transition-colors duration-300">
+                    Request Consultation
+                  </Button>
                 </div>
               </div>
             </div>
@@ -779,19 +785,31 @@ export default function LightLandingPage() {
       </section>
       
       {/* Newsletter */}
-      <section className="py-12 bg-[#3a55e7] text-white">
-        <div className="container mx-auto px-6">
+      <section className="py-16 bg-marni-dark text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1530521954074-e64f6810b32d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1650&q=80')] bg-cover bg-center"></div>
+        </div>
+        <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl font-bold mb-2">Subscribe to Our Newsletter</h2>
-            <p className="mb-6">Get travel tips, destination insights, and exclusive AI-powered recommendations</p>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="inline-flex items-center px-4 py-1 border-l-2 border-marni-accent bg-marni-dark/50 backdrop-blur-sm text-white text-sm font-serif mb-3">
+              <Mail className="h-3.5 w-3.5 mr-1.5 text-marni-accent" /> 
+              CURATED INSIGHTS
+            </div>
+            <h2 className="text-3xl mb-3 font-display text-white">Join Our Distinguished Travelers</h2>
+            <p className="mb-8 font-serif text-white/80">Receive refined travel commentary, exclusive destination insights, and personalized AI recommendations curated for the discerning traveler</p>
+            <div className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
               <Input 
                 type="email" 
                 placeholder="Your email address" 
-                className="flex-grow bg-white text-gray-800 placeholder:text-gray-500 border-0"
+                className="flex-grow bg-white/10 backdrop-blur-sm text-white placeholder:text-white/50 border border-white/20 focus:border-marni-accent focus:ring-marni-accent/20 font-serif"
               />
-              <Button className="bg-gray-800 hover:bg-gray-900 text-white border-0">Subscribe</Button>
+              <Button className="bg-marni-accent hover:bg-white hover:text-marni-dark text-white font-medium transition-colors duration-300">
+                Subscribe
+              </Button>
             </div>
+            <p className="mt-4 text-xs text-white/60 font-serif">
+              By subscribing, you'll receive our weekly digest of exceptional journeys. You may unsubscribe at any time.
+            </p>
           </div>
         </div>
       </section>
@@ -799,86 +817,98 @@ export default function LightLandingPage() {
 
       
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-marni-dark text-white py-16">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
             <div>
-              <div className="flex items-center mb-4">
-                <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-[#3a55e7]" stroke="currentColor" strokeWidth="2">
+              <div className="flex items-center mb-6 group">
+                <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-marni-accent transition-transform duration-300 group-hover:scale-110" stroke="currentColor" strokeWidth="2">
                   <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" strokeLinejoin="round" strokeLinecap="round"/>
                 </svg>
-                <h3 className="font-bold text-xl ml-2">JET AI</h3>
+                <div className="ml-2">
+                  <h3 className="font-display text-2xl tracking-tight">JET AI</h3>
+                  <div className="text-xs text-white/70 -mt-1 font-serif">TRAVEL COMPANION</div>
+                </div>
               </div>
-              <p className="text-gray-400">
-                Your AI-powered travel companion. Discover destinations, plan itineraries, and experience the world like never before.
+              <p className="text-white/70 font-serif leading-relaxed">
+                Your distinguished AI-powered travel companion. Discover exceptional destinations, curate bespoke itineraries, and experience the world with unparalleled sophistication.
               </p>
-              <div className="flex space-x-4 mt-4">
-                <a href="#" className="text-gray-400 hover:text-white">
+              <div className="flex space-x-4 mt-6">
+                <a href="#" className="text-white/60 hover:text-marni-accent transition-colors">
                   <Facebook className="h-5 w-5" />
                 </a>
-                <a href="#" className="text-gray-400 hover:text-white">
+                <a href="#" className="text-white/60 hover:text-marni-accent transition-colors">
                   <Twitter className="h-5 w-5" />
                 </a>
-                <a href="#" className="text-gray-400 hover:text-white">
+                <a href="#" className="text-white/60 hover:text-marni-accent transition-colors">
                   <Instagram className="h-5 w-5" />
                 </a>
-                <a href="#" className="text-gray-400 hover:text-white">
+                <a href="#" className="text-white/60 hover:text-marni-accent transition-colors">
                   <Youtube className="h-5 w-5" />
                 </a>
               </div>
             </div>
             
             <div>
-              <h4 className="font-semibold text-lg mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                <li><Link href="/" className="text-gray-400 hover:text-white">Home</Link></li>
-                <li><Link href="/destinations" className="text-gray-400 hover:text-white">Destinations</Link></li>
-                <li><Link href="/blog" className="text-gray-400 hover:text-white">Travel Blog</Link></li>
-                <li><Link href="/about" className="text-gray-400 hover:text-white">About Us</Link></li>
-                <li><Link href="/contact" className="text-gray-400 hover:text-white">Contact</Link></li>
+              <h4 className="font-display text-lg mb-5 text-white">Navigation</h4>
+              <ul className="space-y-3 font-serif">
+                <li><Link href="/" className="text-white/70 hover:text-marni-accent transition-colors">Home</Link></li>
+                <li><Link href="/destinations" className="text-white/70 hover:text-marni-accent transition-colors">Destinations</Link></li>
+                <li><Link href="/blog" className="text-white/70 hover:text-marni-accent transition-colors">Travel Journal</Link></li>
+                <li><Link href="/about" className="text-white/70 hover:text-marni-accent transition-colors">About JET AI</Link></li>
+                <li><Link href="/contact" className="text-white/70 hover:text-marni-accent transition-colors">Contact</Link></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="font-semibold text-lg mb-4">Features</h4>
-              <ul className="space-y-2">
-                <li><Link href="/chat" className="text-gray-400 hover:text-white">AI Assistant</Link></li>
-                <li><Link href="/itinerary" className="text-gray-400 hover:text-white">Itinerary Creator</Link></li>
-                <li><Link href="/translator" className="text-gray-400 hover:text-white">Language Translator</Link></li>
-                <li><Link href="/pricing" className="text-gray-400 hover:text-white">Pricing</Link></li>
-                <li><Link href="/faq" className="text-gray-400 hover:text-white">FAQ</Link></li>
+              <h4 className="font-display text-lg mb-5 text-white">Services</h4>
+              <ul className="space-y-3 font-serif">
+                <li><Link href="/chat" className="text-white/70 hover:text-marni-accent transition-colors">AI Concierge</Link></li>
+                <li><Link href="/itinerary" className="text-white/70 hover:text-marni-accent transition-colors">Itinerary Curator</Link></li>
+                <li><Link href="/translator" className="text-white/70 hover:text-marni-accent transition-colors">Language Translation</Link></li>
+                <li><Link href="/pricing" className="text-white/70 hover:text-marni-accent transition-colors">Membership Options</Link></li>
+                <li><Link href="/faq" className="text-white/70 hover:text-marni-accent transition-colors">FAQs</Link></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="font-semibold text-lg mb-4">Contact Us</h4>
-              <ul className="space-y-2 text-gray-400">
+              <h4 className="font-display text-lg mb-5 text-white">Connect</h4>
+              <ul className="space-y-4 text-white/70 font-serif">
                 <li className="flex items-start">
-                  <Mail className="h-5 w-5 mr-2 mt-0.5" />
-                  <span>support@jetai.travel</span>
+                  <Mail className="h-5 w-5 mr-3 mt-0.5 text-marni-accent" />
+                  <span>concierge@jetai.travel</span>
                 </li>
                 <li className="flex items-start">
-                  <MessageSquare className="h-5 w-5 mr-2 mt-0.5" />
-                  <span>Live chat on our website</span>
+                  <MessageSquare className="h-5 w-5 mr-3 mt-0.5 text-marni-accent" />
+                  <span>Live assistance available</span>
+                </li>
+                <li className="mt-6">
+                  <Button variant="outline" className="border-white/20 hover:border-marni-accent text-white hover:bg-marni-accent/10 hover:text-marni-accent transition-all duration-300 font-serif">
+                    <Link href="/contact" className="flex items-center">
+                      Request Information
+                    </Link>
+                  </Button>
                 </li>
               </ul>
             </div>
           </div>
           
-          <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between">
-            <p className="text-gray-500">© 2025 JET AI. All rights reserved.</p>
-            <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link href="/terms" className="text-gray-500 hover:text-white">Terms of Service</Link>
-              <Link href="/privacy" className="text-gray-500 hover:text-white">Privacy Policy</Link>
-              <Link href="/cookies" className="text-gray-500 hover:text-white">Cookie Policy</Link>
+          <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between">
+            <p className="text-white/50 font-serif">© 2025 JET AI. All rights reserved.</p>
+            <div className="flex space-x-8 mt-4 md:mt-0 font-serif">
+              <Link href="/terms" className="text-white/50 hover:text-marni-accent transition-colors">Terms of Service</Link>
+              <Link href="/privacy" className="text-white/50 hover:text-marni-accent transition-colors">Privacy Policy</Link>
+              <Link href="/cookies" className="text-white/50 hover:text-marni-accent transition-colors">Cookie Policy</Link>
             </div>
           </div>
         </div>
       </footer>
+      
       {/* AI Assistant Button (Fixed position) */}
       <div className="fixed bottom-6 right-6 z-50">
         <Link href="/chat">
-          <Button className="w-14 h-14 rounded-full flex items-center justify-center bg-[#3a55e7] hover:bg-[#2b3fbb] shadow-lg">
+          <Button className="w-14 h-14 rounded-full flex items-center justify-center bg-marni-accent hover:bg-marni-dark text-white shadow-lg border border-white/10 transition-all duration-300">
+            <div className="absolute inset-0 rounded-full bg-marni-accent animate-pulse opacity-30"></div>
             <MessageSquare className="h-6 w-6 text-white" />
           </Button>
         </Link>
