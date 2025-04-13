@@ -1,54 +1,102 @@
-import { initializeApp } from "firebase/app";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-
-// Firebase configuration with environment variables
-const firebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY,
-  authDomain: `${process.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: `${process.env.VITE_FIREBASE_PROJECT_ID}.appspot.com`,
-  appId: process.env.VITE_FIREBASE_APP_ID,
-};
+import { initializeApp, cert, App } from 'firebase-admin/app';
+import { getStorage } from 'firebase-admin/storage';
+import { randomUUID } from 'crypto';
 
 // Initialize Firebase
-export const firebaseApp = initializeApp(firebaseConfig);
+const firebaseConfig = {
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: `${process.env.VITE_FIREBASE_PROJECT_ID}.appspot.com`
+};
 
-// Initialize Cloud Storage and get a reference to the service
-export const storage = getStorage(firebaseApp);
+let storageInstance: any = null;
+export let firebaseApp: App | null = null;
 
-console.log("✅ Firebase configured successfully for media uploads");
+try {
+  firebaseApp = initializeApp({
+    credential: cert({
+      projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL || `firebase-adminsdk-xxxx@${process.env.VITE_FIREBASE_PROJECT_ID}.iam.gserviceaccount.com`,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : undefined,
+    }),
+    storageBucket: firebaseConfig.storageBucket
+  }, 'storage-app');
+  
+  storageInstance = getStorage(firebaseApp);
+  console.log('✅ Firebase configured successfully for media uploads');
+} catch (error) {
+  console.error('Firebase initialization error:', error);
+}
 
 /**
- * Uploads a file to Firebase Storage
+ * Uploads media to Firebase Storage
  * @param file The file to upload
- * @param userId The ID of the user uploading the file
- * @param folder The folder to store the file in (e.g., 'travel-stories', 'social-posts')
- * @returns A promise resolving to the download URL
+ * @param userId The user ID uploading the file
+ * @param folder Optional folder name (default: 'uploads')
+ * @returns The public URL of the uploaded file
  */
 export async function uploadMediaToFirebase(
   file: Express.Multer.File,
   userId: number,
-  folder: string
+  folder: string = 'uploads'
 ): Promise<string> {
   try {
-    const timestamp = Date.now();
-    const originalName = file.originalname.replace(/[^a-zA-Z0-9.]/g, '_');
-    const fileName = `${userId}_${timestamp}_${originalName}`;
+    if (!storageInstance) {
+      throw new Error('Firebase Storage not initialized');
+    }
     
-    // Create a storage reference
-    const storageRef = ref(storage, `${folder}/${fileName}`);
+    const bucket = storageInstance.bucket();
+    
+    // Generate unique filename
+    const fileExtension = file.originalname.split('.').pop();
+    const fileName = `${folder}/${userId}/${Date.now()}-${randomUUID()}.${fileExtension}`;
+    
+    // Create a file reference
+    const fileRef = bucket.file(fileName);
     
     // Upload the file
-    const snapshot = await uploadBytes(storageRef, file.buffer, {
-      contentType: file.mimetype,
+    await fileRef.save(file.buffer, {
+      metadata: {
+        contentType: file.mimetype,
+      },
     });
     
-    // Get the download URL
-    const downloadURL = await getDownloadURL(snapshot.ref);
+    // Make the file publicly accessible
+    await fileRef.makePublic();
     
-    return downloadURL;
+    // Get the public URL
+    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+    
+    return publicUrl;
   } catch (error) {
-    console.error('Error uploading file to Firebase:', error);
-    throw new Error('Failed to upload media to Firebase Storage');
+    console.error('Error uploading to Firebase:', error);
+    throw new Error('Failed to upload media');
+  }
+}
+
+/**
+ * Delete media from Firebase Storage
+ * @param url The public URL of the file to delete
+ * @returns Boolean indicating success
+ */
+export async function deleteMediaFromFirebase(url: string): Promise<boolean> {
+  try {
+    if (!storageInstance) {
+      throw new Error('Firebase Storage not initialized');
+    }
+    
+    const bucket = storageInstance.bucket();
+    
+    // Extract filename from URL
+    const urlObj = new URL(url);
+    const pathSegments = urlObj.pathname.split('/');
+    const fileName = pathSegments.slice(2).join('/'); // Skip /storage.googleapis.com/bucket-name
+    
+    // Delete the file
+    await bucket.file(fileName).delete();
+    
+    return true;
+  } catch (error) {
+    console.error('Error deleting from Firebase:', error);
+    return false;
   }
 }

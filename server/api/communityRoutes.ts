@@ -8,9 +8,7 @@ import { storage } from '../storage';
 const router = express.Router();
 
 // Configure Firebase storage
-import { firebaseApp } from '../lib/firebase';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-const firebaseStorage = getStorage(firebaseApp);
+import { uploadMediaToFirebase, deleteMediaFromFirebase } from '../lib/firebase';
 
 // Configure multer for file uploads
 const upload = multer({
@@ -94,13 +92,13 @@ router.post('/posts', ensureAuthenticated, upload.array('media', 5), async (req,
     try {
       // Upload to Firebase if available
       for (const file of files) {
-        const fileExtension = path.extname(file.originalname);
-        const fileName = `${randomUUID()}${fileExtension}`;
-        const storageRef = ref(firebaseStorage, `community/${fileName}`);
-        
-        await uploadBytes(storageRef, file.buffer);
-        const downloadUrl = await getDownloadURL(storageRef);
-        mediaUrls.push(downloadUrl);
+        try {
+          const downloadUrl = await uploadMediaToFirebase(file, user.id, 'community');
+          mediaUrls.push(downloadUrl);
+        } catch (uploadError) {
+          console.error('Individual file upload error:', uploadError);
+          throw uploadError; // Rethrow to be caught by the outer try-catch
+        }
       }
     } catch (uploadError) {
       console.error('Firebase upload error:', uploadError);
