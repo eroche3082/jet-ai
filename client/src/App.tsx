@@ -204,6 +204,10 @@ function App() {
         <Route path="/language-learning" component={LanguageLearningPage} />
         <Route path="/admin" component={AdminPage} />
         
+        {/* Social Media and Rewards routes */}
+        <Route path="/social-media-hub" component={SocialMediaHubPage} />
+        <Route path="/rewards" component={RewardsPage} />
+        
         {/* Partner/Affiliate routes */}
         <Route path="/partner/dashboard" component={PartnerDashboard} />
         <Route path="/partner/signup" component={PartnerSignup} />

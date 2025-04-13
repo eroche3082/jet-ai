@@ -11,6 +11,7 @@ export type UserProfile = {
 
 export type AuthContextType = {
   currentUser: any | null;
+  user: any | null; // Alias for currentUser to maintain compatibility
   userProfile: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -105,6 +106,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const value: AuthContextType = {
     currentUser,
+    user: currentUser, // Alias for currentUser
     userProfile,
     isAuthenticated: !!currentUser,
     isLoading,
