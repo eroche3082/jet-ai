@@ -63,19 +63,22 @@ export default function About() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative py-20 bg-primary/5">
+      <section className="relative py-20 bg-marni-dark/10">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="font-display text-4xl md:text-5xl font-bold text-dark mb-6">
+            <div className="inline-flex items-center px-4 py-1 border-l-2 border-marni-accent bg-marni-dark/5 text-marni-dark text-sm font-serif mb-3">
+              <span className="text-marni-accent">ABOUT</span> JET AI
+            </div>
+            <h1 className="font-display text-4xl md:text-5xl font-bold text-marni-dark mb-6">
               Redefining Travel Planning with AI
             </h1>
-            <p className="text-lg text-dark/70 mb-8">
-              JetAI combines cutting-edge artificial intelligence with deep travel expertise to create
+            <p className="text-lg text-marni-dark/70 mb-8 font-serif">
+              JET AI combines cutting-edge artificial intelligence with deep travel expertise to create
               personalized experiences that match your unique preferences, budget, and travel style.
             </p>
             <Link 
               href="/destinations" 
-              className="inline-block bg-primary hover:bg-primary/90 text-white font-accent font-semibold px-8 py-3 rounded-full transition"
+              className="inline-block bg-marni-accent hover:bg-marni-accent/90 text-white font-serif font-medium px-8 py-3 rounded transition shadow-md"
             >
               Start Exploring
             </Link>
@@ -97,19 +100,22 @@ export default function About() {
             </div>
             
             <div>
-              <h2 className="font-display text-3xl font-bold text-dark mb-6">Our Story</h2>
-              <p className="text-dark/70 mb-4">
-                JetAI was born from a simple frustration: despite the wealth of travel information available 
+              <div className="inline-flex items-center px-4 py-1 border-l-2 border-marni-accent bg-marni-dark/5 text-marni-dark text-sm font-serif mb-4">
+                OUR STORY
+              </div>
+              <h2 className="font-display text-3xl font-bold text-marni-dark mb-6">From Concept to Reality</h2>
+              <p className="text-marni-dark/70 mb-4 font-serif">
+                JET AI was born from a simple frustration: despite the wealth of travel information available 
                 online, planning the perfect trip remained overwhelming and time-consuming.
               </p>
-              <p className="text-dark/70 mb-4">
+              <p className="text-marni-dark/70 mb-4 font-serif">
                 In 2022, our founder David Chen assembled a team of AI experts, travel industry veterans, and 
                 passionate globetrotters to create a smarter way to plan travel experiences. We built an AI 
                 platform that learns from millions of travel patterns and preferences to offer truly personalized 
                 recommendations.
               </p>
-              <p className="text-dark/70 mb-4">
-                Today, JetAI helps thousands of travelers discover destinations that match their unique interests, 
+              <p className="text-marni-dark/70 mb-4 font-serif">
+                Today, JET AI helps thousands of travelers discover destinations that match their unique interests, 
                 create custom itineraries that optimize their time, and book exceptional experiences they might 
                 never have found on their own.
               </p>
@@ -119,43 +125,58 @@ export default function About() {
       </section>
 
       {/* Our Mission */}
-      <section className="py-16 bg-gradient-to-br from-primary/5 to-secondary/5">
+      <section className="py-16 bg-gradient-to-br from-marni-dark/5 to-marni-accent/5">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="font-display text-3xl font-bold text-dark mb-6">Our Mission</h2>
-            <p className="text-xl text-dark/70 mb-8">
+            <div className="inline-flex items-center px-4 py-1 border-l-2 border-marni-accent bg-marni-dark/5 text-marni-dark text-sm font-serif mb-4">
+              OUR MISSION
+            </div>
+            <h2 className="font-display text-3xl font-bold text-marni-dark mb-6">Elevating Travel Experiences</h2>
+            <p className="text-xl text-marni-dark/70 mb-8 font-serif">
               We believe travel should be transformative, not transactional. Our mission is to make exceptional 
               travel experiences accessible to everyone through intelligent technology that understands your preferences
               better than you do yourself.
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-              <div className="bg-white p-6 rounded-xl shadow-sm">
-                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4 mx-auto">
-                  <i className="fas fa-lightbulb text-primary text-xl"></i>
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-marni-dark/5">
+                <div className="w-14 h-14 rounded-full bg-marni-accent/10 flex items-center justify-center mb-4 mx-auto">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-marni-accent">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
                 </div>
-                <h3 className="font-accent text-lg font-semibold text-dark mb-3">Personalization</h3>
-                <p className="text-dark/70">
+                <h3 className="font-display text-lg font-semibold text-marni-dark mb-3">Personalization</h3>
+                <p className="text-marni-dark/70 font-serif">
                   We create travel plans tailored to your preferences, not generic tourist routes.
                 </p>
               </div>
               
-              <div className="bg-white p-6 rounded-xl shadow-sm">
-                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4 mx-auto">
-                  <i className="fas fa-globe text-primary text-xl"></i>
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-marni-dark/5">
+                <div className="w-14 h-14 rounded-full bg-marni-accent/10 flex items-center justify-center mb-4 mx-auto">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-marni-accent">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M2 12h20"></path>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                  </svg>
                 </div>
-                <h3 className="font-accent text-lg font-semibold text-dark mb-3">Sustainability</h3>
-                <p className="text-dark/70">
+                <h3 className="font-display text-lg font-semibold text-marni-dark mb-3">Sustainability</h3>
+                <p className="text-marni-dark/70 font-serif">
                   We promote responsible tourism that respects local communities and the environment.
                 </p>
               </div>
               
-              <div className="bg-white p-6 rounded-xl shadow-sm">
-                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4 mx-auto">
-                  <i className="fas fa-hands-helping text-primary text-xl"></i>
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-marni-dark/5">
+                <div className="w-14 h-14 rounded-full bg-marni-accent/10 flex items-center justify-center mb-4 mx-auto">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-marni-accent">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <polyline points="17 11 19 13 23 9"></polyline>
+                  </svg>
                 </div>
-                <h3 className="font-accent text-lg font-semibold text-dark mb-3">Accessibility</h3>
-                <p className="text-dark/70">
+                <h3 className="font-display text-lg font-semibold text-marni-dark mb-3">Accessibility</h3>
+                <p className="text-marni-dark/70 font-serif">
                   We make travel planning efficient and stress-free for everyone, regardless of expertise.
                 </p>
               </div>
@@ -168,9 +189,12 @@ export default function About() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="font-display text-3xl font-bold text-dark mb-4">Meet Our Team</h2>
-            <p className="text-lg text-dark/70 max-w-2xl mx-auto">
-              The passionate people behind JetAI who are dedicated to transforming how you experience travel.
+            <div className="inline-flex items-center px-4 py-1 border-l-2 border-marni-accent bg-marni-dark/5 text-marni-dark text-sm font-serif mb-4">
+              OUR TEAM
+            </div>
+            <h2 className="font-display text-3xl font-bold text-marni-dark mb-4">Meet Our Experts</h2>
+            <p className="text-lg text-marni-dark/70 max-w-2xl mx-auto font-serif">
+              The passionate people behind JET AI who are dedicated to transforming how you experience travel.
             </p>
           </div>
           
