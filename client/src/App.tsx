@@ -45,6 +45,7 @@ import LanguageLearningPage from "@/pages/LanguageLearningPage";
 import AdminPage from "@/pages/AdminPage";
 import SocialMediaHubPage from "@/pages/SocialMediaHubPage";
 import RewardsPage from "@/pages/RewardsPage";
+import AccessCodeDashboard from "@/pages/AccessCodeDashboard";
 
 function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -207,6 +208,7 @@ function App() {
         {/* Social Media and Rewards routes */}
         <Route path="/social-media-hub" component={SocialMediaHubPage} />
         <Route path="/rewards" component={RewardsPage} />
+        <Route path="/access-dashboard" component={AccessCodeDashboard} />
         
         {/* Partner/Affiliate routes */}
         <Route path="/partner/dashboard" component={PartnerDashboard} />
