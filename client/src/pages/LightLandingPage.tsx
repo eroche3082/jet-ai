@@ -34,7 +34,7 @@ export default function LightLandingPage() {
   return (
     <div className="bg-white text-gray-800 min-h-screen">
       {/* Fixed Header */}
-      <header className="sticky top-0 z-50 bg-marni-dark text-white shadow-sm border-b border-marni-gray">
+      <header className="sticky top-0 z-50 bg-[#050b17] text-white shadow-sm border-b border-gray-800">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center mb-0 group">
@@ -47,21 +47,21 @@ export default function LightLandingPage() {
               </div>
             </div>
             
-            <div className="hidden md:flex space-x-2">
-              <Link href="/" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-sans">Home</Link>
-              <Link href="/destinations" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-sans">Destinations</Link>
-              <Link href="/blog" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-sans">Travel Blog</Link>
-              <Link href="/about" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-sans">About Us</Link>
-              <Link href="/chat" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-sans">AI Assistant</Link>
+            <div className="hidden md:flex space-x-6">
+              <Link href="/" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">Home</Link>
+              <Link href="/destinations" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">Destinations</Link>
+              <Link href="/blog" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">Travel Blog</Link>
+              <Link href="/about" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">About Us</Link>
+              <Link href="/chat" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">AI Assistant</Link>
             </div>
             
             <div className="flex items-center space-x-4">
               <Link href="/login">
-                <Button variant="outline" className="border-marni-lightgray text-white hover:bg-marni-accent hover:text-white hover:border-marni-accent transition-all duration-300 font-sans">
+                <Button variant="outline" className="bg-white text-[#050b17] hover:bg-[#4a89dc] hover:text-white border-none transition-all duration-300 font-serif rounded">
                   Sign In
                 </Button>
               </Link>
-              <button className="md:hidden text-white hover:bg-marni-gray p-2 transition-colors">
+              <button className="md:hidden text-white hover:bg-gray-800 p-2 transition-colors">
                 <Menu className="h-6 w-6" />
               </button>
             </div>
@@ -75,46 +75,56 @@ export default function LightLandingPage() {
         style={{ 
           backgroundImage: "url('/img/jet_hero.jpg')",
           backgroundPosition: 'center',
-          backgroundColor: '#101020',
+          backgroundColor: '#050b17',
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-t from-marni-black/80 via-marni-dark/60 to-marni-dark/30"></div>
+        <div className="absolute inset-0 bg-[#050b17]/80"></div>
         <div className="container mx-auto px-6 h-full flex flex-col justify-center relative z-10">
           <div className="max-w-2xl">
-            <div className="bg-marni-dark/40 backdrop-blur-sm px-4 py-1 inline-flex items-center mb-6 border-l-2 border-marni-accent">
+            <div className="border-l-2 border-[#4a89dc] bg-white/5 px-4 py-1 inline-flex items-center mb-6">
               <span className="text-white/90 text-sm font-serif tracking-wide">INTELLIGENT TRAVEL PLANNING</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-display text-white mb-6 leading-tight drop-shadow-md">
-              Journey Beyond <span className="text-marni-accent">Boundaries</span>
+            <h1 className="text-5xl md:text-6xl font-display text-white mb-6 leading-tight">
+              Journey Beyond <span className="text-[#4a89dc]">Boundaries</span>
             </h1>
-            <p className="text-xl text-white/90 mb-10 max-w-xl leading-relaxed drop-shadow-sm font-serif">
+            <p className="text-xl text-white/90 mb-10 max-w-xl leading-relaxed font-serif">
               JET AI harmonizes sophisticated artificial intelligence with refined travel expertise to curate your ideal journey.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-5">
-              <Button size="lg" className="bg-marni-accent text-white hover:bg-white hover:text-marni-dark transition-all duration-300 shadow-lg hover:shadow-xl px-8 font-medium">
-                <Link href="/destinations" className="flex items-center">
-                  <Compass className="mr-2 h-5 w-5" /> Explore Destinations
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 hover:border-white transition-all duration-300">
-                <Link href="/chat" className="flex items-center">
-                  <BookOpen className="mr-2 h-5 w-5" /> Discover Services
-                </Link>
-              </Button>
+              <Link href="/destinations" className="inline-flex items-center bg-[#4a89dc] hover:bg-[#3a79cc] text-white font-serif font-medium px-6 py-3 rounded-md transition shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 mr-2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                </svg>
+                Explore Destinations
+              </Link>
+              <Link href="/chat" className="inline-flex items-center bg-transparent border border-white/30 hover:border-white/50 text-white font-serif font-medium px-6 py-3 rounded-md transition">
+                Start Planning
+              </Link>
             </div>
             
             <div className="flex justify-start items-center space-x-10 text-white/90 font-serif mt-10">
-              <div className="flex items-center group">
-                <div className="h-9 w-9 rounded-full bg-marni-accent/20 flex items-center justify-center mr-3 group-hover:bg-marni-accent/30 transition-all duration-300">
-                  <Star className="h-4 w-4 text-marni-accent" />
+              <div className="flex items-center">
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mr-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-[#4a89dc]">
+                    <path d="M12 2v20M2 12h20"></path>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                  </svg>
                 </div>
-                <span>AI-Powered Precision</span>
+                <div>
+                  <h3 className="text-white font-serif">AI-Powered Precision</h3>
+                </div>
               </div>
-              <div className="flex items-center group">
-                <div className="h-9 w-9 rounded-full bg-marni-accent/20 flex items-center justify-center mr-3 group-hover:bg-marni-accent/30 transition-all duration-300">
-                  <Heart className="h-4 w-4 text-marni-accent" />
+              <div className="flex items-center">
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mr-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-[#4a89dc]">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 16v-4M12 8h.01"></path>
+                  </svg>
                 </div>
-                <span>Bespoke Experiences</span>
+                <div>
+                  <h3 className="text-white font-serif">Bespoke Experiences</h3>
+                </div>
               </div>
             </div>
           </div>
@@ -123,18 +133,20 @@ export default function LightLandingPage() {
         {/* Search Box */}
         <div className="absolute bottom-0 left-0 right-0 transform translate-y-1/2">
           <div className="container mx-auto px-6">
-            <div className="bg-white/95 backdrop-blur-lg shadow-md border border-gray-100 p-6 md:p-8">
+            <div className="bg-white/95 backdrop-blur-lg shadow-md border border-gray-100 p-6 md:p-8 rounded-sm">
               <div className="md:max-w-4xl mx-auto">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-display text-marni-dark flex items-center">
-                    <div className="mr-3 p-2 rounded-full bg-marni-dark/5 text-marni-accent">
-                      <Plane className="h-5 w-5" />
+                  <h3 className="text-xl font-serif text-marni-dark flex items-center">
+                    <div className="mr-3 p-2 rounded-full bg-[#4a89dc]/10 text-[#4a89dc]">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-5 w-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l14 9-14 9V3z" />
+                      </svg>
                     </div>
                     Plan Your Journey
                   </h3>
                   <div className="hidden md:block">
                     <span className="text-gray-500 text-sm font-serif">
-                      <span className="text-marni-accent font-medium">Tip:</span> Try searching by experience like "cultural" or "relaxation"
+                      <span className="text-[#4a89dc] font-medium">Tip:</span> Try searching by experience like "cultural" or "relaxation"
                     </span>
                   </div>
                 </div>
@@ -167,47 +179,47 @@ export default function LightLandingPage() {
                 }}>
                   <div className="grid grid-cols-1 md:grid-cols-8 gap-4 md:gap-6">
                     <div className="md:col-span-4">
-                      <label className="block text-sm font-medium text-marni-dark mb-2 flex items-center font-serif">
-                        <Globe className="h-4 w-4 mr-1.5 text-marni-accent" />
+                      <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center font-serif">
+                        <Globe className="h-4 w-4 mr-1.5 text-[#4a89dc]" />
                         Destination
                       </label>
                       <div className="relative group">
                         <Input 
                           name="destination" 
                           placeholder="Where do you want to go?" 
-                          className="pl-11 py-5 border-gray-200 focus:border-marni-accent focus:ring-marni-accent/10 shadow-sm group-hover:border-marni-accent/50 transition-all font-sans" 
+                          className="pl-11 py-5 border-gray-200 focus:border-[#4a89dc] focus:ring-[#4a89dc]/10 shadow-sm group-hover:border-[#4a89dc]/50 transition-all font-serif" 
                           required 
                         />
-                        <Map className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 group-hover:text-marni-accent transition-colors" />
+                        <Map className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 group-hover:text-[#4a89dc] transition-colors" />
                       </div>
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-marni-dark mb-2 flex items-center font-serif">
-                        <Calendar className="h-4 w-4 mr-1.5 text-marni-accent" />
+                      <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center font-serif">
+                        <Calendar className="h-4 w-4 mr-1.5 text-[#4a89dc]" />
                         Travel Date
                       </label>
                       <div className="relative group">
                         <Input 
                           name="date" 
                           type="date" 
-                          className="pl-11 py-5 border-gray-200 focus:border-marni-accent focus:ring-marni-accent/10 shadow-sm group-hover:border-marni-accent/50 transition-all font-sans" 
+                          className="pl-11 py-5 border-gray-200 focus:border-[#4a89dc] focus:ring-[#4a89dc]/10 shadow-sm group-hover:border-[#4a89dc]/50 transition-all font-serif" 
                           required 
                         />
-                        <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 group-hover:text-marni-accent transition-colors" />
+                        <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 group-hover:text-[#4a89dc] transition-colors" />
                       </div>
                     </div>
                     <div className="md:col-span-2 flex items-end">
-                      <Button 
+                      <button 
                         type="submit" 
-                        className="w-full py-5 bg-marni-dark hover:bg-marni-accent text-white font-medium shadow-md hover:shadow-lg transition-all duration-300"
+                        className="w-full py-5 bg-[#050b17] hover:bg-[#4a89dc] text-white font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center rounded"
                       >
                         <Search className="mr-2 h-5 w-5" /> Find Journeys
-                      </Button>
+                      </button>
                     </div>
                   </div>
                   <div className="mt-4 text-center">
                     <span className="text-xs text-gray-500 font-serif">
-                      Powered by <span className="font-semibold">JET AI</span> technology for personalized travel recommendations
+                      Powered by <span className="font-semibold text-[#050b17]">JET AI</span> technology for personalized travel recommendations
                     </span>
                   </div>
                 </form>
