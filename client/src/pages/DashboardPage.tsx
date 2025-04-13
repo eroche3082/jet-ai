@@ -96,7 +96,7 @@ export default function DashboardPage() {
         </div>
         <Button 
           size="lg" 
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 bg-[#4e6af9] hover:bg-[#3a55e7]"
           onClick={() => setIsShowingAIChat(!isShowingAIChat)}
         >
           <MessageSquareIcon size={18} />
@@ -178,7 +178,7 @@ export default function DashboardPage() {
                   <XAxis dataKey="month" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="searches" fill="#6366f1" name="Searches" />
+                  <Bar dataKey="searches" fill="#4e6af9" name="Searches" />
                   <Bar dataKey="bookings" fill="#10b981" name="Bookings" />
                 </BarChart>
               </ResponsiveContainer>
@@ -210,8 +210,8 @@ export default function DashboardPage() {
                   <Area 
                     type="monotone" 
                     dataKey="searches" 
-                    stroke="#6366f1" 
-                    fill="#6366f1" 
+                    stroke="#4e6af9" 
+                    fill="#4e6af9" 
                     fillOpacity={0.2}
                     name="Searches"
                   />
@@ -255,7 +255,7 @@ export default function DashboardPage() {
                     <span 
                       className={`
                         px-2 py-1 rounded-full text-xs font-medium 
-                        ${trip.status === 'Confirmed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}
+                        ${trip.status === 'Confirmed' ? 'bg-green-100 text-green-800' : 'bg-[#ebeffe] text-[#4e6af9]'}
                       `}
                     >
                       {trip.status}
