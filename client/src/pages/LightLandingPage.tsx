@@ -51,16 +51,15 @@ export default function LightLandingPage() {
               <Link href="/" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">Home</Link>
               <Link href="/destinations" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">Destinations</Link>
               <Link href="/blog" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">Travel Blog</Link>
-              <Link href="/about" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">About Us</Link>
-              <Link href="/chat" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">AI Assistant</Link>
+              <Link href="/chat" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">
+                <div className="flex items-center space-x-1">
+                  <MessageSquare className="h-4 w-4" />
+                  <span>AI Assistant</span>
+                </div>
+              </Link>
             </div>
             
             <div className="flex items-center space-x-4">
-              <Link href="/onboarding">
-                <Button className="bg-[#4a89dc] text-white hover:bg-[#3a79cc] border-none transition-all duration-300 font-serif rounded">
-                  Get Started
-                </Button>
-              </Link>
               <Link href="/login">
                 <Button variant="outline" className="bg-white text-[#050b17] hover:bg-[#4a89dc] hover:text-white border-none transition-all duration-300 font-serif rounded">
                   Sign In
@@ -980,15 +979,21 @@ export default function LightLandingPage() {
         </div>
       </footer>
       
-      {/* AI Assistant Button (Fixed position) */}
-      <div className="fixed bottom-6 right-6 z-50 group">
+      {/* AI Assistant Button (Fixed position) - Moved to bottom left */}
+      <div className="fixed bottom-6 left-6 z-50 group">
         <div className="absolute inset-0 rounded-full bg-[#4a89dc] animate-ping opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
-        <Link href="/chat">
-          <Button className="w-14 h-14 rounded-full flex items-center justify-center bg-[#4a89dc] hover:bg-[#050b17] text-white shadow-lg border border-white/10 transition-all duration-300">
-            <div className="absolute inset-0 rounded-full bg-[#4a89dc] animate-pulse opacity-30"></div>
-            <MessageSquare className="h-6 w-6 text-white" />
-          </Button>
-        </Link>
+        <button 
+          onClick={() => {
+            // This will eventually open the chat dialog component
+            console.log('Opening AI chat dialog');
+            // Future implementation: setShowChatDialog(true);
+            window.location.href = '/chat';
+          }}
+          className="w-14 h-14 rounded-full flex items-center justify-center bg-[#4a89dc] hover:bg-[#050b17] text-white shadow-lg border border-white/10 transition-all duration-300"
+        >
+          <div className="absolute inset-0 rounded-full bg-[#4a89dc] animate-pulse opacity-30"></div>
+          <MessageSquare className="h-6 w-6 text-white" />
+        </button>
       </div>
     </div>
   );
