@@ -35,7 +35,7 @@ import PartnerDashboard from "@/pages/partner/Dashboard";
 import PartnerSignup from "@/pages/partner/Signup";
 import { initializePWA } from '@/lib/pwa';
 import { AuthProvider } from '@/hooks/useAuth';
-import LandingPage from "@/pages/NewLandingPage";
+import LandingPage from "@/pages/DarkLandingPage";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
 
