@@ -817,14 +817,14 @@ export default function LightLandingPage() {
       </section>
       
       {/* Newsletter */}
-      <section className="py-16 bg-marni-dark text-white relative overflow-hidden">
+      <section className="py-16 bg-[#050b17] text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1530521954074-e64f6810b32d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1650&q=80')] bg-cover bg-center"></div>
         </div>
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center px-4 py-1 border-l-2 border-marni-accent bg-marni-dark/50 backdrop-blur-sm text-white text-sm font-serif mb-3">
-              <Mail className="h-3.5 w-3.5 mr-1.5 text-marni-accent" /> 
+            <div className="inline-flex items-center px-4 py-1 border-l-2 border-[#4a89dc] bg-[#050b17]/50 backdrop-blur-sm text-white text-sm font-serif mb-3">
+              <Mail className="h-3.5 w-3.5 mr-1.5 text-[#4a89dc]" /> 
               CURATED INSIGHTS
             </div>
             <h2 className="text-3xl mb-3 font-display text-white">Join Our Distinguished Travelers</h2>
@@ -833,9 +833,9 @@ export default function LightLandingPage() {
               <Input 
                 type="email" 
                 placeholder="Your email address" 
-                className="flex-grow bg-white/10 backdrop-blur-sm text-white placeholder:text-white/50 border border-white/20 focus:border-marni-accent focus:ring-marni-accent/20 font-serif"
+                className="flex-grow bg-white/10 backdrop-blur-sm text-white placeholder:text-white/50 border border-white/20 focus:border-[#4a89dc] focus:ring-[#4a89dc]/20 font-serif rounded"
               />
-              <Button className="bg-marni-accent hover:bg-white hover:text-marni-dark text-white font-medium transition-colors duration-300">
+              <Button className="bg-[#4a89dc] hover:bg-white hover:text-[#050b17] text-white font-medium transition-colors duration-300 rounded">
                 Subscribe
               </Button>
             </div>
@@ -849,12 +849,12 @@ export default function LightLandingPage() {
 
       
       {/* Footer */}
-      <footer className="bg-marni-dark text-white py-16">
+      <footer className="bg-[#050b17] text-white py-16">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
             <div>
               <div className="flex items-center mb-6 group">
-                <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-marni-accent transition-transform duration-300 group-hover:scale-110" stroke="currentColor" strokeWidth="2">
+                <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-[#4a89dc] transition-transform duration-300 group-hover:scale-110" stroke="currentColor" strokeWidth="2">
                   <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" strokeLinejoin="round" strokeLinecap="round"/>
                 </svg>
                 <div className="ml-2">
@@ -866,16 +866,16 @@ export default function LightLandingPage() {
                 Your distinguished AI-powered travel companion. Discover exceptional destinations, curate bespoke itineraries, and experience the world with unparalleled sophistication.
               </p>
               <div className="flex space-x-4 mt-6">
-                <a href="#" className="text-white/60 hover:text-marni-accent transition-colors">
+                <a href="#" className="text-white/60 hover:text-[#4a89dc] transition-colors">
                   <Facebook className="h-5 w-5" />
                 </a>
-                <a href="#" className="text-white/60 hover:text-marni-accent transition-colors">
+                <a href="#" className="text-white/60 hover:text-[#4a89dc] transition-colors">
                   <Twitter className="h-5 w-5" />
                 </a>
-                <a href="#" className="text-white/60 hover:text-marni-accent transition-colors">
+                <a href="#" className="text-white/60 hover:text-[#4a89dc] transition-colors">
                   <Instagram className="h-5 w-5" />
                 </a>
-                <a href="#" className="text-white/60 hover:text-marni-accent transition-colors">
+                <a href="#" className="text-white/60 hover:text-[#4a89dc] transition-colors">
                   <Youtube className="h-5 w-5" />
                 </a>
               </div>
@@ -884,22 +884,22 @@ export default function LightLandingPage() {
             <div>
               <h4 className="font-display text-lg mb-5 text-white">Navigation</h4>
               <ul className="space-y-3 font-serif">
-                <li><Link href="/" className="text-white/70 hover:text-marni-accent transition-colors">Home</Link></li>
-                <li><Link href="/destinations" className="text-white/70 hover:text-marni-accent transition-colors">Destinations</Link></li>
-                <li><Link href="/blog" className="text-white/70 hover:text-marni-accent transition-colors">Travel Journal</Link></li>
-                <li><Link href="/about" className="text-white/70 hover:text-marni-accent transition-colors">About JET AI</Link></li>
-                <li><Link href="/contact" className="text-white/70 hover:text-marni-accent transition-colors">Contact</Link></li>
+                <li><Link href="/" className="text-white/70 hover:text-[#4a89dc] transition-colors">Home</Link></li>
+                <li><Link href="/destinations" className="text-white/70 hover:text-[#4a89dc] transition-colors">Destinations</Link></li>
+                <li><Link href="/blog" className="text-white/70 hover:text-[#4a89dc] transition-colors">Travel Journal</Link></li>
+                <li><Link href="/about" className="text-white/70 hover:text-[#4a89dc] transition-colors">About JET AI</Link></li>
+                <li><Link href="/contact" className="text-white/70 hover:text-[#4a89dc] transition-colors">Contact</Link></li>
               </ul>
             </div>
             
             <div>
               <h4 className="font-display text-lg mb-5 text-white">Services</h4>
               <ul className="space-y-3 font-serif">
-                <li><Link href="/chat" className="text-white/70 hover:text-marni-accent transition-colors">AI Concierge</Link></li>
-                <li><Link href="/itinerary" className="text-white/70 hover:text-marni-accent transition-colors">Itinerary Curator</Link></li>
-                <li><Link href="/translator" className="text-white/70 hover:text-marni-accent transition-colors">Language Translation</Link></li>
-                <li><Link href="/pricing" className="text-white/70 hover:text-marni-accent transition-colors">Membership Options</Link></li>
-                <li><Link href="/faq" className="text-white/70 hover:text-marni-accent transition-colors">FAQs</Link></li>
+                <li><Link href="/chat" className="text-white/70 hover:text-[#4a89dc] transition-colors">AI Concierge</Link></li>
+                <li><Link href="/itinerary" className="text-white/70 hover:text-[#4a89dc] transition-colors">Itinerary Curator</Link></li>
+                <li><Link href="/translator" className="text-white/70 hover:text-[#4a89dc] transition-colors">Language Translation</Link></li>
+                <li><Link href="/pricing" className="text-white/70 hover:text-[#4a89dc] transition-colors">Membership Options</Link></li>
+                <li><Link href="/faq" className="text-white/70 hover:text-[#4a89dc] transition-colors">FAQs</Link></li>
               </ul>
             </div>
             
@@ -907,15 +907,15 @@ export default function LightLandingPage() {
               <h4 className="font-display text-lg mb-5 text-white">Connect</h4>
               <ul className="space-y-4 text-white/70 font-serif">
                 <li className="flex items-start">
-                  <Mail className="h-5 w-5 mr-3 mt-0.5 text-marni-accent" />
+                  <Mail className="h-5 w-5 mr-3 mt-0.5 text-[#4a89dc]" />
                   <span>concierge@jetai.travel</span>
                 </li>
                 <li className="flex items-start">
-                  <MessageSquare className="h-5 w-5 mr-3 mt-0.5 text-marni-accent" />
+                  <MessageSquare className="h-5 w-5 mr-3 mt-0.5 text-[#4a89dc]" />
                   <span>Live assistance available</span>
                 </li>
                 <li className="mt-6">
-                  <Button variant="outline" className="border-white/20 hover:border-marni-accent text-white hover:bg-marni-accent/10 hover:text-marni-accent transition-all duration-300 font-serif">
+                  <Button variant="outline" className="border-white/20 hover:border-[#4a89dc] text-white hover:bg-[#4a89dc]/10 hover:text-[#4a89dc] transition-all duration-300 font-serif rounded">
                     <Link href="/contact" className="flex items-center">
                       Request Information
                     </Link>
@@ -928,19 +928,20 @@ export default function LightLandingPage() {
           <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between">
             <p className="text-white/50 font-serif">© 2025 JET AI. All rights reserved.</p>
             <div className="flex space-x-8 mt-4 md:mt-0 font-serif">
-              <Link href="/terms" className="text-white/50 hover:text-marni-accent transition-colors">Terms of Service</Link>
-              <Link href="/privacy" className="text-white/50 hover:text-marni-accent transition-colors">Privacy Policy</Link>
-              <Link href="/cookies" className="text-white/50 hover:text-marni-accent transition-colors">Cookie Policy</Link>
+              <Link href="/terms" className="text-white/50 hover:text-[#4a89dc] transition-colors">Terms of Service</Link>
+              <Link href="/privacy" className="text-white/50 hover:text-[#4a89dc] transition-colors">Privacy Policy</Link>
+              <Link href="/cookies" className="text-white/50 hover:text-[#4a89dc] transition-colors">Cookie Policy</Link>
             </div>
           </div>
         </div>
       </footer>
       
       {/* AI Assistant Button (Fixed position) */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-6 right-6 z-50 group">
+        <div className="absolute inset-0 rounded-full bg-[#4a89dc] animate-ping opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
         <Link href="/chat">
-          <Button className="w-14 h-14 rounded-full flex items-center justify-center bg-marni-accent hover:bg-marni-dark text-white shadow-lg border border-white/10 transition-all duration-300">
-            <div className="absolute inset-0 rounded-full bg-marni-accent animate-pulse opacity-30"></div>
+          <Button className="w-14 h-14 rounded-full flex items-center justify-center bg-[#4a89dc] hover:bg-[#050b17] text-white shadow-lg border border-white/10 transition-all duration-300">
+            <div className="absolute inset-0 rounded-full bg-[#4a89dc] animate-pulse opacity-30"></div>
             <MessageSquare className="h-6 w-6 text-white" />
           </Button>
         </Link>
