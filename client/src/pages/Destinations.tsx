@@ -172,7 +172,7 @@ export default function Destinations() {
   return (
     <>
       {/* Page Header */}
-      <div className="bg-[#3a55e7]/10 py-12">
+      <div className="bg-gradient-to-r from-[#ff6b35]/20 to-yellow-500/20 py-16">
         <div className="container mx-auto px-4">
           <h1 className="font-display text-4xl font-bold text-dark text-center mb-6">Explore Destinations</h1>
           <p className="text-lg text-dark/70 text-center max-w-3xl mx-auto mb-8">
@@ -208,10 +208,10 @@ export default function Destinations() {
                   <button 
                     key={continent}
                     onClick={() => setSelectedContinent(continent)}
-                    className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
+                    className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all duration-300 ${
                       selectedContinent === continent 
-                        ? 'bg-[#3a55e7] hover:bg-[#2b3fbb] text-white' 
-                        : 'bg-gray-100 text-dark hover:bg-gray-200'
+                        ? 'bg-[#ff6b35] hover:bg-[#e85a24] text-white shadow-md' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
                     }`}
                   >
                     {continent}
@@ -228,10 +228,10 @@ export default function Destinations() {
                   <button 
                     key={climate}
                     onClick={() => setSelectedClimate(climate)}
-                    className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
+                    className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all duration-300 ${
                       selectedClimate === climate 
-                        ? 'bg-[#3a55e7] hover:bg-[#2b3fbb] text-white' 
-                        : 'bg-gray-100 text-dark hover:bg-gray-200'
+                        ? 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-md' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
                     }`}
                   >
                     {climate}
@@ -248,10 +248,10 @@ export default function Destinations() {
                   <button 
                     key={category}
                     onClick={() => setSelectedCategory(category)}
-                    className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
+                    className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all duration-300 ${
                       selectedCategory === category 
-                        ? 'bg-[#3a55e7] hover:bg-[#2b3fbb] text-white' 
-                        : 'bg-gray-100 text-dark hover:bg-gray-200'
+                        ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
                     }`}
                   >
                     {category}
@@ -302,7 +302,7 @@ export default function Destinations() {
                   setSelectedCategory('All');
                   setSearchQuery('');
                 }}
-                className="bg-[#3a55e7] hover:bg-[#2b3fbb] text-white font-accent font-medium px-5 py-2 rounded-full transition"
+                className="bg-gradient-to-r from-[#ff6b35] to-yellow-500 hover:from-yellow-500 hover:to-[#ff6b35] text-white font-bold px-6 py-3 rounded-full shadow-lg transform transition-all duration-300 hover:scale-105"
               >
                 Reset Filters
               </button>

@@ -92,9 +92,9 @@ export default function DestinationSearchInput({
           onChange={handleInputChange}
           onFocus={() => setIsFocused(true)}
           placeholder={placeholder}
-          className="w-full py-3 px-5 pl-12 rounded-full border border-gray-200 focus:outline-none focus:border-[#3a55e7]"
+          className="w-full py-3.5 px-5 pl-12 rounded-full border-2 border-transparent bg-white/80 backdrop-blur-sm shadow-lg focus:outline-none focus:border-[#ff6b35] transition-all duration-300"
         />
-        <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#3a55e7]">
+        <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#ff6b35]">
           <Search className="h-5 w-5" />
         </div>
         {isLoading && (
