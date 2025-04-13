@@ -346,7 +346,7 @@ export default function LightLandingPage() {
                   alt="Hidden Gems in Paris" 
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4 bg-[#4e6af9] text-white text-xs font-bold uppercase px-3 py-1 rounded">
+                <div className="absolute top-4 left-4 bg-[#3a55e7] text-white text-xs font-bold uppercase px-3 py-1 rounded">
                   City Guide
                 </div>
               </div>
@@ -369,7 +369,7 @@ export default function LightLandingPage() {
                   alt="Food Adventures in Thailand" 
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4 bg-[#4e6af9] text-white text-xs font-bold uppercase px-3 py-1 rounded">
+                <div className="absolute top-4 left-4 bg-[#3a55e7] text-white text-xs font-bold uppercase px-3 py-1 rounded">
                   Food
                 </div>
               </div>
@@ -392,7 +392,7 @@ export default function LightLandingPage() {
                   alt="Solo Travel" 
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4 bg-[#4e6af9] text-white text-xs font-bold uppercase px-3 py-1 rounded">
+                <div className="absolute top-4 left-4 bg-[#3a55e7] text-white text-xs font-bold uppercase px-3 py-1 rounded">
                   Tips
                 </div>
               </div>
@@ -556,7 +556,7 @@ export default function LightLandingPage() {
                   </li>
                 </ul>
                 <div className="mt-8">
-                  <Button className="w-full bg-[#4e6af9] hover:bg-[#3a55e7]">Get Started</Button>
+                  <Button className="w-full bg-[#3a55e7] hover:bg-[#2b3fbb]">Get Started</Button>
                 </div>
               </div>
             </div>
@@ -614,7 +614,7 @@ export default function LightLandingPage() {
                   </li>
                 </ul>
                 <div className="mt-8">
-                  <Button className="w-full bg-[#4e6af9] hover:bg-[#3a55e7]">Subscribe Now</Button>
+                  <Button className="w-full bg-[#3a55e7] hover:bg-[#2b3fbb]">Subscribe Now</Button>
                 </div>
               </div>
             </div>
@@ -669,7 +669,7 @@ export default function LightLandingPage() {
                   </li>
                 </ul>
                 <div className="mt-8">
-                  <Button className="w-full bg-[#4e6af9] hover:bg-[#3a55e7]">Contact Sales</Button>
+                  <Button className="w-full bg-[#3a55e7] hover:bg-[#2b3fbb]">Contact Sales</Button>
                 </div>
               </div>
             </div>
