@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import { 
   ArrowRight,
@@ -29,8 +30,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import SimpleOnboardingChat from "@/components/SimpleOnboardingChat";
 
 export default function LightLandingPage() {
+  const [showChat, setShowChat] = useState(false);
+  
   return (
     <div className="bg-white text-gray-800 min-h-screen">
       {/* Fixed Header */}
@@ -983,18 +987,28 @@ export default function LightLandingPage() {
       <div className="fixed bottom-6 right-6 z-50 group">
         <div className="absolute inset-0 rounded-full bg-[#4a89dc] animate-ping opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
         <button 
-          onClick={() => {
-            // This will eventually open the chat dialog component
-            console.log('Opening AI chat dialog');
-            // Future implementation: setShowChatDialog(true);
-            window.location.href = '/chat';
-          }}
+          onClick={() => setShowChat(true)}
           className="w-14 h-14 rounded-full flex items-center justify-center bg-[#4a89dc] hover:bg-[#050b17] text-white shadow-lg border border-white/10 transition-all duration-300"
         >
           <div className="absolute inset-0 rounded-full bg-[#4a89dc] animate-pulse opacity-30"></div>
           <MessageSquare className="h-6 w-6 text-white" />
         </button>
       </div>
+      
+      {/* Simple Onboarding Chat Dialog */}
+      {showChat && (
+        <SimpleOnboardingChat 
+          onClose={() => setShowChat(false)}
+          onComplete={(userData: any) => {
+            console.log("Onboarding complete with user data:", userData);
+            setShowChat(false);
+            // Store user data and redirect to dashboard
+            localStorage.setItem('jetai_user', JSON.stringify(userData));
+            localStorage.setItem('isLoggedIn', 'true');
+            window.location.href = '/dashboard';
+          }}
+        />
+      )}
     </div>
   );
 }
