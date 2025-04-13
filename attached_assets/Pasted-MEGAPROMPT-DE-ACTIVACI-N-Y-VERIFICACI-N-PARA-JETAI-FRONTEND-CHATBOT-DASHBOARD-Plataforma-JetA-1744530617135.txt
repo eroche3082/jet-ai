@@ -1,0 +1,194 @@
+MEGAPROMPT DE ACTIVACIÓN Y VERIFICACIÓN PARA JETAI – FRONTEND + CHATBOT + DASHBOARD
+Plataforma: JetAI
+Versión: Landing Pública + AI Assistant + Dashboard Personalizado
+Lenguaje: Inglés
+Modelo de IA: Gemini Flash (Vertex AI)
+Objetivo: Verificar todos los elementos visuales, funcionales, AI-based, y activar el flujo completo de personalización para usuarios de viajes globales.
+
+1. HERO SECTION (Landing Principal)
+Verificar que los botones Explore Destinations y el segundo botón (actualmente invisible o sin acción) estén visibles y funcionales.
+
+El botón Explore Destinations debe hacer scroll a la sección de viajes destacados o activar el asistente.
+
+Asegurar que el diseño no colapse en móvil y que el fondo visual (Bali, Venice, Kyoto) se vea claro.
+
+Al hacer clic en “Plan Your Journey” o “Start with AI”, debe activarse el flujo de onboarding inteligente.
+
+2. AI ASSISTANT – FLUJO DE ONBOARDING PERSONALIZADO (20 PREGUNTAS)
+Este flujo comienza después del login o del clic en “Plan My Journey” y debe presentar las siguientes preguntas:
+
+What types of travel experiences do you prefer? (Adventure, Cultural, Relaxation, Business)
+
+What is your preferred travel budget range?
+
+Do you usually travel solo, with a partner, family, or in groups?
+
+What destinations are on your bucket list?
+
+Do you prefer planned itineraries or spontaneous adventures?
+
+How long do your ideal trips usually last?
+
+Are you interested in luxury, mid-range, or backpacking accommodations?
+
+Do you have any dietary restrictions or preferences?
+
+Are you open to international travel or domestic only?
+
+What kind of activities do you enjoy? (Hiking, Museums, Nightlife, Beaches)
+
+Are you interested in eco-friendly or sustainable travel options?
+
+How often do you travel in a year?
+
+Do you have any accessibility needs during travel?
+
+Would you like JetAI to manage your bookings?
+
+Do you prefer flying, road trips, cruises, or train travel?
+
+What languages do you speak or prefer for your experience?
+
+Do you like meeting other travelers or prefer privacy?
+
+Are you looking for AI travel guides, real-time suggestions, or both?
+
+Do you want to share your journey or keep it private?
+
+Would you like to receive curated experiences based on mood or energy?
+
+Al finalizar, el sistema debe redirigir al usuario directamente a su Dashboard personalizado JetAI.
+
+3. DASHBOARD INTELIGENTE – MÓDULOS VISIBLES
+El Dashboard debe tener:
+
+My Trips – itinerarios activos, próximos, pasados
+
+Explore More – recomendaciones según perfil
+
+Smart Travel Planner – permite armar nuevas rutas AI-based
+
+Saved Destinations – lista personalizada del onboarding
+
+Travel Journal – entradas del usuario (blog interno)
+
+Chatbot Access constante con voz, texto y comandos rápidos
+
+Widgets de clima, moneda local, alertas de vuelos y eventos
+
+4. AI-BASED FEATURES – VERIFICACIÓN (mínimo 20 herramientas)
+JetAI debe tener activas y conectadas las siguientes herramientas:
+
+✅ Destination Explorer
+
+✅ Personalized Itinerary Generator
+
+✅ AI Travel Assistant (Chatbot)
+
+✅ Flight Price Tracker
+
+✅ Hotel & Airbnb Recommender
+
+✅ Experience Curator by Mood
+
+✅ Smart Packing List Generator
+
+✅ Currency & Budget Converter
+
+✅ Real-Time Travel Alerts
+
+✅ Local Language Assistant
+
+✅ Visa Requirement Checker
+
+✅ Cultural Etiquette Guide
+
+✅ Emergency Assistant Locator
+
+✅ AI Photo Spot Finder
+
+✅ Wellness & Retreat Matcher
+
+✅ Travel Journal & Memory Vault
+
+✅ Group Travel Organizer
+
+✅ Sustainable Travel Suggestions
+
+✅ Remote Work Travel Matcher
+
+✅ Festival & Event Tracker
+
+Si alguno no está implementado, debe reportarse como:
+
+Nombre de herramienta
+
+Estado: (✔️ working, ❌ missing, ⚠️ partially connected)
+
+API usada (si aplica)
+
+5. CHATBOT – PERSONALIDAD Y FUNCIONALIDAD
+Estilo: Explorador global, elegante, inspirador, emocionalmente conectado.
+
+Modelo: Gemini Flash (Vertex AI)
+
+Funciones clave:
+
+Sugerir destinos según perfil o estado de ánimo
+
+Dar tips de viaje o comportamiento local
+
+Integrar información de vuelos, clima y hoteles
+
+Recordar respuestas del onboarding
+
+Compartir experiencias o rutas guardadas
+
+Activar módulos como: “Plan my trip to Spain”, “What’s trending in Japan?”, “Find me a nature escape”
+
+6. BLOG & JOURNAL SECTION
+Verificar que los artículos de Read More estén conectados a blogs internos reales
+
+“Explore all journal entries” debe mostrar lista o grid de artículos
+
+7. MEMBERSHIP SYSTEM & PLANS
+Planes visibles:
+
+Plan	Precio	Acceso Incluye
+Voyager	Free	Itinerary basics + 3 saved trips
+Connoisseur	$9.99	All core features + AI suggestions + journal
+Luminary	$29.99	Luxury itineraries, full automation, concierge alerts
+Cada botón (Get Started, Request Access, Subscribe) debe estar conectado y funcional.
+
+8. FOOTER
+Verificar que incluya y esté activo:
+
+Navegación (Home, Blog, Pricing, Assistant)
+
+Contact Info
+
+Social Media (Instagram, YouTube, TikTok, Threads, Pinterest)
+
+Email Subscribe
+
+Legal: Terms, Privacy, Data Policy
+
+9. REPORTE FINAL
+Antes de avanzar a próximas fases (automatización, expansión multilingüe, integración de YouTube, newsletter, etc.), entregar:
+
+Lista de features funcionando
+
+APIs conectadas (Gemini, travel APIs, currency, etc.)
+
+Estado del onboarding
+
+Estado del dashboard
+
+Videos/artículos rotos o ausentes
+
+Comandos funcionales del chatbot
+
+Sugerencias visuales y de experiencia
+
+Confirmación de que todo está en inglés
+

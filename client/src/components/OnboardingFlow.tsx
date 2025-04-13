@@ -12,19 +12,33 @@ import { UserProfile } from '@/lib/firebase';
 import { Heart, MapPin, Plane, Star, DollarSign, Hotel, Utensils, Camera, Languages, Clock, Users } from 'lucide-react';
 
 // Types for onboarding steps
+// TODO: Update OnboardingFlow component to use the 20 questions from onboardingFlow.ts
+// The current implementation uses the old steps below, but we've updated the data model
+// in onboardingFlow.ts with the new 20 questions format for future implementation
 export type OnboardingStep = 'name' | 'email' | 'destinations' | 'travelerType' | 'interests' | 'budget' | 'accommodation' | 'dietary' | 'languages' | 'complete';
 
 export type OnboardingData = {
-  name?: string;
-  email?: string;
   travelPreferences?: {
-    upcomingDestinations?: string[];
-    travelerType?: string;
-    interests?: string[];
+    experienceTypes?: string[];
     budget?: string;
-    preferredAccommodation?: string;
+    travelCompanions?: string;
+    bucketListDestinations?: string[];
+    itineraryPreference?: string;
+    tripDuration?: string;
+    accommodationPreference?: string[];
     dietaryRestrictions?: string[];
+    internationalTravel?: string;
+    preferredActivities?: string[];
+    ecofriendlyTravel?: string;
+    travelFrequency?: string;
+    accessibilityNeeds?: string[];
+    bookingManagement?: string;
+    transportationPreference?: string[];
     languages?: string[];
+    socialPreference?: string;
+    aiAssistancePreference?: string;
+    journeySharing?: string;
+    experienceCuration?: string;
   };
 };
 

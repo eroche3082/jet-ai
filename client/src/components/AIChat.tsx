@@ -94,26 +94,26 @@ export default function AIChat() {
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div className={`flex gap-3 max-w-[80%] ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-              <Avatar className={message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}>
+              <Avatar className={message.role === 'user' ? 'bg-[#050b17] text-white' : 'bg-[#4a89dc]/10'}>
                 <AvatarFallback>{message.role === 'user' ? 'U' : 'AI'}</AvatarFallback>
                 {message.role === 'assistant' && (
-                  <AvatarImage src="/logo.png" alt="JetAI" />
+                  <AvatarImage src="/logo.png" alt="JET AI" />
                 )}
               </Avatar>
               <div className={`rounded-lg px-4 py-2 ${
                 message.role === 'user' 
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted'
+                  ? 'bg-[#050b17] text-white'
+                  : 'bg-[#4a89dc]/10 text-[#050b17]'
               }`}>
-                <div className="prose prose-sm max-w-none">
+                <div className="prose prose-sm max-w-none dark:prose-invert">
                   <ReactMarkdown>
                     {message.content}
                   </ReactMarkdown>
                 </div>
                 <div className={`text-xs mt-1 ${
                   message.role === 'user' 
-                    ? 'text-primary-foreground/70' 
-                    : 'text-muted-foreground'
+                    ? 'text-white/70' 
+                    : 'text-[#050b17]/70'
                 }`}>
                   {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
@@ -125,15 +125,15 @@ export default function AIChat() {
         {isTyping && (
           <div className="flex justify-start">
             <div className="flex gap-3 max-w-[80%]">
-              <Avatar className="bg-muted">
+              <Avatar className="bg-[#4a89dc]/10">
                 <AvatarFallback>AI</AvatarFallback>
-                <AvatarImage src="/logo.png" alt="JetAI" />
+                <AvatarImage src="/logo.png" alt="JET AI" />
               </Avatar>
-              <div className="rounded-lg px-4 py-3 bg-muted">
+              <div className="rounded-lg px-4 py-3 bg-[#4a89dc]/10">
                 <div className="flex space-x-2">
-                  <div className="h-2 w-2 rounded-full bg-neutral-400 animate-bounce"></div>
-                  <div className="h-2 w-2 rounded-full bg-neutral-400 animate-bounce delay-200"></div>
-                  <div className="h-2 w-2 rounded-full bg-neutral-400 animate-bounce delay-500"></div>
+                  <div className="h-2 w-2 rounded-full bg-[#4a89dc] animate-bounce"></div>
+                  <div className="h-2 w-2 rounded-full bg-[#4a89dc] animate-bounce delay-200"></div>
+                  <div className="h-2 w-2 rounded-full bg-[#4a89dc] animate-bounce delay-500"></div>
                 </div>
               </div>
             </div>
@@ -181,14 +181,15 @@ export default function AIChat() {
               type="submit"
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isTyping}
+              className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white"
             >
               <SendIcon className="h-4 w-4" />
             </Button>
           </div>
         </div>
-        <div className="flex justify-between mt-2 text-xs text-gray-500">
-          <div>Powered by Gemini AI with GPT-4o fallback</div>
-          <Button variant="ghost" size="sm" className="h-auto p-0">
+        <div className="flex justify-between mt-2 text-xs">
+          <div className="text-[#4a89dc]">Powered by Gemini AI with GPT-4o and Claude fallback</div>
+          <Button variant="ghost" size="sm" className="h-auto p-0 text-[#4a89dc] hover:text-[#3a79cc]">
             <RefreshCw className="h-3 w-3 mr-1" />
             <span>Reset Chat</span>
           </Button>
