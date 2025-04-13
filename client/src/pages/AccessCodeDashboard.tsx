@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, Check, QrCode, Share2, LockOpen, Users } from 'lucide-react';
+import { AlertCircle, Check, QrCode, Share2, LockOpen, Users, Copy } from 'lucide-react';
 import AccessCodeQRGenerator from '@/components/AccessCodeQRGenerator';
 import UnlockableLevels from '@/components/UnlockableLevels';
 import { validateAccessCode, generateAccessCode, saveAccessCode, CodeType, UserCategory } from '@/lib/accessCodeSystem';
@@ -43,7 +43,7 @@ export default function AccessCodeDashboard() {
           
           // If there's a new level unlocked, add it to our state
           if (result.level && !unlockedLevels.includes(result.level)) {
-            setUnlockedLevels(prev => [...prev, result.level]);
+            setUnlockedLevels(prev => [...prev, result.level as string]);
           }
           
           // Clean up URL

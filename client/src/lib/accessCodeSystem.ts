@@ -1,98 +1,107 @@
 // Access Code System for JET AI
-// Handles code generation, validation, and management
 
-import { firestore } from './firebase';
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import { UserProfile } from './firebase';
-
-// Code types and formats
+/**
+ * Enum for different types of access codes
+ */
 export enum CodeType {
   TRAVEL = 'TRAVEL',
-  FIT = 'FIT',
-  SHOP = 'SHOP',
-  FINANCE = 'FINANCE'
+  BUSINESS = 'BUSINESS',
+  PROMOTIONAL = 'PROMO',
+  PARTNER = 'PARTNER',
+  ADMIN = 'ADMIN'
 }
 
+/**
+ * Enum for different user categories
+ */
 export enum UserCategory {
-  BEGINNER = 'BEG',
-  INTERMEDIATE = 'INT',
-  ADVANCED = 'ADV',
+  STANDARD = 'STD',
+  PREMIUM = 'PRE',
   LUXURY = 'LUX',
-  ECONOMY = 'ECO',
-  ADVENTURE = 'ADV',
-  VIP = 'VIP',
-  STANDARD = 'STD'
+  BUSINESS = 'BIZ',
+  ENTERPRISE = 'ENT'
 }
 
-// CountryCode is a two-letter country code (e.g., ES for Spain)
-type CountryCode = string;
-
-export interface AccessCode {
+/**
+ * Interface for access code data
+ */
+export interface AccessCodeData {
   code: string;
+  userId: string;
   type: CodeType;
   category: UserCategory;
-  countryCode?: CountryCode;
-  sequenceNumber: number;
-  createdAt: Date;
-  userId: string;
+  countryCode: string;
   unlockedLevels: string[];
-  paymentStatus: 'free' | 'paid';
-  stripePaymentId?: string;
-  referredBy?: string;
+  createdAt: Date;
+  expiresAt?: Date;
+  isActive: boolean;
 }
 
 /**
- * Generates a unique access code for a user
+ * Generates a unique access code based on type, category, and country
+ * Format: TYPE-CATEGORY-COUNTRY-RANDOM
+ * Example: TRAVEL-LUX-ES-1099
  */
 export function generateAccessCode(
-  type: CodeType,
-  category: UserCategory,
-  countryCode?: CountryCode
+  type: CodeType = CodeType.TRAVEL,
+  category: UserCategory = UserCategory.STANDARD,
+  countryCode: string = 'US'
 ): string {
-  // Generate a random 4-digit number for uniqueness
-  const sequenceNumber = Math.floor(1000 + Math.random() * 9000);
+  // Ensure country code is uppercase and limited to 2 chars
+  const formattedCountryCode = countryCode.toUpperCase().substring(0, 2);
   
-  // Format: TYPE-CATEGORY-CC-XXXX (e.g., TRAVEL-LUX-ES-1099)
-  // If countryCode is provided, include it, otherwise just TYPE-CATEGORY-XXXX
-  return countryCode 
-    ? `${type}-${category}-${countryCode}-${sequenceNumber}`
-    : `${type}-${category}-${sequenceNumber}`;
+  // Generate random 4-digit number
+  const randomDigits = Math.floor(1000 + Math.random() * 9000);
+  
+  // Format the code
+  return `${type}-${category}-${formattedCountryCode}-${randomDigits}`;
 }
 
 /**
- * Saves a new access code to Firestore
+ * Saves an access code to the database
+ * In a real implementation, this would call an API endpoint
  */
 export async function saveAccessCode(
   userId: string,
   code: string,
   type: CodeType,
   category: UserCategory,
-  countryCode?: CountryCode,
-  referredBy?: string
+  countryCode: string,
+  unlockedLevels: string[] = ['Level 1'],
+  expiresAt?: Date
 ): Promise<boolean> {
   try {
-    const sequenceNumber = parseInt(code.split('-').pop() || '0000');
-    const codeRef = doc(firestore, 'accessCodes', code);
-    
-    await setDoc(codeRef, {
+    // This would be an API call in a real implementation
+    // For now, we'll simulate success
+    console.log('Saving access code:', {
       code,
+      userId,
       type,
       category,
       countryCode,
-      sequenceNumber,
+      unlockedLevels,
       createdAt: new Date(),
-      userId,
-      unlockedLevels: ['Level 1', 'Level 2', 'Level 3'],
-      paymentStatus: 'free',
-      referredBy
+      expiresAt,
+      isActive: true
     });
     
-    // Also update the user profile with the code
-    const userRef = doc(firestore, 'users', userId);
-    await updateDoc(userRef, {
-      accessCode: code,
-      completedOnboarding: true
+    // Simulate API latency
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // For demo purposes, we store in localStorage
+    const codes = JSON.parse(localStorage.getItem('accessCodes') || '[]');
+    codes.push({
+      code,
+      userId,
+      type,
+      category,
+      countryCode,
+      unlockedLevels,
+      createdAt: new Date(),
+      expiresAt,
+      isActive: true
     });
+    localStorage.setItem('accessCodes', JSON.stringify(codes));
     
     return true;
   } catch (error) {
@@ -102,15 +111,49 @@ export async function saveAccessCode(
 }
 
 /**
- * Validates if an access code exists and is valid
+ * Validates an access code and returns its data if valid
+ * In a real implementation, this would call an API endpoint
  */
-export async function validateAccessCode(code: string): Promise<AccessCode | null> {
+export async function validateAccessCode(code: string): Promise<AccessCodeData | null> {
   try {
-    const codeRef = doc(firestore, 'accessCodes', code);
-    const codeSnap = await getDoc(codeRef);
+    // This would be an API call in a real implementation
+    // For now, we'll simulate validation
+    console.log('Validating access code:', code);
     
-    if (codeSnap.exists()) {
-      return codeSnap.data() as AccessCode;
+    // Simulate API latency
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Check code format with regex
+    const codePattern = /^([A-Z]+)-([A-Z]+)-([A-Z]{2})-(\d{4})$/;
+    const match = code.match(codePattern);
+    
+    if (!match) {
+      console.log('Invalid code format');
+      return null;
+    }
+    
+    // For demo purposes, we check localStorage
+    const codes = JSON.parse(localStorage.getItem('accessCodes') || '[]');
+    const foundCode = codes.find((c: any) => c.code === code && c.isActive);
+    
+    // If we have a stored code, return it
+    if (foundCode) {
+      return foundCode;
+    }
+    
+    // Otherwise, for demo, we can consider the format-valid code as valid
+    // with basic unlocked levels
+    if (match) {
+      return {
+        code,
+        userId: 'demo-user',
+        type: match[1] as CodeType,
+        category: match[2] as UserCategory,
+        countryCode: match[3],
+        unlockedLevels: ['Level 1', 'Level 2', 'Level 3'],
+        createdAt: new Date(),
+        isActive: true
+      };
     }
     
     return null;
@@ -121,55 +164,45 @@ export async function validateAccessCode(code: string): Promise<AccessCode | nul
 }
 
 /**
- * Get user profile by access code
+ * Unlocks a specific level for an access code
+ * In a real implementation, this would call an API endpoint
  */
-export async function getUserByAccessCode(code: string): Promise<UserProfile | null> {
+export async function unlockLevel(accessCode: string, level: string): Promise<boolean> {
   try {
-    const usersRef = collection(firestore, 'users');
-    const q = query(usersRef, where('accessCode', '==', code));
-    const querySnapshot = await getDocs(q);
+    // This would be an API call in a real implementation
+    console.log(`Unlocking ${level} for code ${accessCode}`);
     
-    if (!querySnapshot.empty) {
-      return querySnapshot.docs[0].data() as UserProfile;
+    // Simulate API latency
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // For demo purposes, update in localStorage
+    const codes = JSON.parse(localStorage.getItem('accessCodes') || '[]');
+    const codeIndex = codes.findIndex((c: any) => c.code === accessCode);
+    
+    if (codeIndex >= 0) {
+      // Add the level if not already unlocked
+      if (!codes[codeIndex].unlockedLevels.includes(level)) {
+        codes[codeIndex].unlockedLevels.push(level);
+      }
+      localStorage.setItem('accessCodes', JSON.stringify(codes));
+      return true;
     }
     
-    return null;
-  } catch (error) {
-    console.error('Error getting user by access code:', error);
-    return null;
-  }
-}
-
-/**
- * Updates the unlocked levels for a specific code
- */
-export async function unlockLevel(code: string, level: string, paymentId?: string): Promise<boolean> {
-  try {
-    const codeRef = doc(firestore, 'accessCodes', code);
-    const codeSnap = await getDoc(codeRef);
-    
-    if (!codeSnap.exists()) {
-      return false;
-    }
-    
-    const accessCode = codeSnap.data() as AccessCode;
-    const newUnlockedLevels = [...accessCode.unlockedLevels];
-    
-    if (!newUnlockedLevels.includes(level)) {
-      newUnlockedLevels.push(level);
-    }
-    
-    const updateData: Partial<AccessCode> = {
-      unlockedLevels: newUnlockedLevels,
+    // If code not found in localStorage, create a new entry
+    const newCode: AccessCodeData = {
+      code: accessCode,
+      userId: 'demo-user',
+      type: CodeType.TRAVEL,
+      category: UserCategory.STANDARD,
+      countryCode: 'US',
+      unlockedLevels: ['Level 1', level],
+      createdAt: new Date(),
+      isActive: true
     };
     
-    // If payment ID is provided, this was a paid unlock
-    if (paymentId) {
-      updateData.paymentStatus = 'paid';
-      updateData.stripePaymentId = paymentId;
-    }
+    codes.push(newCode);
+    localStorage.setItem('accessCodes', JSON.stringify(codes));
     
-    await updateDoc(codeRef, updateData);
     return true;
   } catch (error) {
     console.error('Error unlocking level:', error);
@@ -178,20 +211,45 @@ export async function unlockLevel(code: string, level: string, paymentId?: strin
 }
 
 /**
- * Add an activity record for tracking
+ * Gets all unlocked levels for an access code
+ * In a real implementation, this would call an API endpoint
  */
-export async function addCodeActivity(
-  code: string,
-  activity: 'login' | 'payment' | 'referral' | 'unlock'
-): Promise<void> {
+export async function getUnlockedLevels(accessCode: string): Promise<string[]> {
   try {
-    const activityRef = doc(collection(firestore, 'code_activities'));
-    await setDoc(activityRef, {
-      code,
-      activity,
-      timestamp: new Date()
-    });
+    const validatedCode = await validateAccessCode(accessCode);
+    
+    if (validatedCode) {
+      return validatedCode.unlockedLevels;
+    }
+    
+    return ['Level 1']; // Default level
   } catch (error) {
-    console.error('Error adding code activity:', error);
+    console.error('Error getting unlocked levels:', error);
+    return ['Level 1']; // Default level on error
   }
+}
+
+/**
+ * Checks if a specific level is unlocked for an access code
+ */
+export async function isLevelUnlocked(accessCode: string, level: string): Promise<boolean> {
+  const unlockedLevels = await getUnlockedLevels(accessCode);
+  return unlockedLevels.includes(level);
+}
+
+/**
+ * Generates a referral code based on an existing access code
+ */
+export function generateReferralCode(accessCode: string): string {
+  // Extract parts of the access code
+  const parts = accessCode.split('-');
+  
+  if (parts.length !== 4) {
+    // If invalid format, generate a new one
+    return generateAccessCode(CodeType.PROMOTIONAL, UserCategory.STANDARD);
+  }
+  
+  // Change type to PROMO and generate new random digits
+  const randomDigits = Math.floor(1000 + Math.random() * 9000);
+  return `PROMO-${parts[1]}-${parts[2]}-${randomDigits}`;
 }

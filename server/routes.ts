@@ -32,6 +32,7 @@ import { configureRoutes as configureGeminiRoutes } from './api/geminiService';
 import translationRoutes from './api/translationRoutes';
 import notificationRoutes from './api/notificationRoutes';
 import socialPostRoutes from './api/socialPostRoutes';
+import paymentRoutes from './api/paymentRoutes';
 import { configureApiKey } from './lib/googleApiConfig';
 
 // Configure session store
@@ -245,6 +246,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Registramos las rutas de los posts sociales
   app.use('/api/social', socialPostRoutes);
   console.log('Social post routes configured successfully');
+  
+  // Registramos las rutas de pagos
+  app.use('/api/payments', paymentRoutes);
+  console.log('Payment routes configured successfully');
   
   // Configuramos la clave API para Google Cloud
   configureApiKey(process.env.GOOGLE_CLOUD_API_KEY || 'AIzaSyBGWmVEy2zp6fpqaBkDOpV-Qj_FP6QkZj0');
