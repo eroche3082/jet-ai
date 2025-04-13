@@ -45,7 +45,7 @@ export default function LoginPage() {
               </svg>
               <span className="ml-2 text-2xl font-bold">JetAI</span>
             </div>
-            <CardTitle className="text-2xl font-bold text-center">Welcome Back</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">Welcome</CardTitle>
             <CardDescription className="text-center">
               Log in to your JetAI account to access your personalized travel assistant
             </CardDescription>
@@ -80,7 +80,7 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full text-white" disabled={isLoading}>
                 {isLoading ? 'Logging in...' : 'Log In'}
               </Button>
             </form>

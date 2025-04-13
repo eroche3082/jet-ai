@@ -1,0 +1,101 @@
+MEGAPROMPT – JET AI Phase 4: Social, Multimedia & Reward Integration
+Context:
+We are now entering Phase 4 of JetAI, where the focus shifts from travel planning and onboarding to social identity, media sharing, and reward synchronization. All the UI updates, social integrations, and backend connectivity must now be implemented directly into the user dashboard (see attached screenshot).
+
+GOALS FOR THIS PROMPT
+Fix UI Issues
+
+Update the top-right button to say Log Out instead of Sign In once the user is inside the platform.
+
+Fix the hover bug on the left sidebar: menu text disappears on hover. Suggested fix:
+
+Use white as default text color.
+
+On hover, either stay white or use a high-contrast color (suggested: #FFD700 yellow).
+
+Ensure that all tabs (Explore, Trips, Destinations, Itineraries, Accommodations, Dining, Budget) are active and working — currently they show blank.
+
+Add New Tab: SOCIAL
+
+Add a new tab in the sidebar labeled Social Media Hub.
+
+This tab should open a dedicated section where the user can:
+
+Connect their Instagram, TikTok, YouTube, Facebook, X (Twitter), and Pinterest accounts.
+
+Upload photos and videos from each trip.
+
+Create a portfolio with their travel content.
+
+Automatically generate stories, captions, hashtags, and social posts using JetAI.
+
+Schedule and publish posts directly to their linked social media platforms.
+
+Download social assets for reuse or collaboration.
+
+Include a section called “AI Social Assistant” that asks:
+
+What kind of post do you want to create? (Story, Reel, Post, Carousel)
+
+Which trip/destination is it for?
+
+Which platforms to publish to?
+
+What tone? (Luxury, Fun, Cultural, Informative, Vlog)
+
+The assistant should generate everything: caption, hashtags, video cuts, thumbnails.
+
+Add New Tab: REWARDS & LOYALTY
+
+Add a second new tab labeled Rewards & Loyalty.
+
+This will allow users to:
+
+Connect their travel loyalty programs: airlines (e.g., American Airlines, Delta, JetBlue), cruise lines, hotels, car rentals, etc.
+
+See an overview of points and miles across programs.
+
+Get suggestions on how to use those points based on upcoming trips.
+
+See deals or upgrades available based on current loyalty status.
+
+Enable syncing with TripIt, AwardWallet, or other APIs.
+
+Extend the Dashboard Personalization Logic
+
+Update the Dashboard to display:
+
+Social metrics (e.g., “Posts Created with JetAI”, “Top Performing Story”, “Connected Accounts”).
+
+Travel reward summaries (points balances, upgrade opportunities).
+
+Travel memory timeline: auto-generated recap of past trips with a "Share Memory" button.
+
+Backend and API Integration Notes
+Social posting can be simulated for now unless access tokens for APIs are available.
+
+Add stub methods for social sync and reward sync, so logic can be expanded later.
+
+Store uploaded media in Firebase Storage or connected cloud bucket.
+
+Store all user-generated content in the user profile in Firestore.
+
+Add a “generate QR code” option for any created story or travel portfolio.
+
+To-Do Summary
+ Update button label from Sign In to Log Out.
+
+ Fix sidebar hover text visibility.
+
+ Activate existing blank tabs with placeholder content.
+
+ Add Social Media Hub tab with portfolio, AI story creator, and scheduling assistant.
+
+ Add Rewards & Loyalty tab with airline/cruise/hotel integration.
+
+ Expand Dashboard with new widgets: social stats, rewards overview, timeline recap.
+
+ Implement stubs for all backend sync functionality (social + rewards).
+
+ Save everything to Firestore or designated backend.
+

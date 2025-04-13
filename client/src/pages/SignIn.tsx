@@ -75,7 +75,7 @@ export default function SignIn() {
       if (user) {
         toast({
           title: "Sesión iniciada",
-          description: "¡Bienvenido de nuevo a JetAI!",
+          description: "¡Bienvenido a JetAI!",
         });
         setLocation('/dashboard');
       } else {
@@ -153,7 +153,7 @@ export default function SignIn() {
             {isLogin ? (
               /* Login Form */
               <form onSubmit={loginForm.handleSubmit(onLoginSubmit)}>
-                <h2 className="font-display text-2xl font-bold text-dark mb-6 text-center">Welcome Back</h2>
+                <h2 className="font-display text-2xl font-bold text-dark mb-6 text-center">Welcome</h2>
                 
                 <div className="space-y-4">
                   <div>
