@@ -1,0 +1,47 @@
+/* slider */
+.slider {
+    direction: ltr;
+}
+
+/* navigation arrow */
+.main-navigation li ul li.menu-item-has-children > a:after, 
+.main-navigation li ul li.page_item_has_children > a:after {
+    content: "\f104";
+}
+
+/* post meta */
+.post-info-author .serif-italic,
+.post-info-date .serif-italic,
+.post-info-comment .serif-italic,
+.post-info-author .serif-italic {
+    float: right;
+    padding-left: 3px;
+}
+
+/* woocommerce */
+.cart-contents-count {
+    margin-right: 3px;
+    float: left;
+}
+
+
+
+
+
+
+/* fontawesome pagination arrows */
+.fa-angle-right:before {
+	content: "\f104";
+	}
+
+.fa-angle-left:before {
+	content: "\f105";
+	}
+
+.fa-angle-double-right:before {
+	content: "\f100";
+	}
+
+.fa-angle-double-left:before {
+	content: "\f101";
+	}

@@ -1,0 +1,94 @@
+/*!
+ * SlickNav Responsive Mobile Menu v1.0.10
+ * (c) 2016 Josh Cope
+ * licensed under MIT
+ */
+
+#site-navigation-responsive {
+	z-index: 99;
+	}
+
+.slicknav_menu{
+	position: relative;
+	}
+
+.slicknav_menu .slicknav_icon {
+	display: none
+	}
+
+.slicknav_btn {
+	position: absolute;
+	top: -26px;
+	cursor: pointer; 
+	background: red;
+	overflow: hidden;
+	padding: 0 4px 0 0;	
+	}
+
+.slicknav_nav, 
+.slicknav_nav li {
+	margin: 0;
+	}
+
+.slicknav_nav ul {
+	margin-top: 0;
+	margin-bottom: 0;
+	}
+
+.slicknav_nav li {
+	list-style-type: none;
+	border-top: 1px solid #eee;
+	}
+
+.slicknav_nav li:first-child {
+	border-top: none;
+	padding-top: 20px;
+	}
+
+.menu-responsive.header1 .slicknav_nav > li:nth-child(2) {
+	border-top: none;
+	padding-top: 20px;
+	}
+
+.slicknav_nav li:last-child {
+	border-bottom: 1px solid #eee;
+	}
+
+.slicknav_nav ul.sub-menu li:first-child {
+	border-top: 1px solid #eee;
+	padding-top: 0;
+	}
+
+.slicknav_nav ul.sub-menu li:last-child {
+	border-bottom: none;
+	}
+
+.slicknav_menu ul li a {
+	text-transform: uppercase;
+	letter-spacing: 2px;
+	padding: 12px 0 12px;
+	line-height: 1.5em;
+	font-weight: 700;
+	}
+
+.slicknav_nav .slicknav_row,
+.slicknav_nav a {
+	display: block; 
+	}
+
+/* submenu */
+.slicknav_nav .slicknav_item {
+	cursor: pointer; 
+	}
+
+.slicknav_nav .slicknav_item a {
+	display: inline; 
+	}
+
+.slicknav_nav li.menu-item-has-children > a:after { /* arrow down */
+	content: "\f107";
+	padding-left: 4px;
+    	font-family: FontAwesome;
+    	opacity: 0.5;
+    	white-space: nowrap;
+	}

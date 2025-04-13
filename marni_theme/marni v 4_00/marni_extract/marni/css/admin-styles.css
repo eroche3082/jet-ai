@@ -1,0 +1,55 @@
+/*
+* ADMIN STYLES
+*/
+
+
+/* Cusomizer Styles  */
+.customizer-larger-header {
+	font-size: 18px;
+	font-weight: bold;
+	line-height: 1.3em;
+	padding-top: 18px;
+	}
+
+.customizer-xlarge-header {
+	font-size: 22px;
+	line-height: 1.3em;
+	font-weight: bold;
+	text-transform: uppercase;
+	padding-top: 46px;
+	}
+
+/* Meta Boxes  */
+.rwmb-divider-wrapper hr {
+	margin: 20px 0 0;
+	}
+
+.rwmb-images {
+	max-width: 340px;
+	}
+
+#general .rwmb-meta-box h4,
+#contentboxes .rwmb-meta-box h4 {
+	color: #00b9eb;
+	}
+
+.rwmb-label h4 {
+	width: 150%;
+	}
+
+.rwmb-label p {
+	width: 200%;
+	}
+
+.rwmb-label h5 {
+	margin: 0;
+	}
+
+.wp-picker-container .iris-picker,
+.icons-selector .selector-popup {
+	max-width: none;
+	}
+
+.mb-tooltip .dashicons-editor-help {
+	font-size: 20px;
+	}
