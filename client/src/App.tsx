@@ -43,6 +43,8 @@ import OnboardingPage from "@/pages/OnboardingPage";
 import FeaturesPage from "@/pages/FeaturesPage";
 import LanguageLearningPage from "@/pages/LanguageLearningPage";
 import AdminPage from "@/pages/AdminPage";
+import SocialMediaHubPage from "@/pages/SocialMediaHubPage";
+import RewardsPage from "@/pages/RewardsPage";
 
 function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);

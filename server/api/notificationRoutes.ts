@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { sendEmail, generateWelcomeEmail } from '../services/emailService';
+import { sendEmail, generateWelcomeEmail, generateTravelSummaryEmail } from '../services/emailService';
 
 const router = Router();
 
@@ -224,6 +224,129 @@ router.post('/send-custom', async (req, res) => {
     }
   } catch (error) {
     console.error('Error sending custom email:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Internal server error while sending email'
+    });
+  }
+});
+
+/**
+ * Generate a preview of the travel summary email
+ * POST /api/notifications/preview-travel-summary
+ */
+router.post('/preview-travel-summary', async (req, res) => {
+  try {
+    const { 
+      userName, 
+      destination, 
+      tripDuration, 
+      travelCategory, 
+      totalSpent, 
+      pointsEarned,
+      mediaUrl,
+      postCaption,
+      postHashtags,
+      travelAccessCode 
+    } = req.body;
+    
+    if (!userName || !destination) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'User name and destination are required' 
+      });
+    }
+    
+    // Generate the travel summary email
+    const html = generateTravelSummaryEmail({
+      userName,
+      destination,
+      tripDuration: tripDuration || 7,
+      travelCategory: travelCategory || 'Adventure',
+      totalSpent: totalSpent || 0,
+      pointsEarned: pointsEarned || 0,
+      mediaUrl,
+      postCaption: postCaption || '',
+      postHashtags: postHashtags || '',
+      travelAccessCode: travelAccessCode || 'TRAVEL-ADV-0000',
+      dashboardUrl: 'https://jetai.travel/dashboard'
+    });
+    
+    res.json({ 
+      success: true, 
+      html 
+    });
+  } catch (error) {
+    console.error('Error generating travel summary preview:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error generating travel summary preview'
+    });
+  }
+});
+
+/**
+ * Send a travel summary email
+ * POST /api/notifications/send-travel-summary
+ */
+router.post('/send-travel-summary', async (req, res) => {
+  try {
+    const { 
+      email,
+      userName, 
+      destination, 
+      tripDuration, 
+      travelCategory, 
+      totalSpent, 
+      pointsEarned,
+      mediaUrl,
+      postCaption,
+      postHashtags,
+      travelAccessCode 
+    } = req.body;
+    
+    if (!email || !userName || !destination) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Email, user name, and destination are required' 
+      });
+    }
+    
+    // Generate the travel summary email
+    const html = generateTravelSummaryEmail({
+      userName,
+      destination,
+      tripDuration: tripDuration || 7,
+      travelCategory: travelCategory || 'Adventure',
+      totalSpent: totalSpent || 0,
+      pointsEarned: pointsEarned || 0,
+      mediaUrl,
+      postCaption: postCaption || '',
+      postHashtags: postHashtags || '',
+      travelAccessCode: travelAccessCode || 'TRAVEL-ADV-0000',
+      dashboardUrl: 'https://jetai.travel/dashboard'
+    });
+    
+    // Send the email
+    const success = await sendEmail({
+      to: email,
+      subject: `Your ${destination} Trip Summary - JET AI`,
+      html
+    });
+    
+    if (success) {
+      res.status(200).json({ 
+        success: true, 
+        message: 'Travel summary email sent successfully' 
+      });
+    } else {
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to send travel summary email' 
+      });
+    }
+  } catch (error) {
+    console.error('Error sending travel summary email:', error);
     res.status(500).json({ 
       success: false, 
       message: 'Internal server error while sending email'
