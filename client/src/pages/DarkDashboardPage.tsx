@@ -184,8 +184,9 @@ export default function DarkDashboardPage() {
                         Hi there! Welcome to JET AI. I'm your travel AI Assistant.
                         Let's personalize your experience.
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <div className="flex justify-between items-center text-xs text-gray-500 mt-1">
+                        <span>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className="bg-gray-100 px-2 py-0.5 rounded text-gray-600">vertex-flash-ai</span>
                       </div>
                     </div>
                   </div>
@@ -198,8 +199,9 @@ export default function DarkDashboardPage() {
                       <div className="bg-white text-[#050b17] border border-gray-200 rounded-lg px-4 py-3 inline-block">
                         What's your name?
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <div className="flex justify-between items-center text-xs text-gray-500 mt-1">
+                        <span>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className="bg-gray-100 px-2 py-0.5 rounded text-gray-600">vertex-flash-ai</span>
                       </div>
                     </div>
                   </div>

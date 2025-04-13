@@ -251,9 +251,10 @@ export default function SimpleOnboardingChat({ onClose, onComplete }: SimpleOnbo
                     {message.content}
                   </div>
                   
-                  {/* Display time for messages */}
-                  <div className={`text-xs text-gray-500 mt-1 clear-both ${message.role === 'user' ? 'text-right' : ''}`}>
-                    {message.timestamp}
+                  {/* Display time and model for messages */}
+                  <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-between'} items-center text-xs text-gray-500 mt-1 clear-both`}>
+                    {message.role === 'ai' && <span className="bg-gray-100 px-2 py-0.5 rounded text-gray-600">vertex-flash-ai</span>}
+                    <span>{message.timestamp}</span>
                   </div>
                   
                   {/* Options for multiple choice questions */}
