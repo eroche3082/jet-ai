@@ -40,8 +40,9 @@ export default function Header() {
   const navLinks = [
     { title: 'Home', path: '/' },
     { title: 'Destinations', path: '/destinations' },
-    { title: 'Travel Memories', path: '/portfolio' },
-    { title: 'About', path: '/about' }
+    { title: 'Travel Blog', path: '/blog' },
+    { title: 'About Us', path: '/about' },
+    { title: 'AI Assistant', path: '/chat' }
   ];
   
   return (
@@ -51,11 +52,11 @@ export default function Header() {
           <div className="flex items-center">
             {/* Logo */}
             <Link href="/" className="flex items-center">
-              <span className="text-primary text-2xl sm:text-3xl mr-2">
-                <i className="fas fa-paper-plane"></i>
+              <span className="text-[#4a89dc] text-2xl sm:text-3xl mr-2">
+                <i className="fas fa-plane"></i>
               </span>
-              <span className="font-display font-bold text-xl sm:text-2xl text-dark">
-                Jet<span className="text-primary">AI</span>
+              <span className="font-display font-bold text-xl sm:text-2xl text-marni-dark">
+                JET <span className="text-[#4a89dc]">AI</span>
               </span>
             </Link>
           </div>
@@ -66,9 +67,9 @@ export default function Header() {
               <Link 
                 key={link.path}
                 href={link.path} 
-                className={`font-accent font-medium ${
-                  location === link.path ? 'text-primary' : 'text-dark hover:text-primary'
-                } transition`}
+                className={`font-serif font-medium ${
+                  location === link.path ? 'text-[#4a89dc]' : 'text-marni-dark hover:text-[#4a89dc]'
+                } transition-colors duration-300`}
               >
                 {link.title}
               </Link>
@@ -131,7 +132,7 @@ export default function Header() {
             ) : (
               <Link 
                 href="/signin" 
-                className="font-accent font-medium text-white bg-primary hover:bg-primary/90 px-5 py-2 rounded-full transition"
+                className="font-serif font-medium text-white bg-[#4a89dc] hover:bg-[#3a79cc] px-5 py-2 rounded transition-colors duration-300 shadow-sm"
               >
                 Sign In
               </Link>
@@ -161,9 +162,9 @@ export default function Header() {
                 <Link
                   key={link.path}
                   href={link.path}
-                  className={`block py-3 font-medium ${
-                    location === link.path ? 'text-primary' : 'text-dark hover:text-primary'
-                  }`}
+                  className={`block py-3 font-serif font-medium ${
+                    location === link.path ? 'text-[#4a89dc]' : 'text-marni-dark hover:text-[#4a89dc]'
+                  } transition-colors duration-300`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {link.title}
@@ -221,7 +222,7 @@ export default function Header() {
               <div className="py-4">
                 <Link
                   href="/signin"
-                  className="block py-3 text-center font-medium text-white bg-primary hover:bg-primary/90 rounded-full"
+                  className="block py-3 text-center font-serif font-medium text-white bg-[#4a89dc] hover:bg-[#3a79cc] rounded transition-colors duration-300 shadow-sm"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Sign In / Sign Up

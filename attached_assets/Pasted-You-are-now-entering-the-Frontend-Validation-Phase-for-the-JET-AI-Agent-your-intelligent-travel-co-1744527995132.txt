@@ -1,0 +1,134 @@
+You are now entering the Frontend Validation Phase for the JET AI Agent – your intelligent travel companion system.
+
+Your responsibility is to fully audit, verify, and activate **ALL visible and interactive elements** of the JetAI platform before proceeding to any backend or AI expansion.
+
+---
+
+### 1. VISUAL + STYLING VERIFICATION
+- Confirm that the **approved style** is applied:
+  - Font type and size
+  - Button color, hover states, and padding
+  - Section spacing, icons, layout symmetry
+  - Hero image contrast and text readability
+  - Colors (blues, whites, neutrals) consistent with the JetAI branding
+
+---
+
+### 2. TOP NAVIGATION MENU
+- Must include and route correctly:
+  - **Home**
+  - **Destinations**
+  - **Travel Blog**
+  - **About Us**
+  - **AI Assistant**
+- Confirm all nav buttons:
+  - Are visible and working
+  - Have correct hover and active states
+  - Lead to the correct internal sections
+
+---
+
+### 3. HERO SECTION (TOP)
+- Button: **“Explore Destinations”** must be functional and scroll/route to destinations below
+- **Second button (next to it)** currently invisible – must be:
+  - Visible
+  - Functional
+  - Labeled clearly (e.g., “Plan My Journey” or “Get Started”)
+
+---
+
+### 4. PLAN YOUR JOURNEY (Search Bar Section)
+- The entire section must be active and connected:
+  - Input fields: **Destination**, **Travel Date**
+  - Button: **“Find Journeys”** must fetch personalized journey suggestions
+- AI logic (Gemini or GPT) must be connected to process destination type or preference (“cultural”, “relaxation” etc.)
+
+---
+
+### 5. EXCEPTIONAL JOURNEYS (Destinations)
+- Cards (e.g. Bali, Venice, Kyoto) must include:
+  - Image
+  - Labels (Trending, Best Value, etc.)
+  - Price
+  - Reviews
+  - Button: **Explore [Destination]** → must route to detail page or destination preview
+- If pages don’t exist yet, they must return a placeholder or modal
+
+---
+
+### 6. INTELLIGENT TRAVEL TECHNOLOGY SECTION
+- Ensure four tiles are styled and interactive:
+  - Curated Recommendations
+  - Elegant Itineraries
+  - Language Intelligence
+  - Value Optimization
+- Optional: Each tile may link to expanded explanation or be enhanced with hover descriptions
+
+---
+
+### 7. TRAVEL JOURNAL (Blog Section)
+- Each card must contain:
+  - Image
+  - Category (e.g. City Guide, Culinary Journey)
+  - Date
+  - Title + Excerpt
+  - Button: **Read More** must link to full article or blog content
+- Button “Explore all journal entries” must be active
+
+---
+
+### 8. TESTIMONIALS SECTION (Distinguished Perspectives)
+- Check for:
+  - Visible testimonials with names, roles, quotes, images
+  - Proper alignment on all screen sizes
+  - Style consistency with theme (padding, margins, colors)
+
+---
+
+### 9. MEMBERSHIPS / PRICING PLANS
+- Three tiers must be live:
+  - Voyager – $0/month
+  - Connoisseur – $9.99/month
+  - Luminary – $29.99/month
+- Each plan must:
+  - Show full list of features
+  - Have a working CTA button (e.g., “Begin Your Journey”, “Request Consultation”)
+  - Be styled responsively for mobile
+
+---
+
+### 10. FOOTER VALIDATION
+- Footer must contain:
+  - Logo
+  - Navigation section (Home, Destinations, Blog, etc.)
+  - Services section (Membership, Planning, Concierge, etc.)
+  - Contact or Social Links
+- All links must be active or placeholder temporarily
+- Email subscribe field must be functional or clearly indicate pending functionality
+
+---
+
+### 11. CHATBOT & AI INTEGRATION
+- Chatbot must:
+  - Appear on bottom right
+  - Be active and visible
+  - Be connected to **Gemini Flash (Vertex AI)** or fallback LLM
+  - Offer responses related to travel planning, destinations, itinerary questions
+  - Connect to “Experience Jet AI Assistant” section
+
+---
+
+### 12. FUNCTIONAL STATUS REPORT
+At the end of this phase, deliver a report with:
+- ✅ All sections working and verified
+- ❌ Missing or broken sections (with explanation)
+- ⚠️ Partially implemented features or buttons (and expected date of fix)
+- API integration report (e.g. Travel APIs, Blog backend, Gemini assistant, Stripe)
+
+---
+
+### FINAL DIRECTIVE
+**JetAI Agent may not proceed to advanced integrations, translations, or mobile deployment unless all above sections are live, functional, and properly styled.**  
+Your priority is to deliver a complete travel assistant experience that feels intuitive, luxurious, and data-driven.
+
+Begin validation now.
