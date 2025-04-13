@@ -172,27 +172,49 @@ export default function Destinations() {
   return (
     <>
       {/* Page Header */}
-      <div className="bg-gradient-to-r from-[#ff6b35]/20 to-yellow-500/20 py-16">
-        <div className="container mx-auto px-4">
-          <h1 className="font-display text-4xl font-bold text-dark text-center mb-6">Explore Destinations</h1>
-          <p className="text-lg text-dark/70 text-center max-w-3xl mx-auto mb-8">
-            Discover amazing places around the world, from vibrant cities to tropical beaches and historic landmarks.
+      <div className="bg-[url('https://images.unsplash.com/photo-1488085061387-422e29b40080?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1931&q=80')] bg-cover bg-center relative py-20">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#ff6b35]/90 to-yellow-500/90 mix-blend-multiply"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="flex items-center justify-center mb-3">
+            <div className="bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full border border-white/30">
+              <span className="text-white font-bold tracking-wider text-sm">JET AI TRAVEL EXPERIENCES</span>
+            </div>
+          </div>
+          <h1 className="font-display text-5xl md:text-6xl font-extrabold text-white text-center mb-6 drop-shadow-md">
+            Discover Your Next Adventure
+          </h1>
+          <p className="text-xl text-white/90 text-center max-w-3xl mx-auto mb-10 drop-shadow">
+            Explore extraordinary destinations around the world, from hidden gems to iconic landmarks
           </p>
           
           {/* Search Form */}
-          <form onSubmit={handleSearch} className="max-w-md mx-auto">
-            <DestinationSearchInput 
-              value={searchQuery}
-              onChange={setSearchQuery}
-              onSelect={(place) => {
-                setSearchQuery(place.description);
-                toast({
-                  title: "Destination selected",
-                  description: `Showing results for ${place.mainText}, ${place.secondaryText || ''}`,
-                });
-              }}
-            />
-          </form>
+          <div className="max-w-2xl mx-auto backdrop-blur-md bg-white/10 p-6 rounded-xl border border-white/20 shadow-xl">
+            <div className="flex items-center gap-2 mb-5">
+              <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <h2 className="text-white font-bold text-lg">Where do you want to explore?</h2>
+            </div>
+            
+            <form onSubmit={handleSearch}>
+              <DestinationSearchInput 
+                value={searchQuery}
+                onChange={setSearchQuery}
+                onSelect={(place) => {
+                  setSearchQuery(place.description);
+                  toast({
+                    title: "Destination selected",
+                    description: `Showing results for ${place.mainText}, ${place.secondaryText || ''}`,
+                    variant: "default",
+                  });
+                }}
+                placeholder="Search for cities, countries, or landmarks..."
+                className="bg-white/90 backdrop-blur-md border-white/30 shadow-lg"
+              />
+            </form>
+          </div>
         </div>
       </div>
       
