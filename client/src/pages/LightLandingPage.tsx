@@ -32,23 +32,23 @@ export default function LightLandingPage() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-blue-500" stroke="currentColor" strokeWidth="2">
+              <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-[#4e6af9]" stroke="currentColor" strokeWidth="2">
                 <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" strokeLinejoin="round" strokeLinecap="round"/>
               </svg>
               <h1 className="font-bold text-2xl">JET AI</h1>
             </div>
             
             <div className="hidden md:flex space-x-8 text-gray-700">
-              <Link href="/" className="font-medium hover:text-blue-500 transition-colors">Home</Link>
-              <Link href="/destinations" className="font-medium hover:text-blue-500 transition-colors">Destinations</Link>
-              <Link href="/blog" className="font-medium hover:text-blue-500 transition-colors">Blog</Link>
-              <Link href="/about" className="font-medium hover:text-blue-500 transition-colors">About</Link>
-              <Link href="/chat" className="font-medium hover:text-blue-500 transition-colors">AI Assistant</Link>
+              <Link href="/" className="font-medium hover:text-[#4e6af9] transition-colors">Home</Link>
+              <Link href="/destinations" className="font-medium hover:text-[#4e6af9] transition-colors">Destinations</Link>
+              <Link href="/blog" className="font-medium hover:text-[#4e6af9] transition-colors">Blog</Link>
+              <Link href="/about" className="font-medium hover:text-[#4e6af9] transition-colors">About</Link>
+              <Link href="/chat" className="font-medium hover:text-[#4e6af9] transition-colors">AI Assistant</Link>
             </div>
             
             <div className="flex items-center space-x-4">
               <Link href="/login">
-                <Button variant="outline" className="border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white">
+                <Button variant="outline" className="border-[#4e6af9] text-[#4e6af9] hover:bg-[#4e6af9] hover:text-white">
                   Sign In
                 </Button>
               </Link>
@@ -68,10 +68,10 @@ export default function LightLandingPage() {
             <h1 className="text-5xl font-bold text-white mb-4">Discover Your Next Adventure with AI</h1>
             <p className="text-xl text-white mb-8">Let JET AI be your personal travel companion. Find destinations, plan itineraries, and experience the world like never before.</p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-              <Button size="lg" className="bg-blue-500 hover:bg-blue-600 text-white">
+              <Button size="lg" className="bg-[#4e6af9] hover:bg-[#3a55e7] text-white">
                 <Link href="/destinations">Explore Destinations</Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-500">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-[#4e6af9]">
                 <Link href="/chat">Talk to AI Assistant</Link>
               </Button>
             </div>
@@ -98,7 +98,7 @@ export default function LightLandingPage() {
                   </div>
                 </div>
                 <div className="flex items-end">
-                  <Button className="w-full bg-blue-500 hover:bg-blue-600">
+                  <Button className="w-full bg-[#4e6af9] hover:bg-[#3a55e7]">
                     <Search className="mr-2 h-5 w-5" /> Search
                   </Button>
                 </div>
@@ -116,7 +116,7 @@ export default function LightLandingPage() {
               <h2 className="text-3xl font-bold mb-2">Featured Destinations</h2>
               <p className="text-gray-600">Explore our AI-recommended destinations based on traveler reviews</p>
             </div>
-            <Link href="/destinations" className="flex items-center text-blue-500 font-medium mt-4 md:mt-0 hover:underline">
+            <Link href="/destinations" className="flex items-center text-[#4e6af9] font-medium mt-4 md:mt-0 hover:underline">
               View all destinations <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </div>
@@ -155,11 +155,11 @@ export default function LightLandingPage() {
               </div>
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <p className="text-blue-500 font-semibold">Beach, Culture, Nature</p>
+                  <p className="text-[#4e6af9] font-semibold">Beach, Culture, Nature</p>
                   <p className="text-green-600 font-semibold">$1,200</p>
                 </div>
                 <p className="text-gray-600 mb-4">Experience the perfect blend of tranquil beaches, lush rice terraces, and vibrant cultural rituals on this magical island.</p>
-                <Button className="w-full bg-blue-500 hover:bg-blue-600">View Details</Button>
+                <Button className="w-full bg-[#4e6af9] hover:bg-[#3a55e7]">View Details</Button>
               </div>
             </div>
             
@@ -196,11 +196,11 @@ export default function LightLandingPage() {
               </div>
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <p className="text-blue-500 font-semibold">Historic, Romantic, City</p>
+                  <p className="text-[#4e6af9] font-semibold">Historic, Romantic, City</p>
                   <p className="text-green-600 font-semibold">$950</p>
                 </div>
                 <p className="text-gray-600 mb-4">Navigate through the romantic canals of this unique city built on water, with its architectural marvels and timeless charm.</p>
-                <Button className="w-full bg-blue-500 hover:bg-blue-600">View Details</Button>
+                <Button className="w-full bg-[#4e6af9] hover:bg-[#3a55e7]">View Details</Button>
               </div>
             </div>
             
@@ -237,11 +237,11 @@ export default function LightLandingPage() {
               </div>
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <p className="text-blue-500 font-semibold">Cultural, Historic, Temples</p>
+                  <p className="text-[#4e6af9] font-semibold">Cultural, Historic, Temples</p>
                   <p className="text-green-600 font-semibold">$1,450</p>
                 </div>
                 <p className="text-gray-600 mb-4">Step back in time in Japan's former capital with its thousands of classical Buddhist temples, gardens, and traditional wooden houses.</p>
-                <Button className="w-full bg-blue-500 hover:bg-blue-600">View Details</Button>
+                <Button className="w-full bg-[#4e6af9] hover:bg-[#3a55e7]">View Details</Button>
               </div>
             </div>
           </div>
@@ -259,7 +259,7 @@ export default function LightLandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Feature 1 */}
             <div className="bg-white p-6 rounded-lg text-center shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-blue-100 rounded-full text-blue-500">
+              <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-[#ebeffe] rounded-full text-[#4e6af9]">
                 <Sparkles className="h-8 w-8" />
               </div>
               <h3 className="text-xl font-semibold mb-3">Smart Recommendations</h3>
@@ -268,7 +268,7 @@ export default function LightLandingPage() {
             
             {/* Feature 2 */}
             <div className="bg-white p-6 rounded-lg text-center shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-blue-100 rounded-full text-blue-500">
+              <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-[#ebeffe] rounded-full text-[#4e6af9]">
                 <Compass className="h-8 w-8" />
               </div>
               <h3 className="text-xl font-semibold mb-3">Itinerary Generation</h3>
@@ -277,7 +277,7 @@ export default function LightLandingPage() {
             
             {/* Feature 3 */}
             <div className="bg-white p-6 rounded-lg text-center shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-blue-100 rounded-full text-blue-500">
+              <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-[#ebeffe] rounded-full text-[#4e6af9]">
                 <Globe className="h-8 w-8" />
               </div>
               <h3 className="text-xl font-semibold mb-3">Language Translation</h3>
@@ -286,7 +286,7 @@ export default function LightLandingPage() {
             
             {/* Feature 4 */}
             <div className="bg-white p-6 rounded-lg text-center shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-blue-100 rounded-full text-blue-500">
+              <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-[#ebeffe] rounded-full text-[#4e6af9]">
                 <Plane className="h-8 w-8" />
               </div>
               <h3 className="text-xl font-semibold mb-3">Flight & Hotel Deals</h3>
@@ -304,7 +304,7 @@ export default function LightLandingPage() {
               <h2 className="text-3xl font-bold mb-2">Latest from Our Travel Blog</h2>
               <p className="text-gray-600">Insights, tips, and stories from around the world</p>
             </div>
-            <Link href="/blog" className="flex items-center text-blue-500 font-medium mt-4 md:mt-0 hover:underline">
+            <Link href="/blog" className="flex items-center text-[#4e6af9] font-medium mt-4 md:mt-0 hover:underline">
               Read all articles <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </div>
@@ -318,7 +318,7 @@ export default function LightLandingPage() {
                   alt="Hidden Gems in Paris" 
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4 bg-blue-500 text-white text-xs font-bold uppercase px-3 py-1 rounded">
+                <div className="absolute top-4 left-4 bg-[#4e6af9] text-white text-xs font-bold uppercase px-3 py-1 rounded">
                   City Guide
                 </div>
               </div>
@@ -329,7 +329,7 @@ export default function LightLandingPage() {
                 </div>
                 <h3 className="text-xl font-bold mb-3">10 Hidden Gems in Paris You Need to Visit</h3>
                 <p className="text-gray-600 mb-4">Discover the lesser-known spots in Paris that most tourists miss but locals love.</p>
-                <Link href="/blog/1" className="text-blue-500 font-medium hover:underline">Read More</Link>
+                <Link href="/blog/1" className="text-[#4e6af9] font-medium hover:underline">Read More</Link>
               </div>
             </div>
             
@@ -341,7 +341,7 @@ export default function LightLandingPage() {
                   alt="Food Adventures in Thailand" 
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4 bg-blue-500 text-white text-xs font-bold uppercase px-3 py-1 rounded">
+                <div className="absolute top-4 left-4 bg-[#4e6af9] text-white text-xs font-bold uppercase px-3 py-1 rounded">
                   Food
                 </div>
               </div>
@@ -352,7 +352,7 @@ export default function LightLandingPage() {
                 </div>
                 <h3 className="text-xl font-bold mb-3">Ultimate Food Adventures in Thailand's Street Markets</h3>
                 <p className="text-gray-600 mb-4">From spicy curries to sweet mango sticky rice, these Thai street foods are a must-try.</p>
-                <Link href="/blog/2" className="text-blue-500 font-medium hover:underline">Read More</Link>
+                <Link href="/blog/2" className="text-[#4e6af9] font-medium hover:underline">Read More</Link>
               </div>
             </div>
             
@@ -364,7 +364,7 @@ export default function LightLandingPage() {
                   alt="Solo Travel" 
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4 bg-blue-500 text-white text-xs font-bold uppercase px-3 py-1 rounded">
+                <div className="absolute top-4 left-4 bg-[#4e6af9] text-white text-xs font-bold uppercase px-3 py-1 rounded">
                   Tips
                 </div>
               </div>
@@ -375,7 +375,7 @@ export default function LightLandingPage() {
                 </div>
                 <h3 className="text-xl font-bold mb-3">Solo Travel: How to Make the Most of Your Adventure</h3>
                 <p className="text-gray-600 mb-4">Expert advice on planning, staying safe, and creating meaningful experiences while traveling alone.</p>
-                <Link href="/blog/3" className="text-blue-500 font-medium hover:underline">Read More</Link>
+                <Link href="/blog/3" className="text-[#4e6af9] font-medium hover:underline">Read More</Link>
               </div>
             </div>
           </div>
@@ -491,25 +491,25 @@ export default function LightLandingPage() {
               <div className="p-6">
                 <ul className="space-y-4">
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-[#4e6af9] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>Basic destination search</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-[#4e6af9] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>5 AI assistant queries per day</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-[#4e6af9] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>Standard itinerary builder</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-[#4e6af9] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>Community forum access</span>
@@ -528,14 +528,14 @@ export default function LightLandingPage() {
                   </li>
                 </ul>
                 <div className="mt-8">
-                  <Button className="w-full bg-blue-500 hover:bg-blue-600">Get Started</Button>
+                  <Button className="w-full bg-[#4e6af9] hover:bg-[#3a55e7]">Get Started</Button>
                 </div>
               </div>
             </div>
             
             {/* Premium Plan */}
-            <div className="bg-white rounded-lg overflow-hidden shadow-2xl transition-all duration-300 hover:shadow-xl transform scale-105 border-2 border-blue-500">
-              <div className="p-1 bg-blue-500">
+            <div className="bg-white rounded-lg overflow-hidden shadow-2xl transition-all duration-300 hover:shadow-xl transform scale-105 border-2 border-[#4e6af9]">
+              <div className="p-1 bg-[#4e6af9]">
                 <p className="text-white text-center text-sm font-semibold uppercase">Most Popular</p>
               </div>
               <div className="p-6 border-b">
@@ -549,31 +549,31 @@ export default function LightLandingPage() {
               <div className="p-6">
                 <ul className="space-y-4">
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-[#4e6af9] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>Everything in Free plan</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-[#4e6af9] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>Unlimited AI assistant queries</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-[#4e6af9] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>Advanced flight & hotel comparisons</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-[#4e6af9] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>Real-time language translation</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-[#4e6af9] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>Custom itinerary creation</span>
@@ -586,7 +586,7 @@ export default function LightLandingPage() {
                   </li>
                 </ul>
                 <div className="mt-8">
-                  <Button className="w-full bg-blue-500 hover:bg-blue-600">Subscribe Now</Button>
+                  <Button className="w-full bg-[#4e6af9] hover:bg-[#3a55e7]">Subscribe Now</Button>
                 </div>
               </div>
             </div>
@@ -604,44 +604,44 @@ export default function LightLandingPage() {
               <div className="p-6">
                 <ul className="space-y-4">
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-[#4e6af9] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>Everything in Premium plan</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-[#4e6af9] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>Multi-user accounts (up to 5)</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-[#4e6af9] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>Group itinerary coordination</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-[#4e6af9] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>Business expense tracking</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-[#4e6af9] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>Priority customer support</span>
                   </li>
                   <li className="flex items-start">
-                    <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-[#4e6af9] mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>API access for customizations</span>
                   </li>
                 </ul>
                 <div className="mt-8">
-                  <Button className="w-full bg-blue-500 hover:bg-blue-600">Contact Sales</Button>
+                  <Button className="w-full bg-[#4e6af9] hover:bg-[#3a55e7]">Contact Sales</Button>
                 </div>
               </div>
             </div>
@@ -650,7 +650,7 @@ export default function LightLandingPage() {
       </section>
       
       {/* Newsletter */}
-      <section className="py-12 bg-blue-500 text-white">
+      <section className="py-12 bg-[#4e6af9] text-white">
         <div className="container mx-auto px-6">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-2xl font-bold mb-2">Subscribe to Our Newsletter</h2>
@@ -659,9 +659,9 @@ export default function LightLandingPage() {
               <Input 
                 type="email" 
                 placeholder="Your email address" 
-                className="flex-grow bg-white text-gray-800 placeholder:text-gray-500"
+                className="flex-grow bg-white text-gray-800 placeholder:text-gray-500 border-0"
               />
-              <Button className="bg-gray-800 hover:bg-gray-900 text-white">Subscribe</Button>
+              <Button className="bg-gray-800 hover:bg-gray-900 text-white border-0">Subscribe</Button>
             </div>
           </div>
         </div>
@@ -675,10 +675,10 @@ export default function LightLandingPage() {
             Join thousands of travelers who have discovered the power of AI-assisted travel planning with JET AI.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg" className="bg-blue-500 hover:bg-blue-600 text-white px-8">
+            <Button size="lg" className="bg-[#4e6af9] hover:bg-[#3a55e7] text-white px-8">
               <Link href="/signup">Sign Up for Free</Link>
             </Button>
-            <Button size="lg" variant="outline" className="border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white px-8">
+            <Button size="lg" variant="outline" className="border-[#4e6af9] text-[#4e6af9] hover:bg-[#4e6af9] hover:text-white px-8">
               <Link href="/chat">Try AI Assistant</Link>
             </Button>
           </div>
@@ -691,7 +691,7 @@ export default function LightLandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center mb-4">
-                <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-blue-500" stroke="currentColor" strokeWidth="2">
+                <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-[#4e6af9]" stroke="currentColor" strokeWidth="2">
                   <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" strokeLinejoin="round" strokeLinecap="round"/>
                 </svg>
                 <h3 className="font-bold text-xl ml-2">JET AI</h3>
