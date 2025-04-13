@@ -5,6 +5,7 @@ import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { chatHandler } from "./lib/ai";
+import { analyzePreferences } from "./api/userCategorization";
 import { 
   travelSearchDestinations, 
   travelSearchExperiences, 
@@ -393,6 +394,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     req.logout(() => {
       res.status(200).json({ message: "Logged out successfully" });
     });
+  });
+
+  // Onboarding AI user categorization endpoint
+  app.post("/api/analyze-preferences", async (req, res) => {
+    return analyzePreferences(req, res);
   });
 
   // User routes

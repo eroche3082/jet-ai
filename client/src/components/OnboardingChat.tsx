@@ -4,10 +4,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
-import { SendIcon, ArrowRightCircle } from 'lucide-react';
+import { SendIcon, ArrowRightCircle, Loader2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { onboardingSteps } from '@/lib/onboardingFlow';
+import { generateUserCode, processWithAI, generateQRCode } from '@/lib/chatCodeGenerator';
 
 type MessageType = {
   id: string;
@@ -22,6 +23,10 @@ type MessageType = {
     icon?: string;
   }>;
   userSelections?: string[];
+  isLoading?: boolean;
+  code?: string;
+  codeCategory?: string;
+  qrCodeUrl?: string;
 };
 
 type UserData = {
@@ -29,6 +34,8 @@ type UserData = {
   email: string;
   preferences: Record<string, any>;
   currentStep: number;
+  code?: string;
+  category?: string;
 };
 
 export default function OnboardingChat({ onComplete }: { onComplete: (userData: UserData) => void }) {
@@ -36,10 +43,11 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
   const [inputValue, setInputValue] = useState('');
   const [emailValue, setEmailValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [processingAI, setProcessingAI] = useState(false);
   const [messages, setMessages] = useState<MessageType[]>([
     {
       id: '1',
-      content: "Hi there! Welcome to JET AI. I'm your travel AI Assistant. Let's personalize your experience.",
+      content: "Hi there! Welcome to JET AI. I'm your travel AI Assistant. Let's personalize your experience by answering a few questions.",
       role: 'assistant',
       timestamp: new Date(),
       expectsResponse: true,
@@ -55,7 +63,7 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
   });
   
   const [progress, setProgress] = useState(0);
-  const totalSteps = onboardingSteps.length + 2; // +2 for name and email steps
+  const totalSteps = 10; // Fixed 10-step conversation as specified in the requirements
 
   // Scroll to the bottom of the chat
   useEffect(() => {
@@ -311,25 +319,127 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
     }
   };
   
-  const handleFinalStep = () => {
-    setTimeout(() => {
+  const handleFinalStep = async () => {
+    // Loading message for AI processing
+    const processingMessage: MessageType = {
+      id: Date.now().toString(),
+      content: `Thanks ${userData.name}! Analyzing your preferences with our AI travel assistant...`,
+      role: 'assistant',
+      timestamp: new Date(),
+      isLoading: true,
+    };
+    
+    setMessages((prev) => [...prev, processingMessage]);
+    setProcessingAI(true);
+    
+    try {
+      // Process preferences with AI and generate code
+      const aiResult = await processWithAI(userData);
+      
+      // Generate QR code
+      const qrCodeUrl = await generateQRCode(aiResult.code);
+      
+      // Update user data with code and category
+      setUserData((prev) => {
+        const updatedUserData = {
+          ...prev,
+          code: aiResult.code,
+          category: aiResult.category,
+        };
+        
+        localStorage.setItem('jetai_user_data', JSON.stringify(updatedUserData));
+        return updatedUserData;
+      });
+      
+      // Show results message
       const finalMessage: MessageType = {
         id: (Date.now() + 1).toString(),
-        content: `Thanks ${userData.name}! Your custom travel dashboard is now being prepared with your preferences for ${Object.keys(userData.preferences).length} categories.`,
+        content: `Analysis complete! Based on your preferences, we've identified you as a ${aiResult.category} traveler.\n\n${aiResult.summary}\n\nYour personalized JET AI code: ${aiResult.code}`,
         role: 'assistant',
         timestamp: new Date(),
+        code: aiResult.code,
+        codeCategory: aiResult.category,
+        qrCodeUrl: qrCodeUrl || undefined,
       };
       
-      setMessages((prev) => [...prev, finalMessage]);
-      setIsTyping(false);
+      // Remove loading message and add final message
+      setMessages((prev) => [...prev.filter(m => !m.isLoading), finalMessage]);
       
-      // Complete onboarding after showing final message
+      // Show redirect message
       setTimeout(() => {
-        console.log("Onboarding complete with user data:", userData);
+        const redirectMessage: MessageType = {
+          id: (Date.now() + 2).toString(),
+          content: "Loading your personalized dashboard...",
+          role: 'assistant',
+          timestamp: new Date(),
+        };
+        
+        setMessages((prev) => [...prev, redirectMessage]);
+        
+        // Redirect to dashboard after delay
+        setTimeout(() => {
+          console.log("Onboarding complete with user data:", {
+            ...userData,
+            code: aiResult.code,
+            category: aiResult.category,
+          });
+          
+          // Store the data for retrieval
+          localStorage.setItem('jetai_user_preferences', JSON.stringify(userData.preferences));
+          localStorage.setItem('jetai_user_code', aiResult.code);
+          localStorage.setItem('jetai_user_category', aiResult.category);
+          
+          onComplete({
+            ...userData,
+            code: aiResult.code,
+            category: aiResult.category,
+          });
+        }, 2000);
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error in AI processing:', error);
+      
+      // Fallback to simple code generation
+      const code = generateUserCode(userData);
+      
+      // Update user data with code
+      setUserData((prev) => {
+        const updatedUserData = {
+          ...prev,
+          code: code,
+        };
+        
+        localStorage.setItem('jetai_user_data', JSON.stringify(updatedUserData));
+        return updatedUserData;
+      });
+      
+      // Show simple completion message
+      const fallbackMessage: MessageType = {
+        id: (Date.now() + 1).toString(),
+        content: `Thanks ${userData.name}! Your personalized JET AI code: ${code}\n\nWe're preparing your custom dashboard...`,
+        role: 'assistant',
+        timestamp: new Date(),
+        code: code,
+      };
+      
+      // Remove loading message and add fallback message
+      setMessages((prev) => [...prev.filter(m => !m.isLoading), fallbackMessage]);
+      
+      // Redirect after delay
+      setTimeout(() => {
+        console.log("Onboarding complete with fallback code:", code);
         localStorage.setItem('jetai_user_preferences', JSON.stringify(userData.preferences));
-        onComplete(userData);
+        localStorage.setItem('jetai_user_code', code);
+        
+        onComplete({
+          ...userData,
+          code: code,
+        });
       }, 2000);
-    }, 1000);
+    } finally {
+      setProcessingAI(false);
+    }
   };
   
   const moveToNextStep = (currentStepIndex: number) => {
@@ -498,7 +608,33 @@ export default function OnboardingChat({ onComplete }: { onComplete: (userData: 
                   : 'bg-[#4a89dc]/10 text-[#050b17]'
               }`}>
                 <div className="prose prose-sm max-w-none dark:prose-invert">
-                  {message.content}
+                  {message.isLoading ? (
+                    <div className="flex items-center">
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin text-[#4a89dc]" />
+                      {message.content}
+                    </div>
+                  ) : message.code ? (
+                    <>
+                      <div>{message.content}</div>
+                      {message.qrCodeUrl && (
+                        <div className="mt-3 flex justify-center">
+                          <div className="overflow-hidden rounded-lg border-2 border-[#4a89dc]/30 bg-white p-1 max-w-[150px]">
+                            <img src={message.qrCodeUrl} alt="QR Code" className="w-full h-auto" />
+                          </div>
+                        </div>
+                      )}
+                      <div className="mt-3">
+                        <div className="bg-[#050b17] text-white py-2 px-3 rounded-md font-mono text-center">
+                          {message.code}
+                        </div>
+                        <div className="text-center text-xs mt-1 text-[#050b17]/60">
+                          Scan QR code or use this code to access your dashboard
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    message.content
+                  )}
                 </div>
                 <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-between'} items-center text-xs mt-1 ${
                   message.role === 'user' 
