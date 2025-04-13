@@ -41,6 +41,7 @@ import DarkDashboardPage from "@/pages/DarkDashboardPage";
 import BlogPage from "@/pages/BlogPage";
 import OnboardingPage from "@/pages/OnboardingPage";
 import FeaturesPage from "@/pages/FeaturesPage";
+import LanguageLearningPage from "@/pages/LanguageLearningPage";
 
 function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -197,6 +198,7 @@ function App() {
         <Route path="/portfolio" component={PortfolioPage} />
         <Route path="/suggestions" component={SuggestionsPage} />
         <Route path="/memories" component={TravelMemoryPage} />
+        <Route path="/language-learning" component={LanguageLearningPage} />
         
         {/* Partner/Affiliate routes */}
         <Route path="/partner/dashboard" component={PartnerDashboard} />

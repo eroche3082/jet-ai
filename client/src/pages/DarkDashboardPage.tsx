@@ -9,7 +9,9 @@ import {
   Search,
   LogOut,
   User,
-  Settings
+  Settings,
+  Languages,
+  GraduationCap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -153,6 +155,12 @@ export default function DarkDashboardPage() {
       title: 'Interactive Itineraries',
       description: 'Create and manage detailed travel plans with our smart tools',
       icon: <FileText className="h-5 w-5 text-[#4a89dc]" />
+    },
+    {
+      title: 'Language Learning for Travel',
+      description: 'Learn essential travel phrases in the language of your destination',
+      icon: <Languages className="h-5 w-5 text-[#4a89dc]" />,
+      path: '/language-learning'
     }
   ];
   
@@ -254,7 +262,11 @@ export default function DarkDashboardPage() {
             
             <div className="space-y-4">
               {features.map((feature, index) => (
-                <div key={index} className="bg-[#0a1021] border border-gray-800 rounded-lg p-4 hover:border-[#4a89dc]/50 transition-colors">
+                <Link 
+                  key={index} 
+                  href={feature.path || "#"} 
+                  className="block bg-[#0a1021] border border-gray-800 rounded-lg p-4 hover:border-[#4a89dc]/50 transition-colors"
+                >
                   <div className="flex items-center">
                     <div className="w-10 h-10 rounded-full bg-[#4a89dc]/10 flex items-center justify-center mr-3">
                       {feature.icon}
@@ -265,7 +277,7 @@ export default function DarkDashboardPage() {
                     </div>
                     <ChevronRight className="h-5 w-5 text-gray-500" />
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
             

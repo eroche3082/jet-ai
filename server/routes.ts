@@ -29,6 +29,7 @@ import { processConversation } from './lib/vertexAI';
 import { configureRoutes as configureMemoryRoutes } from './api/memoryEnhancementService';
 import { configureRoutes as configureGoogleApiRoutes } from './api/googleApiService';
 import { configureRoutes as configureGeminiRoutes } from './api/geminiService';
+import translationRoutes from './api/translationRoutes';
 import { configureApiKey } from './lib/googleApiConfig';
 
 // Configure session store
@@ -230,6 +231,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Registramos las rutas del servicio Gemini
   configureGeminiRoutes(app);
+  
+  // Registramos las rutas de traducción para el aprendizaje de idiomas
+  app.use('/api', translationRoutes);
+  console.log('Language translation routes configured successfully');
   
   // Configuramos la clave API para Google Cloud
   configureApiKey(process.env.GOOGLE_CLOUD_API_KEY || 'AIzaSyBGWmVEy2zp6fpqaBkDOpV-Qj_FP6QkZj0');

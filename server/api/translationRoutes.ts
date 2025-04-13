@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { v2 } from '@google-cloud/translate';
-import textToSpeech from '@google-cloud/text-to-speech';
+import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 
 const router = Router();
 const { Translate } = v2;
@@ -17,9 +17,9 @@ try {
 }
 
 // Initialize text-to-speech client
-let ttsClient: textToSpeech.TextToSpeechClient;
+let ttsClient: TextToSpeechClient;
 try {
-  ttsClient = new textToSpeech.TextToSpeechClient({
+  ttsClient = new TextToSpeechClient({
     key: process.env.GOOGLE_TTS_API_KEY || process.env.GOOGLE_CLOUD_API_KEY,
   });
   console.log('Google Text-to-Speech client initialized successfully');
