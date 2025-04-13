@@ -830,32 +830,62 @@ export default function LightLandingPage() {
         </div>
       </section>
       
-      {/* Newsletter */}
+      {/* Newsletter & Onboarding CTA */}
       <section className="py-16 bg-[#050b17] text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1530521954074-e64f6810b32d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1650&q=80')] bg-cover bg-center"></div>
         </div>
         <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
+          <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center px-4 py-1 border-l-2 border-[#4a89dc] bg-[#050b17]/50 backdrop-blur-sm text-white text-sm font-serif mb-3">
-              <Mail className="h-3.5 w-3.5 mr-1.5 text-[#4a89dc]" /> 
-              CURATED INSIGHTS
+              <Sparkles className="h-3.5 w-3.5 mr-1.5 text-[#4a89dc]" /> 
+              PERSONALIZED TRAVEL
             </div>
-            <h2 className="text-3xl mb-3 font-display text-white">Join Our Distinguished Travelers</h2>
-            <p className="mb-8 font-serif text-white/80">Receive refined travel commentary, exclusive destination insights, and personalized AI recommendations curated for the discerning traveler</p>
-            <div className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
-              <Input 
-                type="email" 
-                placeholder="Your email address" 
-                className="flex-grow bg-white/10 backdrop-blur-sm text-white placeholder:text-white/50 border border-white/20 focus:border-[#4a89dc] focus:ring-[#4a89dc]/20 font-serif rounded"
-              />
-              <Button className="bg-[#4a89dc] hover:bg-white hover:text-[#050b17] text-white font-medium transition-colors duration-300 rounded">
-                Subscribe
-              </Button>
-            </div>
-            <p className="mt-4 text-xs text-white/60 font-serif">
-              By subscribing, you'll receive our weekly digest of exceptional journeys. You may unsubscribe at any time.
+            <h2 className="text-3xl mb-3 font-display text-white">Unlock Your Personalized Travel Experience</h2>
+            <p className="mb-8 font-serif text-white/80">
+              Create your profile for AI-tailored journeys designed exclusively for your preferences, or subscribe to receive our curated travel insights
             </p>
+            
+            {/* Two options: Create profile or subscribe */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+              <div className="bg-[#050b17]/40 backdrop-blur-sm rounded-lg p-6 border border-white/10 hover:border-[#4a89dc]/30 transition-all">
+                <div className="mb-4 w-16 h-16 bg-[#4a89dc]/10 rounded-full flex items-center justify-center mx-auto">
+                  <User className="h-8 w-8 text-[#4a89dc]" />
+                </div>
+                <h3 className="text-xl font-display mb-3">Create Your Travel Profile</h3>
+                <p className="text-white/70 mb-6 font-serif text-sm">
+                  Complete a brief personalization process to receive AI recommendations tailored to your unique travel preferences
+                </p>
+                <Link href="/onboarding">
+                  <Button className="w-full bg-[#4a89dc] hover:bg-white hover:text-[#050b17] text-white font-medium transition-colors duration-300 rounded">
+                    Start Personalization
+                  </Button>
+                </Link>
+              </div>
+              
+              <div className="bg-[#050b17]/40 backdrop-blur-sm rounded-lg p-6 border border-white/10 hover:border-[#4a89dc]/30 transition-all">
+                <div className="mb-4 w-16 h-16 bg-[#4a89dc]/10 rounded-full flex items-center justify-center mx-auto">
+                  <Mail className="h-8 w-8 text-[#4a89dc]" />
+                </div>
+                <h3 className="text-xl font-display mb-3">Subscribe to Updates</h3>
+                <p className="text-white/70 mb-4 font-serif text-sm">
+                  Receive refined travel commentary, exclusive destination insights, and AI recommendations for the discerning traveler
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Input 
+                    type="email" 
+                    placeholder="Your email address" 
+                    className="flex-grow bg-white/10 backdrop-blur-sm text-white placeholder:text-white/50 border border-white/20 focus:border-[#4a89dc] focus:ring-[#4a89dc]/20 font-serif rounded"
+                  />
+                  <Button className="bg-[#4a89dc] hover:bg-white hover:text-[#050b17] text-white font-medium transition-colors duration-300 rounded">
+                    Subscribe
+                  </Button>
+                </div>
+                <p className="mt-3 text-xs font-serif text-white/50 text-left">
+                  By subscribing, you'll receive our weekly digest of exceptional journeys. You may unsubscribe at any time.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
