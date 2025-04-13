@@ -1,11 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Icons } from "@/components/ui/icons";
 import { Loader2, MapPin, Tag, Image, Plus, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
@@ -114,13 +113,10 @@ export function CreateTravelStoryModal({ onSuccess }: CreateTravelStoryModalProp
       });
 
       // Submit the form
-      const response = await apiRequest("POST", "/api/community/posts", formData, {
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            setProgress(percentCompleted);
-          }
-        }
+      const response = await fetch("/api/community/posts", {
+        method: "POST",
+        body: formData,
+        credentials: "include"
       });
       
       const data = await response.json();
@@ -159,7 +155,7 @@ export function CreateTravelStoryModal({ onSuccess }: CreateTravelStoryModalProp
   };
 
   // Clean up object URLs when component is unmounted
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       previews.forEach(URL.revokeObjectURL);
     };
