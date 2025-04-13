@@ -70,7 +70,7 @@ export default function LightLandingPage() {
       </header>
       
       {/* Hero Section - Bridge Inspired */}
-      <section className="relative bg-cover bg-center h-[650px]" style={{ backgroundImage: "url('/img/tokyo_hero.jpg')" }}>
+      <section className="relative bg-cover bg-center h-[650px]" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1615400688977-501ddbcc0071?q=80&w=1772&auto=format&fit=crop')" }}>
         <div className="absolute inset-0 bg-gradient-to-t from-marni-black/80 via-marni-dark/60 to-marni-dark/30"></div>
         <div className="container mx-auto px-6 h-full flex flex-col justify-center relative z-10">
           <div className="max-w-2xl">
