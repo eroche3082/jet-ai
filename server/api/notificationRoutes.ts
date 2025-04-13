@@ -144,4 +144,91 @@ router.post('/send-itinerary', async (req, res) => {
   }
 });
 
+/**
+ * Sends a custom email to users from admin panel
+ * POST /api/notifications/send-custom
+ */
+router.post('/send-custom', async (req, res) => {
+  try {
+    const { email, name, subject, content, code, category } = req.body;
+    
+    if (!email || !subject || !content) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Email, subject, and content are required' 
+      });
+    }
+    
+    // Format custom email HTML
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${subject}</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background-color: #050b17; padding: 20px; text-align: center; }
+    .content { padding: 20px; background-color: #f9f9f9; }
+    .footer { text-align: center; padding: 10px; font-size: 12px; }
+    h1 { color: #4a89dc; }
+    .code { background-color: #050b17; color: white; padding: 8px; border-radius: 4px; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://i.imgur.com/LZ4TQkz.png" alt="JET AI Logo" style="max-width: 150px;">
+    </div>
+    <div class="content">
+      <h1>${subject}</h1>
+      <p>Hello ${name || 'Traveler'},</p>
+      
+      <div>${content.replace(/\n/g, '<br>')}</div>
+      
+      ${code ? `
+      <div style="margin-top: 20px; margin-bottom: 20px;">
+        <p>Your JET AI Access Code:</p>
+        <div class="code">${code}</div>
+      </div>
+      ` : ''}
+      
+      <p style="margin-top: 20px;">Thank you for choosing JET AI for your travel needs.</p>
+    </div>
+    <div class="footer">
+      <p>&copy; 2025 JET AI Travel Assistant | All Rights Reserved</p>
+    </div>
+  </div>
+</body>
+</html>
+    `;
+    
+    // Send the email
+    const success = await sendEmail({
+      to: email,
+      subject,
+      html: htmlContent
+    });
+    
+    if (success) {
+      res.status(200).json({ 
+        success: true, 
+        message: 'Custom email sent successfully' 
+      });
+    } else {
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to send custom email' 
+      });
+    }
+  } catch (error) {
+    console.error('Error sending custom email:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Internal server error while sending email'
+    });
+  }
+});
+
 export default router;

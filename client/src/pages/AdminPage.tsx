@@ -59,6 +59,10 @@ export default function AdminPage() {
   const [filteredUsers, setFilteredUsers] = useState<UserData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailContent, setEmailContent] = useState('');
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [sendingEmail, setSendingEmail] = useState(false);
   const { toast } = useToast();
   const [_, setLocation] = useLocation();
   
@@ -276,6 +280,83 @@ export default function AdminPage() {
       title: 'Export successful',
       description: 'User data has been exported to CSV.',
     });
+  };
+  
+  const handleSendEmail = async () => {
+    if (selectedUsers.length === 0 || !emailSubject.trim() || !emailContent.trim()) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please select recipients and provide both subject and content.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    setSendingEmail(true);
+    
+    try {
+      // Get the selected users' email addresses
+      const selectedUsersData = users.filter(user => selectedUsers.includes(user.id));
+      
+      // For each selected user, send an email
+      const emailPromises = selectedUsersData.map(async (user) => {
+        try {
+          const response = await fetch('/api/notifications/send-custom', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: user.email,
+              name: user.name,
+              subject: emailSubject,
+              content: emailContent,
+              code: user.code,
+              category: user.category
+            }),
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Failed to send email to ${user.email}`);
+          }
+          
+          return { success: true, email: user.email };
+        } catch (error) {
+          console.error(`Error sending email to ${user.email}:`, error);
+          return { success: false, email: user.email, error };
+        }
+      });
+      
+      const results = await Promise.all(emailPromises);
+      const successCount = results.filter(r => r.success).length;
+      
+      if (successCount === selectedUsersData.length) {
+        toast({
+          title: 'Email Sent Successfully',
+          description: `Email sent to ${successCount} ${successCount === 1 ? 'user' : 'users'}.`,
+        });
+        
+        // Reset form
+        setEmailSubject('');
+        setEmailContent('');
+        setSelectedUsers([]);
+      } else {
+        toast({
+          title: 'Partial Success',
+          description: `Sent to ${successCount} out of ${selectedUsersData.length} users. Some emails failed to send.`,
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Error sending emails:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to send emails. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSendingEmail(false);
+    }
   };
   
   if (!isAuthenticated) {
@@ -669,6 +750,130 @@ export default function AdminPage() {
                       })}
                     </TableBody>
                   </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* Notifications Tab */}
+          <TabsContent value="notifications" className="space-y-6">
+            <Card className="bg-[#0a1021] border-gray-800">
+              <CardHeader>
+                <CardTitle>Email Notifications</CardTitle>
+                <CardDescription className="text-gray-400">
+                  Send email notifications to users
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-medium mb-3">Select Recipients</h3>
+                    <div className="bg-[#050b17] border border-gray-800 rounded-md p-4 max-h-60 overflow-y-auto">
+                      {users.length === 0 ? (
+                        <p className="text-gray-400 text-center py-4">No users available</p>
+                      ) : (
+                        <div className="space-y-2">
+                          <div className="flex items-center mb-3">
+                            <input
+                              type="checkbox"
+                              id="select-all"
+                              className="h-4 w-4 rounded border-gray-700 bg-[#050b17] text-[#4a89dc]"
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedUsers(users.map(user => user.id));
+                                } else {
+                                  setSelectedUsers([]);
+                                }
+                              }}
+                              checked={selectedUsers.length === users.length && users.length > 0}
+                            />
+                            <label htmlFor="select-all" className="ml-2 text-sm font-medium">
+                              Select All Users
+                            </label>
+                          </div>
+                          
+                          {users.map((user) => (
+                            <div key={user.id} className="flex items-center">
+                              <input
+                                type="checkbox"
+                                id={`user-${user.id}`}
+                                className="h-4 w-4 rounded border-gray-700 bg-[#050b17] text-[#4a89dc]"
+                                value={user.id}
+                                checked={selectedUsers.includes(user.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedUsers([...selectedUsers, user.id]);
+                                  } else {
+                                    setSelectedUsers(selectedUsers.filter(id => id !== user.id));
+                                  }
+                                }}
+                              />
+                              <label htmlFor={`user-${user.id}`} className="ml-2 text-sm flex justify-between w-full">
+                                <span>{user.name}</span>
+                                <span className="text-gray-400">{user.email}</span>
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-400 mt-2">
+                      {selectedUsers.length} {selectedUsers.length === 1 ? 'user' : 'users'} selected
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <label htmlFor="email-subject" className="block text-sm font-medium mb-1">
+                        Email Subject
+                      </label>
+                      <Input
+                        id="email-subject"
+                        placeholder="Enter email subject..."
+                        value={emailSubject}
+                        onChange={(e) => setEmailSubject(e.target.value)}
+                        className="bg-[#050b17] border-gray-700 w-full"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="email-content" className="block text-sm font-medium mb-1">
+                        Email Content
+                      </label>
+                      <textarea
+                        id="email-content"
+                        placeholder="Enter email content..."
+                        value={emailContent}
+                        onChange={(e) => setEmailContent(e.target.value)}
+                        className="w-full h-40 rounded-md border border-gray-700 bg-[#050b17] p-3 text-white resize-none focus:outline-none focus:ring-2 focus:ring-[#4a89dc]"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <Button
+                      className="bg-[#4a89dc] hover:bg-[#3a79cc]"
+                      disabled={
+                        selectedUsers.length === 0 ||
+                        !emailSubject.trim() ||
+                        !emailContent.trim() ||
+                        sendingEmail
+                      }
+                      onClick={handleSendEmail}
+                    >
+                      {sendingEmail ? (
+                        <>
+                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-t-transparent border-white"></div>
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <SendIcon className="mr-2 h-4 w-4" />
+                          Send Email
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
