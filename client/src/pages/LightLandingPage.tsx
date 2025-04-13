@@ -1,25 +1,30 @@
 import { Link } from "wouter";
 import { 
-  Compass, 
-  Map, 
+  ArrowRight,
+  Brain,
   Calendar, 
-  Plane, 
+  ChevronRight,
+  Compass, 
+  DollarSign,
+  Facebook,
   Globe, 
   Heart, 
-  Upload, 
-  Sparkles,
-  ArrowRight,
-  Search,
-  Star,
-  User,
-  Mail,
-  MessageSquare,
-  ChevronRight,
   Instagram,
-  Facebook,
+  Languages,
+  Mail,
+  Map, 
+  MapIcon,
+  Menu,
+  MessageCircle,
+  MessageSquare,
+  Plane, 
+  Search,
+  Sparkles,
+  Star,
   Twitter,
-  Youtube,
-  Menu
+  Upload, 
+  User,
+  Youtube
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -209,31 +214,28 @@ export default function LightLandingPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Destination Card 1 */}
-            <div className="bg-white rounded-lg overflow-hidden shadow-md group">
+            <div className="bg-white rounded-xl overflow-hidden shadow-lg group hover:shadow-xl transform transition-all duration-300 hover:-translate-y-2">
               <div className="relative h-64 overflow-hidden">
                 <img 
                   src="https://images.unsplash.com/photo-1542259009477-d625272157b7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80" 
                   alt="Bali, Indonesia" 
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div className="absolute top-4 right-4">
+                  <div className="bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-bold text-white">
+                    TOP TRENDING
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
                 <div className="absolute bottom-4 left-4 right-4">
                   <div className="flex items-center text-white mb-1">
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
+                    <div className="flex">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <svg key={star} viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
+                          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                        </svg>
+                      ))}
+                    </div>
                     <span className="ml-1 text-sm">(256 reviews)</span>
                   </div>
                   <h3 className="text-white text-xl font-bold">Bali, Indonesia</h3>
@@ -241,40 +243,40 @@ export default function LightLandingPage() {
               </div>
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <p className="text-[#3a55e7] font-semibold">Beach, Culture, Nature</p>
-                  <p className="text-green-600 font-semibold">$1,200</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">Beach</span>
+                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">Culture</span>
+                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">Nature</span>
+                  </div>
+                  <p className="text-[#ff6b35] font-bold text-lg">$1,200</p>
                 </div>
                 <p className="text-gray-600 mb-4">Experience the perfect blend of tranquil beaches, lush rice terraces, and vibrant cultural rituals on this magical island.</p>
-                <Button className="w-full bg-[#3a55e7] hover:bg-[#2b3fbb]">View Details</Button>
+                <Button className="w-full bg-gradient-to-r from-[#ff6b35] to-orange-500 hover:from-orange-500 hover:to-[#ff6b35] text-white font-semibold rounded-xl py-2.5 shadow-md hover:shadow-lg transform transition-all duration-300 hover:scale-[1.02]">
+                  <Link href="/destinations/bali" className="flex items-center justify-center">
+                    <Compass className="mr-2 h-4 w-4" /> Explore Bali
+                  </Link>
+                </Button>
               </div>
             </div>
             
             {/* Destination Card 2 */}
-            <div className="bg-white rounded-lg overflow-hidden shadow-md group">
+            <div className="bg-white rounded-xl overflow-hidden shadow-lg group hover:shadow-xl transform transition-all duration-300 hover:-translate-y-2">
               <div className="relative h-64 overflow-hidden">
                 <img 
                   src="https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1830&q=80" 
                   alt="Venice, Italy" 
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
                 <div className="absolute bottom-4 left-4 right-4">
                   <div className="flex items-center text-white mb-1">
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
+                    <div className="flex">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <svg key={star} viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
+                          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                        </svg>
+                      ))}
+                    </div>
                     <span className="ml-1 text-sm">(189 reviews)</span>
                   </div>
                   <h3 className="text-white text-xl font-bold">Venice, Italy</h3>
@@ -282,40 +284,45 @@ export default function LightLandingPage() {
               </div>
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <p className="text-[#3a55e7] font-semibold">Historic, Romantic, City</p>
-                  <p className="text-green-600 font-semibold">$950</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">Historic</span>
+                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">Romantic</span>
+                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">City</span>
+                  </div>
+                  <p className="text-[#ff6b35] font-bold text-lg">$950</p>
                 </div>
                 <p className="text-gray-600 mb-4">Navigate through the romantic canals of this unique city built on water, with its architectural marvels and timeless charm.</p>
-                <Button className="w-full bg-[#3a55e7] hover:bg-[#2b3fbb]">View Details</Button>
+                <Button className="w-full bg-gradient-to-r from-[#ff6b35] to-orange-500 hover:from-orange-500 hover:to-[#ff6b35] text-white font-semibold rounded-xl py-2.5 shadow-md hover:shadow-lg transform transition-all duration-300 hover:scale-[1.02]">
+                  <Link href="/destinations/venice" className="flex items-center justify-center">
+                    <Map className="mr-2 h-4 w-4" /> Explore Venice
+                  </Link>
+                </Button>
               </div>
             </div>
             
             {/* Destination Card 3 */}
-            <div className="bg-white rounded-lg overflow-hidden shadow-md group">
+            <div className="bg-white rounded-xl overflow-hidden shadow-lg group hover:shadow-xl transform transition-all duration-300 hover:-translate-y-2">
               <div className="relative h-64 overflow-hidden">
                 <img 
                   src="https://images.unsplash.com/photo-1532236204992-f5e85c024202?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1822&q=80" 
                   alt="Kyoto, Japan" 
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div className="absolute top-4 right-4">
+                  <div className="bg-yellow-400/90 rounded-full px-3 py-1 text-xs font-bold text-white">
+                    BEST VALUE
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
                 <div className="absolute bottom-4 left-4 right-4">
                   <div className="flex items-center text-white mb-1">
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
+                    <div className="flex">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <svg key={star} viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
+                          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                        </svg>
+                      ))}
+                    </div>
                     <span className="ml-1 text-sm">(221 reviews)</span>
                   </div>
                   <h3 className="text-white text-xl font-bold">Kyoto, Japan</h3>
@@ -323,11 +330,19 @@ export default function LightLandingPage() {
               </div>
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <p className="text-[#3a55e7] font-semibold">Cultural, Historic, Temples</p>
-                  <p className="text-green-600 font-semibold">$1,450</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">Cultural</span>
+                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">Historic</span>
+                    <span className="px-2 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-xs font-semibold">Temples</span>
+                  </div>
+                  <p className="text-[#ff6b35] font-bold text-lg">$1,450</p>
                 </div>
                 <p className="text-gray-600 mb-4">Step back in time in Japan's former capital with its thousands of classical Buddhist temples, gardens, and traditional wooden houses.</p>
-                <Button className="w-full bg-[#3a55e7] hover:bg-[#2b3fbb]">View Details</Button>
+                <Button className="w-full bg-gradient-to-r from-[#ff6b35] to-orange-500 hover:from-orange-500 hover:to-[#ff6b35] text-white font-semibold rounded-xl py-2.5 shadow-md hover:shadow-lg transform transition-all duration-300 hover:scale-[1.02]">
+                  <Link href="/destinations/kyoto" className="flex items-center justify-center">
+                    <Globe className="mr-2 h-4 w-4" /> Explore Kyoto
+                  </Link>
+                </Button>
               </div>
             </div>
           </div>
@@ -335,49 +350,64 @@ export default function LightLandingPage() {
       </section>
       
       {/* AI Features */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-6">
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1488085061387-422e29b40080?ixlib=rb-1.2.1&auto=format&fit=crop&w=1489&q=80')] bg-cover bg-center opacity-5"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-gray-50/90"></div>
+        
+        <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">How JET AI Makes Travel Better</h2>
-            <p className="text-gray-600 max-w-3xl mx-auto">Our artificial intelligence technology analyzes millions of data points to create personalized travel experiences just for you.</p>
+            <div className="inline-flex items-center px-4 py-1 bg-[#ff6b35]/10 text-[#ff6b35] rounded-full text-sm font-semibold mb-3">
+              <Sparkles className="h-3.5 w-3.5 mr-1.5" /> 
+              AI-POWERED EXPERIENCES
+            </div>
+            <h2 className="text-4xl font-bold mb-5 font-display">Smart Travel Technology</h2>
+            <p className="text-gray-600 max-w-3xl mx-auto text-lg">JET AI combines cutting-edge artificial intelligence with deep travel expertise to create personalized adventures tailored just for you.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Feature 1 */}
-            <div className="bg-white p-6 rounded-lg text-center shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-[#ebeffe] rounded-full text-[#3a55e7]">
-                <Sparkles className="h-8 w-8" />
+            <div className="bg-white p-8 rounded-2xl text-center shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#ff6b35]/20 group">
+              <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center bg-[#ff6b35]/10 rounded-2xl text-[#ff6b35] transform transition-transform group-hover:scale-110 duration-300">
+                <Brain className="h-10 w-10" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Smart Recommendations</h3>
-              <p className="text-gray-600">Get personalized destination suggestions based on your preferences, budget, and travel style.</p>
+              <h3 className="text-xl font-bold mb-3 group-hover:text-[#ff6b35] transition-colors">Smart Recommendations</h3>
+              <p className="text-gray-600">Personalized destination suggestions based on your unique preferences, budget, and travel style.</p>
             </div>
             
             {/* Feature 2 */}
-            <div className="bg-white p-6 rounded-lg text-center shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-[#ebeffe] rounded-full text-[#3a55e7]">
-                <Compass className="h-8 w-8" />
+            <div className="bg-white p-8 rounded-2xl text-center shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#ff6b35]/20 group">
+              <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center bg-[#ff6b35]/10 rounded-2xl text-[#ff6b35] transform transition-transform group-hover:scale-110 duration-300">
+                <MapIcon className="h-10 w-10" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Itinerary Generation</h3>
-              <p className="text-gray-600">Let our AI create the perfect day-by-day travel plan optimized for your interests and time.</p>
+              <h3 className="text-xl font-bold mb-3 group-hover:text-[#ff6b35] transition-colors">Dynamic Itineraries</h3>
+              <p className="text-gray-600">Custom travel plans that adapt to your interests, available time, and unexpected opportunities along the way.</p>
             </div>
             
             {/* Feature 3 */}
-            <div className="bg-white p-6 rounded-lg text-center shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-[#ebeffe] rounded-full text-[#3a55e7]">
-                <Globe className="h-8 w-8" />
+            <div className="bg-white p-8 rounded-2xl text-center shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#ff6b35]/20 group">
+              <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center bg-[#ff6b35]/10 rounded-2xl text-[#ff6b35] transform transition-transform group-hover:scale-110 duration-300">
+                <Languages className="h-10 w-10" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Language Translation</h3>
-              <p className="text-gray-600">Break down language barriers with our real-time translation features powered by advanced AI.</p>
+              <h3 className="text-xl font-bold mb-3 group-hover:text-[#ff6b35] transition-colors">Universal Translator</h3>
+              <p className="text-gray-600">Break down language barriers with real-time translation in over 100 languages for smooth global communication.</p>
             </div>
             
             {/* Feature 4 */}
-            <div className="bg-white p-6 rounded-lg text-center shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-[#ebeffe] rounded-full text-[#3a55e7]">
-                <Plane className="h-8 w-8" />
+            <div className="bg-white p-8 rounded-2xl text-center shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#ff6b35]/20 group">
+              <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center bg-[#ff6b35]/10 rounded-2xl text-[#ff6b35] transform transition-transform group-hover:scale-110 duration-300">
+                <DollarSign className="h-10 w-10" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Flight & Hotel Deals</h3>
-              <p className="text-gray-600">Our AI constantly scans for the best travel deals to save you money on your next adventure.</p>
+              <h3 className="text-xl font-bold mb-3 group-hover:text-[#ff6b35] transition-colors">Smart Deals Finder</h3>
+              <p className="text-gray-600">Our AI continuously searches for the best flight, hotel, and experience deals to maximize your travel budget.</p>
             </div>
+          </div>
+
+          <div className="mt-16 text-center">
+            <Button className="bg-gradient-to-r from-[#ff6b35] to-orange-500 hover:from-orange-500 hover:to-[#ff6b35] text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <Link href="/chat" className="flex items-center">
+                <MessageCircle className="mr-2 h-5 w-5" /> Try JET AI Assistant Now
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
