@@ -197,12 +197,21 @@ export default function Destinations() {
       </div>
       
       {/* Filters */}
-      <div className="bg-white border-b py-6">
+      <div className="bg-white border-b py-8 backdrop-blur-sm bg-opacity-90">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mb-6">
+            <h2 className="text-center font-display text-2xl font-bold text-gray-800 mb-2">Customize Your Adventure</h2>
+            <p className="text-center text-gray-600 max-w-2xl mx-auto">Use these filters to discover the perfect destination for your next adventure</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Continent Filter */}
-            <div>
-              <h3 className="font-accent font-semibold mb-3">Continent</h3>
+            <div className="bg-gradient-to-br from-[#ff6b35]/5 to-transparent p-5 rounded-xl">
+              <h3 className="font-accent font-bold mb-3 flex items-center text-gray-800">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#ff6b35]" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.083 9h1.946c.089-1.546.383-2.97.837-4.118A6.004 6.004 0 004.083 9zM10 2a8 8 0 100 16 8 8 0 000-16zm0 2c-.076 0-.232.032-.465.262-.238.234-.497.623-.737 1.182-.389.907-.673 2.142-.766 3.556h3.936c-.093-1.414-.377-2.649-.766-3.556-.24-.56-.5-.948-.737-1.182C10.232 4.032 10.076 4 10 4zm3.971 5c-.089-1.546-.383-2.97-.837-4.118A6.004 6.004 0 0115.917 9h-1.946zm-2.003 2H8.032c.093 1.414.377 2.649.766 3.556.24.56.5.948.737 1.182.233.23.389.262.465.262.076 0 .232-.032.465-.262.238-.234.498-.623.737-1.182.389-.907.673-2.142.766-3.556zm1.166 4.118c.454-1.147.748-2.572.837-4.118h1.946a6.004 6.004 0 01-2.783 4.118zm-6.268 0C6.412 13.97 6.118 12.546 6.03 11H4.083a6.004 6.004 0 002.783 4.118z" clipRule="evenodd" />
+                </svg>
+                Continent
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {continents.map((continent) => (
                   <button 
@@ -221,8 +230,13 @@ export default function Destinations() {
             </div>
             
             {/* Climate Filter */}
-            <div>
-              <h3 className="font-accent font-semibold mb-3">Climate</h3>
+            <div className="bg-gradient-to-br from-yellow-500/5 to-transparent p-5 rounded-xl">
+              <h3 className="font-accent font-bold mb-3 flex items-center text-gray-800">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 2c1.105 0 2 .895 2 2s-.895 2-2 2-2-.895-2-2 .895-2 2-2zM6 9a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4zm-4 4a2 2 0 100 4 2 2 0 000-4z" />
+                </svg>
+                Climate
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {climates.map((climate) => (
                   <button 
@@ -241,8 +255,13 @@ export default function Destinations() {
             </div>
             
             {/* Category Filter */}
-            <div>
-              <h3 className="font-accent font-semibold mb-3">Category</h3>
+            <div className="bg-gradient-to-br from-emerald-500/5 to-transparent p-5 rounded-xl">
+              <h3 className="font-accent font-bold mb-3 flex items-center text-gray-800">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                </svg>
+                Category
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {categories.map((category) => (
                   <button 
@@ -264,17 +283,29 @@ export default function Destinations() {
       </div>
       
       {/* Destinations Grid */}
-      <section className="py-16 bg-light">
+      <section className="py-16 bg-gradient-to-b from-white to-yellow-50">
         <div className="container mx-auto px-4">
           {filteredDestinations.length > 0 ? (
             <>
-              <div className="mb-8">
-                <h2 className="font-display text-2xl font-bold text-dark">
-                  {filteredDestinations.length} Destinations Found
-                </h2>
+              <div className="mb-10 flex items-center justify-between">
+                <div>
+                  <span className="inline-block bg-[#ff6b35]/10 text-[#ff6b35] text-sm font-bold px-3 py-1 rounded-full mb-2">Discover</span>
+                  <h2 className="font-display text-3xl font-extrabold text-gray-800 flex items-center">
+                    {filteredDestinations.length} Amazing Destinations
+                    <span className="ml-2 relative inline-flex">
+                      <span className="animate-ping absolute h-3 w-3 rounded-full bg-yellow-400 opacity-75"></span>
+                      <span className="relative rounded-full h-3 w-3 bg-yellow-500"></span>
+                    </span>
+                  </h2>
+                </div>
+                <div className="hidden md:block">
+                  <span className="text-gray-500 text-sm">
+                    <span className="text-[#ff6b35] font-semibold">Pro tip:</span> Click on any destination for detailed adventures!
+                  </span>
+                </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {filteredDestinations.map((destination) => (
                   <DestinationCard 
                     key={destination.id} 
@@ -289,12 +320,14 @@ export default function Destinations() {
               </div>
             </>
           ) : (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-                <i className="fas fa-search text-gray-400 text-2xl"></i>
+            <div className="text-center py-16 px-4 md:px-12 bg-white rounded-2xl shadow-sm border border-gray-100 max-w-3xl mx-auto">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-yellow-100 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
               </div>
-              <h3 className="font-display text-xl font-semibold mb-2">No destinations found</h3>
-              <p className="text-dark/70 mb-6">Try adjusting your search criteria or explore our top destinations.</p>
+              <h3 className="font-display text-2xl font-bold mb-3 text-gray-800">Adventure Not Found!</h3>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg">Your dream destination might be hiding behind different filters. Try adjusting your search criteria or explore our trending adventures.</p>
               <button 
                 onClick={() => {
                   setSelectedContinent('All');
