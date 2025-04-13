@@ -172,7 +172,7 @@ export default function Destinations() {
   return (
     <>
       {/* Page Header */}
-      <div className="bg-primary/10 py-12">
+      <div className="bg-[#3a55e7]/10 py-12">
         <div className="container mx-auto px-4">
           <h1 className="font-display text-4xl font-bold text-dark text-center mb-6">Explore Destinations</h1>
           <p className="text-lg text-dark/70 text-center max-w-3xl mx-auto mb-8">
@@ -210,7 +210,7 @@ export default function Destinations() {
                     onClick={() => setSelectedContinent(continent)}
                     className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
                       selectedContinent === continent 
-                        ? 'bg-primary text-white' 
+                        ? 'bg-[#3a55e7] hover:bg-[#2b3fbb] text-white' 
                         : 'bg-gray-100 text-dark hover:bg-gray-200'
                     }`}
                   >
