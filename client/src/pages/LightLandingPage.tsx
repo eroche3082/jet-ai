@@ -979,8 +979,8 @@ export default function LightLandingPage() {
         </div>
       </footer>
       
-      {/* AI Assistant Button (Fixed position) - Moved to bottom left */}
-      <div className="fixed bottom-6 left-6 z-50 group">
+      {/* AI Assistant Button (Fixed position) - Positioned at bottom right */}
+      <div className="fixed bottom-6 right-6 z-50 group">
         <div className="absolute inset-0 rounded-full bg-[#4a89dc] animate-ping opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
         <button 
           onClick={() => {
