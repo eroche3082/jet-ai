@@ -1,11 +1,19 @@
 import OpenAI from 'openai';
 
-// Initialize OpenAI client
+// Initialize the OpenAI client
 const apiKey = process.env.OPENAI_API_KEY;
-const openaiClient = apiKey ? new OpenAI({ apiKey }) : null;
+let openaiClient: OpenAI | null = null;
 
-// The newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const MODEL = "gpt-4o";
+try {
+  if (apiKey) {
+    openaiClient = new OpenAI({ apiKey });
+    console.log("OpenAI GPT initialized successfully!");
+  } else {
+    console.warn("OPENAI_API_KEY not set. OpenAI GPT functionality will be limited.");
+  }
+} catch (error) {
+  console.error("Error initializing OpenAI GPT:", error);
+}
 
 /**
  * Generates content using OpenAI's GPT-4o model
@@ -15,17 +23,17 @@ const MODEL = "gpt-4o";
 export async function generateContentWithGPT4(prompt: string): Promise<string | null> {
   try {
     if (!openaiClient) {
-      console.warn("OpenAI API key not configured");
+      console.warn("OpenAI GPT not initialized");
       return null;
     }
     
-    const completion = await openaiClient.chat.completions.create({
-      model: MODEL,
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 1024,
+    const response = await openaiClient.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 1024
     });
     
-    return completion.choices[0]?.message?.content || null;
+    return response.choices[0].message.content;
   } catch (error) {
     console.error("Error generating content with GPT-4o:", error);
     return null;
@@ -44,25 +52,25 @@ export async function generateStructuredContentWithGPT4(
 ): Promise<any | null> {
   try {
     if (!openaiClient) {
-      console.warn("OpenAI API key not configured");
+      console.warn("OpenAI GPT not initialized");
       return null;
     }
     
-    const completion = await openaiClient.chat.completions.create({
-      model: MODEL,
+    const response = await openaiClient.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: prompt }
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `${prompt}\n\nRespond with valid JSON only, no additional text.` }
       ],
-      max_tokens: 1024,
-      response_format: { type: "json_object" }
+      response_format: { type: "json_object" },
+      max_tokens: 1024
     });
     
-    const responseText = completion.choices[0]?.message?.content || null;
+    const content = response.choices[0].message.content;
     
-    if (responseText) {
+    if (content) {
       try {
-        return JSON.parse(responseText);
+        return JSON.parse(content);
       } catch (parseError) {
         console.error("Failed to parse structured content:", parseError);
         return null;

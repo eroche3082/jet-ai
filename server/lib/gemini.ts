@@ -1,8 +1,21 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 
-// Initialize the Google Generative AI client
+// Initialize the Gemini client
 const apiKey = process.env.GEMINI_API_KEY;
-const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+let geminiClient: GoogleGenerativeAI | null = null;
+let generativeModel: GenerativeModel | null = null;
+
+try {
+  if (apiKey) {
+    geminiClient = new GoogleGenerativeAI(apiKey);
+    generativeModel = geminiClient.getGenerativeModel({ model: "gemini-1.5-flash" });
+    console.log("Google Gemini AI initialized successfully!");
+  } else {
+    console.warn("GEMINI_API_KEY not set. Gemini AI functionality will be limited.");
+  }
+} catch (error) {
+  console.error("Error initializing Gemini AI:", error);
+}
 
 /**
  * Generates content using Google's Gemini model
@@ -11,19 +24,14 @@ const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
  */
 export async function generateContent(prompt: string): Promise<string | null> {
   try {
-    if (!genAI) {
-      console.warn("Gemini API key not configured");
+    if (!geminiClient || !generativeModel) {
+      console.warn("Gemini AI not initialized");
       return null;
     }
     
-    // For text-only input, use the gemini-1.5-flash model
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-    
-    return text;
+    const result = await generativeModel.generateContent(prompt);
+    const response = result.response;
+    return response.text();
   } catch (error) {
     console.error("Error generating content with Gemini:", error);
     return null;
@@ -31,29 +39,39 @@ export async function generateContent(prompt: string): Promise<string | null> {
 }
 
 /**
- * Generates content with a structured output format
+ * Generates structured content using Google's Gemini model
  * @param prompt The prompt to send to the model
  * @returns JSON structured response or null if generation fails
  */
-export async function generateStructuredContent(prompt: string): Promise<any | null> {
+export async function generateStructuredContent(
+  prompt: string,
+  systemPrompt: string = "You are a helpful assistant. Please respond with valid JSON."
+): Promise<any | null> {
   try {
-    const text = await generateContent(prompt);
-    if (!text) return null;
-    
-    // Try to parse JSON from the response
-    try {
-      // First, try to extract JSON if it's wrapped in markdown code blocks
-      const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-      if (jsonMatch && jsonMatch[1]) {
-        return JSON.parse(jsonMatch[1]);
-      }
-      
-      // If not in code blocks, try to parse the entire text as JSON
-      return JSON.parse(text);
-    } catch (parseError) {
-      console.error("Failed to parse structured content:", parseError);
+    if (!geminiClient || !generativeModel) {
+      console.warn("Gemini AI not initialized");
       return null;
     }
+    
+    const enhancedPrompt = `${systemPrompt}\n\n${prompt}\n\nRespond with valid JSON only, no additional text.`;
+    const result = await generativeModel.generateContent(enhancedPrompt);
+    const responseText = result.response.text();
+    
+    if (responseText) {
+      try {
+        // Try to extract JSON from the response
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          return JSON.parse(jsonMatch[0]);
+        }
+        return JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("Failed to parse structured content:", parseError);
+        return null;
+      }
+    }
+    
+    return null;
   } catch (error) {
     console.error("Error generating structured content with Gemini:", error);
     return null;

@@ -1,11 +1,21 @@
 import Anthropic from '@anthropic-ai/sdk';
 
-// Initialize Anthropic client
+// Initialize the Claude client
 const apiKey = process.env.ANTHROPIC_API_KEY;
-const anthropicClient = apiKey ? new Anthropic({ apiKey }) : null;
+let anthropicClient: Anthropic | null = null;
 
-// The newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
-const MODEL = "claude-3-7-sonnet-20250219";
+try {
+  if (apiKey) {
+    anthropicClient = new Anthropic({
+      apiKey
+    });
+    console.log("Anthropic Claude AI initialized successfully!");
+  } else {
+    console.warn("ANTHROPIC_API_KEY not set. Claude AI functionality will be limited.");
+  }
+} catch (error) {
+  console.error("Error initializing Claude AI:", error);
+}
 
 /**
  * Generates content using Anthropic's Claude model
@@ -15,21 +25,17 @@ const MODEL = "claude-3-7-sonnet-20250219";
 export async function generateContentWithClaude(prompt: string): Promise<string | null> {
   try {
     if (!anthropicClient) {
-      console.warn("Anthropic API key not configured");
+      console.warn("Claude AI not initialized");
       return null;
     }
     
     const message = await anthropicClient.messages.create({
-      model: MODEL,
+      model: "claude-3-7-sonnet-20250219", // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
       max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }],
+      messages: [{ role: 'user', content: prompt }]
     });
     
-    if (message.content && message.content.length > 0) {
-      return message.content[0].text;
-    }
-    
-    return null;
+    return message.content[0].text;
   } catch (error) {
     console.error("Error generating content with Claude:", error);
     return null;
@@ -37,9 +43,9 @@ export async function generateContentWithClaude(prompt: string): Promise<string 
 }
 
 /**
- * Generates structured content using Anthropic's Claude model
+ * Generates structured JSON content using Anthropic's Claude model
  * @param prompt The prompt to send to the model
- * @param systemPrompt Optional system prompt to guide Claude's response
+ * @param systemPrompt Optional system prompt to guide the model's response
  * @returns JSON structured response or null if generation fails
  */
 export async function generateStructuredContentWithClaude(
@@ -48,29 +54,26 @@ export async function generateStructuredContentWithClaude(
 ): Promise<any | null> {
   try {
     if (!anthropicClient) {
-      console.warn("Anthropic API key not configured");
+      console.warn("Claude AI not initialized");
       return null;
     }
     
     const message = await anthropicClient.messages.create({
-      model: MODEL,
+      model: "claude-3-7-sonnet-20250219", // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
       max_tokens: 1024,
       system: systemPrompt,
-      messages: [{ role: 'user', content: prompt }],
+      messages: [{ role: 'user', content: `${prompt}\n\nRespond with valid JSON only, no additional text.` }]
     });
     
-    if (message.content && message.content.length > 0) {
-      const responseText = message.content[0].text;
-      
-      // Try to parse JSON from the response
+    const responseText = message.content[0].text;
+    
+    if (responseText) {
       try {
-        // First, try to extract JSON if it's wrapped in markdown code blocks
-        const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-        if (jsonMatch && jsonMatch[1]) {
-          return JSON.parse(jsonMatch[1]);
+        // Try to extract JSON from the response
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          return JSON.parse(jsonMatch[0]);
         }
-        
-        // If not in code blocks, try to parse the entire text as JSON
         return JSON.parse(responseText);
       } catch (parseError) {
         console.error("Failed to parse structured content:", parseError);

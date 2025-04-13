@@ -109,6 +109,7 @@ export class MemStorage implements IStorage {
   private itineraries: Map<number, any>;
   private socialPosts: Map<string, SocialPost>;
   private communityPosts: Map<string, any>;
+  private socialPostId: number;
   currentId: number;
 
   constructor() {
@@ -122,6 +123,82 @@ export class MemStorage implements IStorage {
     this.socialPosts = new Map();
     this.communityPosts = new Map();
     this.currentId = 1;
+    this.socialPostId = 1;
+    
+    // Initialize with demo social posts
+    const demoPostId1 = `post_${Date.now()}_1`;
+    const demoPostId2 = `post_${Date.now()}_2`;
+    const demoPostId3 = `post_${Date.now()}_3`;
+    
+    this.socialPosts.set(demoPostId1, {
+      id: demoPostId1,
+      userId: 1,
+      content: "Just arrived in Bali for a week of adventure and relaxation! The sunset view from my villa is absolutely breathtaking. Can't wait to explore the beaches and temples tomorrow. #TravelWithJetAI #BaliAdventure",
+      hashtags: ["#TravelWithJetAI", "#BaliAdventure", "#IslandLife", "#Paradise"],
+      mediaUrls: ["https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&q=80&w=2938&ixlib=rb-4.0.3"],
+      platform: "instagram",
+      postType: "image",
+      status: "published",
+      publishedAt: new Date().toISOString(),
+      likes: 124,
+      comments: 18,
+      shares: 5,
+      analytics: {
+        impressions: 1450,
+        engagement: 147,
+        clicks: 36
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    
+    this.socialPosts.set(demoPostId2, {
+      id: demoPostId2,
+      userId: 1,
+      content: "Planning my trip to Kyoto next month during cherry blossom season. Any recommendations for must-visit temples or hidden gems? #TravelPlanning #Kyoto #JapanTravel",
+      hashtags: ["#TravelPlanning", "#Kyoto", "#JapanTravel", "#CherryBlossoms"],
+      mediaUrls: [],
+      platform: "twitter",
+      postType: "text",
+      status: "published",
+      publishedAt: new Date().toISOString(),
+      likes: 42,
+      comments: 26,
+      shares: 3,
+      analytics: {
+        impressions: 876,
+        engagement: 71,
+        clicks: 12
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    
+    // A scheduled post for future publication
+    const scheduledDate = new Date();
+    scheduledDate.setDate(scheduledDate.getDate() + 7); // One week from now
+    
+    this.socialPosts.set(demoPostId3, {
+      id: demoPostId3,
+      userId: 1,
+      content: "Excited to announce I'll be starting a 10-day road trip through the scenic coast of California next month! Follow along for stunning views and travel tips. #CaliforniaDreaming #RoadTrip #TravelWithJetAI",
+      hashtags: ["#CaliforniaDreaming", "#RoadTrip", "#TravelWithJetAI", "#CoastalViews"],
+      mediaUrls: ["https://images.unsplash.com/photo-1505245208761-ba872912fac0?auto=format&fit=crop&q=80&w=2940&ixlib=rb-4.0.3"],
+      platform: "instagram",
+      postType: "image",
+      status: "scheduled",
+      scheduledFor: scheduledDate.toISOString(),
+      likes: 0,
+      comments: 0,
+      shares: 0,
+      analytics: {
+        impressions: 0,
+        engagement: 0,
+        clicks: 0
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
     
     // Initialize with a demo user
     this.users.set(1, {
@@ -881,6 +958,65 @@ export class MemStorage implements IStorage {
     }
     
     return posts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  // Social Media Post Methods
+  async getSocialPostsByUserId(userId: number): Promise<SocialPost[]> {
+    const posts: SocialPost[] = [];
+    
+    for (const post of this.socialPosts.values()) {
+      if (post.userId === userId) {
+        posts.push(post);
+      }
+    }
+    
+    return posts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getSocialPostById(id: string): Promise<SocialPost | undefined> {
+    return this.socialPosts.get(id);
+  }
+
+  async createSocialPost(post: InsertSocialPost): Promise<SocialPost> {
+    const id = `post_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const now = new Date().toISOString();
+    
+    const newPost: SocialPost = {
+      id,
+      ...post,
+      likes: 0,
+      comments: 0,
+      shares: 0,
+      analytics: {
+        impressions: 0,
+        engagement: 0,
+        clicks: 0
+      },
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    this.socialPosts.set(id, newPost);
+    return newPost;
+  }
+
+  async updateSocialPost(id: string, data: Partial<SocialPost>): Promise<SocialPost | undefined> {
+    const post = this.socialPosts.get(id);
+    if (!post) return undefined;
+    
+    const updatedPost = { 
+      ...post, 
+      ...data, 
+      updatedAt: new Date().toISOString() 
+    };
+    
+    this.socialPosts.set(id, updatedPost);
+    return updatedPost;
+  }
+
+  async deleteSocialPost(id: string): Promise<boolean> {
+    if (!this.socialPosts.has(id)) return false;
+    return this.socialPosts.delete(id);
   }
 }
 
