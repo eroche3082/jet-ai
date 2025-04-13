@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { saveAs } from 'file-saver';
 import { Share2, Download, Mail, Copy, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { sendEmail } from '@/lib/emailClient';
 
 interface AccessCodeQRGeneratorProps {
   accessCode: string;
@@ -21,7 +20,7 @@ export default function AccessCodeQRGenerator({ accessCode, userName, email }: A
   const { toast } = useToast();
 
   // The base URL for the dashboard with the access code
-  const dashboardUrl = `${window.location.origin}/dashboard?code=${accessCode}`;
+  const dashboardUrl = `${window.location.origin}/access-dashboard?code=${accessCode}`;
 
   // Generate QR code on component mount
   useEffect(() => {

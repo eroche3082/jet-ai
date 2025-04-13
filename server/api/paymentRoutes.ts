@@ -3,9 +3,9 @@ import Stripe from 'stripe';
 
 const router = Router();
 
-// Initialize Stripe
+// Initialize Stripe with the latest API version
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2023-10-16',
+  apiVersion: '2025-03-31.basil',
 });
 
 /**
@@ -115,9 +115,9 @@ router.post('/webhook', async (req, res) => {
       sig,
       process.env.STRIPE_WEBHOOK_SECRET as string
     );
-  } catch (err) {
+  } catch (err: unknown) {
     console.error('Webhook signature verification failed:', err);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    return res.status(400).send(`Webhook Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
   }
   
   // Handle the event
