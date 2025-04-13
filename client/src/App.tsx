@@ -9,6 +9,7 @@ import Dashboard from "@/pages/Dashboard";
 import Checkout from "@/pages/Checkout";
 import Membership from "@/pages/Membership";
 import PricingPlans from "@/pages/PricingPlans";
+import TravelCommunityPage from "@/pages/TravelCommunityPage";
 import NotFound from "@/pages/not-found";
 import VertexAIPage from "@/pages/VertexAIPage";
 import GeminiTestPage from "@/pages/GeminiTestPage";
@@ -209,6 +210,7 @@ function App() {
         <Route path="/social-media-hub" component={SocialMediaHubPage} />
         <Route path="/rewards" component={RewardsPage} />
         <Route path="/access-dashboard" component={AccessCodeDashboard} />
+        <Route path="/travel-community" component={TravelCommunityPage} />
         
         {/* Partner/Affiliate routes */}
         <Route path="/partner/dashboard" component={PartnerDashboard} />

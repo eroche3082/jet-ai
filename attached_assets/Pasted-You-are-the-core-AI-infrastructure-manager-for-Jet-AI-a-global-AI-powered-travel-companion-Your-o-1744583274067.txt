@@ -1,0 +1,122 @@
+You are the core AI infrastructure manager for Jet AI – a global AI-powered travel companion. Your objective is to complete the full homepage implementation, community interaction system, and content/media integration.
+
+---
+
+🗺️ 1. TRAVEL COMMUNITY MODULE
+Path: `/travel-community`
+
+• Create a new full-page experience called “Travel Community” under the main navigation
+• Include a masonry-style content feed that displays:
+   - Recent traveler stories (text, photo, video)
+   - Traveler name, country, and journey tag (e.g., #JET-LUXURY-3521)
+   - Like, comment, and share buttons
+   - Tags for filtering (e.g., #family, #digitalnomad, #honeymoon)
+• Include a button: `Start My Travel Story` which:
+   - Opens a modal to upload images or short video
+   - Lets user write a brief description of their trip
+   - Auto-generates a QR code and unique journey code
+• All media should be saved securely to Firebase Storage with metadata
+
+---
+
+📹 2. MEDIA LIBRARY + VIDEO CONTENT
+• Under `/features`, add a section called `Destination Media Library`
+• Pull curated images & videos (you can use Unsplash API, Pexels, or custom Firebase assets)
+• Allow users to click `Preview Highlights` → plays a destination-specific travel video
+• Suggested categories:
+   - Cultural Tours
+   - Romantic Escapes
+   - Adventure Travel
+   - Food & Cuisine
+   - Local Stories
+
+---
+
+🌍 3. EXPAND TO 20+ FEATURES
+• Update homepage “Features” block to include:
+   1. AI Itinerary Generator
+   2. QR-Activated Journey Codes
+   3. Multilingual Travel Assistant
+   4. Live Weather + Packing Suggestions
+   5. Real-time Flight Search
+   6. Hotel Recommendations
+   7. AI Concierge via Gemini Flash
+   8. Interactive Travel Maps
+   9. Travel Insurance Integration
+   10. Trip Budget Tracker
+   11. Visa Requirement Checker
+   12. Currency Converter (live)
+   13. Personalized Travel Journal
+   14. Group Travel Planner
+   15. 360º Destination Views
+   16. Cultural Etiquette Guide
+   17. Food Spot Recommender
+   18. Premium Support Chat
+   19. Social Media Content Creator
+   20. Travel Points + Gamification
+
+---
+
+💡 4. HOMEPAGE UI FIXES
+• Add subheadline under hero: “Your AI-Powered Companion to Explore the World”
+• Replace "Sign In" → "Log Out" once user is authenticated
+• Fix hover color on tabs (e.g. `hover:text-yellow-500` or white with glow)
+• Ensure all buttons: “Explore”, “Find Trip”, “Subscribe”, “Watch Demo” are working and linked
+
+---
+
+📦 5. SOCIAL POST GENERATOR (AFTER TRIP)
+• After a user completes a journey (via code), auto-generate:
+   - Recap post with destination photo
+   - Emoji travel summary (📍Visited X, 💸 Spent Y, ⏳ Days Z)
+   - Suggested caption
+   - One-click “Post to Instagram/TikTok” using connected API (placeholders if needed)
+• Store post content in Firebase under `/user/social-posts`
+
+---
+
+📬 6. EMAIL & NEWSLETTER INTEGRATION
+• At the footer, add a `Subscribe to Travel Insights` newsletter section
+• Connect to SendGrid
+• After onboarding, send:
+   - Confirmation email with user’s code and travel guide
+   - Weekly recommendations (3 destinations + blog links)
+• Save all email leads into Firestore or Firebase Realtime DB
+
+---
+
+🔗 7. API/FEATURE CHECK
+✅ Weather API
+✅ Hotel API
+✅ Stripe payments
+✅ Flight search (add retry logic for errors)
+✅ Gemini Flash + Google Translate
+❌ Currency converter → Fix fallback logic or switch provider
+⚠️ External travel providers → Add retry handler
+
+---
+
+🧠 8. AI/AR INTEGRATIONS
+• On `/dashboard`, embed a section:
+   - “Relive Your Journey in AR” → generates map with pins
+   - “Watch Your Trip Timeline” → uses AI to build a mini travel vlog from uploaded content
+
+---
+
+📊 9. DASHBOARD ENHANCEMENTS
+- Create a “My Travel Feed” tab to show personal trips with media
+- Allow uploading photos or videos post-trip
+- Display number of trips, badges unlocked, and QR journey codes
+- Reward milestones: visited 5 countries → unlock Jet Explorer badge
+
+---
+
+✅ Final Requirements:
+• Entire homepage in English
+• Responsive and mobile-ready
+• ChatBot at bottom right, integrated with onboarding
+• All links and CTAs must function correctly
+• Use Firebase Storage and Firestore for storing user media/posts
+• Deploy updates and confirm status with a final report checklist
+
+Begin implementation and provide confirmation screenshots and status report upon completion.
