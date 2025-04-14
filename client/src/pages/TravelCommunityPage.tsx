@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
-import { MapPinIcon, HeartIcon, MessageSquareIcon, ShareIcon, GlobeIcon, UserIcon, Loader2 } from 'lucide-react';
+import { MapPinIcon, HeartIcon, MessageSquareIcon, ShareIcon, GlobeIcon, UserIcon, Loader2, RefreshCwIcon } from 'lucide-react';
 import { 
   Card, 
   CardContent, 
@@ -350,9 +350,9 @@ export default function TravelCommunityPage() {
   return (
     <div className="container mx-auto py-8 max-w-6xl">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 text-center">Global Travel Community</h1>
+        <h1 className="text-3xl font-bold mb-2 text-center">JET AI Travel Community</h1>
         <p className="text-center text-muted-foreground mb-6">
-          Connect with travelers worldwide, share experiences, and discover hidden gems
+          Connect with AI-powered travelers worldwide, share JET AI enhanced experiences, and discover hidden gems
         </p>
         
         <div className="flex items-center justify-center gap-4 mb-6">
@@ -362,8 +362,30 @@ export default function TravelCommunityPage() {
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
-          <Button className="bg-[#4a89dc] hover:bg-[#3a79cc]">
-            Search
+          <Button 
+            className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white font-medium"
+            onClick={() => {
+              if (searchTerm.trim()) {
+                toast({
+                  title: "AI-Powered Search",
+                  description: `JET AI is analyzing travel data for "${searchTerm}"`,
+                });
+                // Simulate search delay
+                setTimeout(() => {
+                  setPosts(INITIAL_POSTS.filter(post => 
+                    post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    post.location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                    post.author.name.toLowerCase().includes(searchTerm.toLowerCase())
+                  ));
+                }, 1500);
+              }
+            }}
+          >
+            <svg className="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            Search with JET AI
           </Button>
         </div>
       </header>
@@ -376,17 +398,38 @@ export default function TravelCommunityPage() {
               <CardTitle className="text-lg">Explore</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 pb-4">
-              <Button variant="ghost" className="w-full justify-start text-left">
-                <GlobeIcon className="mr-2 h-4 w-4" />
-                <span>Trending Destinations</span>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-left hover:bg-[#4a89dc]/10"
+                onClick={() => toast({
+                  title: "JET AI Destinations",
+                  description: "Discovering trending destinations with real-time data!",
+                })}
+              >
+                <GlobeIcon className="mr-2 h-4 w-4 text-[#4a89dc]" />
+                <span>JET AI Destinations</span>
               </Button>
-              <Button variant="ghost" className="w-full justify-start text-left">
-                <HeartIcon className="mr-2 h-4 w-4" />
-                <span>Popular Experiences</span>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-left hover:bg-[#4a89dc]/10"
+                onClick={() => toast({
+                  title: "AI-Enhanced Experiences",
+                  description: "Discover trips enhanced by JET AI's smart recommendations!",
+                })}
+              >
+                <HeartIcon className="mr-2 h-4 w-4 text-[#4a89dc]" />
+                <span>AI-Enhanced Experiences</span>
               </Button>
-              <Button variant="ghost" className="w-full justify-start text-left">
-                <UserIcon className="mr-2 h-4 w-4" />
-                <span>Featured Travelers</span>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-left hover:bg-[#4a89dc]/10"
+                onClick={() => toast({
+                  title: "JET AI Travel Experts",
+                  description: "Connect with travelers who use JET AI to enhance their journeys!",
+                })}
+              >
+                <UserIcon className="mr-2 h-4 w-4 text-[#4a89dc]" />
+                <span>JET AI Travel Experts</span>
               </Button>
               
               <Separator className="my-2" />
@@ -394,7 +437,7 @@ export default function TravelCommunityPage() {
               <div className="pt-2">
                 <h3 className="text-sm font-medium mb-2">Popular Tags</h3>
                 <div className="flex flex-wrap gap-1">
-                  {['Adventure', 'Foodie', 'Culture', 'Beach', 'City', 'Mountains', 'Budget', 'Luxury'].map(tag => (
+                  {['JetAI', 'TravelTech', 'Translation', 'Foodie', 'Culture', 'Adventure', 'AIPowered', 'JetTravel'].map(tag => (
                     <Badge key={tag} variant="secondary" className="text-xs cursor-pointer">
                       #{tag}
                     </Badge>
@@ -445,7 +488,50 @@ export default function TravelCommunityPage() {
           </div>
           
           <div className="mt-8 flex justify-center">
-            <Button variant="outline">Load More</Button>
+            <Button 
+              variant="outline" 
+              className="border-[#4a89dc]/30 hover:bg-[#4a89dc]/10"
+              onClick={() => {
+                setIsLoading(true);
+                toast({
+                  title: "JET AI Community",
+                  description: "Discovering more AI-enhanced travel experiences...",
+                });
+                
+                // Simulate loading more posts after a delay
+                setTimeout(() => {
+                  const newStory = {
+                    id: 'jetai-' + (posts.length + 1),
+                    author: {
+                      id: 'user4',
+                      name: 'Rachel Kim',
+                      avatar: '/avatars/rachel.jpg',
+                      location: 'Seoul, South Korea'
+                    },
+                    content: "JET AI's cultural immersion feature completely transformed my trip to Morocco! It helped me learn key phrases in Arabic and Berber, explained local customs, and even guided me through a traditional tea ceremony with a local family. Such an authentic experience!",
+                    images: ['/community/morocco-market.jpg'],
+                    location: {
+                      name: 'Marrakech, Morocco',
+                      coordinates: {
+                        lat: 31.6295, 
+                        lng: -7.9811
+                      }
+                    },
+                    tags: ['JetAI', 'CulturalImmersion', 'Morocco', 'LocalExperience', 'LanguageLearning'],
+                    likes: 175,
+                    comments: 29,
+                    isLiked: false,
+                    createdAt: new Date('2025-04-09')
+                  };
+                  
+                  setPosts(prevPosts => [...prevPosts, newStory]);
+                  setIsLoading(false);
+                }, 2000);
+              }}
+            >
+              <RefreshCwIcon className="h-4 w-4 mr-2" />
+              Discover More Stories
+            </Button>
           </div>
         </div>
       </div>
