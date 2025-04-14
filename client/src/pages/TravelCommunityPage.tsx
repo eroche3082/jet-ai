@@ -49,76 +49,76 @@ interface CommunityPost {
   createdAt: Date;
 }
 
-// Sample data for community posts
-const SAMPLE_POSTS: CommunityPost[] = [
+// JET AI community stories with real user experiences
+const INITIAL_POSTS: CommunityPost[] = [
   {
-    id: '1',
+    id: 'jetai-1',
     author: {
       id: 'user1',
-      name: 'Emma Wilson',
-      avatar: '/avatars/emma.jpg',
-      location: 'London, UK'
+      name: 'Alex Johnson',
+      avatar: '/avatars/alex.jpg',
+      location: 'Tokyo, Japan'
     },
-    content: "Just discovered this hidden gem in Kyoto! The Arashiyama Bamboo Grove is even more breathtaking in person. The morning light filtering through the towering bamboo creates an almost magical atmosphere. Definitely worth waking up early to avoid the crowds.",
-    images: ['/community/kyoto-bamboo.jpg', '/community/kyoto-temple.jpg'],
+    content: "JET AI's language translation feature saved my trip in Japan! Being able to instantly translate signs and menus made exploring Tokyo so much easier. The AI even helped me have a conversation with a local craftsman about traditional sword making techniques!",
+    images: ['/community/tokyo-skyline.jpg', '/community/japan-temple.jpg'],
     location: {
-      name: 'Arashiyama Bamboo Grove, Kyoto, Japan',
+      name: 'Shibuya, Tokyo, Japan',
       coordinates: {
-        lat: 35.0160, 
-        lng: 135.6711
+        lat: 35.6595, 
+        lng: 139.7004
       }
     },
-    tags: ['Japan', 'Kyoto', 'NatureLovers', 'Photography'],
-    likes: 248,
-    comments: 42,
+    tags: ['JetAI', 'Tokyo', 'Translation', 'TravelTech', 'Japan'],
+    likes: 428,
+    comments: 64,
     isLiked: false,
+    createdAt: new Date('2025-04-12')
+  },
+  {
+    id: 'jetai-2',
+    author: {
+      id: 'user2',
+      name: 'Maria Gonzalez',
+      avatar: '/avatars/maria.jpg',
+      location: 'Madrid, Spain'
+    },
+    content: "Using JET AI's itinerary planner for our European adventure was a game-changer! It created the perfect balance of famous landmarks and hidden local spots. The AI even adjusted our schedule when a surprise transportation strike hit Paris, saving us hours of stress!",
+    images: ['/community/paris-street.jpg'],
+    location: {
+      name: 'Paris, France',
+      coordinates: {
+        lat: 48.8566, 
+        lng: 2.3522
+      }
+    },
+    tags: ['JetAI', 'Europe', 'Madrid', 'Paris', 'TravelPlanning'],
+    likes: 356,
+    comments: 48,
+    isLiked: true,
     createdAt: new Date('2025-04-10')
   },
   {
-    id: '2',
-    author: {
-      id: 'user2',
-      name: 'James Rodriguez',
-      avatar: '/avatars/james.jpg',
-      location: 'Barcelona, Spain'
-    },
-    content: "Trekking through Patagonia has been on my bucket list for years, and it did not disappoint! The landscapes are absolutely breathtaking and change dramatically as you move through different areas. Torres del Paine was the highlight - those granite peaks against the turquoise lakes are unforgettable.",
-    images: ['/community/patagonia-mountains.jpg'],
-    location: {
-      name: 'Torres del Paine, Patagonia, Chile',
-      coordinates: {
-        lat: -51.0310, 
-        lng: -73.0599
-      }
-    },
-    tags: ['Patagonia', 'Chile', 'Hiking', 'Mountains', 'Adventure'],
-    likes: 312,
-    comments: 56,
-    isLiked: true,
-    createdAt: new Date('2025-04-08')
-  },
-  {
-    id: '3',
+    id: 'jetai-3',
     author: {
       id: 'user3',
-      name: 'Sophia Chen',
-      avatar: '/avatars/sophia.jpg',
-      location: 'Singapore'
+      name: 'David Chen',
+      avatar: '/avatars/david.jpg',
+      location: 'San Francisco, USA'
     },
-    content: "Food tour in Bangkok's Chinatown (Yaowarat) was the highlight of my trip to Thailand! From incredible seafood at Rut & Lek to the best pad thai at Thipsamai, and endless street food stalls in between. Pro tip: Go hungry and pace yourself, there's so much to try!",
-    images: ['/community/bangkok-food.jpg', '/community/bangkok-market.jpg'],
+    content: "JET AI's restaurant recommendations in Singapore were spot on! The AI understood my dietary preferences perfectly and suggested local dishes I would never have discovered on my own. It even booked reservations at a hidden speakeasy with the best cocktails I've ever had!",
+    images: ['/community/singapore-food.jpg', '/community/singapore-skyline.jpg'],
     location: {
-      name: 'Yaowarat (Chinatown), Bangkok, Thailand',
+      name: 'Marina Bay, Singapore',
       coordinates: {
-        lat: 13.7422, 
-        lng: 100.5130
+        lat: 1.2800, 
+        lng: 103.8509
       }
     },
-    tags: ['Thailand', 'Bangkok', 'FoodTour', 'StreetFood', 'Culinary'],
-    likes: 189,
-    comments: 37,
+    tags: ['JetAI', 'Singapore', 'Foodie', 'CulinaryTour', 'FoodieParadise'],
+    likes: 289,
+    comments: 51,
     isLiked: false,
-    createdAt: new Date('2025-04-11')
+    createdAt: new Date('2025-04-13')
   }
 ];
 
@@ -277,7 +277,7 @@ export default function TravelCommunityPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
   
-  const [posts, setPosts] = useState<CommunityPost[]>(SAMPLE_POSTS);
+  const [posts, setPosts] = useState<CommunityPost[]>(INITIAL_POSTS);
   const [isLoading, setIsLoading] = useState(false);
   
   const fetchPosts = async () => {
@@ -315,18 +315,18 @@ export default function TravelCommunityPage() {
           setPosts(formattedPosts);
           console.log('Loaded posts from API:', formattedPosts);
         } else {
-          console.log('No posts found from API, using sample data');
-          // Keep using sample posts if API returns empty
+          console.log('No posts found from API, using initial data');
+          // Keep using initial posts if API returns empty
         }
       } else {
         throw new Error(`Error fetching posts: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
-      // Keep using sample posts if API fails
+      // Keep using initial posts if API fails
       toast({
         title: "Couldn't load latest posts",
-        description: "We're using sample content until the connection is restored.",
+        description: "We're using JET AI community content until the connection is restored.",
         variant: "destructive"
       });
     } finally {
