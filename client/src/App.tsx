@@ -38,7 +38,8 @@ import PartnerSignup from "@/pages/partner/Signup";
 import { initializePWA } from '@/lib/pwa';
 import { AuthProvider } from '@/hooks/use-auth';
 import { LanguageProvider } from '@/lib/LanguageContext';
-import LandingPage from "@/pages/LightLandingPage";
+import LandingPage from "@/pages/LandingPage";
+import LightLandingPage from "@/pages/LightLandingPage";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
 import DarkDashboardPage from "@/pages/DarkDashboardPage";
@@ -163,6 +164,7 @@ function App() {
       <Switch>
         {/* Main Routes */}
         <Route path="/" component={LandingPage} />
+        <Route path="/light" component={LandingPage} />
         <Route path="/login" component={LoginPage} />
         <Route path="/onboarding" component={OnboardingPage} />
         <Route path="/dashboard" component={DashboardPage} />
@@ -250,7 +252,7 @@ function App() {
 
   // Don't use Layout for landing page, login page, onboarding or status pages
   const shouldUseLayout = () => {
-    return !['/login', '/', '/onboarding'].includes(location) && !location.startsWith('/status/');
+    return !['/login', '/', '/light', '/onboarding'].includes(location) && !location.startsWith('/status/');
   };
 
   return (
