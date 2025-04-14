@@ -80,7 +80,11 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              <Button type="submit" className="w-full text-white" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                className="w-full bg-[#4a89dc] hover:bg-[#4a89dc]/90 text-white font-medium py-2" 
+                disabled={isLoading}
+              >
                 {isLoading ? 'Logging in...' : 'Log In'}
               </Button>
             </form>
@@ -108,28 +112,16 @@ export default function LoginPage() {
       <div 
         className="w-full md:w-1/2 bg-cover bg-center hidden md:block"
         style={{ 
-          backgroundImage: "url('https://images.unsplash.com/photo-1530521954074-e64f6810b32d?q=80&w=2070&auto=format&fit=crop')" 
+          backgroundImage: "url('https://images.unsplash.com/photo-1526434426615-1abe81efcb0b?q=80&w=2070&auto=format&fit=crop')" 
         }}
       >
-        <div className="h-full bg-primary/30 p-12 flex flex-col justify-center">
+        <div className="h-full bg-[#050b17]/70 p-12 flex flex-col justify-center">
           <div className="max-w-md text-white">
-            <h2 className="text-3xl font-bold mb-6">Unlock Your Travel Potential</h2>
+            <h2 className="text-3xl font-bold mb-6">Unlock Your Travel Potential with JET AI</h2>
             <p className="text-lg opacity-90 mb-8">
               Log in to access your AI travel assistant, saved itineraries, and personalized recommendations. 
               Your next adventure is just a few clicks away.
             </p>
-            <div className="bg-white/10 p-6 rounded-lg backdrop-blur-sm">
-              <p className="italic text-white/90">
-                "JetAI transformed how I plan my trips. The AI assistant understood exactly what I wanted and created the perfect itinerary."
-              </p>
-              <div className="mt-4 flex items-center">
-                <div className="h-10 w-10 rounded-full bg-white/30"></div>
-                <div className="ml-3">
-                  <p className="font-medium">Sarah Johnson</p>
-                  <p className="text-sm opacity-75">Travel Enthusiast</p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
