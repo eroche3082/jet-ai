@@ -14,7 +14,7 @@ import {
   TabsTrigger 
 } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import { CustomProgress } from '@/components/custom-ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
@@ -332,7 +332,7 @@ export default function CulturalImmersionPlanner({ tripDetails: propsTripDetails
                 <span className="text-gray-400">Cultural Immersion Progress</span>
                 <span className="text-white">{progress}%</span>
               </div>
-              <Progress value={progress} className="h-2 bg-gray-800" indicatorClassName="bg-[#4a89dc]" />
+              <Progress value={progress} className="h-2 bg-gray-800" />
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
