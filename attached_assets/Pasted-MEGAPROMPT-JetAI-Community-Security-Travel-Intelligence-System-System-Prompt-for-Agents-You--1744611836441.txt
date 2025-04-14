@@ -1,0 +1,202 @@
+MEGAPROMPT - JetAI Community + Security + Travel Intelligence System
+System Prompt for Agents:
+
+You are an advanced AI Travel Companion system operating under the JetAI platform. Your mission is to analyze, validate, activate, and expand the entire JetAI ecosystem to include advanced safety protocols, real-time travel community connections, smart recommendations, QR-based payments, and multilingual immersive onboarding. Use the Global Google API Key (process.env.GOOGLE_API_KEY) and coordinate with Firebase, Stripe, and SendGrid. Begin the scanning process across all routes, components, and models and ensure full activation of the following features:
+
+1. ONBOARDING SYSTEM EXTENSION – Identity & Safety
+Instructions:
+
+Add the following fields to the onboarding questionnaire:
+
+Gender identity (Male / Female / Other)
+
+Are you traveling alone? (Yes/No)
+
+Are you traveling with a group? (Friends/Family/Community)
+
+Preferred level of privacy and security (Low / Standard / Maximum)
+
+Output:
+
+Based on responses, activate security protocols, community visibility, and AI assistance modes.
+
+2. SAFETY SYSTEM – Women Travel Protocols + GeoTracking
+Instructions:
+
+If user identifies as female and traveling alone or in a small group, trigger the following:
+
+Enable Maximum Safety Mode
+
+Enable optional GeoTracking permission prompt
+
+Provide button in dashboard for "Emergency Mode"
+
+Auto-populate emergency numbers by country in Health & Safety tab
+
+Show "Safe zones" and "Caution zones" in destination city
+
+Features:
+
+Daily check-in notifications
+
+Option to share live location with JetAI system or chosen contacts
+
+Integration with GPS & Google Maps for hiking or remote alerts
+
+Panic alert via button or voice trigger
+
+3. COMMUNITY SYSTEM – Smart Matching & Meetups
+Instructions:
+
+Create dynamic matching engine:
+
+Match travelers in same city during overlapping dates
+
+Suggest meetups in public places (cafes, museums, co-working hubs)
+
+Use AI to rank compatibility: interests, languages, preferred activities
+
+Optional filter: Gender-based, group-only, solo-only, or open
+
+Bonus:
+
+"Travel Buddy Board" in dashboard: show others in city
+
+"Coffee Connect" feature to schedule small local meetings
+
+4. EXPERIENCE SYSTEM – Tinder-Style Discovery of Events
+Instructions:
+
+Activate the swipe-based recommendation module:
+
+Use cards to show AI-curated events: Airbnb Experiences, local concerts, museums, conferences, etc.
+
+Swipe right to bookmark, swipe left to skip
+
+Integrate with user's calendar if accepted
+
+Source suggestions based on:
+
+Current city
+
+Onboarding preferences
+
+Time of day & weather
+
+APIs to Use:
+
+Amadeus, Eventbrite, Google Places, Airbnb, local feeds
+
+Translation API for event details
+
+5. DASHBOARD – Health, Visa, Requirements & Customization
+Tabs to Implement:
+
+Health & Safety Tab:
+
+Emergency numbers (auto-loaded by country)
+
+Hospital/clinic finder using Maps API
+
+Weather warnings
+
+Immunization suggestions
+
+Visa & Entry Requirements Tab:
+
+Automatically detects nationality vs. destination
+
+Pulls visa requirements
+
+Lists documentation, entry restrictions, etc.
+
+Customization Tab:
+
+Customize language, currency, notifications
+
+AI assistant tone (Formal / Friendly / Fast / Visual)
+
+6. PAYMENT SYSTEM – QR-Based Wallet & Rewards Integration
+Instructions:
+
+Use existing JetAI Access Code (JET-[TIER]-XXXX) as user payment ID
+
+Implement digital wallet system:
+
+Show wallet balance (including VidaRewards points)
+
+Scan QR code to pay at local events, JetAI experiences, etc.
+
+Apple Pay / Google Pay fallback for compatibility
+
+Rewards System:
+
+Earn points for daily check-ins, activity participation, referrals
+
+Redeem points for merchandise, upgrades, travel perks
+
+7. VOICE, TTS, MULTILINGUAL SUPPORT – Immersive Companion Mode
+Instructions:
+
+Finalize Speech-to-Text + Text-to-Speech using Google Cloud APIs
+
+Translate onboarding, chatbot, travel prompts to:
+
+English
+
+Spanish
+
+French
+
+Portuguese
+
+Set memory system to retain language preference across sessions
+
+8. FULL SYSTEM CHECK – Deployment Validation
+Command to Agents:
+
+Run a full scan of the JetAI platform and provide three categorized reports:
+
+✅ Fully Working Features
+
+⚠️ Partially Implemented Features
+
+❌ Missing or Inactive Features
+
+Also include:
+
+Feature Suggestions for expansion
+
+Security holes or permission issues
+
+API service connectivity diagnostics
+
+Recommendations for deployment optimization
+
+Timestamped readiness percentage
+
+✅ INTEGRATIONS TO VERIFY
+Gemini AI (Fast + Vision capabilities)
+
+Firebase Auth (Custom fallback OK)
+
+Google Cloud APIs (Vision, STT, TTS, Translate, Maps, Calendar, Video Intelligence)
+
+SendGrid (Verification, Onboarding, Emergency Notifications)
+
+Stripe (Subscriptions, Event Payments)
+
+RapidAPI (Global Data Streams, Weather, Currency)
+
+TAG THE INITIATIVE
+json
+Copiar
+Editar
+{
+  "project": "JetAI",
+  "phase": "5.5",
+  "tag": "jetai_phase5_safety_community_experiences",
+  "priority": "CRITICAL",
+  "language": "multilingual",
+  "output": "FULL-SYSTEM-REPORT + AUTO-FIX RECOMMENDATIONS"
+}
