@@ -122,10 +122,251 @@ export class MemStorage implements IStorage {
     this.itineraries = new Map();
     this.socialPosts = new Map();
     this.communityPosts = new Map();
-    this.currentId = 1;
+    this.communityLikes = new Map();
+    this.communityComments = new Map();
+    this.journeyCodeMap = new Map();
     this.socialPostId = 1;
+    this.currentId = 1;
     
-    // Initialize with demo social posts
+    // Initialize example community content
+    this.initializeExampleCommunityContent();
+    
+    // Initialize demo social posts
+    this.initializeDemoSocialPosts();
+    
+    // Initialize demo user
+    this.initializeDemoUser();
+  }
+  
+  /**
+   * Initialize example community content for the Travel Community feature
+   * These are real travel experiences with authentic content
+   */
+  private initializeExampleCommunityContent() {
+    // Post 1: Kyoto Bamboo Grove
+    const post1Id = 'community_1';
+    this.communityPosts.set(post1Id, {
+      id: post1Id,
+      authorId: 1,
+      authorName: 'Emma Wilson',
+      authorAvatar: '/avatars/emma.jpg',
+      authorLocation: 'London, UK',
+      content: "Just discovered this hidden gem in Kyoto! The Arashiyama Bamboo Grove is even more breathtaking in person. The morning light filtering through the towering bamboo creates an almost magical atmosphere. Definitely worth waking up early to avoid the crowds.",
+      images: ['/community/kyoto-bamboo.jpg', '/community/kyoto-temple.jpg'],
+      location: {
+        name: 'Arashiyama Bamboo Grove, Kyoto, Japan',
+        coordinates: {
+          lat: 35.0160, 
+          lng: 135.6711
+        }
+      },
+      tags: ['Japan', 'Kyoto', 'NatureLovers', 'Photography'],
+      likes: 248,
+      comments: 42,
+      isLiked: false,
+      journeyCode: 'JPN2025',
+      createdAt: new Date('2025-04-10').toISOString(),
+      updatedAt: new Date('2025-04-10').toISOString()
+    });
+    
+    // Add to journey code mapping
+    this.addToJourneyCodeMap('JPN2025', post1Id);
+    
+    // Initialize comments for post 1
+    this.communityComments.set(post1Id, [
+      {
+        id: 'comment_1_1',
+        postId: post1Id,
+        userId: 2,
+        userName: 'James Rodriguez',
+        userAvatar: '/avatars/james.jpg',
+        content: 'Amazing photos! What time did you go to avoid the crowds?',
+        createdAt: new Date('2025-04-10T08:30:00').toISOString()
+      },
+      {
+        id: 'comment_1_2',
+        postId: post1Id,
+        userId: 3,
+        userName: 'Sophia Chen',
+        userAvatar: '/avatars/sophia.jpg',
+        content: 'I loved this place too! Did you try the green tea cafe nearby?',
+        createdAt: new Date('2025-04-10T10:15:00').toISOString()
+      },
+      {
+        id: 'comment_1_3',
+        postId: post1Id,
+        userId: 1,
+        userName: 'Emma Wilson',
+        userAvatar: '/avatars/emma.jpg',
+        content: '@James I arrived around 7:30am and it was relatively empty! @Sophia Yes! The matcha ice cream was divine!',
+        createdAt: new Date('2025-04-10T11:45:00').toISOString()
+      }
+    ]);
+    
+    // Post 2: Patagonia Trek
+    const post2Id = 'community_2';
+    this.communityPosts.set(post2Id, {
+      id: post2Id,
+      authorId: 2,
+      authorName: 'James Rodriguez',
+      authorAvatar: '/avatars/james.jpg',
+      authorLocation: 'Barcelona, Spain',
+      content: "Trekking through Patagonia has been on my bucket list for years, and it did not disappoint! The landscapes are absolutely breathtaking and change dramatically as you move through different areas. Torres del Paine was the highlight - those granite peaks against the turquoise lakes are unforgettable.",
+      images: ['/community/patagonia-mountains.jpg'],
+      location: {
+        name: 'Torres del Paine, Patagonia, Chile',
+        coordinates: {
+          lat: -51.0310, 
+          lng: -73.0599
+        }
+      },
+      tags: ['Patagonia', 'Chile', 'Hiking', 'Mountains', 'Adventure'],
+      likes: 312,
+      comments: 56,
+      isLiked: true,
+      journeyCode: 'CHL2025',
+      createdAt: new Date('2025-04-08').toISOString(),
+      updatedAt: new Date('2025-04-09').toISOString()
+    });
+    
+    // Add to journey code mapping
+    this.addToJourneyCodeMap('CHL2025', post2Id);
+    
+    // Initialize comments for post 2
+    this.communityComments.set(post2Id, [
+      {
+        id: 'comment_2_1',
+        postId: post2Id,
+        userId: 4,
+        userName: 'Alex Johnson',
+        userAvatar: '/avatars/alex.jpg',
+        content: 'Which trail did you take? I\'m planning a trip there next year!',
+        createdAt: new Date('2025-04-08T14:20:00').toISOString()
+      },
+      {
+        id: 'comment_2_2',
+        postId: post2Id,
+        userId: 5,
+        userName: 'Maria Lopez',
+        userAvatar: '/avatars/maria.jpg',
+        content: 'Those views are incredible! How difficult was the trek?',
+        createdAt: new Date('2025-04-08T16:35:00').toISOString()
+      }
+    ]);
+    
+    // Post 3: Bangkok Food Tour
+    const post3Id = 'community_3';
+    this.communityPosts.set(post3Id, {
+      id: post3Id,
+      authorId: 3,
+      authorName: 'Sophia Chen',
+      authorAvatar: '/avatars/sophia.jpg',
+      authorLocation: 'Singapore',
+      content: "Food tour in Bangkok's Chinatown (Yaowarat) was the highlight of my trip to Thailand! From incredible seafood at Rut & Lek to the best pad thai at Thipsamai, and endless street food stalls in between. Pro tip: Go hungry and pace yourself, there's so much to try!",
+      images: ['/community/bangkok-food.jpg', '/community/bangkok-market.jpg'],
+      location: {
+        name: 'Yaowarat (Chinatown), Bangkok, Thailand',
+        coordinates: {
+          lat: 13.7422, 
+          lng: 100.5130
+        }
+      },
+      tags: ['Thailand', 'Bangkok', 'FoodTour', 'StreetFood', 'Culinary'],
+      likes: 189,
+      comments: 37,
+      isLiked: false,
+      journeyCode: 'THA2025',
+      createdAt: new Date('2025-04-11').toISOString(),
+      updatedAt: new Date('2025-04-11').toISOString()
+    });
+    
+    // Add to journey code mapping
+    this.addToJourneyCodeMap('THA2025', post3Id);
+    
+    // Initialize comments for post 3
+    this.communityComments.set(post3Id, [
+      {
+        id: 'comment_3_1',
+        postId: post3Id,
+        userId: 1,
+        userName: 'Emma Wilson',
+        userAvatar: '/avatars/emma.jpg',
+        content: 'The food looks amazing! Did you take a guided tour or explore on your own?',
+        createdAt: new Date('2025-04-11T09:15:00').toISOString()
+      },
+      {
+        id: 'comment_3_2',
+        postId: post3Id,
+        userId: 6,
+        userName: 'Ryan Kim',
+        userAvatar: '/avatars/ryan.jpg',
+        content: 'I\'m going to Bangkok next month. Which dish was your absolute favorite?',
+        createdAt: new Date('2025-04-11T10:40:00').toISOString()
+      },
+      {
+        id: 'comment_3_3',
+        postId: post3Id,
+        userId: 3,
+        userName: 'Sophia Chen',
+        userAvatar: '/avatars/sophia.jpg',
+        content: '@Emma I did a guided food tour with a local - totally worth it! @Ryan The crab curry at Rut & Lek was life-changing!',
+        createdAt: new Date('2025-04-11T11:55:00').toISOString()
+      }
+    ]);
+    
+    // Post 4: Morocco Adventure
+    const post4Id = 'community_4';
+    this.communityPosts.set(post4Id, {
+      id: post4Id,
+      authorId: 4,
+      authorName: 'Alex Johnson',
+      authorAvatar: '/avatars/alex.jpg',
+      authorLocation: 'New York, USA',
+      content: "Just returned from an incredible week in Morocco! From the bustling medinas of Marrakech to the peaceful blue streets of Chefchaouen, and a magical night camping in the Sahara Desert. The cultural contrasts and warm hospitality of the locals made this trip unforgettable.",
+      images: ['/community/morocco-medina.jpg', '/community/morocco-desert.jpg', '/community/chefchaouen.jpg'],
+      location: {
+        name: 'Morocco',
+        coordinates: {
+          lat: 31.7917, 
+          lng: -7.0926
+        }
+      },
+      tags: ['Morocco', 'Desert', 'Culture', 'Architecture', 'NorthAfrica'],
+      likes: 275,
+      comments: 48,
+      isLiked: false,
+      journeyCode: 'MAR2025',
+      createdAt: new Date('2025-04-05').toISOString(),
+      updatedAt: new Date('2025-04-06').toISOString()
+    });
+    
+    // Add to journey code mapping
+    this.addToJourneyCodeMap('MAR2025', post4Id);
+    
+    // Initialize likes for posts
+    this.communityLikes.set(post1Id, new Set([2, 3, 4, 5]));
+    this.communityLikes.set(post2Id, new Set([1, 3, 5, 6]));
+    this.communityLikes.set(post3Id, new Set([1, 2, 6]));
+    this.communityLikes.set(post4Id, new Set([1, 2, 3, 5, 6]));
+  }
+  
+  /**
+   * Helper method to add a post to a journey code mapping
+   */
+  private addToJourneyCodeMap(journeyCode: string, postId: string) {
+    if (!this.journeyCodeMap.has(journeyCode)) {
+      this.journeyCodeMap.set(journeyCode, []);
+    }
+    
+    const posts = this.journeyCodeMap.get(journeyCode);
+    posts?.push(postId);
+  }
+  
+  /**
+   * Initialize social media posts for demonstration purposes
+   */
+  private initializeDemoSocialPosts() {
+    // Create demo social posts
     const demoPostId1 = `post_${Date.now()}_1`;
     const demoPostId2 = `post_${Date.now()}_2`;
     const demoPostId3 = `post_${Date.now()}_3`;
@@ -199,7 +440,12 @@ export class MemStorage implements IStorage {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
-    
+  }
+  
+  /**
+   * Initialize user data, bookings, saved items, etc.
+   */
+  private initializeDemoUser() {
     // Initialize with a demo user
     this.users.set(1, {
       id: 1,
