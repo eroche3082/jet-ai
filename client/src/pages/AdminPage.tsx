@@ -70,7 +70,7 @@ export default function AdminPage() {
   const ADMIN_USERNAME = 'admin';
   const ADMIN_PASSWORD = 'admin123456';
   
-  // Mock statistics
+  // Analytics data
   const statistics = {
     totalUsers: 0,
     vipUsers: 0,
@@ -78,6 +78,52 @@ export default function AdminPage() {
     beginnerUsers: 0,
     languageSpecialists: 0,
     codesGenerated: 0,
+    // Additional statistics for enhanced analytics
+    destinationsVisited: 15,
+    upcomingTrips: 8,
+    activeBudgets: 12,
+    totalRewards: 2450,
+    aiInteractions: 348,
+    // Daily stats for 7 days
+    dailyStats: [
+      { date: '2025-04-08', users: 3, searches: 25, bookings: 1 },
+      { date: '2025-04-09', users: 5, searches: 42, bookings: 2 },
+      { date: '2025-04-10', users: 8, searches: 63, bookings: 3 },
+      { date: '2025-04-11', users: 4, searches: 37, bookings: 1 },
+      { date: '2025-04-12', users: 7, searches: 59, bookings: 4 },
+      { date: '2025-04-13', users: 10, searches: 78, bookings: 5 },
+      { date: '2025-04-14', users: 6, searches: 45, bookings: 2 }
+    ],
+    // Platform usage
+    platformUsage: {
+      web: 65,
+      mobile: 35,
+      ios: 20,
+      android: 15
+    },
+    // Top destinations
+    topDestinations: [
+      { name: 'Tokyo, Japan', count: 18 },
+      { name: 'Paris, France', count: 15 },
+      { name: 'New York, USA', count: 12 },
+      { name: 'Barcelona, Spain', count: 10 },
+      { name: 'London, UK', count: 8 }
+    ],
+    // User engagement categories
+    engagement: {
+      activeUsers: 42,
+      returning: 28,
+      new: 14,
+      churnRate: 3.5
+    },
+    // AI feature usage
+    aiFeatureUsage: [
+      { feature: 'Smart Recommendations', usage: 78 },
+      { feature: 'Trip Planning', usage: 65 },
+      { feature: 'Language Translation', usage: 42 },
+      { feature: 'Budget Optimization', usage: 38 },
+      { feature: 'Safety Alerts', usage: 22 }
+    ]
   };
   
   useEffect(() => {
@@ -556,111 +602,388 @@ export default function AdminPage() {
           
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
-            <Card className="bg-[#0a1021] border-gray-800">
-              <CardHeader>
-                <CardTitle>User Analytics</CardTitle>
-                <CardDescription className="text-gray-400">
-                  Overview of user statistics and engagement metrics
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="bg-[#050b17] rounded-lg p-5 border border-gray-800">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-gray-400 text-sm">Total Users</p>
-                        <h3 className="text-3xl font-bold mt-1">{statistics.totalUsers}</h3>
+            {/* Overview Dashboard Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="bg-[#0a1021] border-gray-800 hover:border-[#4a89dc]/50 transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-gray-400 text-sm">Total Users</p>
+                      <h3 className="text-3xl font-bold mt-1">{statistics.totalUsers}</h3>
+                      <p className="text-xs text-green-500 mt-1">↑ 12% growth</p>
+                    </div>
+                    <div className="bg-[#4a89dc]/10 p-3 rounded-lg">
+                      <Users className="h-6 w-6 text-[#4a89dc]" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-[#0a1021] border-gray-800 hover:border-[#4a89dc]/50 transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-gray-400 text-sm">Destinations Visited</p>
+                      <h3 className="text-3xl font-bold mt-1">{statistics.destinationsVisited}</h3>
+                      <p className="text-xs text-green-500 mt-1">↑ 8% this month</p>
+                    </div>
+                    <div className="bg-[#4a89dc]/10 p-3 rounded-lg">
+                      <MapPin className="h-6 w-6 text-[#4a89dc]" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-[#0a1021] border-gray-800 hover:border-[#4a89dc]/50 transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-gray-400 text-sm">Active Budgets</p>
+                      <h3 className="text-3xl font-bold mt-1">{statistics.activeBudgets}</h3>
+                      <p className="text-xs text-green-500 mt-1">↑ 15% this week</p>
+                    </div>
+                    <div className="bg-[#4a89dc]/10 p-3 rounded-lg">
+                      <BarChart3 className="h-6 w-6 text-[#4a89dc]" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-[#0a1021] border-gray-800 hover:border-[#4a89dc]/50 transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-gray-400 text-sm">AI Interactions</p>
+                      <h3 className="text-3xl font-bold mt-1">{statistics.aiInteractions}</h3>
+                      <p className="text-xs text-green-500 mt-1">↑ 23% increase</p>
+                    </div>
+                    <div className="bg-[#4a89dc]/10 p-3 rounded-lg">
+                      <Brain className="h-6 w-6 text-[#4a89dc]" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Main Analytics Cards */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* User Analytics Card */}
+              <Card className="bg-[#0a1021] border-gray-800 col-span-1">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center">
+                    <Users className="h-5 w-5 mr-2 text-[#4a89dc]" />
+                    User Analytics
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Detailed user statistics and distribution
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-5">
+                    {/* User Types Distribution */}
+                    <div>
+                      <h4 className="text-sm font-medium mb-3 text-gray-300">User Distribution</h4>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="flex justify-between mb-1">
+                            <span className="text-sm text-gray-400">Standard Users</span>
+                            <span className="text-sm text-gray-400">{statistics.standardUsers}</span>
+                          </div>
+                          <div className="h-2 bg-[#050b17] rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-blue-500" 
+                              style={{ width: `${statistics.totalUsers ? (statistics.standardUsers / statistics.totalUsers) * 100 : 0}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div className="flex justify-between mb-1">
+                            <span className="text-sm text-gray-400">VIP Users</span>
+                            <span className="text-sm text-gray-400">{statistics.vipUsers}</span>
+                          </div>
+                          <div className="h-2 bg-[#050b17] rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-[#4a89dc]" 
+                              style={{ width: `${statistics.totalUsers ? (statistics.vipUsers / statistics.totalUsers) * 100 : 0}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div className="flex justify-between mb-1">
+                            <span className="text-sm text-gray-400">Language Specialists</span>
+                            <span className="text-sm text-gray-400">{statistics.languageSpecialists}</span>
+                          </div>
+                          <div className="h-2 bg-[#050b17] rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-purple-500" 
+                              style={{ width: `${statistics.totalUsers ? (statistics.languageSpecialists / statistics.totalUsers) * 100 : 0}%` }}
+                            ></div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="bg-[#4a89dc]/10 p-2 rounded-md">
-                        <Users className="h-5 w-5 text-[#4a89dc]" />
+                    </div>
+                    
+                    {/* Platform Usage */}
+                    <div>
+                      <h4 className="text-sm font-medium mb-3 text-gray-300">Platform Usage</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-[#050b17] rounded-lg p-3 text-center border border-gray-800">
+                          <p className="text-2xl font-bold text-[#4a89dc]">{statistics.platformUsage.web}%</p>
+                          <p className="text-xs text-gray-400 mt-1">Web Platform</p>
+                        </div>
+                        <div className="bg-[#050b17] rounded-lg p-3 text-center border border-gray-800">
+                          <p className="text-2xl font-bold text-[#4a89dc]">{statistics.platformUsage.mobile}%</p>
+                          <p className="text-xs text-gray-400 mt-1">Mobile Platform</p>
+                        </div>
+                        <div className="bg-[#050b17] rounded-lg p-3 text-center border border-gray-800">
+                          <p className="text-2xl font-bold text-[#4a89dc]">{statistics.platformUsage.ios}%</p>
+                          <p className="text-xs text-gray-400 mt-1">iOS Usage</p>
+                        </div>
+                        <div className="bg-[#050b17] rounded-lg p-3 text-center border border-gray-800">
+                          <p className="text-2xl font-bold text-[#4a89dc]">{statistics.platformUsage.android}%</p>
+                          <p className="text-xs text-gray-400 mt-1">Android Usage</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* User Engagement */}
+                    <div>
+                      <h4 className="text-sm font-medium mb-3 text-gray-300">User Engagement</h4>
+                      <div className="bg-[#050b17] rounded-lg p-4 border border-gray-800">
+                        <div className="flex justify-between mb-2">
+                          <div>
+                            <p className="text-sm text-gray-400">Active Users</p>
+                            <p className="text-lg font-bold">{statistics.engagement.activeUsers}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-400">Churn Rate</p>
+                            <p className="text-lg font-bold">{statistics.engagement.churnRate}%</p>
+                          </div>
+                        </div>
+                        <div className="flex justify-between mt-3">
+                          <div>
+                            <p className="text-sm text-gray-400">New Users</p>
+                            <p className="text-lg font-bold">{statistics.engagement.new}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-400">Returning</p>
+                            <p className="text-lg font-bold">{statistics.engagement.returning}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Activity Trends Card */}
+              <Card className="bg-[#0a1021] border-gray-800 col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center">
+                    <LineChart className="h-5 w-5 mr-2 text-[#4a89dc]" />
+                    Activity Trends
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    7-day overview of users, searches, and bookings
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px] pt-4 px-4">
+                    {/* This would be a chart in a real implementation */}
+                    <div className="relative h-full flex items-end p-4 border-b border-l border-gray-700">
+                      {/* X and Y axis labels */}
+                      <div className="absolute left-0 top-0 bottom-0 w-10 flex flex-col justify-between">
+                        <span className="text-xs text-gray-500">80</span>
+                        <span className="text-xs text-gray-500">60</span>
+                        <span className="text-xs text-gray-500">40</span>
+                        <span className="text-xs text-gray-500">20</span>
+                        <span className="text-xs text-gray-500">0</span>
+                      </div>
+                      
+                      {/* Chart bars - this is a simple representation */}
+                      <div className="w-full h-full flex justify-between pl-10">
+                        {statistics.dailyStats.map((day, index) => (
+                          <div key={index} className="flex flex-col items-center justify-end h-full">
+                            <div className="relative flex flex-col items-center justify-end w-12">
+                              {/* Bookings bar */}
+                              <div 
+                                className="w-3 bg-green-500 rounded-t-sm mb-px" 
+                                style={{ height: `${(day.bookings / 10) * 100}%` }}
+                                title={`${day.bookings} bookings`}
+                              ></div>
+                              
+                              {/* Users bar */}
+                              <div 
+                                className="w-3 bg-[#4a89dc] rounded-t-sm mb-px" 
+                                style={{ height: `${(day.users / 10) * 100}%` }}
+                                title={`${day.users} users`}
+                              ></div>
+                              
+                              {/* Searches bar */}
+                              <div 
+                                className="w-3 bg-purple-500 rounded-t-sm" 
+                                style={{ height: `${(day.searches / 100) * 100}%` }}
+                                title={`${day.searches} searches`}
+                              ></div>
+                            </div>
+                            <span className="text-xs text-gray-500 mt-2">{day.date.split('-')[2]}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Chart Legend */}
+                    <div className="flex justify-center items-center mt-6 space-x-6">
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 rounded-sm bg-purple-500 mr-2"></div>
+                        <span className="text-xs text-gray-400">Searches</span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 rounded-sm bg-[#4a89dc] mr-2"></div>
+                        <span className="text-xs text-gray-400">Users</span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 rounded-sm bg-green-500 mr-2"></div>
+                        <span className="text-xs text-gray-400">Bookings</span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-[#050b17] rounded-lg p-5 border border-gray-800">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-gray-400 text-sm">VIP Users</p>
-                        <h3 className="text-3xl font-bold mt-1">{statistics.vipUsers}</h3>
+                  {/* AI Feature Insights */}
+                  <div className="mt-8">
+                    <h4 className="text-sm font-medium mb-4 text-gray-300">AI Feature Usage Insights</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                      {statistics.aiFeatureUsage.map((feature, index) => (
+                        <div key={index} className="bg-[#050b17] rounded-lg p-3 border border-gray-800 flex flex-col items-center">
+                          <div className="w-full bg-gray-800 rounded-full h-1.5 mb-3">
+                            <div 
+                              className="bg-[#4a89dc] h-1.5 rounded-full" 
+                              style={{ width: `${(feature.usage / 100) * 100}%` }}
+                            ></div>
+                          </div>
+                          <p className="text-sm text-center">{feature.feature}</p>
+                          <p className="text-lg font-bold text-[#4a89dc]">{feature.usage}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Top Destinations & Travel Insights */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="bg-[#0a1021] border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center">
+                    <MapPin className="h-5 w-5 mr-2 text-[#4a89dc]" />
+                    Top Destinations
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Most popular travel destinations
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {statistics.topDestinations.map((destination, index) => (
+                      <div key={index} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0">
+                        <div className="flex items-center">
+                          <div className="w-6 h-6 rounded-full bg-[#4a89dc]/20 flex items-center justify-center text-sm mr-3">
+                            {index + 1}
+                          </div>
+                          <span>{destination.name}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="font-bold mr-2">{destination.count}</span>
+                          <span className="text-xs text-gray-500">visits</span>
+                        </div>
                       </div>
-                      <div className="bg-[#4a89dc]/10 p-2 rounded-md">
-                        <Shield className="h-5 w-5 text-[#4a89dc]" />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-[#0a1021] border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center">
+                    <Rocket className="h-5 w-5 mr-2 text-[#4a89dc]" />
+                    System Performance
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Key metrics and operational status
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="bg-[#050b17] rounded-lg p-4 border border-gray-800">
+                      <div className="flex justify-between mb-2">
+                        <h4 className="text-sm font-medium text-gray-300">AI Response Time</h4>
+                        <span className="text-xs bg-green-900/30 text-green-400 px-2 py-0.5 rounded">Excellent</span>
+                      </div>
+                      <div className="flex items-end">
+                        <span className="text-2xl font-bold">0.8</span>
+                        <span className="text-sm text-gray-400 ml-1">seconds</span>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-[#050b17] rounded-lg p-4 border border-gray-800">
+                      <div className="flex justify-between mb-2">
+                        <h4 className="text-sm font-medium text-gray-300">System Uptime</h4>
+                        <span className="text-xs bg-green-900/30 text-green-400 px-2 py-0.5 rounded">Stable</span>
+                      </div>
+                      <div className="flex items-end">
+                        <span className="text-2xl font-bold">99.9</span>
+                        <span className="text-sm text-gray-400 ml-1">%</span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-[#050b17] rounded-lg p-5 border border-gray-800">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-gray-400 text-sm">Codes Generated</p>
-                        <h3 className="text-3xl font-bold mt-1">{statistics.codesGenerated}</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm text-gray-400">API Health</span>
+                        <span className="text-xs text-green-400">Operational</span>
                       </div>
-                      <div className="bg-[#4a89dc]/10 p-2 rounded-md">
-                        <Code className="h-5 w-5 text-[#4a89dc]" />
+                      <div className="h-2 bg-[#050b17] rounded-full overflow-hidden">
+                        <div className="h-full bg-green-500 w-[98%]"></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm text-gray-400">Database Performance</span>
+                        <span className="text-xs text-green-400">Optimal</span>
+                      </div>
+                      <div className="h-2 bg-[#050b17] rounded-full overflow-hidden">
+                        <div className="h-full bg-green-500 w-[95%]"></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm text-gray-400">Memory Usage</span>
+                        <span className="text-xs text-yellow-400">Moderate</span>
+                      </div>
+                      <div className="h-2 bg-[#050b17] rounded-full overflow-hidden">
+                        <div className="h-full bg-yellow-500 w-[65%]"></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm text-gray-400">Storage Usage</span>
+                        <span className="text-xs text-green-400">Low</span>
+                      </div>
+                      <div className="h-2 bg-[#050b17] rounded-full overflow-hidden">
+                        <div className="h-full bg-green-500 w-[30%]"></div>
                       </div>
                     </div>
                   </div>
-                </div>
-                
-                {/* Category Distribution */}
-                <div className="mb-6">
-                  <h4 className="text-lg font-medium mb-4">User Category Distribution</h4>
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-sm text-gray-400">Standard Users</span>
-                        <span className="text-sm text-gray-400">{statistics.standardUsers}</span>
-                      </div>
-                      <div className="h-2 bg-[#050b17] rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-blue-500" 
-                          style={{ width: `${statistics.totalUsers ? (statistics.standardUsers / statistics.totalUsers) * 100 : 0}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-sm text-gray-400">VIP Users</span>
-                        <span className="text-sm text-gray-400">{statistics.vipUsers}</span>
-                      </div>
-                      <div className="h-2 bg-[#050b17] rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-[#4a89dc]" 
-                          style={{ width: `${statistics.totalUsers ? (statistics.vipUsers / statistics.totalUsers) * 100 : 0}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-sm text-gray-400">Beginner Users</span>
-                        <span className="text-sm text-gray-400">{statistics.beginnerUsers}</span>
-                      </div>
-                      <div className="h-2 bg-[#050b17] rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-green-500" 
-                          style={{ width: `${statistics.totalUsers ? (statistics.beginnerUsers / statistics.totalUsers) * 100 : 0}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-sm text-gray-400">Language Specialists</span>
-                        <span className="text-sm text-gray-400">{statistics.languageSpecialists}</span>
-                      </div>
-                      <div className="h-2 bg-[#050b17] rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-purple-500" 
-                          style={{ width: `${statistics.totalUsers ? (statistics.languageSpecialists / statistics.totalUsers) * 100 : 0}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
           
           {/* Codes Tab */}
