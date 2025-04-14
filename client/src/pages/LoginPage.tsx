@@ -112,7 +112,7 @@ export default function LoginPage() {
       <div 
         className="w-full md:w-1/2 bg-cover bg-center hidden md:block"
         style={{ 
-          backgroundImage: "url('https://images.unsplash.com/photo-1526434426615-1abe81efcb0b?q=80&w=2070&auto=format&fit=crop')" 
+          backgroundImage: "url('https://images.unsplash.com/photo-1569629743817-70d8db6c323b?q=80&w=2071&auto=format&fit=crop')" 
         }}
       >
         <div className="h-full bg-[#050b17]/70 p-12 flex flex-col justify-center">
