@@ -28,6 +28,10 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // API Keys for each service group
 const GOOGLE_KEYS = {
+  // Main universal API key for all Google services
+  UNIVERSAL: process.env.GOOGLE_CLOUD_API_KEY || process.env.GOOGLE_VERTEX_KEY_ID || process.env.GEMINI_API_KEY || 'AIzaSyDnmNNHrQ-xpnOozOZgVv4F9qQpiU-GfdA',
+  
+  // Legacy fallbacks (only used if universal key is not available)
   // Group 1: Maps, Places, Vision AI, Weather
   MAPS: process.env.GOOGLE_GROUP1_API_KEY || 'AIzaSyBUYoJ-RndERrcY9qkjD-2YGGY5m3Mzc0U',
   
@@ -39,11 +43,11 @@ const GOOGLE_KEYS = {
 };
 
 // Main API Key for fallback and compatibility
-const GOOGLE_API_KEY = GOOGLE_KEYS.AI;
+const GOOGLE_API_KEY = GOOGLE_KEYS.UNIVERSAL || GOOGLE_KEYS.AI;
 
 // Initialize the Gemini client (Generative Language API)
-// We use API key from group 2 or 3 which have Generative Language API enabled
-const genAI = new GoogleGenerativeAI(GOOGLE_KEYS.AI || GOOGLE_KEYS.FIREBASE);
+// We use the universal API key which has all Google APIs enabled
+const genAI = new GoogleGenerativeAI(GOOGLE_KEYS.UNIVERSAL || GOOGLE_KEYS.AI || GOOGLE_KEYS.FIREBASE);
 
 // IMPORTANT: Available models:
 // - models/gemini-1.5-flash-latest (fast, efficient)
@@ -84,60 +88,66 @@ export const initializeApiClients = (): void => {
   try {
     console.log('Initializing Google Cloud APIs with specific API keys...');
 
-    // Initialize Vision API (for image analysis) - Uses GROUP 1 or 2
+    // Initialize Vision API (for image analysis)
     try {
       apiClients.vision = new ImageAnnotatorClient({
-        key: GOOGLE_KEYS.AI // Both groups have Vision enabled, we use GROUP 2
+        key: GOOGLE_KEYS.UNIVERSAL || GOOGLE_KEYS.AI // Use universal key first, fallback to GROUP 2
       });
       console.log('✅ Google Cloud Vision client initialized successfully');
     } catch (error) {
       console.error('❌ Error initializing Vision API:', error);
     }
 
-    // Initialize Translation API (for multilingual translations) - Uses GROUP 2
+    // Initialize Translation API (for multilingual translations)
     try {
       apiClients.translation = new TranslationServiceClient({
-        key: GOOGLE_KEYS.AI
+        key: GOOGLE_KEYS.UNIVERSAL || GOOGLE_KEYS.AI
       });
       console.log('✅ Google Cloud Translate client initialized successfully');
     } catch (error) {
       console.error('❌ Error initializing Translation API:', error);
     }
 
-    // Initialize Text-to-Speech API (for voice synthesis) - Uses GROUP 2
+    // Initialize Text-to-Speech API (for voice synthesis)
     try {
       apiClients.textToSpeech = new TextToSpeechClient({
-        key: GOOGLE_KEYS.AI
+        key: GOOGLE_KEYS.UNIVERSAL || GOOGLE_KEYS.AI
       });
       console.log('✅ Google Cloud Text-to-Speech client initialized successfully');
     } catch (error) {
       console.error('❌ Error initializing Text-to-Speech API:', error);
     }
 
-    // Initialize Maps API (for geocoding, places, routes) - Uses GROUP 1
+    // Initialize Maps API (for geocoding, places, routes)
     try {
       // Maps API typically uses the key in each request, so we configure the client here
-      // but send the key in each request
-      apiClients.maps = new MapsClient({});
+      // but send the key in each request as part of the URL
+      apiClients.maps = new MapsClient({
+        // The universal key will be used in the URL parameters for all Maps API requests
+        // via the apiUrls values below
+      });
       console.log('✅ Google Maps client initialized successfully');
     } catch (error) {
       console.error('❌ Error initializing Maps API:', error);
     }
 
-    // Initialize Video Intelligence API (for video analysis) - Uses GROUP 2
+    // Initialize Video Intelligence API (for video analysis)
     try {
       apiClients.videoIntelligence = new VideoIntelligenceServiceClient({
-        key: GOOGLE_KEYS.AI
+        key: GOOGLE_KEYS.UNIVERSAL || GOOGLE_KEYS.AI
       });
       console.log('✅ Google Cloud Video Intelligence client initialized successfully');
     } catch (error) {
       console.error('❌ Error initializing Video Intelligence API:', error);
     }
 
-    // Initialize Vertex AI (for advanced AI models) - Uses GROUP 2
+    // Initialize Vertex AI (for advanced AI models) - Using the provided credentials
     try {
+      // For Vertex AI, we need to use the project from the credentials file
+      // or explicitly set from the universal API key
       apiClients.vertexAi = new VertexAI({
-        project: 'jetai-travel-companion',
+        // Default project for Vertex AI
+        project: 'erudite-creek-431302-q3',
         location: 'us-central1',
       });
       console.log('✅ Google Vertex AI client initialized successfully');
@@ -145,26 +155,26 @@ export const initializeApiClients = (): void => {
       console.error('❌ Error initializing Vertex AI:', error);
     }
 
-    // Initialize Generative Language API (Gemini) - Uses GROUP 2 for main LLM
+    // Initialize Generative Language API (Gemini) with the universal key
     // Note: Already initialized in the genAI definition
     if (apiClients.generativeAI) {
       console.log('✅ Google Generative AI (Gemini) client initialized successfully');
     } else {
       console.error('❌ Error initializing Generative AI (Gemini)');
       
-      // Attempt re-initialization with another key if it failed
+      // Attempt re-initialization with the universal key if failed
       try {
-        apiClients.generativeAI = new GoogleGenerativeAI(GOOGLE_KEYS.FIREBASE);
-        console.log('✅ Google Generative AI (Gemini) client initialized with alternative key');
+        apiClients.generativeAI = new GoogleGenerativeAI(GOOGLE_KEYS.UNIVERSAL);
+        console.log('✅ Google Generative AI (Gemini) client initialized with universal key');
       } catch (secondError) {
-        console.error('❌ Error initializing Generative AI (Gemini) with alternative key:', secondError);
+        console.error('❌ Error initializing Generative AI (Gemini) with universal key:', secondError);
       }
     }
 
-    // Initialize Secret Manager (for secure secrets management) - Any key
+    // Initialize Secret Manager (for secure secrets management)
     try {
       apiClients.secretManager = new SecretManagerServiceClient({
-        key: GOOGLE_KEYS.AI
+        key: GOOGLE_KEYS.UNIVERSAL || GOOGLE_KEYS.AI
       });
       console.log('✅ Secret Manager client initialized successfully');
     } catch (error) {
@@ -190,15 +200,15 @@ export const getGenerativeAIClient = (): GoogleGenerativeAI | null => apiClients
 
 // URLs for APIs that are accessed directly from the client
 export const apiUrls = {
-  mapsJavascript: `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places,geometry,visualization`,
-  mapsEmbed: `https://www.google.com/maps/embed/v1/place?key=${GOOGLE_API_KEY}&q=`,
-  weatherApi: `https://weather.googleapis.com/v1/current?key=${GOOGLE_API_KEY}`,
-  geocodingApi: `https://maps.googleapis.com/maps/api/geocode/json?key=${GOOGLE_API_KEY}`,
-  placesApi: `https://maps.googleapis.com/maps/api/place/details/json?key=${GOOGLE_API_KEY}`,
-  routesApi: `https://routes.googleapis.com/directions/v2:computeRoutes?key=${GOOGLE_API_KEY}`,
-  timeZoneApi: `https://maps.googleapis.com/maps/api/timezone/json?key=${GOOGLE_API_KEY}`,
-  streetViewApi: `https://maps.googleapis.com/maps/api/streetview?key=${GOOGLE_API_KEY}`,
-  mapsStaticApi: `https://maps.googleapis.com/maps/api/staticmap?key=${GOOGLE_API_KEY}`
+  mapsJavascript: `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_KEYS.UNIVERSAL || GOOGLE_API_KEY}&libraries=places,geometry,visualization`,
+  mapsEmbed: `https://www.google.com/maps/embed/v1/place?key=${GOOGLE_KEYS.UNIVERSAL || GOOGLE_API_KEY}&q=`,
+  weatherApi: `https://weather.googleapis.com/v1/current?key=${GOOGLE_KEYS.UNIVERSAL || GOOGLE_API_KEY}`,
+  geocodingApi: `https://maps.googleapis.com/maps/api/geocode/json?key=${GOOGLE_KEYS.UNIVERSAL || GOOGLE_API_KEY}`,
+  placesApi: `https://maps.googleapis.com/maps/api/place/details/json?key=${GOOGLE_KEYS.UNIVERSAL || GOOGLE_API_KEY}`,
+  routesApi: `https://routes.googleapis.com/directions/v2:computeRoutes?key=${GOOGLE_KEYS.UNIVERSAL || GOOGLE_API_KEY}`,
+  timeZoneApi: `https://maps.googleapis.com/maps/api/timezone/json?key=${GOOGLE_KEYS.UNIVERSAL || GOOGLE_API_KEY}`,
+  streetViewApi: `https://maps.googleapis.com/maps/api/streetview?key=${GOOGLE_KEYS.UNIVERSAL || GOOGLE_API_KEY}`,
+  mapsStaticApi: `https://maps.googleapis.com/maps/api/staticmap?key=${GOOGLE_KEYS.UNIVERSAL || GOOGLE_API_KEY}`
 };
 
 // Verify if an API is available for use
