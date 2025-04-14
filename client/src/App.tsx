@@ -36,6 +36,7 @@ import PartnerDashboard from "@/pages/partner/Dashboard";
 import PartnerSignup from "@/pages/partner/Signup";
 import { initializePWA } from '@/lib/pwa';
 import { AuthProvider } from '@/hooks/use-auth';
+import { LanguageProvider } from '@/lib/LanguageContext';
 import LandingPage from "@/pages/LightLandingPage";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
@@ -251,19 +252,21 @@ function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
-        {shouldUseLayout() ? (
-          isMobile ? (
-            <MobileLayout>
-              {renderRoutes()}
-            </MobileLayout>
+        <LanguageProvider>
+          {shouldUseLayout() ? (
+            isMobile ? (
+              <MobileLayout>
+                {renderRoutes()}
+              </MobileLayout>
+            ) : (
+              <Layout>
+                {renderRoutes()}
+              </Layout>
+            )
           ) : (
-            <Layout>
-              {renderRoutes()}
-            </Layout>
-          )
-        ) : (
-          renderRoutes()
-        )}
+            renderRoutes()
+          )}
+        </LanguageProvider>
       </ThemeProvider>
     </AuthProvider>
   );

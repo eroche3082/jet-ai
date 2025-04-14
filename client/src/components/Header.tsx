@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
+import LanguageSelector from './LanguageSelector';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -74,6 +75,9 @@ export default function Header() {
                 {link.title}
               </Link>
             ))}
+            
+            {/* Language Selector */}
+            <LanguageSelector variant="icon-only" className="mr-2" />
             
             {isLoggedIn ? (
               <div className="relative group">
@@ -170,6 +174,12 @@ export default function Header() {
                   {link.title}
                 </Link>
               ))}
+              
+              {/* Language Selector for Mobile */}
+              <div className="py-3 flex items-center">
+                <span className="text-marni-dark text-sm mr-3">Language:</span>
+                <LanguageSelector variant="minimal" />
+              </div>
             </div>
             
             {isLoggedIn ? (
