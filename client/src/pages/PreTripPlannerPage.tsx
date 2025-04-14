@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Helmet } from 'react-helmet-async';
+// Removing Helmet temporarily due to error
+// import { Helmet } from 'react-helmet-async';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -21,9 +22,8 @@ export default function PreTripPlannerPage() {
   
   return (
     <div className="container mx-auto py-8 px-4">
-      <Helmet>
-        <title>Pre-Trip Planner | JET AI</title>
-      </Helmet>
+      {/* Helmet removed temporarily due to error */}
+      {/* Page title: Pre-Trip Planner | JET AI */}
       
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Pre-Trip Planner</h1>
