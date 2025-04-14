@@ -1,6 +1,7 @@
 /**
  * Google API Configuration
  * Manages API keys and service account credentials for Google Cloud services
+ * Integrates with API Key Manager for dynamic API key assignment
  */
 
 import * as fs from 'fs';
@@ -13,8 +14,9 @@ import { Client as MapsClient } from '@googlemaps/google-maps-services-js';
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { VertexAI } from '@google-cloud/vertexai';
+import { apiKeyManager, ServiceCategory } from './apiKeyManager';
 
-// API keys by service group
+// API keys by service group - keeping this for backwards compatibility
 export const API_KEYS = {
   // Group 1: Maps and location services
   MAPS_API_KEY: 'AIzaSyBUYoJ-RndERrcY9qkjD-2YGGY5m3Mzc0U',
@@ -53,14 +55,17 @@ export const serviceStatus = {
 };
 
 /**
- * Initialize all Google Cloud API clients
+ * Initialize all Google Cloud API clients using the API Key Manager
+ * for dynamic API key assignment
  */
 export function initializeGoogleCloudApis() {
   console.log('Initializing Google Cloud APIs with specific API keys...');
   
   try {
-    // Vision API
-    visionClient = new ImageAnnotatorClient({ key: API_KEYS.UNIVERSAL_API_KEY });
+    // Vision API with dynamic API key assignment
+    visionClient = new ImageAnnotatorClient({ 
+      key: apiKeyManager.getApiKeyForService(ServiceCategory.VISION) 
+    });
     serviceStatus.vision = true;
     console.log('✅ Google Cloud Vision client initialized successfully');
   } catch (error) {
@@ -68,8 +73,10 @@ export function initializeGoogleCloudApis() {
   }
   
   try {
-    // Translate API
-    translateClient = new TranslationServiceClient({ key: API_KEYS.UNIVERSAL_API_KEY });
+    // Translate API with dynamic API key assignment
+    translateClient = new TranslationServiceClient({ 
+      key: apiKeyManager.getApiKeyForService(ServiceCategory.TRANSLATE) 
+    });
     serviceStatus.translate = true;
     console.log('✅ Google Cloud Translate client initialized successfully');
   } catch (error) {
@@ -77,8 +84,10 @@ export function initializeGoogleCloudApis() {
   }
   
   try {
-    // Text-to-Speech API
-    ttsClient = new TextToSpeechClient({ key: API_KEYS.UNIVERSAL_API_KEY });
+    // Text-to-Speech API with dynamic API key assignment
+    ttsClient = new TextToSpeechClient({ 
+      key: apiKeyManager.getApiKeyForService(ServiceCategory.TTS) 
+    });
     serviceStatus.tts = true;
     console.log('✅ Google Cloud Text-to-Speech client initialized successfully');
   } catch (error) {
@@ -86,17 +95,21 @@ export function initializeGoogleCloudApis() {
   }
   
   try {
-    // Maps API
-    mapsClient = new MapsClient({});
-    serviceStatus.maps = true;
-    console.log('✅ Google Maps client initialized successfully');
+    // Maps API - using API Key Manager for initialization 
+    mapsClient = apiKeyManager.initializeMaps();
+    if (mapsClient) {
+      serviceStatus.maps = true;
+      console.log('✅ Google Maps client initialized successfully');
+    }
   } catch (error) {
     console.error('❌ Failed to initialize Google Maps client:', error);
   }
   
   try {
-    // Video Intelligence API
-    videoClient = new VideoIntelligenceServiceClient({ key: API_KEYS.UNIVERSAL_API_KEY });
+    // Video Intelligence API with dynamic API key assignment
+    videoClient = new VideoIntelligenceServiceClient({ 
+      key: apiKeyManager.getApiKeyForService(ServiceCategory.VIDEO) 
+    });
     serviceStatus.video = true;
     console.log('✅ Google Cloud Video Intelligence client initialized successfully');
   } catch (error) {
@@ -104,8 +117,10 @@ export function initializeGoogleCloudApis() {
   }
   
   try {
-    // Secret Manager API
-    secretManagerClient = new SecretManagerServiceClient({ key: API_KEYS.UNIVERSAL_API_KEY });
+    // Secret Manager API with dynamic API key assignment
+    secretManagerClient = new SecretManagerServiceClient({ 
+      key: apiKeyManager.getApiKeyForService(ServiceCategory.SECRETMANAGER) 
+    });
     serviceStatus.secretManager = true;
     console.log('✅ Secret Manager client initialized successfully');
   } catch (error) {
@@ -113,25 +128,29 @@ export function initializeGoogleCloudApis() {
   }
   
   try {
-    // Vertex AI
-    vertexAI = new VertexAI({
-      project: 'jetai-travel-companion',
-      location: 'us-central1',
-    });
-    serviceStatus.vertexAI = true;
-    console.log('✅ Google Vertex AI client initialized successfully');
+    // Vertex AI - using API Key Manager for initialization
+    vertexAI = apiKeyManager.initializeVertexAI();
+    if (vertexAI) {
+      serviceStatus.vertexAI = true;
+      console.log('✅ Google Vertex AI client initialized successfully');
+    }
   } catch (error) {
     console.error('❌ Failed to initialize Google Vertex AI client:', error);
   }
   
   try {
-    // Gemini API - Use GROUP2 key which is confirmed working
-    genAI = new GoogleGenerativeAI(API_KEYS.GEMINI_API_KEY);
-    serviceStatus.genAI = true;
-    console.log('✅ Google Generative AI (Gemini) client initialized successfully');
+    // Gemini API - using API Key Manager for initialization
+    genAI = apiKeyManager.initializeGemini();
+    if (genAI) {
+      serviceStatus.genAI = true;
+      console.log('✅ Google Generative AI (Gemini) client initialized successfully');
+    }
   } catch (error) {
     console.error('❌ Failed to initialize Google Generative AI (Gemini) client:', error);
   }
+  
+  // Log API assignment summary
+  console.log(apiKeyManager.getApiAssignmentSummary());
   
   console.log('🚀 API initialization completed!');
 }
@@ -181,8 +200,13 @@ export function getMapsClient(): MapsClient {
  */
 export function getGeminiClient(): GoogleGenerativeAI {
   if (!genAI) {
-    // Use the GROUP2 key which is confirmed working for Gemini
-    genAI = new GoogleGenerativeAI(API_KEYS.GEMINI_API_KEY);
+    // Use the API Key Manager to get the appropriate key for Gemini
+    genAI = apiKeyManager.initializeGemini();
+    if (!genAI) {
+      // Fallback to the static GROUP2 key which is known to work
+      genAI = new GoogleGenerativeAI(API_KEYS.GEMINI_API_KEY);
+      console.log('⚠️ Using fallback GEMINI_API_KEY as API Key Manager failed to initialize Gemini');
+    }
   }
   return genAI;
 }
@@ -192,10 +216,16 @@ export function getGeminiClient(): GoogleGenerativeAI {
  */
 export function getVertexAIClient(): VertexAI {
   if (!vertexAI) {
-    vertexAI = new VertexAI({
-      project: 'jetai-travel-companion',
-      location: 'us-central1',
-    });
+    // Use the API Key Manager to get the appropriate configuration for Vertex AI
+    vertexAI = apiKeyManager.initializeVertexAI();
+    if (!vertexAI) {
+      // Fallback to directly initializing Vertex AI
+      vertexAI = new VertexAI({
+        project: 'jetai-travel-companion',
+        location: 'us-central1',
+      });
+      console.log('⚠️ Using fallback VertexAI initialization as API Key Manager failed');
+    }
   }
   return vertexAI;
 }
@@ -231,7 +261,7 @@ export function configureGoogleMapsRequest(params: any = {}): any {
     ...params,
     params: {
       ...params.params,
-      key: API_KEYS.MAPS_API_KEY // Use GROUP1 key which is designed for Maps
+      key: apiKeyManager.getMapsApiKey() // Use dynamic API key assignment
     }
   };
 }
