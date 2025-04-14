@@ -1,103 +1,114 @@
-import React, { useState, useRef } from 'react';
-import { Map as MapIcon, Camera, Navigation, Search, Compass, Info } from 'lucide-react';
+import React, { useState } from 'react';
+import { 
+  Camera, 
+  Navigation,
+  MapPin,
+  MicIcon,
+  ImageIcon,
+  Send,
+  Info,
+  Languages
+} from 'lucide-react';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from '@/hooks/use-toast';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const ARNavigationPanel: React.FC = () => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('map');
   const [isLoading, setIsLoading] = useState(false);
-  const [landmarks, setLandmarks] = useState<any[]>([]);
-  const [directions, setDirections] = useState<any>(null);
-  const [nearby, setNearby] = useState<any[]>([]);
-  const [immersiveDescription, setImmersiveDescription] = useState('');
-  const [audioSrc, setAudioSrc] = useState('');
-  const [originLocation, setOriginLocation] = useState('');
-  const [destinationLocation, setDestinationLocation] = useState('');
-  const [locationName, setLocationName] = useState('');
-  const [language, setLanguage] = useState('en');
-  const [useCurrentLocation, setUseCurrentLocation] = useState(false);
-  const [currentCoords, setCurrentCoords] = useState({ lat: 0, lng: 0 });
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [recognizedLandmark, setRecognizedLandmark] = useState<string | null>(null);
+  const [directionResults, setDirectionResults] = useState<any>(null);
+  const [spokenDirections, setSpokenDirections] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [immersiveDescription, setImmersiveDescription] = useState<string | null>(null);
+  const [nearbyPlaces, setNearbyPlaces] = useState<any[]>([]);
+  const [selectedLanguage, setSelectedLanguage] = useState('en-US');
   
-  // Get current location
-  const getCurrentLocation = () => {
-    if (navigator.geolocation) {
-      setIsLoading(true);
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setCurrentCoords({ lat: latitude, lng: longitude });
-          setIsLoading(false);
-          toast({
-            title: "Location detected",
-            description: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
-          });
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-          setIsLoading(false);
-          toast({
-            title: "Location error",
-            description: "Could not get your current location",
-            variant: "destructive",
-          });
-        }
-      );
-    } else {
-      toast({
-        title: "Geolocation not supported",
-        description: "Your browser doesn't support geolocation",
-        variant: "destructive",
-      });
-    }
-  };
-  
-  // Handle file upload for landmark recognition
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle image upload
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     
-    const formData = new FormData();
-    formData.append('image', file);
+    setImageFile(file);
+    
+    // Create image preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    
+    // Reset recognition result
+    setRecognizedLandmark(null);
+  };
+  
+  // Recognize landmark from image
+  const recognizeLandmark = async () => {
+    if (!imageFile) {
+      toast({
+        title: "No Image Selected",
+        description: "Please upload an image first",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsLoading(true);
     try {
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      
       const response = await fetch('/api/ar-navigation/landmark-recognition', {
         method: 'POST',
         body: formData,
       });
       
       if (!response.ok) {
-        throw new Error('Failed to recognize landmarks');
+        throw new Error('Failed to recognize landmark');
       }
       
       const data = await response.json();
-      setLandmarks(data.landmarks || []);
       
-      if (data.landmarks.length === 0) {
+      if (data.landmarks && data.landmarks.length > 0) {
+        setRecognizedLandmark(data.landmarks[0].name);
         toast({
-          title: "No landmarks detected",
-          description: "Try uploading a clearer image of a recognizable landmark",
+          title: "Landmark Recognized",
+          description: `Identified as ${data.landmarks[0].name}`,
         });
       } else {
+        setRecognizedLandmark(null);
         toast({
-          title: "Landmarks detected",
-          description: `Found ${data.landmarks.length} landmarks in the image`,
+          title: "No Landmarks Recognized",
+          description: "Could not identify any landmarks in this image",
+          variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Error recognizing landmarks:', error);
+      console.error('Error recognizing landmark:', error);
       toast({
-        title: "Recognition failed",
-        description: "Failed to analyze the image",
+        title: "Recognition Failed",
+        description: "Could not process the image",
         variant: "destructive",
       });
     } finally {
@@ -105,12 +116,21 @@ const ARNavigationPanel: React.FC = () => {
     }
   };
   
-  // Get directions
-  const getDirections = async () => {
-    if (!destinationLocation) {
+  // Get directions between two points
+  const getDirections = async (event: React.FormEvent) => {
+    event.preventDefault();
+    
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const origin = formData.get('origin') as string;
+    const destination = formData.get('destination') as string;
+    const mode = formData.get('mode') as string;
+    const language = selectedLanguage.split('-')[0]; // Get language code without region
+    
+    if (!origin || !destination) {
       toast({
-        title: "Destination required",
-        description: "Please enter a destination",
+        title: "Missing Information",
+        description: "Please provide both origin and destination",
         variant: "destructive",
       });
       return;
@@ -118,33 +138,40 @@ const ARNavigationPanel: React.FC = () => {
     
     setIsLoading(true);
     try {
-      const origin = useCurrentLocation 
-        ? `${currentCoords.lat},${currentCoords.lng}` 
-        : originLocation;
-      
-      if (!origin) {
-        throw new Error('Origin location is required');
-      }
-      
-      const response = await apiRequest('POST', '/api/ar-navigation/directions', {
-        origin: origin,
-        destination: destinationLocation,
-        mode: 'walking',
-        language: language
+      const response = await fetch('/api/ar-navigation/directions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          origin,
+          destination,
+          mode,
+          language,
+        }),
       });
       
+      if (!response.ok) {
+        throw new Error('Failed to get directions');
+      }
+      
       const data = await response.json();
-      setDirections(data);
+      setDirectionResults(data);
+      
+      // Get first instruction for speech synthesis
+      if (data.steps && data.steps.length > 0) {
+        getSpokenDirections(data.steps[0].instruction);
+      }
       
       toast({
-        title: "Directions found",
-        description: `${data.distance} (${data.duration})`,
+        title: "Directions Retrieved",
+        description: `Found route from ${origin} to ${destination}`,
       });
     } catch (error) {
       console.error('Error getting directions:', error);
       toast({
-        title: "Directions failed",
-        description: "Could not get directions for the specified locations",
+        title: "Navigation Failed",
+        description: "Could not retrieve directions",
         variant: "destructive",
       });
     } finally {
@@ -152,40 +179,35 @@ const ARNavigationPanel: React.FC = () => {
     }
   };
   
-  // Get spoken directions
-  const getSpeechDirections = async (instruction: string) => {
+  // Get spoken directions in selected language
+  const getSpokenDirections = async (instruction: string) => {
+    if (!instruction) return;
+    
     setIsLoading(true);
     try {
-      const response = await apiRequest('POST', '/api/ar-navigation/spoken-directions', {
-        instruction,
-        language
+      const response = await fetch('/api/ar-navigation/spoken-directions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          instruction,
+          language: selectedLanguage,
+        }),
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to get spoken directions');
+      }
       
       const data = await response.json();
-      
-      // Create audio from base64
-      const audioContent = data.audioContent;
-      const audioBlob = new Blob(
-        [Buffer.from(audioContent, 'base64')], 
-        { type: 'audio/mp3' }
-      );
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      setAudioSrc(audioUrl);
-      
-      // Auto-play the audio
-      const audioElement = new Audio(audioUrl);
-      audioElement.play();
-      
-      toast({
-        title: "Speech generated",
-        description: "Playing audio instructions",
-      });
+      setSpokenDirections(instruction);
+      setAudioUrl(data.audioUrl);
     } catch (error) {
-      console.error('Error getting speech:', error);
+      console.error('Error getting spoken directions:', error);
       toast({
-        title: "Speech failed",
-        description: "Could not generate speech for the directions",
+        title: "Speech Synthesis Failed",
+        description: "Could not generate audio instructions",
         variant: "destructive",
       });
     } finally {
@@ -193,12 +215,21 @@ const ARNavigationPanel: React.FC = () => {
     }
   };
   
-  // Get nearby places
-  const getNearbyPlaces = async () => {
-    if (!useCurrentLocation && (!currentCoords.lat || !currentCoords.lng)) {
+  // Get nearby points of interest
+  const getNearbyPlaces = async (event: React.FormEvent) => {
+    event.preventDefault();
+    
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const latitude = parseFloat(formData.get('latitude') as string);
+    const longitude = parseFloat(formData.get('longitude') as string);
+    const radius = parseInt(formData.get('radius') as string);
+    const types = formData.get('types') as string;
+    
+    if (isNaN(latitude) || isNaN(longitude) || isNaN(radius)) {
       toast({
-        title: "Location required",
-        description: "Please enable current location or set coordinates",
+        title: "Invalid Coordinates",
+        description: "Please provide valid latitude, longitude and radius",
         variant: "destructive",
       });
       return;
@@ -206,25 +237,23 @@ const ARNavigationPanel: React.FC = () => {
     
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `/api/ar-navigation/nearby?lat=${currentCoords.lat}&lng=${currentCoords.lng}&radius=500&types=tourist_attraction,museum,restaurant`
-      );
+      const response = await fetch(`/api/ar-navigation/nearby?lat=${latitude}&lng=${longitude}&radius=${radius}&types=${types}`);
       
       if (!response.ok) {
         throw new Error('Failed to get nearby places');
       }
       
       const data = await response.json();
-      setNearby(data.places || []);
+      setNearbyPlaces(data.places || []);
       
       toast({
-        title: "Places found",
-        description: `Found ${data.places.length} interesting places nearby`,
+        title: "Places Found",
+        description: `Found ${data.places?.length || 0} places nearby`,
       });
     } catch (error) {
       console.error('Error getting nearby places:', error);
       toast({
-        title: "Search failed",
+        title: "Search Failed",
         description: "Could not find nearby places",
         variant: "destructive",
       });
@@ -233,12 +262,19 @@ const ARNavigationPanel: React.FC = () => {
     }
   };
   
-  // Get immersive description
-  const getImmersiveDescription = async () => {
+  // Get immersive description of a location
+  const getImmersiveDescription = async (event: React.FormEvent) => {
+    event.preventDefault();
+    
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const locationName = formData.get('locationName') as string;
+    const language = selectedLanguage.split('-')[0]; // Get language code without region
+    
     if (!locationName) {
       toast({
-        title: "Location name required",
-        description: "Please enter a location name",
+        title: "Missing Location",
+        description: "Please provide a location name",
         variant: "destructive",
       });
       return;
@@ -246,23 +282,33 @@ const ARNavigationPanel: React.FC = () => {
     
     setIsLoading(true);
     try {
-      const response = await apiRequest('POST', '/api/ar-navigation/immersive-description', {
-        locationName,
-        language
+      const response = await fetch('/api/ar-navigation/immersive-description', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          locationName,
+          language,
+        }),
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to get immersive description');
+      }
       
       const data = await response.json();
-      setImmersiveDescription(data.translatedDescription || data.originalDescription);
+      setImmersiveDescription(data.description);
       
       toast({
-        title: "Description generated",
-        description: "Immersive description created successfully",
+        title: "Description Generated",
+        description: `Generated immersive description for ${locationName}`,
       });
     } catch (error) {
-      console.error('Error getting description:', error);
+      console.error('Error getting immersive description:', error);
       toast({
-        title: "Description failed",
-        description: "Could not generate description for the location",
+        title: "Generation Failed",
+        description: "Could not generate immersive description",
         variant: "destructive",
       });
     } finally {
@@ -271,393 +317,348 @@ const ARNavigationPanel: React.FC = () => {
   };
   
   return (
-    <div className="w-full max-w-4xl mx-auto p-4">
-      <Card className="border-primary/10 bg-card">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-2xl font-bold flex items-center">
-            <Compass className="mr-2 h-6 w-6 text-primary" />
-            AR Travel Navigation
-          </CardTitle>
-          <CardDescription>
-            Explore the world with augmented reality navigation tools
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="map" onValueChange={setActiveTab} value={activeTab}>
-            <TabsList className="grid grid-cols-4 mb-4">
-              <TabsTrigger value="map">
-                <MapIcon className="mr-2 h-4 w-4" />
-                Map
-              </TabsTrigger>
-              <TabsTrigger value="ar-cam">
-                <Camera className="mr-2 h-4 w-4" />
-                Landmark AR
-              </TabsTrigger>
-              <TabsTrigger value="nearby">
-                <Search className="mr-2 h-4 w-4" />
-                Nearby
-              </TabsTrigger>
-              <TabsTrigger value="immersive">
-                <Info className="mr-2 h-4 w-4" />
-                Immersive
-              </TabsTrigger>
-            </TabsList>
-            
-            {/* Map & Directions Tab */}
-            <TabsContent value="map">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Switch 
-                    id="use-current" 
-                    checked={useCurrentLocation} 
-                    onCheckedChange={setUseCurrentLocation}
+    <Tabs defaultValue="landmark" className="w-full">
+      <TabsList className="grid grid-cols-4">
+        <TabsTrigger value="landmark" className="flex items-center space-x-2">
+          <Camera className="h-4 w-4" />
+          <span>Landmark</span>
+        </TabsTrigger>
+        <TabsTrigger value="directions" className="flex items-center space-x-2">
+          <Navigation className="h-4 w-4" />
+          <span>Directions</span>
+        </TabsTrigger>
+        <TabsTrigger value="nearby" className="flex items-center space-x-2">
+          <MapPin className="h-4 w-4" />
+          <span>Nearby</span>
+        </TabsTrigger>
+        <TabsTrigger value="immersive" className="flex items-center space-x-2">
+          <Info className="h-4 w-4" />
+          <span>Immersive</span>
+        </TabsTrigger>
+      </TabsList>
+      
+      {/* Language Selector */}
+      <div className="flex justify-end mt-4">
+        <div className="flex items-center space-x-2">
+          <Languages className="h-4 w-4 text-muted-foreground" />
+          <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Language" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="en-US">English (US)</SelectItem>
+              <SelectItem value="fr-FR">French</SelectItem>
+              <SelectItem value="es-ES">Spanish</SelectItem>
+              <SelectItem value="de-DE">German</SelectItem>
+              <SelectItem value="ja-JP">Japanese</SelectItem>
+              <SelectItem value="zh-CN">Chinese</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      {/* Landmark Recognition */}
+      <TabsContent value="landmark">
+        <Card>
+          <CardHeader>
+            <CardTitle>Landmark Recognition</CardTitle>
+            <CardDescription>
+              Upload a photo of a landmark to identify it using AI
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex flex-col space-y-2">
+                <Label htmlFor="landmark-image">Upload Image</Label>
+                <Input
+                  id="landmark-image"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                />
+              </div>
+              
+              {imagePreview && (
+                <div className="mt-4">
+                  <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
+                    <img 
+                      src={imagePreview}
+                      alt="Landmark preview"
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {recognizedLandmark && (
+                <div className="p-4 rounded-lg bg-primary/10 mt-4">
+                  <h3 className="font-medium text-lg">Recognized Landmark:</h3>
+                  <p className="text-primary font-semibold text-xl">{recognizedLandmark}</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button 
+              onClick={recognizeLandmark} 
+              disabled={!imageFile || isLoading}
+              className="w-full"
+            >
+              {isLoading ? 'Processing...' : 'Recognize Landmark'}
+            </Button>
+          </CardFooter>
+        </Card>
+      </TabsContent>
+      
+      {/* Directions */}
+      <TabsContent value="directions">
+        <Card>
+          <CardHeader>
+            <CardTitle>AR Navigation</CardTitle>
+            <CardDescription>
+              Get detailed directions with AR-powered navigation
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={getDirections} className="space-y-4">
+              <div className="grid gap-4">
+                <div className="flex flex-col space-y-2">
+                  <Label htmlFor="origin">Starting Point</Label>
+                  <Input
+                    id="origin"
+                    name="origin"
+                    placeholder="Enter your starting point"
+                    required
                   />
-                  <Label htmlFor="use-current">Use current location</Label>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={getCurrentLocation}
-                    className="ml-auto"
-                  >
-                    <Compass className="h-4 w-4 mr-2" />
-                    Get location
-                  </Button>
                 </div>
-                
-                <div className="grid gap-4">
-                  <div>
-                    <Label htmlFor="origin">Origin</Label>
-                    <Input
-                      id="origin"
-                      placeholder={useCurrentLocation ? "Using current location" : "Enter starting point"}
-                      value={originLocation}
-                      onChange={(e) => setOriginLocation(e.target.value)}
-                      disabled={useCurrentLocation}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="destination">Destination</Label>
-                    <Input
-                      id="destination"
-                      placeholder="Enter destination"
-                      value={destinationLocation}
-                      onChange={(e) => setDestinationLocation(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="language">Language</Label>
-                    <select
-                      id="language"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      value={language}
-                      onChange={(e) => setLanguage(e.target.value)}
-                    >
-                      <option value="en">English</option>
-                      <option value="es">Spanish</option>
-                      <option value="fr">French</option>
-                      <option value="de">German</option>
-                      <option value="it">Italian</option>
-                      <option value="ja">Japanese</option>
-                      <option value="ko">Korean</option>
-                      <option value="zh">Chinese</option>
-                    </select>
-                  </div>
-                  
-                  <Button 
-                    onClick={getDirections} 
-                    disabled={isLoading || (!destinationLocation)}
-                  >
-                    {isLoading ? 'Getting directions...' : 'Get Directions'}
-                  </Button>
+                <div className="flex flex-col space-y-2">
+                  <Label htmlFor="destination">Destination</Label>
+                  <Input
+                    id="destination"
+                    name="destination"
+                    placeholder="Enter your destination"
+                    required
+                  />
                 </div>
-                
-                {directions && (
-                  <div className="mt-4 border rounded-md p-4 space-y-4">
-                    <div className="flex justify-between">
-                      <div>
-                        <p className="text-sm font-medium">Distance</p>
-                        <p className="text-xl font-bold">{directions.distance}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">Duration</p>
-                        <p className="text-xl font-bold">{directions.duration}</p>
-                      </div>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div>
-                      <h3 className="font-medium mb-2">Route: {directions.summary}</h3>
-                      <div className="space-y-4">
-                        {directions.steps.map((step: any, i: number) => (
-                          <div key={i} className="flex border-l-2 border-primary pl-4 ml-2">
-                            <div>
-                              <div 
-                                dangerouslySetInnerHTML={{ __html: step.instruction }} 
-                                className="mb-1"
-                              />
-                              <div className="flex items-center text-sm text-muted-foreground">
-                                <span>{step.distance} ({step.duration})</span>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="ml-2 h-6 text-xs"
-                                  onClick={() => getSpeechDirections(step.instruction.replace(/<[^>]*>/g, ''))}
-                                >
-                                  🔊 Speak
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <div className="flex flex-col space-y-2">
+                  <Label htmlFor="mode">Travel Mode</Label>
+                  <Select name="mode" defaultValue="walking">
+                    <SelectTrigger id="mode">
+                      <SelectValue placeholder="Select travel mode" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="walking">Walking</SelectItem>
+                      <SelectItem value="driving">Driving</SelectItem>
+                      <SelectItem value="bicycling">Bicycling</SelectItem>
+                      <SelectItem value="transit">Public Transit</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? 'Getting Directions...' : 'Get Directions'}
+                </Button>
               </div>
-            </TabsContent>
+            </form>
             
-            {/* Landmark AR Camera Tab */}
-            <TabsContent value="ar-cam">
-              <div className="space-y-4">
-                <div className="grid gap-4">
-                  <div className="flex justify-center items-center border-2 border-dashed rounded-md p-8 h-40">
-                    <div className="text-center">
-                      <Camera className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-                      <h3 className="font-medium">Upload a landmark image</h3>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        Upload a photo to identify landmarks
-                      </p>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                      />
-                      <Button
-                        variant="outline"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        Choose Image
-                      </Button>
+            {directionResults && (
+              <div className="mt-6 space-y-4">
+                <Separator />
+                <div>
+                  <h3 className="font-medium text-lg mb-2">Route Information</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="rounded-lg p-3 bg-primary/10">
+                      <p className="text-sm text-muted-foreground">Distance</p>
+                      <p className="text-lg font-semibold">{directionResults.distance}</p>
+                    </div>
+                    <div className="rounded-lg p-3 bg-primary/10">
+                      <p className="text-sm text-muted-foreground">Duration</p>
+                      <p className="text-lg font-semibold">{directionResults.duration}</p>
                     </div>
                   </div>
-                  
-                  {landmarks.length > 0 && (
-                    <div className="border rounded-md p-4 space-y-4">
-                      <h3 className="font-medium">Recognized Landmarks</h3>
-                      <div className="space-y-4">
-                        {landmarks.map((landmark, i) => (
-                          <div key={i} className="flex items-start gap-2">
-                            <div className="bg-primary/10 p-2 rounded-full">
-                              <MapIcon className="h-4 w-4 text-primary" />
-                            </div>
-                            <div>
-                              <h4 className="font-medium">{landmark.name}</h4>
-                              <p className="text-sm text-muted-foreground">
-                                Confidence: {(landmark.confidence * 100).toFixed(1)}%
-                              </p>
-                              {landmark.locations && landmark.locations.length > 0 && (
-                                <p className="text-sm">
-                                  Location: {landmark.locations[0].latitude.toFixed(4)}, {landmark.locations[0].longitude.toFixed(4)}
-                                </p>
-                              )}
-                              <Button
-                                variant="link"
-                                size="sm"
-                                className="p-0 h-6"
-                                onClick={() => {
-                                  // Set this landmark's location for directions
-                                  if (landmark.locations && landmark.locations.length > 0) {
-                                    setActiveTab('map');
-                                    setDestinationLocation(`${landmark.locations[0].latitude},${landmark.locations[0].longitude}`);
-                                    setLocationName(landmark.name);
-                                  }
-                                }}
-                              >
-                                Get directions
-                              </Button>
-                              {' | '}
-                              <Button
-                                variant="link"
-                                size="sm"
-                                className="p-0 h-6"
-                                onClick={() => {
-                                  // Set for immersive description
-                                  setActiveTab('immersive');
-                                  setLocationName(landmark.name);
-                                }}
-                              >
-                                Get description
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </TabsContent>
-            
-            {/* Nearby Tab */}
-            <TabsContent value="nearby">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={getCurrentLocation}
-                    className="mr-2"
-                  >
-                    <Compass className="h-4 w-4 mr-2" />
-                    Get location
-                  </Button>
-                  
-                  <p className="text-sm">
-                    {currentCoords.lat
-                      ? `Current: ${currentCoords.lat.toFixed(4)}, ${currentCoords.lng.toFixed(4)}`
-                      : 'No location set'}
-                  </p>
-                  
-                  <Button 
-                    onClick={getNearbyPlaces} 
-                    disabled={isLoading || (!currentCoords.lat)} 
-                    className="ml-auto"
-                  >
-                    Find Nearby
-                  </Button>
                 </div>
                 
-                {nearby.length > 0 && (
-                  <div className="border rounded-md p-4">
-                    <h3 className="font-medium mb-4">Places Near You</h3>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      {nearby.map((place, i) => (
-                        <div key={i} className="border rounded-md p-3 hover:bg-muted/50 transition">
-                          <div className="flex justify-between">
-                            <h4 className="font-medium">{place.name}</h4>
-                            {place.rating && (
-                              <div className="flex items-center">
-                                <span>⭐ {place.rating}</span>
-                              </div>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-2">{place.address}</p>
-                          <div className="flex items-center gap-2 text-sm">
-                            <p className="bg-primary/10 px-2 py-1 rounded text-xs">
-                              {place.types && place.types[0].replace(/_/g, ' ')}
-                            </p>
-                            {place.openNow !== undefined && (
-                              <p className={`text-xs ${place.openNow ? 'text-green-600' : 'text-red-600'}`}>
-                                {place.openNow ? 'Open now' : 'Closed'}
-                              </p>
-                            )}
-                          </div>
-                          <div className="mt-2 flex">
-                            <Button
-                              variant="link"
-                              size="sm"
-                              className="p-0 h-6"
-                              onClick={() => {
-                                // Set this place for directions
-                                setActiveTab('map');
-                                setDestinationLocation(`${place.location.lat},${place.location.lng}`);
-                              }}
-                            >
-                              Get directions
-                            </Button>
-                            {' | '}
-                            <Button
-                              variant="link"
-                              size="sm"
-                              className="p-0 h-6"
-                              onClick={() => {
-                                // Set for immersive description
-                                setActiveTab('immersive');
-                                setLocationName(place.name);
-                              }}
-                            >
-                              Description
-                            </Button>
-                          </div>
+                <div>
+                  <h3 className="font-medium text-lg mb-2">Navigation Steps</h3>
+                  <div className="space-y-3 max-h-60 overflow-y-auto">
+                    {directionResults.steps?.map((step: any, index: number) => (
+                      <div key={index} className="p-3 rounded-lg border">
+                        <div className="flex justify-between items-start">
+                          <div dangerouslySetInnerHTML={{ __html: step.instruction }} />
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => getSpokenDirections(step.instruction)}
+                            className="ml-2 flex-shrink-0"
+                          >
+                            <MicIcon className="h-4 w-4" />
+                          </Button>
                         </div>
-                      ))}
-                    </div>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {step.distance} · {step.duration}
+                        </p>
+                      </div>
+                    ))}
                   </div>
-                )}
-              </div>
-            </TabsContent>
-            
-            {/* Immersive Tab */}
-            <TabsContent value="immersive">
-              <div className="space-y-4">
-                <div className="grid gap-4">
-                  <div>
-                    <Label htmlFor="location-name">Location Name</Label>
-                    <Input
-                      id="location-name"
-                      placeholder="Enter a location or landmark name"
-                      value={locationName}
-                      onChange={(e) => setLocationName(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="immersive-language">Language</Label>
-                    <select
-                      id="immersive-language"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      value={language}
-                      onChange={(e) => setLanguage(e.target.value)}
-                    >
-                      <option value="en">English</option>
-                      <option value="es">Spanish</option>
-                      <option value="fr">French</option>
-                      <option value="de">German</option>
-                      <option value="it">Italian</option>
-                      <option value="ja">Japanese</option>
-                      <option value="ko">Korean</option>
-                      <option value="zh">Chinese</option>
-                    </select>
-                  </div>
-                  
-                  <Button 
-                    onClick={getImmersiveDescription} 
-                    disabled={isLoading || !locationName}
-                  >
-                    {isLoading ? 'Generating...' : 'Generate Description'}
-                  </Button>
                 </div>
                 
-                {immersiveDescription && (
-                  <div className="mt-4 border rounded-md p-6 bg-primary/5">
-                    <h3 className="font-medium mb-2 text-lg">{locationName}</h3>
-                    <div className="prose prose-sm dark:prose-invert max-w-none">
-                      {immersiveDescription.split('\n\n').map((paragraph, i) => (
-                        <p key={i}>{paragraph}</p>
-                      ))}
-                    </div>
-                    <div className="mt-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => getSpeechDirections(immersiveDescription)}
-                      >
-                        🔊 Listen to description
-                      </Button>
+                {audioUrl && (
+                  <div className="mt-4">
+                    <h3 className="font-medium text-lg mb-2">Spoken Directions</h3>
+                    <div className="p-4 rounded-lg bg-primary/10">
+                      <p className="text-sm mb-2">{spokenDirections}</p>
+                      <audio controls className="w-full">
+                        <source src={audioUrl} type="audio/mp3" />
+                        Your browser does not support the audio element.
+                      </audio>
                     </div>
                   </div>
                 )}
               </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </div>
+            )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+      
+      {/* Nearby Places */}
+      <TabsContent value="nearby">
+        <Card>
+          <CardHeader>
+            <CardTitle>Points of Interest</CardTitle>
+            <CardDescription>
+              Find nearby attractions, restaurants, and more
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={getNearbyPlaces} className="space-y-4">
+              <div className="grid gap-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col space-y-2">
+                    <Label htmlFor="latitude">Latitude</Label>
+                    <Input
+                      id="latitude"
+                      name="latitude"
+                      type="number"
+                      step="any"
+                      placeholder="40.7128"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col space-y-2">
+                    <Label htmlFor="longitude">Longitude</Label>
+                    <Input
+                      id="longitude"
+                      name="longitude"
+                      type="number"
+                      step="any"
+                      placeholder="-74.0060"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col space-y-2">
+                  <Label htmlFor="radius">Search Radius (meters)</Label>
+                  <Input
+                    id="radius"
+                    name="radius"
+                    type="number"
+                    placeholder="1000"
+                    defaultValue="1000"
+                    required
+                  />
+                </div>
+                <div className="flex flex-col space-y-2">
+                  <Label htmlFor="types">Place Types</Label>
+                  <Select name="types" defaultValue="tourist_attraction">
+                    <SelectTrigger id="types">
+                      <SelectValue placeholder="Select place type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="tourist_attraction">Tourist Attractions</SelectItem>
+                      <SelectItem value="restaurant">Restaurants</SelectItem>
+                      <SelectItem value="museum">Museums</SelectItem>
+                      <SelectItem value="hotel">Hotels</SelectItem>
+                      <SelectItem value="shopping_mall">Shopping</SelectItem>
+                      <SelectItem value="park">Parks</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? 'Searching...' : 'Find Nearby Places'}
+                </Button>
+              </div>
+            </form>
+            
+            {nearbyPlaces.length > 0 && (
+              <div className="mt-6">
+                <Separator className="my-4" />
+                <h3 className="font-medium text-lg mb-3">Nearby Points of Interest</h3>
+                <div className="grid gap-4">
+                  {nearbyPlaces.map((place, index) => (
+                    <div key={index} className="p-4 rounded-lg border">
+                      <div className="flex justify-between">
+                        <h4 className="font-semibold">{place.name}</h4>
+                        <span className="text-sm bg-primary/10 px-2 py-1 rounded-full">
+                          {place.rating ? `★ ${place.rating}` : 'No rating'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">{place.vicinity}</p>
+                      <div className="flex items-center mt-2 text-sm">
+                        <MapPin className="h-3 w-3 mr-1 text-muted-foreground" />
+                        <span className="text-muted-foreground">
+                          {place.distance ? `${place.distance} away` : 'Distance unavailable'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+      
+      {/* Immersive Descriptions */}
+      <TabsContent value="immersive">
+        <Card>
+          <CardHeader>
+            <CardTitle>Immersive Descriptions</CardTitle>
+            <CardDescription>
+              Get detailed AI-generated descriptions of locations for a more immersive experience
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={getImmersiveDescription} className="space-y-4">
+              <div className="grid gap-4">
+                <div className="flex flex-col space-y-2">
+                  <Label htmlFor="locationName">Location Name</Label>
+                  <Input
+                    id="locationName"
+                    name="locationName"
+                    placeholder="e.g., Eiffel Tower, Grand Canyon, Tokyo"
+                    required
+                  />
+                </div>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? 'Generating...' : 'Generate Immersive Description'}
+                </Button>
+              </div>
+            </form>
+            
+            {immersiveDescription && (
+              <div className="mt-6">
+                <Separator className="my-4" />
+                <div className="p-4 rounded-lg bg-primary/5">
+                  <h3 className="font-medium text-lg mb-2">Immersive Experience</h3>
+                  <div className="prose dark:prose-invert max-w-none">
+                    <p className="whitespace-pre-line">{immersiveDescription}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
   );
 };
 

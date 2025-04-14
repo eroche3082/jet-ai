@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ARNavigationPanel from '@/components/ARNavigationPanel';
-import MainLayout from '@/components/layouts/MainLayout';
+import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
@@ -113,22 +113,20 @@ const ARNavigationPage: React.FC = () => {
   };
 
   return (
-    <MainLayout>
-      <div className="container mx-auto py-6">
-        <h1 className="text-3xl font-bold mb-2">
-          Augmented Reality Travel Companion
-        </h1>
-        <p className="text-muted-foreground mb-6">
-          Navigate and explore destinations with AR-powered features and real-time information
-        </p>
-        
-        <Separator className="my-6" />
-        
-        {renderServiceStatus()}
-        
-        <ARNavigationPanel />
-      </div>
-    </MainLayout>
+    <div className="container mx-auto py-6">
+      <h1 className="text-3xl font-bold mb-2">
+        Augmented Reality Travel Companion
+      </h1>
+      <p className="text-muted-foreground mb-6">
+        Navigate and explore destinations with AR-powered features and real-time information
+      </p>
+      
+      <Separator className="my-6" />
+      
+      {renderServiceStatus()}
+      
+      <ARNavigationPanel />
+    </div>
   );
 };
 

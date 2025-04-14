@@ -201,6 +201,7 @@ function App() {
         <Route path="/audio" component={AudioToolsPage} />
         <Route path="/bookings" component={BookingsPage} />
         <Route path="/ar" component={ARPage} />
+        <Route path="/ar-navigation" component={ARNavigationPage} />
         <Route path="/portfolio" component={PortfolioPage} />
         <Route path="/suggestions" component={SuggestionsPage} />
         <Route path="/memories" component={TravelMemoryPage} />
