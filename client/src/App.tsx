@@ -7,6 +7,8 @@ import ItineraryView from "@/pages/ItineraryView";
 import SignIn from "@/pages/SignIn";
 import Dashboard from "@/pages/Dashboard";
 import Checkout from "@/pages/Checkout";
+import CheckoutPage from "@/pages/CheckoutPage";
+import PaymentSuccessPage from "@/pages/PaymentSuccessPage";
 import Membership from "@/pages/Membership";
 import PricingPlans from "@/pages/PricingPlans";
 import TravelCommunityPage from "@/pages/TravelCommunityPage";
@@ -185,6 +187,8 @@ function App() {
           }}
         </Route>
         <Route path="/checkout" component={Checkout} />
+        <Route path="/checkout-page" component={CheckoutPage} />
+        <Route path="/payment-success" component={PaymentSuccessPage} />
         
         {/* AI Assistant routes */}
         <Route path="/vertex-ai" component={VertexAIPage} />

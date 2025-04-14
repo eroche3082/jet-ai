@@ -339,19 +339,42 @@ export default function Membership() {
                   ))}
                 </ul>
               </CardContent>
-              <CardFooter>
-                <Button 
-                  className="w-full"
-                  disabled={plan.disabled || membershipData.membershipTier === plan.tier || 
-                    (plan.tier === 'freemium' && membershipData.membershipTier === 'premium') ||
-                    upgradeToFreemium.isPending || upgradeToPremium.isPending}
-                  onClick={() => handleUpgrade(plan.tier)}
-                  variant={membershipData.membershipTier === plan.tier ? "outline" : "default"}
-                >
-                  {membershipData.membershipTier === plan.tier ? 'Current Plan' : 
-                   (plan.tier === 'freemium' && membershipData.membershipTier === 'premium') ? 'Premium Plan Active' :
-                   plan.buttonText}
-                </Button>
+              <CardFooter className="flex flex-col space-y-2">
+                {plan.tier === 'premium' ? (
+                  <>
+                    <Button 
+                      className="w-full"
+                      disabled={membershipData.membershipTier === plan.tier || 
+                        upgradeToFreemium.isPending || upgradeToPremium.isPending}
+                      onClick={() => handleUpgrade(plan.tier)}
+                      variant={membershipData.membershipTier === plan.tier ? "outline" : "default"}
+                    >
+                      {membershipData.membershipTier === plan.tier ? 'Current Plan' : 'Upgrade (Free Trial)'}
+                    </Button>
+                    
+                    {membershipData.membershipTier !== 'premium' && (
+                      <Link href="/checkout-page">
+                        <Button variant="secondary" className="w-full flex items-center">
+                          <CreditCard className="mr-2 h-4 w-4" />
+                          Pay for Annual Plan ($99.99)
+                        </Button>
+                      </Link>
+                    )}
+                  </>
+                ) : (
+                  <Button 
+                    className="w-full"
+                    disabled={plan.disabled || membershipData.membershipTier === plan.tier || 
+                      (plan.tier === 'freemium' && membershipData.membershipTier === 'premium') ||
+                      upgradeToFreemium.isPending || upgradeToPremium.isPending}
+                    onClick={() => handleUpgrade(plan.tier)}
+                    variant={membershipData.membershipTier === plan.tier ? "outline" : "default"}
+                  >
+                    {membershipData.membershipTier === plan.tier ? 'Current Plan' : 
+                     (plan.tier === 'freemium' && membershipData.membershipTier === 'premium') ? 'Premium Plan Active' :
+                     plan.buttonText}
+                  </Button>
+                )}
               </CardFooter>
             </Card>
           ))}
@@ -378,6 +401,27 @@ export default function Membership() {
               <span>Early access to new features</span>
             </li>
           </ul>
+          
+          <div className="mt-6 p-4 bg-amber-50 rounded-lg border border-amber-200">
+            <h4 className="font-medium mb-2 text-amber-800">Annual Premium Plan Benefits</h4>
+            <p className="text-amber-700 text-sm mb-2">
+              Pay once and enjoy premium benefits for a full year at a 16% discount compared to monthly billing.
+            </p>
+            <ul className="text-sm text-amber-700 space-y-1">
+              <li>✓ Save $19.90 compared to monthly payments</li>
+              <li>✓ All premium features included</li>
+              <li>✓ Priority support for the entire year</li>
+              <li>✓ Price locked for 12 months</li>
+            </ul>
+            <div className="mt-3">
+              <Link href="/checkout-page">
+                <Button variant="default" size="sm" className="bg-amber-600 hover:bg-amber-700 text-white">
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Get Annual Plan - $99.99
+                </Button>
+              </Link>
+            </div>
+          </div>
           
           <Separator className="my-6" />
           
