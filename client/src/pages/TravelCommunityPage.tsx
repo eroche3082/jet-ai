@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
-import { MapPinIcon, HeartIcon, MessageSquareIcon, ShareIcon, GlobeIcon, UserIcon, Loader2, RefreshCwIcon } from 'lucide-react';
+import { MapPinIcon, HeartIcon, MessageSquareIcon, ShareIcon, GlobeIcon, UserIcon, Loader2 } from 'lucide-react';
 import { 
   Card, 
   CardContent, 
@@ -49,76 +49,76 @@ interface CommunityPost {
   createdAt: Date;
 }
 
-// JET AI community stories with real user experiences
-const INITIAL_POSTS: CommunityPost[] = [
+// Sample data for community posts
+const SAMPLE_POSTS: CommunityPost[] = [
   {
-    id: 'jetai-1',
+    id: '1',
     author: {
       id: 'user1',
-      name: 'Alex Johnson',
-      avatar: '/avatars/alex.jpg',
-      location: 'Tokyo, Japan'
+      name: 'Emma Wilson',
+      avatar: '/avatars/emma.jpg',
+      location: 'London, UK'
     },
-    content: "JET AI's language translation feature saved my trip in Japan! Being able to instantly translate signs and menus made exploring Tokyo so much easier. The AI even helped me have a conversation with a local craftsman about traditional sword making techniques!",
-    images: ['/community/tokyo-skyline.jpg', '/community/japan-temple.jpg'],
+    content: "Just discovered this hidden gem in Kyoto! The Arashiyama Bamboo Grove is even more breathtaking in person. The morning light filtering through the towering bamboo creates an almost magical atmosphere. Definitely worth waking up early to avoid the crowds.",
+    images: ['/community/kyoto-bamboo.jpg', '/community/kyoto-temple.jpg'],
     location: {
-      name: 'Shibuya, Tokyo, Japan',
+      name: 'Arashiyama Bamboo Grove, Kyoto, Japan',
       coordinates: {
-        lat: 35.6595, 
-        lng: 139.7004
+        lat: 35.0160, 
+        lng: 135.6711
       }
     },
-    tags: ['JetAI', 'Tokyo', 'Translation', 'TravelTech', 'Japan'],
-    likes: 428,
-    comments: 64,
+    tags: ['Japan', 'Kyoto', 'NatureLovers', 'Photography'],
+    likes: 248,
+    comments: 42,
     isLiked: false,
-    createdAt: new Date('2025-04-12')
-  },
-  {
-    id: 'jetai-2',
-    author: {
-      id: 'user2',
-      name: 'Maria Gonzalez',
-      avatar: '/avatars/maria.jpg',
-      location: 'Madrid, Spain'
-    },
-    content: "Using JET AI's itinerary planner for our European adventure was a game-changer! It created the perfect balance of famous landmarks and hidden local spots. The AI even adjusted our schedule when a surprise transportation strike hit Paris, saving us hours of stress!",
-    images: ['/community/paris-street.jpg'],
-    location: {
-      name: 'Paris, France',
-      coordinates: {
-        lat: 48.8566, 
-        lng: 2.3522
-      }
-    },
-    tags: ['JetAI', 'Europe', 'Madrid', 'Paris', 'TravelPlanning'],
-    likes: 356,
-    comments: 48,
-    isLiked: true,
     createdAt: new Date('2025-04-10')
   },
   {
-    id: 'jetai-3',
+    id: '2',
     author: {
-      id: 'user3',
-      name: 'David Chen',
-      avatar: '/avatars/david.jpg',
-      location: 'San Francisco, USA'
+      id: 'user2',
+      name: 'James Rodriguez',
+      avatar: '/avatars/james.jpg',
+      location: 'Barcelona, Spain'
     },
-    content: "JET AI's restaurant recommendations in Singapore were spot on! The AI understood my dietary preferences perfectly and suggested local dishes I would never have discovered on my own. It even booked reservations at a hidden speakeasy with the best cocktails I've ever had!",
-    images: ['/community/singapore-food.jpg', '/community/singapore-skyline.jpg'],
+    content: "Trekking through Patagonia has been on my bucket list for years, and it did not disappoint! The landscapes are absolutely breathtaking and change dramatically as you move through different areas. Torres del Paine was the highlight - those granite peaks against the turquoise lakes are unforgettable.",
+    images: ['/community/patagonia-mountains.jpg'],
     location: {
-      name: 'Marina Bay, Singapore',
+      name: 'Torres del Paine, Patagonia, Chile',
       coordinates: {
-        lat: 1.2800, 
-        lng: 103.8509
+        lat: -51.0310, 
+        lng: -73.0599
       }
     },
-    tags: ['JetAI', 'Singapore', 'Foodie', 'CulinaryTour', 'FoodieParadise'],
-    likes: 289,
-    comments: 51,
+    tags: ['Patagonia', 'Chile', 'Hiking', 'Mountains', 'Adventure'],
+    likes: 312,
+    comments: 56,
+    isLiked: true,
+    createdAt: new Date('2025-04-08')
+  },
+  {
+    id: '3',
+    author: {
+      id: 'user3',
+      name: 'Sophia Chen',
+      avatar: '/avatars/sophia.jpg',
+      location: 'Singapore'
+    },
+    content: "Food tour in Bangkok's Chinatown (Yaowarat) was the highlight of my trip to Thailand! From incredible seafood at Rut & Lek to the best pad thai at Thipsamai, and endless street food stalls in between. Pro tip: Go hungry and pace yourself, there's so much to try!",
+    images: ['/community/bangkok-food.jpg', '/community/bangkok-market.jpg'],
+    location: {
+      name: 'Yaowarat (Chinatown), Bangkok, Thailand',
+      coordinates: {
+        lat: 13.7422, 
+        lng: 100.5130
+      }
+    },
+    tags: ['Thailand', 'Bangkok', 'FoodTour', 'StreetFood', 'Culinary'],
+    likes: 189,
+    comments: 37,
     isLiked: false,
-    createdAt: new Date('2025-04-13')
+    createdAt: new Date('2025-04-11')
   }
 ];
 
@@ -277,7 +277,7 @@ export default function TravelCommunityPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
   
-  const [posts, setPosts] = useState<CommunityPost[]>(INITIAL_POSTS);
+  const [posts, setPosts] = useState<CommunityPost[]>(SAMPLE_POSTS);
   const [isLoading, setIsLoading] = useState(false);
   
   const fetchPosts = async () => {
@@ -315,18 +315,18 @@ export default function TravelCommunityPage() {
           setPosts(formattedPosts);
           console.log('Loaded posts from API:', formattedPosts);
         } else {
-          console.log('No posts found from API, using initial data');
-          // Keep using initial posts if API returns empty
+          console.log('No posts found from API, using sample data');
+          // Keep using sample posts if API returns empty
         }
       } else {
         throw new Error(`Error fetching posts: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
-      // Keep using initial posts if API fails
+      // Keep using sample posts if API fails
       toast({
         title: "Couldn't load latest posts",
-        description: "We're using JET AI community content until the connection is restored.",
+        description: "We're using sample content until the connection is restored.",
         variant: "destructive"
       });
     } finally {
@@ -350,9 +350,9 @@ export default function TravelCommunityPage() {
   return (
     <div className="container mx-auto py-8 max-w-6xl">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 text-center">JET AI Travel Community</h1>
+        <h1 className="text-3xl font-bold mb-2 text-center">Global Travel Community</h1>
         <p className="text-center text-muted-foreground mb-6">
-          Connect with AI-powered travelers worldwide, share JET AI enhanced experiences, and discover hidden gems
+          Connect with travelers worldwide, share experiences, and discover hidden gems
         </p>
         
         <div className="flex items-center justify-center gap-4 mb-6">
@@ -362,30 +362,8 @@ export default function TravelCommunityPage() {
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
-          <Button 
-            className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white font-medium"
-            onClick={() => {
-              if (searchTerm.trim()) {
-                toast({
-                  title: "AI-Powered Search",
-                  description: `JET AI is analyzing travel data for "${searchTerm}"`,
-                });
-                // Simulate search delay
-                setTimeout(() => {
-                  setPosts(INITIAL_POSTS.filter(post => 
-                    post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    post.location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                    post.author.name.toLowerCase().includes(searchTerm.toLowerCase())
-                  ));
-                }, 1500);
-              }
-            }}
-          >
-            <svg className="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            Search with JET AI
+          <Button className="bg-[#4a89dc] hover:bg-[#3a79cc]">
+            Search
           </Button>
         </div>
       </header>
@@ -398,38 +376,17 @@ export default function TravelCommunityPage() {
               <CardTitle className="text-lg">Explore</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 pb-4">
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start text-left hover:bg-[#4a89dc]/10"
-                onClick={() => toast({
-                  title: "JET AI Destinations",
-                  description: "Discovering trending destinations with real-time data!",
-                })}
-              >
-                <GlobeIcon className="mr-2 h-4 w-4 text-[#4a89dc]" />
-                <span>JET AI Destinations</span>
+              <Button variant="ghost" className="w-full justify-start text-left">
+                <GlobeIcon className="mr-2 h-4 w-4" />
+                <span>Trending Destinations</span>
               </Button>
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start text-left hover:bg-[#4a89dc]/10"
-                onClick={() => toast({
-                  title: "AI-Enhanced Experiences",
-                  description: "Discover trips enhanced by JET AI's smart recommendations!",
-                })}
-              >
-                <HeartIcon className="mr-2 h-4 w-4 text-[#4a89dc]" />
-                <span>AI-Enhanced Experiences</span>
+              <Button variant="ghost" className="w-full justify-start text-left">
+                <HeartIcon className="mr-2 h-4 w-4" />
+                <span>Popular Experiences</span>
               </Button>
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start text-left hover:bg-[#4a89dc]/10"
-                onClick={() => toast({
-                  title: "JET AI Travel Experts",
-                  description: "Connect with travelers who use JET AI to enhance their journeys!",
-                })}
-              >
-                <UserIcon className="mr-2 h-4 w-4 text-[#4a89dc]" />
-                <span>JET AI Travel Experts</span>
+              <Button variant="ghost" className="w-full justify-start text-left">
+                <UserIcon className="mr-2 h-4 w-4" />
+                <span>Featured Travelers</span>
               </Button>
               
               <Separator className="my-2" />
@@ -437,7 +394,7 @@ export default function TravelCommunityPage() {
               <div className="pt-2">
                 <h3 className="text-sm font-medium mb-2">Popular Tags</h3>
                 <div className="flex flex-wrap gap-1">
-                  {['JetAI', 'TravelTech', 'Translation', 'Foodie', 'Culture', 'Adventure', 'AIPowered', 'JetTravel'].map(tag => (
+                  {['Adventure', 'Foodie', 'Culture', 'Beach', 'City', 'Mountains', 'Budget', 'Luxury'].map(tag => (
                     <Badge key={tag} variant="secondary" className="text-xs cursor-pointer">
                       #{tag}
                     </Badge>
@@ -488,50 +445,7 @@ export default function TravelCommunityPage() {
           </div>
           
           <div className="mt-8 flex justify-center">
-            <Button 
-              variant="outline" 
-              className="border-[#4a89dc]/30 hover:bg-[#4a89dc]/10"
-              onClick={() => {
-                setIsLoading(true);
-                toast({
-                  title: "JET AI Community",
-                  description: "Discovering more AI-enhanced travel experiences...",
-                });
-                
-                // Simulate loading more posts after a delay
-                setTimeout(() => {
-                  const newStory = {
-                    id: 'jetai-' + (posts.length + 1),
-                    author: {
-                      id: 'user4',
-                      name: 'Rachel Kim',
-                      avatar: '/avatars/rachel.jpg',
-                      location: 'Seoul, South Korea'
-                    },
-                    content: "JET AI's cultural immersion feature completely transformed my trip to Morocco! It helped me learn key phrases in Arabic and Berber, explained local customs, and even guided me through a traditional tea ceremony with a local family. Such an authentic experience!",
-                    images: ['/community/morocco-market.jpg'],
-                    location: {
-                      name: 'Marrakech, Morocco',
-                      coordinates: {
-                        lat: 31.6295, 
-                        lng: -7.9811
-                      }
-                    },
-                    tags: ['JetAI', 'CulturalImmersion', 'Morocco', 'LocalExperience', 'LanguageLearning'],
-                    likes: 175,
-                    comments: 29,
-                    isLiked: false,
-                    createdAt: new Date('2025-04-09')
-                  };
-                  
-                  setPosts(prevPosts => [...prevPosts, newStory]);
-                  setIsLoading(false);
-                }, 2000);
-              }}
-            >
-              <RefreshCwIcon className="h-4 w-4 mr-2" />
-              Discover More Stories
-            </Button>
+            <Button variant="outline">Load More</Button>
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import Header from './Header';
 import Footer from './Footer';
-import Sidebar from './Sidebar';
+import FloatingChatButton from './FloatingChatButton';
 
 interface LayoutProps {
   children: ReactNode;
@@ -9,15 +9,13 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex flex-col flex-1 ml-64"> {/* Adjust margin to match sidebar width (w-64) */}
-        <Header />
-        <main className="flex-grow">
-          {children}
-        </main>
-        <Footer />
-      </div>
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-grow">
+        {children}
+      </main>
+      <Footer />
+      <FloatingChatButton />
     </div>
   );
 }

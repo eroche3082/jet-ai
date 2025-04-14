@@ -19,7 +19,6 @@ import HotelsPage from "@/pages/HotelsPage";
 import FlightsPage from "@/pages/FlightsPage";
 import ChatPage from "@/pages/ChatPage";
 import PlannerPage from "@/pages/PlannerPage";
-import PreTripPlannerPage from "@/pages/PreTripPlannerPage";
 import AudioToolsPage from "@/pages/AudioToolsPage";
 import BookingsPage from "@/pages/BookingsPage";
 import ARPage from "@/pages/ARPage";
@@ -161,11 +160,12 @@ function App() {
     // Regular application routes
     return (
       <Switch>
-        {/* Main Routes */}
+        {/* New unified structure routes */}
         <Route path="/" component={LandingPage} />
         <Route path="/login" component={LoginPage} />
         <Route path="/onboarding" component={OnboardingPage} />
         <Route path="/dashboard" component={DashboardPage} />
+        <Route path="/chat-demo" component={DarkDashboardPage} />
         
         {/* Main application routes */}
         <Route path="/destinations" component={Destinations} />
@@ -187,22 +187,18 @@ function App() {
         <Route path="/checkout" component={Checkout} />
         
         {/* AI Assistant routes */}
-        <Route path="/chat" component={ChatPage} />
-        <Route path="/ai-features" component={FeaturesPage} />
-        
-        {/* Dev/Debug routes */}
         <Route path="/vertex-ai" component={VertexAIPage} />
         <Route path="/gemini-test" component={GeminiTestPage} />
         
         {/* Tool routes */}
         <Route path="/camera" component={CameraPage} />
         <Route path="/qr-scanner" component={QRScannerPage} />
+        <Route path="/chat" component={ChatPage} />
 
         {/* Travel features routes */}
         <Route path="/hotels" component={HotelsPage} />
         <Route path="/flights" component={FlightsPage} />
         <Route path="/planner" component={PlannerPage} />
-        <Route path="/pre-trip-planner" component={PreTripPlannerPage} />
         <Route path="/audio" component={AudioToolsPage} />
         <Route path="/bookings" component={BookingsPage} />
         <Route path="/ar" component={ARPage} />
@@ -248,9 +244,9 @@ function App() {
     );
   };
 
-  // Don't use Layout for landing page, login page, onboarding or status pages
+  // Don't use Layout for landing page, login page, onboarding, chat-demo or status pages
   const shouldUseLayout = () => {
-    return !['/login', '/', '/onboarding'].includes(location) && !location.startsWith('/status/');
+    return !['/login', '/', '/onboarding', '/chat-demo'].includes(location) && !location.startsWith('/status/');
   };
 
   return (

@@ -29,10 +29,7 @@ export default function Sidebar() {
     { name: 'Dashboard', path: '/dashboard', icon: <HomeIcon size={20} /> },
     { name: 'Chat Assistant', path: '/chat', icon: <MessageSquareIcon size={20} /> },
     { name: 'Destinations', path: '/destinations', icon: <GlobeIcon size={20} /> },
-    { name: 'Travel Blog', path: '/blog', icon: <PlaneIcon size={20} className="rotate-45" /> },
-    { name: 'AI Features', path: '/ai-features', icon: <PlaneIcon size={20} className="-rotate-45" /> },
-    { name: 'Travel Community', path: '/travel-community', icon: <GlobeIcon size={20} /> },
-    { name: 'Itineraries', path: '/itineraries', icon: <PlaneIcon size={20} /> },
+    { name: 'Itineraries', path: '/itineraries', icon: <MapIcon size={20} /> },
     { name: 'Bookings', path: '/bookings', icon: <CalendarIcon size={20} /> },
     { name: 'Hotels', path: '/hotels', icon: <HotelIcon size={20} /> },
     { name: 'Flights', path: '/flights', icon: <PlaneIcon size={20} /> },
@@ -73,10 +70,10 @@ export default function Sidebar() {
         <div className="flex flex-col h-full py-6 px-4">
           {/* Logo */}
           <div className="flex items-center justify-center mb-8 px-4">
-            <span className="text-[#4a89dc] text-2xl">
-              <i className="fas fa-plane"></i>
-            </span>
-            <span className="ml-2 text-xl font-bold">JET <span className="text-[#4a89dc]">AI</span></span>
+            <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-primary" stroke="currentColor" strokeWidth="2">
+              <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" strokeLinejoin="round" strokeLinecap="round"/>
+            </svg>
+            <span className="ml-2 text-xl font-bold">JetAI</span>
           </div>
           
           {/* Navigation items */}
