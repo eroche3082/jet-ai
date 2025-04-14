@@ -111,6 +111,13 @@ export default function Header() {
                       <i className="fas fa-map-marked-alt mr-2 text-primary/80"></i>
                       My Itineraries
                     </Link>
+                    <Link 
+                      href="/access-dashboard" 
+                      className="block px-4 py-2 text-sm text-dark hover:bg-gray-50 hover:text-primary transition-colors"
+                    >
+                      <i className="fas fa-key mr-2 text-primary/80"></i>
+                      Access Codes
+                    </Link>
                     <div className="border-t border-gray-100 my-1"></div>
                     <button 
                       onClick={async () => {
@@ -136,7 +143,7 @@ export default function Header() {
             ) : (
               <Link 
                 href="/login" 
-                className="font-serif font-medium text-white bg-[#4a89dc] hover:bg-[#3a79cc] px-5 py-2 rounded transition-colors duration-300 shadow-sm"
+                className="font-serif font-medium text-white bg-[#4a89dc] hover:bg-[#3a79cc] px-5 py-2 rounded-md transition-colors duration-300 shadow-sm font-bold"
               >
                 Log In
               </Link>
@@ -207,6 +214,14 @@ export default function Header() {
                 >
                   <i className="fas fa-map-marked-alt mr-2 text-primary/80"></i>
                   My Itineraries
+                </Link>
+                <Link 
+                  href="/access-dashboard" 
+                  className="block py-3 font-medium text-dark hover:text-primary"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <i className="fas fa-key mr-2 text-primary/80"></i>
+                  Access Codes
                 </Link>
                 <button 
                   onClick={async () => {

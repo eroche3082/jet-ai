@@ -43,11 +43,11 @@ export default function LoginPage() {
               <svg viewBox="0 0 24 24" fill="none" className="h-10 w-10 text-primary" stroke="currentColor" strokeWidth="2">
                 <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" strokeLinejoin="round" strokeLinecap="round"/>
               </svg>
-              <span className="ml-2 text-2xl font-bold">JetAI</span>
+              <span className="ml-2 text-2xl font-bold">JET AI</span>
             </div>
             <CardTitle className="text-2xl font-bold text-center">Welcome</CardTitle>
             <CardDescription className="text-center">
-              Log in to your JetAI account to access your personalized travel assistant
+              Log in to your JET AI account to access your personalized travel assistant
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -80,7 +80,7 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              <Button type="submit" className="w-full text-white" disabled={isLoading}>
+              <Button type="submit" className="w-full text-white bg-[#4a89dc] hover:bg-[#3a79cc]" disabled={isLoading}>
                 {isLoading ? 'Logging in...' : 'Log In'}
               </Button>
             </form>
@@ -108,28 +108,16 @@ export default function LoginPage() {
       <div 
         className="w-full md:w-1/2 bg-cover bg-center hidden md:block"
         style={{ 
-          backgroundImage: "url('https://images.unsplash.com/photo-1530521954074-e64f6810b32d?q=80&w=2070&auto=format&fit=crop')" 
+          backgroundImage: "url('https://images.unsplash.com/photo-1569629743817-70d8db6c323b?q=80&w=1974&auto=format&fit=crop')" 
         }}
       >
-        <div className="h-full bg-primary/30 p-12 flex flex-col justify-center">
+        <div className="h-full bg-[#050b17]/60 p-12 flex flex-col justify-center">
           <div className="max-w-md text-white">
             <h2 className="text-3xl font-bold mb-6">Unlock Your Travel Potential</h2>
             <p className="text-lg opacity-90 mb-8">
               Log in to access your AI travel assistant, saved itineraries, and personalized recommendations. 
               Your next adventure is just a few clicks away.
             </p>
-            <div className="bg-white/10 p-6 rounded-lg backdrop-blur-sm">
-              <p className="italic text-white/90">
-                "JetAI transformed how I plan my trips. The AI assistant understood exactly what I wanted and created the perfect itinerary."
-              </p>
-              <div className="mt-4 flex items-center">
-                <div className="h-10 w-10 rounded-full bg-white/30"></div>
-                <div className="ml-3">
-                  <p className="font-medium">Sarah Johnson</p>
-                  <p className="text-sm opacity-75">Travel Enthusiast</p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

@@ -74,18 +74,18 @@ export default function SignIn() {
       
       if (user) {
         toast({
-          title: "Sesión iniciada",
-          description: "¡Bienvenido a JetAI!",
+          title: "Login successful",
+          description: "Welcome to JET AI!",
         });
         setLocation('/dashboard');
       } else {
-        throw new Error("Error al iniciar sesión");
+        throw new Error("Login error");
       }
     } catch (error: any) {
       console.error('Login error:', error);
       toast({
-        title: "Error de inicio de sesión",
-        description: error.message || "Usuario o contraseña inválidos. Por favor, inténtalo de nuevo.",
+        title: "Login Error",
+        description: error.message || "Invalid username or password. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -104,8 +104,8 @@ export default function SignIn() {
         // await updateProfile(user, { displayName: data.username });
         
         toast({
-          title: "Registro exitoso",
-          description: "Tu cuenta ha sido creada. Bienvenido a JetAI.",
+          title: "Registration Successful",
+          description: "Your account has been created. Welcome to JET AI.",
         });
         
         // Redirigir al dashboard después de registrarse exitosamente
@@ -116,8 +116,8 @@ export default function SignIn() {
     } catch (error: any) {
       console.error('Registration error:', error);
       toast({
-        title: "Error de registro",
-        description: error.message || "Este correo electrónico ya puede estar en uso.",
+        title: "Registration Error",
+        description: error.message || "This email may already be in use.",
         variant: "destructive",
       });
     } finally {
@@ -242,8 +242,8 @@ export default function SignIn() {
                         signInWithGoogle()
                           .then(() => {
                             toast({
-                              title: "Sesión iniciada con Google",
-                              description: "¡Bienvenido a JetAI!",
+                              title: "Google Sign-in Successful",
+                              description: "Welcome to JET AI!",
                             });
                             setLocation('/dashboard');
                           })
