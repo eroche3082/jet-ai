@@ -34,6 +34,7 @@ import notificationRoutes from './api/notificationRoutes';
 import socialPostRoutes from './api/socialPostRoutes';
 import paymentRoutes from './api/paymentRoutes';
 import communityRoutes from './api/communityRoutes';
+import arNavigationRoutes from './api/arNavigation';
 import { initializeGoogleApiConfig } from './lib/googleApiConfig';
 
 // Configure session store
@@ -255,6 +256,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Registramos las rutas de la comunidad de viajes
   app.use('/api/community', communityRoutes);
   console.log('Travel community routes configured successfully');
+  
+  // Register AR Navigation routes
+  app.use('/api/ar-navigation', arNavigationRoutes);
+  console.log('AR Navigation routes configured successfully');
   
   // Initialize Google API configuration with verified working keys
   initializeGoogleApiConfig();
