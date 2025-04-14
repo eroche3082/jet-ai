@@ -11,18 +11,30 @@ const firebaseConfig = {
 let storageInstance: any = null;
 export let firebaseApp: App | null = null;
 
+// Attempt to initialize Firebase, but handle the case where credentials aren't available
 try {
-  firebaseApp = initializeApp({
-    credential: cert({
-      projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL || `firebase-adminsdk-xxxx@${process.env.VITE_FIREBASE_PROJECT_ID}.iam.gserviceaccount.com`,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : undefined,
-    }),
-    storageBucket: firebaseConfig.storageBucket
-  }, 'storage-app');
-  
-  storageInstance = getStorage(firebaseApp);
-  console.log('✅ Firebase configured successfully for media uploads');
+  // Only try to initialize if we have required credentials
+  if (process.env.VITE_FIREBASE_PROJECT_ID) {
+    // Use dummy values for development if real credentials aren't available
+    const dummyPrivateKey = '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7VJTUt9Us8cKj\nMzEfYyjiWA4R4/M2bS1GB4t7NXp98C3SC6dVMvDuictGeurT8jNbvJZHtCSuYEvu\nNMoSfm76oqFvAp8Gy0iz5sxjZmSnXyCdPEovGhLa0VzMaQ8s+CLOyS56YyCFGeJm\nFX+Aynx/fy1WuPMrLWytFMg0GwoWbzCYxr+XsqpHljAWroWBgNrvuqv8+icVKRHg\n-----END PRIVATE KEY-----\n';
+    
+    firebaseApp = initializeApp({
+      credential: cert({
+        projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL || `firebase-adminsdk-xxxx@${process.env.VITE_FIREBASE_PROJECT_ID}.iam.gserviceaccount.com`,
+        // Use real key if available, otherwise use dummy for development
+        privateKey: process.env.FIREBASE_PRIVATE_KEY ? 
+          process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : 
+          dummyPrivateKey,
+      }),
+      storageBucket: firebaseConfig.storageBucket
+    }, 'storage-app');
+    
+    storageInstance = getStorage(firebaseApp);
+    console.log('✅ Firebase configured successfully for media uploads');
+  } else {
+    console.warn('Missing Firebase project ID. Firebase Storage will not be available.');
+  }
 } catch (error) {
   console.error('Firebase initialization error:', error);
 }

@@ -83,6 +83,10 @@ router.post('/posts', ensureAuthenticated, upload.array('media', 5), async (req,
     
     const user = req.user;
     
+    if (!user || !user.id) {
+      return res.status(401).json({ message: 'User authentication required' });
+    }
+    
     // Generate a unique journey code for this post
     const journeyCode = `JT${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
     
@@ -152,6 +156,10 @@ router.post('/posts/:id/like', ensureAuthenticated, async (req, res) => {
     const postId = req.params.id;
     const user = req.user;
     
+    if (!user || !user.id) {
+      return res.status(401).json({ message: 'User authentication required' });
+    }
+    
     const result = await storage.likeCommunityPost(postId, user.id);
     
     if (!result) {
@@ -177,6 +185,10 @@ router.post('/posts/:id/comments', ensureAuthenticated, async (req, res) => {
     
     if (!content) {
       return res.status(400).json({ message: 'Comment content is required' });
+    }
+    
+    if (!user || !user.id) {
+      return res.status(401).json({ message: 'User authentication required' });
     }
     
     const comment = await storage.addCommunityPostComment({
