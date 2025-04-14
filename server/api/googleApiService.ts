@@ -15,8 +15,8 @@ import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import { 
   getVisionClient, 
-  getTranslationClient, 
-  getTextToSpeechClient, 
+  getTranslateClient, 
+  getTTSClient, 
   getMapsClient,
   getVideoIntelligenceClient
 } from '../lib/googleApiConfig';
@@ -52,10 +52,8 @@ export const getWeatherHandler = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Se requieren los parámetros lat y lon' });
     }
     
-    const apiKey = process.env.GOOGLE_CLOUD_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: 'No se ha configurado la clave API' });
-    }
+    // Use the working GROUP1 API key for Maps-related services
+    const apiKey = 'AIzaSyBUYoJ-RndERrcY9qkjD-2YGGY5m3Mzc0U';
     
     try {
       // Intentar con Google Weather API
@@ -137,10 +135,8 @@ export const geocodeHandler = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Se requiere el parámetro address' });
     }
     
-    const apiKey = process.env.GOOGLE_CLOUD_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: 'No se ha configurado la clave API' });
-    }
+    // Use the working GROUP1 API key for Maps-related services
+    const apiKey = 'AIzaSyBUYoJ-RndERrcY9qkjD-2YGGY5m3Mzc0U';
     
     try {
       // Intentar con Google Geocoding API

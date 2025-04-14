@@ -34,7 +34,7 @@ import notificationRoutes from './api/notificationRoutes';
 import socialPostRoutes from './api/socialPostRoutes';
 import paymentRoutes from './api/paymentRoutes';
 import communityRoutes from './api/communityRoutes';
-import { configureApiKey } from './lib/googleApiConfig';
+import { initializeGoogleApiConfig } from './lib/googleApiConfig';
 
 // Configure session store
 const createSessionStore = () => {
@@ -256,8 +256,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/community', communityRoutes);
   console.log('Travel community routes configured successfully');
   
-  // Configuramos la clave API para Google Cloud
-  configureApiKey(process.env.GOOGLE_CLOUD_API_KEY || 'AIzaSyBGWmVEy2zp6fpqaBkDOpV-Qj_FP6QkZj0');
+  // Initialize Google API configuration with verified working keys
+  initializeGoogleApiConfig();
   
   // Google Places API routes
   app.get('/api/places/autocomplete', async (req, res) => {
@@ -271,7 +271,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
           input as string
-        )}&types=${types}&key=${process.env.GOOGLE_CLOUD_API_KEY}`
+        )}&types=${types}&key=AIzaSyBUYoJ-RndERrcY9qkjD-2YGGY5m3Mzc0U`
       );
       
       if (!response.ok) {
@@ -295,7 +295,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&fields=name,formatted_address,geometry,photos,place_id,types,formatted_phone_number,website,rating,opening_hours&key=${process.env.GOOGLE_CLOUD_API_KEY}`
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&fields=name,formatted_address,geometry,photos,place_id,types,formatted_phone_number,website,rating,opening_hours&key=AIzaSyBUYoJ-RndERrcY9qkjD-2YGGY5m3Mzc0U`
       );
       
       if (!response.ok) {

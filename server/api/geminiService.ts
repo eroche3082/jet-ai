@@ -6,7 +6,7 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { getGenerativeAIClient } from '../lib/googleApiConfig';
+import { getGeminiClient } from '../lib/googleApiConfig';
 
 // Función para generar respuesta usando Gemini
 export const generateChatResponse = async (req: Request, res: Response) => {
@@ -20,7 +20,7 @@ export const generateChatResponse = async (req: Request, res: Response) => {
       });
     }
     
-    const genAI = getGenerativeAIClient();
+    const genAI = getGeminiClient();
     if (!genAI) {
       return res.status(503).json({
         error: 'Servicio no disponible',
@@ -239,7 +239,7 @@ export const generateChatResponse = async (req: Request, res: Response) => {
 // Función para verificar el estado del servicio Gemini
 export const checkGeminiStatus = async (_req: Request, res: Response) => {
   try {
-    const genAI = getGenerativeAIClient();
+    const genAI = getGeminiClient();
     
     if (!genAI) {
       return res.status(503).json({

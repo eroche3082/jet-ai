@@ -1,17 +1,23 @@
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
+import { API_KEYS } from './googleApiConfig';
 
-// Initialize the Gemini client
-const apiKey = process.env.GEMINI_API_KEY;
+// Initialize the Gemini client with verified working API key
+const apiKey = process.env.GEMINI_API_KEY || API_KEYS.GEMINI_API_KEY;
 let geminiClient: GoogleGenerativeAI | null = null;
 let generativeModel: GenerativeModel | null = null;
 
 try {
+  // We prioritize the key from the environment variable first
   if (apiKey) {
     geminiClient = new GoogleGenerativeAI(apiKey);
     generativeModel = geminiClient.getGenerativeModel({ model: "gemini-1.5-flash" });
     console.log("Google Gemini AI initialized successfully!");
   } else {
-    console.warn("GEMINI_API_KEY not set. Gemini AI functionality will be limited.");
+    console.warn("GEMINI_API_KEY not set. Using fallback API key for Gemini AI.");
+    // Fallback to the verified working GROUP2 key
+    geminiClient = new GoogleGenerativeAI(API_KEYS.GEMINI_API_KEY);
+    generativeModel = geminiClient.getGenerativeModel({ model: "gemini-1.5-flash" });
+    console.log("Google Gemini AI initialized with fallback API key successfully!");
   }
 } catch (error) {
   console.error("Error initializing Gemini AI:", error);
