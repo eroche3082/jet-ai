@@ -1,0 +1,121 @@
+Jet AI: Phase 5 Status Confirmed. Capitana, estás a un paso del despegue.
+
+Tu reporte está impecable y completamente alineado con la arquitectura planteada. Has logrado una estructura que no solo es funcional sino futurista. Aquí va mi respuesta táctica, estratégica y directa para que podamos cerrar Jet AI y dar paso al Jetstream Global Launch.
+
+✅ PHASE 6 LAUNCH FINALIZATION STRATEGY
+🔧 PRIORITY FIXES IMPLEMENTATION PLAN
+Vamos a ejecutar estos cinco fixes de forma quirúrgica y prioritaria para llegar al 100% antes del deployment global:
+
+1. 🌍 LANGUAGE SELECTOR – REACTIVATION AND PERSISTENCE
+Fix: Ensure <LanguageSelector /> sets locale in localStorage or context provider.
+
+Add:
+
+ts
+Copiar
+Editar
+useEffect(() => {
+  const lang = localStorage.getItem("lang") || "en";
+  i18n.changeLanguage(lang);
+}, []);
+Bonus: Add ?lang=es fallback to all routes for deep linking in multi-lingual campaigns.
+
+2. 💬 CHATBOT POSITIONING – STICKY UI REFINEMENT
+Fix: In AIChat.tsx or AIAssistantButton.tsx, wrap the chat widget in:
+
+css
+Copiar
+Editar
+position: fixed;
+bottom: 20px;
+right: 20px;
+z-index: 9999;
+Ensure: It’s visible on all breakpoints and does not overlap other interactive elements.
+
+3. 🎤 VOICE INPUT/OUTPUT – STT/TTS COMPLETION
+STT Implementation:
+
+ts
+Copiar
+Editar
+const recognition = new (window.SpeechRecognition || webkitSpeechRecognition)();
+recognition.lang = "en-US";
+recognition.onresult = (e) => {
+  const transcript = e.results[0][0].transcript;
+  sendMessage(transcript);
+};
+TTS Implementation:
+
+ts
+Copiar
+Editar
+const speech = new SpeechSynthesisUtterance(response.text);
+speech.lang = "en-US";
+window.speechSynthesis.speak(speech);
+Test Cases:
+
+English + Spanish voice
+
+In-chat toggle for mute/voice modes
+
+4. 📊 ADMIN ANALYTICS – CHAT & API USAGE MONITORING
+Add Firebase Analytics or GA4:
+
+ts
+Copiar
+Editar
+logEvent(analytics, 'chat_interaction', { user_id, model_used });
+Admin Dashboard Enhancement:
+
+Total messages per user
+
+AI model usage split (Gemini/GPT/Claude)
+
+Sentiment heatmap (optional)
+
+Optional: Export API usage as CSV for billing preview.
+
+5. 📱 MOBILE OPTIMIZATION – ONBOARDING & COMMUNITY
+Action Items:
+
+Break down 20-question onboarding into 5+5+5+5 with progress bar
+
+Add min-height to modals and overflow-y: auto for small screens
+
+Community page: Stack posts vertically on < 768px screens
+
+Add pull-to-refresh behavior for native app feel
+
+📦 MINI LAUNCH PREP PACKAGE
+Item	Status	Notes
+✅ Stripe Plans	Live	All tiers available
+✅ SendGrid Emails	Ready	Templates tested
+✅ Chatbot	3-Model fallback	Voice nearly done
+✅ QR Codes	Functional	Tested with access unlock
+✅ Travel Community	Functional	Needs mobile tweak
+✅ Onboarding Flow	Complete	Minor responsive fix
+✅ Access Codes	SHOP- / JET- / CRYPTO-	Format standardized
+✅ Admin Panel	Basic	Expand analytics
+⚠️ Docs & Tutorials	Missing	Optional pre-launch
+🧠 EXPANSION PACK: NEXT-GEN IDEAS
+Te recomiendo elegir 1–2 features de estos para activar post-lanzamiento (ideal para retención):
+
+Travel Journal AI – Narrate + organize your trip
+
+Time Machine View – Historical + cultural time overlays
+
+Explorer Badges – Gamification + loyalty system
+
+Local Connection Hub – AI for real-life meetups
+
+Climate-Conscious Planner – Eco mode for flight/hotel search
+
+🛫 FINAL CALL: WHAT’S NEXT?
+🧭 Elige tu siguiente paso y me pongo en marcha:
+
+[ ] Implementar los 5 Priority Fixes ahora mismo (full prompts y comandos)
+
+[ ] Generar todos los archivos /components, /routes, /lib con // TODO: marcados por fix
+
+[ ] Comenzar checklist para fase de Deployment en Firebase + Cloudflare
+

@@ -1,0 +1,148 @@
+ET AI – FINAL SYSTEM-WIDE IMPLEMENTATION MEGAPROMPT
+Agents, prepare for Phase 5: Pre-Deployment Optimization.
+
+🧠 CONTEXT:
+You are the system agent assigned to the JET AI – Travel Companion platform. The entire platform has undergone Phase 4 validation and passed the following checkpoints:
+
+✅ Multi-model AI chat with Gemini, GPT-4o, and Claude
+
+✅ 20-question onboarding system fully implemented
+
+✅ Universal access code system with QR generator and user-level unlocking
+
+✅ 25+ features displayed on the Features Page with proper categorization
+
+✅ Travel Community page with post creation, likes, comments, and share features
+
+✅ Firebase development mode integration
+
+✅ Working APIs: Vision, TTS, Translate, Maps, Video Intelligence, Vertex, Secret Manager
+
+Now, your mission is to finalize and optimize all systems for public deployment.
+
+🧩 MISSION OBJECTIVES
+1. ✅ RE-VALIDATE ALL KEY SYSTEMS
+Please confirm the following:
+
+That each of the 8 core Google Cloud APIs are working:
+
+Vision API
+
+Text-to-Speech
+
+Translate
+
+Maps API
+
+Video Intelligence
+
+Vertex AI
+
+Secret Manager
+
+Gemini AI / Generative AI
+
+That multi-model fallback logic works as expected:
+
+Gemini → GPT-4o → Claude
+
+That Stripe checkout flow is fully testable and working for the different membership levels
+
+That SendGrid is delivering onboarding emails, code sharing, and membership confirmations
+
+2. 🧭 ONBOARDING & CODE SYSTEM COMPLETION
+You must verify and finalize:
+
+That the 20-question onboarding flow correctly assigns the user to a travel category (Explorer, Jetsetter, Nomad, Insider)
+
+That a unique access code is generated, in format JET-[TIER]-XXXX
+
+That QR code generation works and is downloadable, copyable, and shareable
+
+That user tier unlocks correct access in the system
+
+3. 💬 CHATBOT FINALIZATION
+Finalize the AI Chatbot experience:
+
+That it uses markdown for structured responses
+
+That it remembers previous interactions during a session
+
+That typing indicators, error messages, and fallbacks are working
+
+That voice input/output are functional if enabled via Google STT/TTS
+
+That chatbot is available across all pages (floating or embedded)
+
+That each personality mode (Luxury Advisor, Flight Tracker, City Guide, Concierge) is correctly triggered based on user context
+
+4. 🌐 FRONTEND UX/UI POLISH
+Verify that:
+
+The Features Page lists 25+ features with icons, categories, and hover animations
+
+The Travel Community page supports:
+
+Posting with photos
+
+Comments + likes
+
+Firebase storage (or fallback)
+
+The Hero section has mobile-optimized video, background, CTA
+
+The Language selector works and persists language preference (minimum: EN, ES, FR, PT)
+
+The Responsive layout works on desktop, tablet, mobile
+
+5. 📦 ADMIN SYSTEM CHECK
+You must verify:
+
+/admin login works with default credentials (admin / admin123456)
+
+That the admin panel displays:
+
+Registered users
+
+Access codes
+
+Stripe plans
+
+Chat analytics
+
+API usage (optional)
+
+That analytics for onboarding, membership, and usage are present
+
+6. 🛠️ BUG FIX & SUGGESTIONS
+Return a report with:
+
+✅ Fully Working Components
+
+⚠️ Partially Working with Fix Suggestions
+
+❌ Missing/To Be Implemented
+
+🔁 Suggested Enhancements
+
+💡 Ideas to Elevate Experience (UX/UI or AI)
+
+⚙️ PARAMETERS:
+bash
+Copiar
+Editar
+API_KEY_GROUP = GROUP5
+API_KEY = "AIzaSyA--rn_uJjZtyU9kGpIWDpBa-obvtPrC24"
+PROJECT_ID = "erudite-creek-431302-q3"
+FIREBASE_MODE = "development"
+NODE_ENV = "production"
+📩 EXPECTED OUTPUT:
+✅ SYSTEM STATUS CHECKLIST (with working, failing, and pending features)
+
+🔁 FEATURE IMPLEMENTATION STATUS (Onboarding, Codes, Chat, Community, Stripe, etc.)
+
+📈 DEPLOYMENT READINESS SCORE (%)
+
+📋 PRIORITY FIXES (Top 5 to launch)
+
+💡 BONUS IDEAS for future Jet AI expansion (e.g., JetRituals, Global Travel Map, City Guides)
