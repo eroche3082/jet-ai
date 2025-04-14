@@ -1,0 +1,111 @@
+MEGAPROMPT — JETAI DASHBOARD CORE MODULE ACTIVATION & ORGANIZATION THREAD
+ROLE:
+You are the JetAI Interface Operations Agent, assigned to Phase 5: Dashboard System Activation & UX Integrity. Your mission is to:
+
+Activate and validate every tab and navigation link in the left and top navigation bar.
+
+Ensure each tab has functional content, correctly routed pages, and dynamic AI-powered features.
+
+Avoid messy layout overflow — this dashboard must remain elegant, modular, and consistent across all viewports.
+
+You must also maintain UX hierarchy, responsive scaling, and fast-loading interfaces.
+
+PART 1 – TAB ACTIVATION DIRECTIVE
+TABS TO ACTIVATE (LEFT NAVIGATION):
+Dashboard:
+Show overview stats (Destinations visited, Upcoming Trips, Budget, Points), trip highlights, and AI suggestions based on user history.
+
+Explore:
+Display curated global destinations with filters (budget, interest, safety, season, vibe).
+Connect to AI recommendation engine.
+
+Trips:
+Load all past and upcoming trips. Include options to view, edit, cancel, duplicate itineraries.
+Show trip status and associated budget progress.
+
+Destinations:
+Load AI destination profiles with:
+
+Best time to go
+
+Entry requirements
+
+Local culture & safety tips
+
+Visa & vaccination details
+
+Cuisine, events, and language guides
+
+Itineraries:
+Interactive itinerary builder (day-by-day planner).
+Editable blocks with AI auto-fill from preferences.
+Drag & drop UI with Google Maps/Places integration.
+
+Accommodations:
+Show personalized lodging matches. Filterable by style, budget, amenities.
+Connect to Booking, Airbnb, Hostelworld APIs.
+
+Dining:
+Load recommended restaurants per destination.
+Filters: vegan, luxury, cheap eats, locals only, Michelin.
+Include AI-powered food tours and table reservation links.
+
+Budget:
+Interactive budget tracker for each trip.
+Real-time expense analysis and suggestions.
+Connect to Stripe, Open Banking (future phase), Rewards points integration.
+
+Social Media Hub:
+Pull user’s travel posts from linked Instagram, Facebook, X.
+Display AI-summarized memories.
+Highlight top moments, cities, meals, and emotional trends (via sentiment analysis).
+
+Rewards & Loyalty:
+Show user points balance, earned badges, affiliate perks.
+Include marketplace of partners (hotels, airlines, restaurants).
+Activate QR/pay with points functionality.
+
+PART 2 – TOP NAVIGATION BAR TABS
+Destinations: Same as left nav.
+
+Travel Blog: Show dynamic articles, AI-generated guides, community posts.
+
+Features: Pull from FeaturesPage.tsx – display all 25+ JetAI features.
+
+Travel Community: Load community posts, likes, groups, travel buddies.
+
+PART 3 – FUNCTIONAL VALIDATION AND HOOKS
+For each tab:
+
+Verify route is functional (/dashboard, /explore, etc.)
+
+Ensure all buttons, dropdowns, filters, and embedded maps are interactive
+
+Connect to backend API where needed
+
+Ensure state preservation via context or localStorage (esp. for itineraries, budgets)
+
+PART 4 – UI STRUCTURE & ORDERING GUIDELINES
+Left Panel = Navigation only
+→ Do not overload it with widgets or media
+
+Top Bar = Global navigation (switch tabs, profile, logout)
+
+Center Panel = Dynamic content only
+→ Tabs load modular React components, not full-page reloads
+
+AI Assistant (bottom right) = Fixed chat icon, auto-summons based on user actions
+
+PART 5 – TECHNICAL REQUIREMENTS
+Responsive layout using Flex/Grid
+
+Preload animations on async data fetching
+
+Code-splitting for faster tab switch
+
+Use centralized route manager (e.g. React Router)
+
+Track component states and UI transitions (e.g. loading, empty, error)
+
+✅ GOAL:
+"Create a highly functional, AI-powered, modular dashboard where every tab is interactive, responsive, and connected to real data and services. Maintain elegant structure, no visual overflow, and empower each component to operate independently yet cohesively."

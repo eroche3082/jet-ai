@@ -1,0 +1,110 @@
+MEGAPROMPT — JETAI SYSTEM-WIDE FUNCTIONALITY SCAN & AUTO-FIX DIRECTIVE
+(Nombre del thread: jetai_phase5_audit_fix_all_routes_components)
+
+ROLE:
+You are the JetAI System Integrity Agent assigned to perform a complete diagnostic scan, error detection, and auto-fix pass for all interface routes, components, and modules within the JetAI Travel Companion platform.
+
+MISSION OBJECTIVES:
+Perform a full scan across ALL navigation tabs, routes, and pages:
+
+Dashboard
+
+Explore
+
+Trips
+
+Destinations
+
+Itineraries
+
+Accommodations
+
+Dining
+
+Budget
+
+Social Media Hub
+
+Rewards & Loyalty
+
+Validate that each of the following is functional:
+
+Navigation links (left panel + top menu)
+
+Associated routes (/explore, /budget, etc.)
+
+API calls, GraphQL queries or Firestore reads
+
+UI rendering (image, cards, lists, tables, charts)
+
+Buttons and dropdowns trigger correct events
+
+Chat icon is present and responsive
+
+Verify the following for each section:
+
+Content is displaying with no placeholder or error
+
+Loading state and error handling is properly managed
+
+Empty states show correct fallback messaging
+
+Dynamic data (e.g. trips, budget, destinations) is loading correctly
+
+Auto-fix & generate reports if the following issues are found:
+
+Page loads blank → check useEffect, state init, or fetch failure
+
+Buttons not working → check onClick, routing or handlers
+
+Tabs load incorrect content → verify Route binding in App.tsx
+
+Charts or maps not loading → validate API key usage or library init
+
+Cards have placeholders → ensure content props are mapped
+
+For each fixable issue, auto-generate:
+
+Component or route name
+
+File path (e.g. client/src/pages/ExplorePage.tsx)
+
+Summary of problem (e.g. “Trip data undefined”)
+
+Recommended fix or patch
+
+ADDITIONAL DIRECTIVES:
+Use visual markers or logs in DevTools to track the load status of each component.
+
+Highlight critical missing features (e.g. if /budget exists but returns empty).
+
+Detect duplicated or unused routes and remove dead code.
+
+Ensure all styling and layout is consistent across screens (mobile, tablet, desktop).
+
+OUTPUT STRUCTURE:
+For each tab, return:
+
+json
+Copiar
+Editar
+{
+  "section": "Itineraries",
+  "route": "/itineraries",
+  "status": "partial",
+  "issues": [
+    "Route loads with empty container",
+    "Missing API call to fetch itinerary data",
+    "CTA button has no event handler"
+  ],
+  "fixes": [
+    "Add useEffect to load data from backend",
+    "Map itinerary list to Card components",
+    "Bind CTA button to itinerary editor page"
+  ]
+}
+Repeat for each section and attach a summary with a full readiness score out of 100%.
+
+✅ FINAL GOAL:
+“Ensure 100% of the JetAI dashboard tabs are fully functional, correctly routed, content-loaded, and styled before expanding new features. Fix everything silently, log the status, and present a system readiness report for deployment.”
+
