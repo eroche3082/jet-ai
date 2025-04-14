@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
   Tabs, 
@@ -13,12 +13,12 @@ import {
   DialogDescription, 
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger 
+  DialogTitle
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { 
   Calendar as CalendarIcon,
   Clock,
@@ -31,9 +31,15 @@ import {
   DownloadCloud,
   Printer,
   Mail,
-  Info
+  Info,
+  RefreshCcw,
+  AlertCircle
 } from 'lucide-react';
-import { format, addDays } from 'date-fns';
+import { format, parseISO } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 // Types
 interface Booking {
@@ -48,160 +54,67 @@ interface Booking {
   bookingRef: string;
   price: number;
   image?: string;
+  userId: number;
   details: {
     [key: string]: string | number | boolean;
   };
 }
 
 export default function BookingsPage() {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<string>('upcoming');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showDetailDialog, setShowDetailDialog] = useState<boolean>(false);
   
-  // Generate sample bookings for demonstration
-  const generateSampleBookings = (): Booking[] => {
-    const now = new Date();
-    const bookings: Booking[] = [
-      {
-        id: '1',
-        type: 'flight',
-        status: 'upcoming',
-        title: 'Flight to Paris',
-        location: 'Paris, France',
-        startDate: addDays(now, 15),
-        endDate: addDays(now, 22),
-        bookingDate: new Date(now.setDate(now.getDate() - 30)),
-        bookingRef: 'FL928374',
-        price: 580,
-        details: {
-          airline: 'Air France',
-          flightNumber: 'AF1234',
-          departureTime: '14:30',
-          departureAirport: 'JFK',
-          arrivalTime: '06:45',
-          arrivalAirport: 'CDG',
-          seats: '12C, 12D',
-          class: 'Economy',
-        }
-      },
-      {
-        id: '2',
-        type: 'hotel',
-        status: 'upcoming',
-        title: 'Grand Hotel Paris',
-        location: 'Paris, France',
-        startDate: addDays(now, 15),
-        endDate: addDays(now, 22),
-        bookingDate: new Date(now.setDate(now.getDate() - 30)),
-        bookingRef: 'HT283947',
-        price: 1200,
-        image: 'https://placehold.co/600x400/d1d5db/6b7280?text=Grand+Hotel',
-        details: {
-          roomType: 'Deluxe Double',
-          guests: 2,
-          beds: 'King Size',
-          checkInTime: '15:00',
-          checkOutTime: '11:00',
-          breakfast: true,
-          wifiIncluded: true,
-          policyNumber: 'POL-2345-HOT',
-        }
-      },
-      {
-        id: '3',
-        type: 'experience',
-        status: 'upcoming',
-        title: 'Louvre Museum Tour',
-        location: 'Paris, France',
-        startDate: addDays(now, 17),
-        bookingDate: new Date(now.setDate(now.getDate() - 15)),
-        bookingRef: 'EX192837',
-        price: 75,
-        details: {
-          duration: '3 hours',
-          startTime: '10:00',
-          meetingPoint: 'Louvre Pyramid',
-          guideLanguage: 'English',
-          includedItems: 'Skip-the-line ticket, Guided tour',
-          maxGroupSize: 8,
-        }
-      },
-      {
-        id: '4',
-        type: 'flight',
-        status: 'completed',
-        title: 'Flight to Rome',
-        location: 'Rome, Italy',
-        startDate: addDays(now, -45),
-        endDate: addDays(now, -38),
-        bookingDate: addDays(now, -90),
-        bookingRef: 'FL746352',
-        price: 420,
-        details: {
-          airline: 'Alitalia',
-          flightNumber: 'AZ1234',
-          departureTime: '10:15',
-          departureAirport: 'JFK',
-          arrivalTime: '12:30',
-          arrivalAirport: 'FCO',
-          seats: '18A, 18B',
-          class: 'Economy',
-        }
-      },
-      {
-        id: '5',
-        type: 'hotel',
-        status: 'completed',
-        title: 'Hotel Colosseum',
-        location: 'Rome, Italy',
-        startDate: addDays(now, -45),
-        endDate: addDays(now, -38),
-        bookingDate: addDays(now, -90),
-        bookingRef: 'HT638294',
-        price: 880,
-        image: 'https://placehold.co/600x400/d1d5db/6b7280?text=Hotel+Colosseum',
-        details: {
-          roomType: 'Superior Room',
-          guests: 2,
-          beds: 'Queen Size',
-          checkInTime: '14:00',
-          checkOutTime: '10:00',
-          breakfast: true,
-          wifiIncluded: true,
-          policyNumber: 'POL-7821-HOT',
-        }
-      },
-      {
-        id: '6',
-        type: 'flight',
-        status: 'cancelled',
-        title: 'Flight to Tokyo',
-        location: 'Tokyo, Japan',
-        startDate: addDays(now, -20),
-        endDate: addDays(now, -10),
-        bookingDate: addDays(now, -120),
-        bookingRef: 'FL928374',
-        price: 1280,
-        details: {
-          airline: 'JAL',
-          flightNumber: 'JL5678',
-          departureTime: '13:45',
-          departureAirport: 'JFK',
-          arrivalTime: '17:30',
-          arrivalAirport: 'NRT',
-          cancellationReason: 'Flight canceled due to operational constraints',
-          refundStatus: 'Refunded on ' + format(addDays(now, -15), 'MMM d, yyyy'),
-        }
-      },
-    ];
-    
-    return bookings;
-  };
+  // Fetch user bookings from the API
+  const { data: bookings, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['/api/user/bookings'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/user/bookings');
+      if (!response.ok) {
+        throw new Error('Failed to fetch bookings');
+      }
+      const bookingsData = await response.json();
+      
+      // Transform date strings into Date objects
+      return bookingsData.map((booking: any) => ({
+        ...booking,
+        startDate: booking.startDate ? new Date(booking.startDate) : new Date(),
+        endDate: booking.endDate ? new Date(booking.endDate) : undefined,
+        bookingDate: booking.bookingDate ? new Date(booking.bookingDate) : new Date(),
+      }));
+    },
+  });
   
-  const bookings = generateSampleBookings();
+  // Update booking status mutation
+  const updateBookingStatus = useMutation({
+    mutationFn: async ({ id, status }: { id: string, status: string }) => {
+      const response = await apiRequest('PATCH', `/api/booking/${id}/status`, { status });
+      if (!response.ok) {
+        throw new Error('Failed to update booking status');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Booking updated',
+        description: 'The booking status has been updated successfully.',
+      });
+      refetch(); // Refresh the bookings list
+    },
+    onError: (err: Error) => {
+      toast({
+        title: 'Update failed',
+        description: err.message,
+        variant: 'destructive',
+      });
+    }
+  });
   
   // Filter bookings based on active tab
-  const filteredBookings = bookings.filter(booking => booking.status === activeTab);
+  const filteredBookings = bookings ? 
+    bookings.filter((booking: Booking) => booking.status === activeTab) : 
+    [];
   
   // View booking details
   const viewBookingDetails = (booking: Booking) => {
@@ -250,6 +163,36 @@ export default function BookingsPage() {
     }
   };
   
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">My Bookings</h1>
+        <div className="h-60 flex items-center justify-center">
+          <LoadingSpinner size="lg" />
+        </div>
+      </div>
+    );
+  }
+  
+  if (isError) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">My Bookings</h1>
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            Failed to load your bookings. {error instanceof Error ? error.message : 'Please try again later.'}
+          </AlertDescription>
+        </Alert>
+        <Button onClick={() => refetch()} className="flex items-center gap-2">
+          <RefreshCcw className="h-4 w-4" />
+          Retry
+        </Button>
+      </div>
+    );
+  }
+  
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">My Bookings</h1>
@@ -280,7 +223,7 @@ export default function BookingsPage() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredBookings.map((booking) => (
+              {filteredBookings.map((booking: Booking) => (
                 <Card key={booking.id} className="overflow-hidden">
                   {booking.image && (
                     <div className="h-40 overflow-hidden">

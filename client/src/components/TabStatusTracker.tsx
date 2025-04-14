@@ -89,15 +89,15 @@ const TabStatusTracker: React.FC<TabStatusTrackerProps> = ({ refresh = false }) 
       {
         name: "Bookings",
         route: "/bookings",
-        status: "❌" as const,
-        api_connection: "❌" as const,
+        status: "✅" as const,
+        api_connection: "✅" as const,
         responsive: "✅" as const,
-        components_functional: "❌" as const,
-        chatbot_context: "❌" as const,
+        components_functional: "✅" as const,
+        chatbot_context: "✅" as const,
         suggestions: [
-          "Connect to flight booking APIs",
-          "Implement hotel reservation system",
-          "Add car rental booking functionality"
+          "Add booking cancellation functionality",
+          "Implement booking modification interface", 
+          "Add loyalty points for bookings"
         ]
       },
       {
