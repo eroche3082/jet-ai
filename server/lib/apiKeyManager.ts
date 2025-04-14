@@ -26,16 +26,16 @@ enum ServiceCategory {
 
 // Define group preferences for each service category (order matters - first is preferred)
 const SERVICE_GROUP_PREFERENCES: Record<ServiceCategory, number[]> = {
-  [ServiceCategory.AI_ML]: [1, 2, 3, 4],
-  [ServiceCategory.WORKSPACE]: [2, 3, 4, 1],
-  [ServiceCategory.FIREBASE]: [3, 4, 2, 1],
-  [ServiceCategory.MAPS]: [1, 3, 2, 4],
-  [ServiceCategory.VISION]: [1, 2, 3, 4],
-  [ServiceCategory.TRANSLATE]: [1, 2, 3, 4],
-  [ServiceCategory.TTS]: [2, 1, 3, 4],
-  [ServiceCategory.VIDEO]: [1, 2, 3, 4],
-  [ServiceCategory.STORAGE]: [3, 2, 1, 4],
-  [ServiceCategory.SECRETMANAGER]: [2, 3, 1, 4]
+  [ServiceCategory.AI_ML]: [1, 2, 3, 4, 5],
+  [ServiceCategory.WORKSPACE]: [2, 3, 4, 5, 1],
+  [ServiceCategory.FIREBASE]: [3, 4, 5, 2, 1],
+  [ServiceCategory.MAPS]: [1, 5, 3, 2, 4],
+  [ServiceCategory.VISION]: [5, 1, 2, 3, 4],  // Use GROUP5 as first preference for Vision
+  [ServiceCategory.TRANSLATE]: [5, 1, 2, 3, 4], // Use GROUP5 as first preference for Translate
+  [ServiceCategory.TTS]: [5, 2, 1, 3, 4],      // Use GROUP5 as first preference for TTS
+  [ServiceCategory.VIDEO]: [5, 1, 2, 3, 4],    // Use GROUP5 as first preference for Video
+  [ServiceCategory.STORAGE]: [3, 5, 2, 1, 4],
+  [ServiceCategory.SECRETMANAGER]: [2, 5, 3, 1, 4]
 };
 
 // Define API keys for each group
@@ -44,6 +44,7 @@ interface ApiKeyGroups {
   GROUP2: string;
   GROUP3: string;
   GROUP4: string;
+  GROUP5: string;
   [key: string]: string;
 }
 
@@ -68,7 +69,8 @@ class ApiKeyManager {
       GROUP1: process.env.GOOGLE_GROUP1_API_KEY || 'AIzaSyBUYoJ-RndERrcY9qkjD-2YGGY5m3Mzc0U',
       GROUP2: process.env.GOOGLE_GROUP2_API_KEY || 'AIzaSyByRQcsHT0AXxLsyPK2RrBZEwhe3T11q08',
       GROUP3: process.env.GOOGLE_GROUP3_API_KEY || 'AIzaSyBGWmVEy2zp6fpqaBkDOpV-Qj_FP6QkZj0',
-      GROUP4: process.env.GOOGLE_GROUP4_API_KEY || 'AIzaSyA6MCkrLbzGOJ7SGj-yxq4pSc3EnJHLIaI'
+      GROUP4: process.env.GOOGLE_GROUP4_API_KEY || 'AIzaSyA6MCkrLbzGOJ7SGj-yxq4pSc3EnJHLIaI',
+      GROUP5: process.env.GOOGLE_API_KEY || 'AIzaSyA--rn_uJjZtyU9kGpIWDpBa-obvtPrC24'
     };
     
     // Initialize service status tracking
