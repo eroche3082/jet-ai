@@ -96,11 +96,11 @@ export default function SignIn() {
   const onRegisterSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
     try {
-      // Usar la función de registro de Firebase
+      // Use the Firebase registration function
       const user = await signUp(data.email, data.password);
       
       if (user) {
-        // También podríamos actualizar el perfil con el nombre de usuario aquí
+        // We could also update the profile with the username here
         // await updateProfile(user, { displayName: data.username });
         
         toast({
@@ -108,10 +108,10 @@ export default function SignIn() {
           description: "Your account has been created. Welcome to JET AI.",
         });
         
-        // Redirigir al dashboard después de registrarse exitosamente
+        // Redirect to dashboard after successful registration
         setLocation('/dashboard');
       } else {
-        throw new Error("Error al crear la cuenta");
+        throw new Error("Error creating account");
       }
     } catch (error: any) {
       console.error('Registration error:', error);
@@ -249,8 +249,8 @@ export default function SignIn() {
                           })
                           .catch((error: any) => {
                             toast({
-                              title: "Error de inicio de sesión",
-                              description: error.message || "No pudimos iniciar sesión con Google",
+                              title: "Google Sign-in Error",
+                              description: error.message || "We couldn't sign in with Google",
                               variant: "destructive",
                             });
                           })
@@ -393,15 +393,15 @@ export default function SignIn() {
                         signInWithGoogle()
                           .then(() => {
                             toast({
-                              title: "Cuenta creada con Google",
-                              description: "¡Bienvenido a JetAI!",
+                              title: "Google Account Created",
+                              description: "Welcome to JET AI!",
                             });
                             setLocation('/dashboard');
                           })
                           .catch((error: any) => {
                             toast({
-                              title: "Error al registrarse con Google",
-                              description: error.message || "No pudimos crear tu cuenta con Google",
+                              title: "Google Registration Error",
+                              description: error.message || "We couldn't create your account with Google",
                               variant: "destructive",
                             });
                           })
