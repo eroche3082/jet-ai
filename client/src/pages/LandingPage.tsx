@@ -6,7 +6,7 @@ import {
   Plane, Globe, Languages, HeartHandshake, Wallet, FileCheck,
   BrainCircuit, PackageCheck, Cloud, Mountain, Stethoscope, 
   Bus, User, ShieldCheck, Leaf, Hotel, CalendarCheck, Clock,
-  BadgeDollarSign, PanelTopOpen
+  BadgeDollarSign, PanelTopOpen, Brain
 } from 'lucide-react';
 
 const features = [
@@ -137,6 +137,124 @@ export default function LandingPage() {
             <Button size="lg" variant="outline" asChild>
               <Link href="/destinations">Explore Destinations</Link>
             </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* JetFlow Interactive Module */}
+      <div className="py-24 bg-[#050b17]/5 relative">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center px-4 py-1 border-l-2 border-primary bg-primary/10 text-[#050b17] text-sm font-serif mb-3">
+              <BrainCircuit className="h-3.5 w-3.5 mr-1.5 text-primary" /> 
+              INTERACTIVE DEMONSTRATION
+            </div>
+            <h2 className="text-4xl mb-3 font-bold text-[#050b17]">Try JetFlow</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Experience the power of JET AI's decision optimization system with this simple demonstration. 
+              Answer three questions to see a visual flow diagram tailored to your preferences.
+            </p>
+          </div>
+          
+          <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-md overflow-hidden">
+            <div className="flex flex-col md:flex-row">
+              <div className="md:w-1/2 p-8 bg-gradient-to-br from-[#050b17] to-[#1a2b47]">
+                <h3 className="text-white text-2xl font-bold mb-4">Smart Flow Builder</h3>
+                <p className="text-white/80 mb-6">
+                  Our AI analyzes your responses to create a personalized decision flow optimized for your 
+                  preferences, schedule, and budget constraints.
+                </p>
+                
+                <div className="space-y-6">
+                  <div className="flex items-start">
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center mr-4 shrink-0">
+                      <span className="text-white font-medium">1</span>
+                    </div>
+                    <div>
+                      <h4 className="text-white font-medium mb-1">Answer Simple Questions</h4>
+                      <p className="text-white/70 text-sm">Share your preferences, constraints, and goals</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start">
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center mr-4 shrink-0">
+                      <span className="text-white font-medium">2</span>
+                    </div>
+                    <div>
+                      <h4 className="text-white font-medium mb-1">AI Processes Inputs</h4>
+                      <p className="text-white/70 text-sm">Our AI evaluates numerous possibilities in seconds</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start">
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center mr-4 shrink-0">
+                      <span className="text-white font-medium">3</span>
+                    </div>
+                    <div>
+                      <h4 className="text-white font-medium mb-1">View Optimized Flow</h4>
+                      <p className="text-white/70 text-sm">Receive a visual representation of your optimal path</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-8 flex items-center justify-between">
+                  <span className="text-white/50 text-sm">3 free tries without login</span>
+                  <Link href="/planner" className="text-primary hover:text-white text-sm font-medium transition-colors">
+                    Full Builder →
+                  </Link>
+                </div>
+              </div>
+              
+              <div className="md:w-1/2 p-8">
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">What's your primary travel goal?</label>
+                    <select className="w-full p-3 border border-gray-200 rounded-md focus:border-primary focus:ring-primary/10">
+                      <option value="">Select an option...</option>
+                      <option value="relaxation">Relaxation & Leisure</option>
+                      <option value="adventure">Adventure & Exploration</option>
+                      <option value="culture">Cultural Immersion</option>
+                      <option value="luxury">Luxury Experience</option>
+                      <option value="budget">Budget Travel</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Your preferred trip duration?</label>
+                    <select className="w-full p-3 border border-gray-200 rounded-md focus:border-primary focus:ring-primary/10">
+                      <option value="">Select an option...</option>
+                      <option value="weekend">Weekend (2-3 days)</option>
+                      <option value="short">Short trip (4-6 days)</option>
+                      <option value="week">One week (7 days)</option>
+                      <option value="extended">Extended (8-14 days)</option>
+                      <option value="long">Long journey (15+ days)</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">What's your approximate budget?</label>
+                    <select className="w-full p-3 border border-gray-200 rounded-md focus:border-primary focus:ring-primary/10">
+                      <option value="">Select an option...</option>
+                      <option value="budget">Budget ($500-$1,000)</option>
+                      <option value="moderate">Moderate ($1,000-$3,000)</option>
+                      <option value="premium">Premium ($3,000-$5,000)</option>
+                      <option value="luxury">Luxury ($5,000-$10,000)</option>
+                      <option value="ultra">Ultra-luxury ($10,000+)</option>
+                    </select>
+                  </div>
+                  
+                  <button className="w-full bg-[#050b17] hover:bg-primary text-white font-medium py-3 px-4 rounded-md transition-colors duration-300 flex items-center justify-center">
+                    <BrainCircuit className="mr-2 h-5 w-5" /> Generate Flow
+                  </button>
+                  
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">
+                      Full access to JetFlow available with <Link href="/login" className="text-primary hover:underline">login</Link>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
