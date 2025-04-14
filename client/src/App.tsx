@@ -22,6 +22,7 @@ import PlannerPage from "@/pages/PlannerPage";
 import AudioToolsPage from "@/pages/AudioToolsPage";
 import BookingsPage from "@/pages/BookingsPage";
 import ARPage from "@/pages/ARPage";
+import ARNavigationPage from "@/pages/ARNavigationPage";
 import PortfolioPage from "@/pages/PortfolioPage";
 import SuggestionsPage from "@/pages/SuggestionsPage";
 import TravelMemoryPage from "@/pages/TravelMemoryPage";
