@@ -19,6 +19,7 @@ import HotelsPage from "@/pages/HotelsPage";
 import FlightsPage from "@/pages/FlightsPage";
 import ChatPage from "@/pages/ChatPage";
 import PlannerPage from "@/pages/PlannerPage";
+import PreTripPlannerPage from "@/pages/PreTripPlannerPage";
 import AudioToolsPage from "@/pages/AudioToolsPage";
 import BookingsPage from "@/pages/BookingsPage";
 import ARPage from "@/pages/ARPage";
@@ -199,6 +200,7 @@ function App() {
         <Route path="/hotels" component={HotelsPage} />
         <Route path="/flights" component={FlightsPage} />
         <Route path="/planner" component={PlannerPage} />
+        <Route path="/pre-trip-planner" component={PreTripPlannerPage} />
         <Route path="/audio" component={AudioToolsPage} />
         <Route path="/bookings" component={BookingsPage} />
         <Route path="/ar" component={ARPage} />
