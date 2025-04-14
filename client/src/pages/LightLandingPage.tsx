@@ -53,20 +53,36 @@ export default function LightLandingPage() {
             
             <div className="hidden md:flex space-x-6">
               <Link href="/" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">Home</Link>
-              <Link href="/destinations" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">Destinations</Link>
-              <Link href="/blog" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">Travel Blog</Link>
               <Link href="/features" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">
                 <div className="flex items-center space-x-1">
                   <Sparkles className="h-4 w-4" />
-                  <span>AI Features</span>
+                  <span>Features</span>
                 </div>
               </Link>
+              <Link href="/planner" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">
+                Flow Builder
+              </Link>
+              <Link href="/pricing" className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif">
+                Pricing
+              </Link>
+              <button 
+                onClick={() => setShowChat(true)} 
+                className="px-4 py-2 text-white/90 hover:text-white transition-colors font-serif flex items-center space-x-1"
+              >
+                <MessageCircle className="h-4 w-4 mr-1" />
+                <span>AI Assistant</span>
+              </button>
             </div>
             
             <div className="flex items-center space-x-4">
               <Link href="/login">
                 <Button variant="outline" className="bg-white text-[#050b17] hover:bg-[#4a89dc] hover:text-white border-none transition-all duration-300 font-serif rounded">
-                  Sign In
+                  Login
+                </Button>
+              </Link>
+              <Link href="/signup">
+                <Button className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white border-none transition-all duration-300 font-serif rounded">
+                  Sign Up
                 </Button>
               </Link>
               <button className="md:hidden text-white hover:bg-gray-800 p-2 transition-colors">
@@ -93,10 +109,10 @@ export default function LightLandingPage() {
               <span className="text-white/90 text-sm font-serif tracking-wide">INTELLIGENT TRAVEL PLANNING</span>
             </div>
             <h1 className="text-5xl md:text-6xl font-display text-white mb-6 leading-tight">
-              Journey Beyond <span className="text-[#4a89dc]">Boundaries</span>
+              The Intelligent AI Copilot for <span className="text-[#4a89dc]">Decisions, Data & Life.</span>
             </h1>
             <p className="text-xl text-white/90 mb-10 max-w-xl leading-relaxed font-serif">
-              JET AI harmonizes sophisticated artificial intelligence with refined travel expertise to curate your ideal journey.
+              JET AI helps you navigate travel, business, and daily life with smart flows, emotional insights, and instant recommendations.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-5">
               <Link href="/onboarding" className="inline-flex items-center bg-[#4a89dc] hover:bg-[#3a79cc] text-white font-serif font-medium px-6 py-3 rounded-md transition shadow-lg">

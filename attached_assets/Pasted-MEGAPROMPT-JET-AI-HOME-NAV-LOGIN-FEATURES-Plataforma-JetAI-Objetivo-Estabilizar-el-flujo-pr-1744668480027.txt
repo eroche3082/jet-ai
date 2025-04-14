@@ -1,0 +1,162 @@
+MEGAPROMPT – JET AI (HOME, NAV, LOGIN, FEATURES)
+Plataforma: JetAI
+Objetivo: Estabilizar el flujo principal de la plataforma, unificar estructura visual con el resto del ecosistema, activar asistentes inteligentes desde el home, y preparar onboarding con experiencia emocional conectada.
+
+✅ 1. HOMEPAGE STRUCTURE
+Secciones esenciales:
+
+Hero Title:
+The Intelligent AI Copilot for Decisions, Data & Life.
+
+Subheadline:
+JetAI helps you navigate travel, business, and daily life with smart flows, emotional insights, and instant recommendations.
+
+Botones visibles:
+
+Launch Now → conecta directo a /login
+
+Explore Features → conecta a nueva página /features
+
+Incluir módulo interactivo:
+
+🧠 Try JetFlow (simulación del flujo)
+
+Demo donde el usuario puede responder 3 preguntas y recibir un flujo visual simple
+
+Solo 3 intentos disponibles sin login
+
+Visual de tipo "JetEngine diagram" mostrando un mini resultado
+
+Destacar 3 funciones en el home:
+
+Flow Builder with AI
+
+Emotional Insight Engine
+
+Decision Optimizer
+
+Asistente AI (inferior derecho):
+
+Debe estar siempre activo como ícono flotante
+
+Al hacer click en “AI Assistant” del menú también debe activarse
+
+✅ 2. MAIN MENU STRUCTURE
+JetAI debe tener el siguiente menú (Navbar superior):
+
+Tab	Acción
+Home	Regresa al homepage
+Features	Redirige a /features
+Flow Builder	Página pública con demo visual de flujos (1 demo previsualizable)
+Pricing	Scroll a la sección de paquetes (dentro del homepage o /pricing)
+AI Assistant	Al hacer click, activa el asistente AI flotante
+Login	Abre página de login (credentials + access code)
+Sign Up	Abre formulario de registro
+Condiciones lógicas:
+
+Si no hay login → mostrar Login y Sign Up
+
+Si el usuario está logueado → ocultar esos botones, mostrar Logout
+
+Menú debe ser pegajoso y responsivo
+
+✅ 3. LOGIN / SIGNUP FLOW
+Login Page (/login)
+
+Dos opciones:
+
+Credentials → usuario + contraseña
+
+Access Code → para flujos protegidos o invitados
+
+Signup Page (/signup)
+
+Formulario con:
+
+Nombre de usuario
+
+Email
+
+Contraseña
+
+Confirmación
+
+Credenciales por defecto para prueba:
+
+admin / admin123456
+
+✅ 4. FEATURES PAGE (/features)
+Nueva página pública con los 20+ features de JetAI explicados.
+Cada feature debe mostrar:
+
+Nombre
+
+Descripción breve
+
+Icono/ilustración
+
+Ejemplos de features clave:
+
+Smart Flow Generator
+
+QR Unblock Engine
+
+Emotional Sentiment Tracker
+
+Strategic Itinerary Builder
+
+Business & Travel Copilot
+
+Multilingual Chat Decision Engine
+
+Schedule Optimizer
+
+Visualized Mind Mapping
+
+Payment + API Integration Flow
+
+PDF/Document Reader Bot
+
+Flow-to-Action Generator
+
+GPT-4o + Gemini Dual Assistant Core
+
+Smart Notifications
+
+Travel AI Concierge
+
+AI Stream with Voice
+
+✅ 5. SEGURIDAD Y LÓGICA DE ACCESO
+El Dashboard debe estar completamente protegido
+
+Ninguna ruta interna puede ser visible sin login
+
+Si se intenta entrar sin estar autenticado → redirigir a /login
+
+Al iniciar sesión:
+
+Navbar muestra Logout
+
+Acceso a Dashboard y flujos activos habilitado
+
+✅ 6. VERIFICACIÓN FINAL – CHECKLIST
+Cada plataforma debe devolver un reporte de validación, confirmando:
+
+Elemento	Estado Esperado
+Homepage cargado	✅ Con Hero, botones, módulos
+Botones funcionando	✅ Redireccionan correctamente
+Menú unificado	✅ Todos los tabs operativos
+Login/Signup funcionando	✅ Sin errores
+Dashboard protegido	✅ No accesible sin login
+AI Assistant activo	✅ Ícono y desde menú
+Features page creada	✅ Con los 20+ features
+Flow Builder demo (x3 tries)	✅ Activo en el homepage
+Logout funciona	✅ Oculta login y signup
+❌ COSAS A ELIMINAR O AJUSTAR
+❌ Cualquier ruta /dashboard pública debe ser bloqueada
+
+❌ No debe haber duplicación de acceso (navbar + botón flotante deben ser consistentes)
+
+❌ El flujo de login no puede redirigir al dashboard automáticamente si no se valida sesión
+
