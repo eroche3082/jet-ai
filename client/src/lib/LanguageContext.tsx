@@ -1,21 +1,19 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { SupportedLanguage, getDefaultLanguage, LANGUAGES } from './i18n';
+import { SupportedLanguage, getDefaultLanguage, LANGUAGES, LOCAL_STORAGE_KEY } from './i18n';
 
-interface LanguageContextType {
+// Define context type
+export interface LanguageContextType {
   language: SupportedLanguage;
   setLanguage: (lang: SupportedLanguage) => void;
   languages: typeof LANGUAGES;
 }
 
 // Create context with default values
-const LanguageContext = createContext<LanguageContextType>({
+export const LanguageContext = createContext<LanguageContextType>({
   language: 'en',
   setLanguage: () => {},
   languages: LANGUAGES
 });
-
-// Export hook for easy consumption
-export const useLanguageContext = () => useContext(LanguageContext);
 
 // Language Provider component
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -31,7 +29,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     
     // Update state and document property
     setLanguageState(newLanguage);
-    localStorage.setItem('jetai_language', newLanguage);
+    localStorage.setItem(LOCAL_STORAGE_KEY, newLanguage);
     document.documentElement.lang = newLanguage;
     
     // Dispatch event for components that need to react to language changes
@@ -76,4 +74,26 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   );
 };
 
-export default LanguageContext;
+// Custom hook for using the language context
+export function useLanguageContext() {
+  const context = useContext(LanguageContext);
+  if (context === undefined) {
+    throw new Error('useLanguageContext must be used within a LanguageProvider');
+  }
+  return context;
+}
+
+// Create a wrapper hook to match the previous API
+export function useLanguage() {
+  const { language, setLanguage, languages } = useLanguageContext();
+  
+  // Get the current language info
+  const currentLanguageInfo = LANGUAGES.find(lang => lang.code === language) || LANGUAGES[0];
+  
+  return {
+    language,
+    setLanguage,
+    languages,
+    currentLanguageInfo
+  };
+}

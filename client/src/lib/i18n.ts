@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react';
-
-// Define supported languages
+// Defining core language types and constants
 export type SupportedLanguage = 'en' | 'es' | 'fr' | 'pt' | 'de' | 'it';
 
 export interface Language {
@@ -19,7 +17,7 @@ export const LANGUAGES: Language[] = [
   { code: 'it', name: 'Italian', flag: '🇮🇹', native: 'Italiano' },
 ];
 
-const LOCAL_STORAGE_KEY = 'jetai_language';
+export const LOCAL_STORAGE_KEY = 'jetai_language';
 
 // Get default language from localStorage or browser
 export function getDefaultLanguage(): SupportedLanguage {
@@ -42,62 +40,10 @@ export function getDefaultLanguage(): SupportedLanguage {
   return 'en';
 }
 
-// Hook for using language throughout the app
-export function useLanguage() {
-  const [language, setLanguageState] = useState<SupportedLanguage>(getDefaultLanguage());
-  
-  const setLanguage = (newLanguage: SupportedLanguage) => {
-    if (!LANGUAGES.some(lang => lang.code === newLanguage)) {
-      console.warn(`Language ${newLanguage} is not supported`);
-      return;
-    }
-    
-    setLanguageState(newLanguage);
-    localStorage.setItem(LOCAL_STORAGE_KEY, newLanguage);
-    document.documentElement.lang = newLanguage;
-    
-    // Dispatch event for components that need to react to language changes
-    window.dispatchEvent(new CustomEvent('languageChange', { 
-      detail: { language: newLanguage } 
-    }));
-  };
-  
-  // Initialize language on mount
-  useEffect(() => {
-    const savedLanguage = getDefaultLanguage();
-    if (savedLanguage !== language) {
-      setLanguage(savedLanguage);
-    }
-    
-    // Listen for language changes from other components (like LanguageSelector)
-    const handleLanguageChange = (e: CustomEvent) => {
-      if (e.detail?.language && e.detail.language !== language) {
-        setLanguageState(e.detail.language);
-      }
-    };
-    
-    window.addEventListener('languageChange', handleLanguageChange as EventListener);
-    
-    return () => {
-      window.removeEventListener('languageChange', handleLanguageChange as EventListener);
-    };
-  }, []);
-  
-  return {
-    language,
-    setLanguage,
-    languages: LANGUAGES,
-    currentLanguageInfo: LANGUAGES.find(lang => lang.code === language) || LANGUAGES[0]
-  };
-}
+// Import the translation utility
+import { t } from './translations';
 
-// Utility for translating text - in a real app, this would use proper i18n libraries
+// Utility for translating text using our translation files
 export function translate(key: string, language: SupportedLanguage = 'en'): string {
-  if (language === 'en') {
-    return key; // For demo purposes, we're just returning the key for English
-  }
-  
-  // In a real implementation, this would look up translations from files or API
-  console.log(`Translating ${key} to ${language}`);
-  return key; // Return key as fallback
+  return t(key, language);
 }

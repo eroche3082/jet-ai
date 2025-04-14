@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Globe } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { LANGUAGES, useLanguage, SupportedLanguage } from '@/lib/i18n';
+import { LANGUAGES, SupportedLanguage } from '@/lib/i18n';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface LanguageSelectorProps {
   variant?: 'default' | 'minimal' | 'icon-only';
