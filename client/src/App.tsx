@@ -187,13 +187,16 @@ function App() {
         <Route path="/checkout" component={Checkout} />
         
         {/* AI Assistant routes */}
+        <Route path="/chat" component={ChatPage} />
+        <Route path="/ai-features" component={FeaturesPage} />
+        
+        {/* Dev/Debug routes */}
         <Route path="/vertex-ai" component={VertexAIPage} />
         <Route path="/gemini-test" component={GeminiTestPage} />
         
         {/* Tool routes */}
         <Route path="/camera" component={CameraPage} />
         <Route path="/qr-scanner" component={QRScannerPage} />
-        <Route path="/chat" component={ChatPage} />
 
         {/* Travel features routes */}
         <Route path="/hotels" component={HotelsPage} />
