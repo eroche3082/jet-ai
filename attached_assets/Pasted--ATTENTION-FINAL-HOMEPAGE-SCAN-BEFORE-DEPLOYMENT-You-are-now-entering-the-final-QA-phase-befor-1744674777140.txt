@@ -1,0 +1,97 @@
+[ ATTENTION – FINAL HOMEPAGE SCAN BEFORE DEPLOYMENT ]
+
+You are now entering the final QA phase before Jet AI is officially launched. You must follow this exact checklist and provide a **FULL REPORT** of the homepage status.
+
+---
+
+PHASE: JET AI – HOMEPAGE SANITY CHECK
+
+1. LANGUAGE VERIFICATION
+- Ensure the **entire homepage is in English only**
+- No content should be in Spanish, placeholders, or Latin filler text
+
+---
+
+2. BUTTON FUNCTIONALITY CHECK
+- Confirm the following buttons are active and correctly routed:
+  - [ ] Create My Profile
+  - [ ] Explore Destinations
+  - [ ] Start Planning
+  - [ ] View All Destinations
+  - [ ] Experience Jet AI Assistant
+  - [ ] Begin Your Journey (Voyager)
+  - [ ] Elevate Your Experience (Connoisseur)
+  - [ ] Request Consultation (Luminary)
+  - [ ] Start Personalization
+  - [ ] Subscribe to Updates
+
+If any of these do not work → remove or disable them immediately.
+
+---
+
+3. NAVIGATION BAR VERIFICATION
+Tabs must be active and properly linked:
+| Tab             | Required Behavior              |
+|------------------|---------------------------------|
+| Home             | Returns to homepage            |
+| Destinations     | Scrolls or navigates to section|
+| Travel Blog      | Opens full journal/articles    |
+| AI Features      | Scrolls to or opens feature list|
+| Sign In          | Leads to login page            |
+
+If any link is not connected or leads nowhere → fix or hide it.
+
+---
+
+4. FOOTER CLEANUP (MANDATORY)
+Remove any **non-functional, fake, or unapproved content**:
+- [ ] Delete any placeholder emails (e.g. concierge@jetai.travel if it’s not active)
+- [ ] Remove “Live assistance available” if it’s not functioning
+- [ ] Remove any broken or empty social links
+- [ ] Eliminate any "About JET AI" page link if it’s not active
+
+Only approved legal links should remain:
+- ✅ Terms of Service
+- ✅ Privacy Policy
+- ✅ Cookie Policy
+
+---
+
+5. CONTENT SANITY – REMOVE / FIX:
+- Remove **any subscription boxes** that don’t save real emails
+- Remove or replace **“Read More”** links if they go nowhere
+- If blog entries are not live or real → remove them
+- Remove any client quotes or testimonials if not real/approved
+- If Travel Profile or Personalization process is not complete → disable or label as “Coming Soon”
+
+---
+
+6. VISUAL & UI CHECK
+- Verify mobile view works correctly
+- Confirm all fonts, buttons, icons are consistent
+- Ensure the AI Assistant icon is visible in bottom right and functions
+
+---
+
+7. FINAL REPORT FORMAT (TO RETURN NOW)
+
+You must respond with the following 3 sections:
+
+**SECTION A – ACTIVE COMPONENTS**
+List all working components/buttons/links
+
+**SECTION B – REMOVED OR BROKEN COMPONENTS**
+List what was removed or was not functional
+
+**SECTION C – SUGGESTED IMPROVEMENTS**
+List anything the agent suggests for future improvement of Jet AI (optional)
+
+---
+
+⚠️ DO NOT PROCEED TO NEXT PHASE unless:
+- Homepage is 100% cleaned and verified
+- Language is unified (English only)
+- Footer contains no false links or contact info
+- ALL buttons route correctly
+
+This is a final instruction for JetAI. Awaiting your clean report now.
