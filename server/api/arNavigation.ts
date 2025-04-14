@@ -29,6 +29,18 @@ import {
   configureGoogleMapsRequest 
 } from '../lib/googleApiConfig';
 
+// Import test suite for API validation
+import { 
+  testVisionAPI,
+  testTranslationAPI,
+  testTextToSpeechAPI,
+  testSpeechToTextAPI,
+  testNaturalLanguageAPI,
+  testGeminiAI,
+  testMapsAPI,
+  testVideoIntelligenceAPI 
+} from '../test/google-services-test';
+
 // Set up file storage for image uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -375,18 +387,7 @@ router.post('/immersive-description', async (req, res) => {
  */
 router.get('/test', async (req, res) => {
   try {
-    // Import the comprehensive test suite
-    const {
-      runAllTests,
-      testVisionAPI,
-      testTranslationAPI,
-      testTextToSpeechAPI,
-      testSpeechToTextAPI,
-      testNaturalLanguageAPI,
-      testGeminiAI,
-      testMapsAPI,
-      testVideoIntelligenceAPI
-    } = require('../test/google-services-test');
+    // Use the test suite imported at the top of the file
     
     // Run all tests
     const results = await Promise.all([

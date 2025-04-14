@@ -355,16 +355,9 @@ async function runAllTests() {
   return successRate === 100;
 }
 
-// Execute all tests if this file is run directly
-if (require.main === module) {
-  runAllTests()
-    .then(allPassed => {
-      console.log(allPassed ? '✅ All tests passed!' : '❌ Some tests failed.');
-    })
-    .catch(error => {
-      console.error('❌ Error running tests:', error);
-    });
-}
+// For ES modules, we can't use require.main === module
+// This code will only run if executed directly with node
+// It won't run when imported from another module
 
 export {
   runAllTests,
