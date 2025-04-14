@@ -161,12 +161,11 @@ function App() {
     // Regular application routes
     return (
       <Switch>
-        {/* New unified structure routes */}
+        {/* Main Routes */}
         <Route path="/" component={LandingPage} />
         <Route path="/login" component={LoginPage} />
         <Route path="/onboarding" component={OnboardingPage} />
         <Route path="/dashboard" component={DashboardPage} />
-        <Route path="/chat-demo" component={DarkDashboardPage} />
         
         {/* Main application routes */}
         <Route path="/destinations" component={Destinations} />
@@ -246,9 +245,9 @@ function App() {
     );
   };
 
-  // Don't use Layout for landing page, login page, onboarding, chat-demo or status pages
+  // Don't use Layout for landing page, login page, onboarding or status pages
   const shouldUseLayout = () => {
-    return !['/login', '/', '/onboarding', '/chat-demo'].includes(location) && !location.startsWith('/status/');
+    return !['/login', '/', '/onboarding'].includes(location) && !location.startsWith('/status/');
   };
 
   return (

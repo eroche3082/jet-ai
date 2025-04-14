@@ -42,7 +42,7 @@ export default function Header() {
     { title: 'Home', path: '/' },
     { title: 'Destinations', path: '/destinations' },
     { title: 'Travel Blog', path: '/blog' },
-    { title: 'Features', path: '/features' },
+    { title: 'AI Features', path: '/features' },
     { title: 'Travel Community', path: '/travel-community' }
   ];
   
