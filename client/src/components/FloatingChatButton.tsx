@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { MessageSquare, X } from 'lucide-react';
+import { MessageSquare, X, Volume2, Mic } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import OnboardingChat from '@/components/OnboardingChat';
+import AIChat from '@/components/AIChat';
 import { 
   createUserProfile, 
   registerWithEmail,
@@ -11,19 +12,53 @@ import {
 } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 
+// Type for the different chat modes
+type ChatMode = 'onboarding' | 'assistant';
+
 export default function FloatingChatButton() {
   const [isOpen, setIsOpen] = useState(false);
+  const [chatMode, setChatMode] = useState<ChatMode>('assistant');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+
+  // Check if user is logged in on component mount
+  useEffect(() => {
+    const loggedInStatus = localStorage.getItem('isLoggedIn') === 'true';
+    setIsLoggedIn(loggedInStatus);
+    
+    // If user is not logged in, show onboarding
+    if (!loggedInStatus) {
+      setChatMode('onboarding');
+    }
+    
+    // Check voice preference
+    const voicePreference = localStorage.getItem('jetai_voice_enabled') === 'true';
+    setVoiceEnabled(voicePreference);
+  }, []);
 
   const handleChatOpen = () => {
     setIsOpen(true);
   };
 
+  const toggleVoice = () => {
+    const newValue = !voiceEnabled;
+    setVoiceEnabled(newValue);
+    localStorage.setItem('jetai_voice_enabled', newValue.toString());
+    
+    toast({
+      title: newValue ? "Voice Mode Enabled" : "Voice Mode Disabled",
+      description: newValue 
+        ? "You can now speak to JET AI and hear responses."
+        : "Voice interaction has been turned off.",
+    });
+  };
+
   // Handle onboarding completion with Firebase integration
   const handleOnboardingComplete = async (userData: any) => {
     console.log('Onboarding complete with user data:', userData);
-    setIsOpen(false);
+    setChatMode('assistant');
     
     try {
       // Generate a password from email (temporary for demo)
@@ -60,15 +95,13 @@ export default function FloatingChatButton() {
         
         // Set logged in state
         localStorage.setItem('isLoggedIn', 'true');
+        setIsLoggedIn(true);
         
         // Inform user of successful registration
         toast({
           title: "Registration Successful",
           description: `Welcome ${userData.name}! Your personalized dashboard is ready.`,
         });
-        
-        // Redirect to dashboard
-        setLocation('/dashboard');
       } else {
         throw new Error('Failed to create user account');
       }
@@ -101,7 +134,7 @@ export default function FloatingChatButton() {
           }
           
           localStorage.setItem('isLoggedIn', 'true');
-          setLocation('/dashboard');
+          setIsLoggedIn(true);
         } catch (loginError) {
           toast({
             variant: "destructive",
@@ -121,18 +154,36 @@ export default function FloatingChatButton() {
 
   return (
     <>
-      {/* Floating Chat Button */}
-      <div className="fixed bottom-6 right-6 z-50">
+      {/* Floating Chat Button - Standardized position: bottom-right on all pages */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+        {/* Voice toggle button (only for logged in users) */}
+        {isLoggedIn && isOpen && (
+          <button
+            onClick={toggleVoice}
+            className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-all duration-200 ${
+              voiceEnabled 
+                ? "bg-[#4a89dc] text-white" 
+                : "bg-white text-[#4a89dc] border border-[#4a89dc]/30"
+            }`}
+            aria-label={voiceEnabled ? "Disable voice interaction" : "Enable voice interaction"}
+            title={voiceEnabled ? "Disable voice" : "Enable voice"}
+          >
+            {voiceEnabled ? <Volume2 className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+          </button>
+        )}
+        
+        {/* Main chat button */}
         <button 
           onClick={handleChatOpen}
           className="w-14 h-14 rounded-full bg-[#4a89dc] hover:bg-[#3a79cc] text-white shadow-lg flex items-center justify-center transition-all duration-300 animate-pulse-soft"
           aria-label="Open chat assistant"
         >
           <MessageSquare className="w-6 h-6" />
+          <span className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-red-500 animate-pulse"></span>
         </button>
       </div>
 
-      {/* Chat Dialog */}
+      {/* Chat Dialog - Standardized UI */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-[425px] h-[600px] p-0 overflow-hidden">
           <div className="flex flex-col h-full">
@@ -141,18 +192,37 @@ export default function FloatingChatButton() {
                 <div className="h-8 w-8 rounded-full bg-[#4a89dc]/20 flex items-center justify-center">
                   <MessageSquare className="h-5 w-5 text-[#4a89dc]" />
                 </div>
-                <span className="font-medium">JET AI Onboarding</span>
+                <span className="font-medium">
+                  {chatMode === 'onboarding' ? 'JET AI Onboarding' : 'JET AI Assistant'}
+                </span>
               </div>
-              <button 
-                onClick={() => setIsOpen(false)}
-                className="text-white/70 hover:text-white"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                {isLoggedIn && (
+                  <button
+                    onClick={toggleVoice}
+                    className="text-white/70 hover:text-white"
+                    aria-label={voiceEnabled ? "Disable voice" : "Enable voice"}
+                    title={voiceEnabled ? "Disable voice" : "Enable voice"}
+                  >
+                    {voiceEnabled ? <Volume2 className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                  </button>
+                )}
+                <button 
+                  onClick={() => setIsOpen(false)}
+                  className="text-white/70 hover:text-white"
+                  aria-label="Close chat"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
             
             <div className="flex-grow overflow-hidden">
-              <OnboardingChat onComplete={handleOnboardingComplete} />
+              {chatMode === 'onboarding' ? (
+                <OnboardingChat onComplete={handleOnboardingComplete} />
+              ) : (
+                <AIChat voiceEnabled={voiceEnabled} />
+              )}
             </div>
           </div>
         </DialogContent>
