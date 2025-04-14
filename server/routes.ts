@@ -727,75 +727,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Endpoint para búsqueda de destinos desde la landing page
-  app.post("/api/search/destinations", async (req, res) => {
-    try {
-      const { destination, date, useGemini, useRapidAPI } = req.body;
-      
-      if (!destination) {
-        return res.status(400).json({ message: "Destination is required" });
-      }
-      
-      console.log(`Searching for destination: ${destination}, date: ${date}`);
-      
-      let destinationResults;
-      try {
-        // Usar la función de búsqueda de destinos del API de viaje
-        destinationResults = await searchDestinations(destination);
-        
-        // Registrar la búsqueda en analytics (si el usuario está autenticado)
-        const userId = req.user ? (req.user as any).id : null;
-        if (userId) {
-          await storage.logUserActivity({
-            userId,
-            action: 'search_destination',
-            details: JSON.stringify({ destination, date }),
-            createdAt: new Date()
-          });
-        }
-        
-        // Si se solicitó Gemini para enriquecer los resultados
-        if (useGemini && destinationResults.destinations.length > 0) {
-          try {
-            const geminiResults = await processConversation(
-              `Provide additional travel information about ${destination}. Focus on key attractions, best time to visit, and cultural highlights. Format the response as JSON with fields: highlights (array), bestTimeToVisit (string), culturalNotes (string), safetyTips (string).`,
-              [],
-              'gemini'
-            );
-            
-            if (geminiResults && typeof geminiResults === 'string') {
-              try {
-                // Intentar extraer el JSON de la respuesta
-                const jsonMatch = geminiResults.match(/```json\n([\s\S]*?)\n```/) || 
-                                 geminiResults.match(/{[\s\S]*?}/);
-                
-                if (jsonMatch) {
-                  const parsedData = JSON.parse(jsonMatch[1] || jsonMatch[0]);
-                  destinationResults.aiEnrichment = parsedData;
-                }
-              } catch (jsonError) {
-                console.error('Error parsing Gemini JSON:', jsonError);
-              }
-            }
-          } catch (geminiError) {
-            console.error('Error getting Gemini enrichment:', geminiError);
-          }
-        }
-        
-        res.json(destinationResults);
-      } catch (searchError) {
-        console.error("Error searching destinations:", searchError);
-        res.status(500).json({ 
-          message: "Error searching destinations",
-          error: searchError.message
-        });
-      }
-    } catch (error) {
-      console.error("Error in destination search endpoint:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });
-
   app.post("/api/itinerary/generate", async (req, res) => {
     try {
       const { destination, days, preferences } = req.body;
@@ -997,7 +928,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Endpoint duplicado eliminado para evitar conflictos
+  // Search destinations endpoint to support the landing page search box
+  app.post("/api/search/destinations", async (req, res) => {
+    try {
+      const { destination, date, useGemini, useRapidAPI } = req.body;
+      
+      if (!destination) {
+        return res.status(400).json({ message: "Destination is required" });
+      }
+      
+      console.log(`Searching for destinations: ${destination}, date: ${date}`);
+      
+      // Search for destinations using the existing API
+      const searchResults = await searchDestinations(destination);
+      
+      // Track the search in analytics if applicable
+      // ...
+      
+      // Return search results
+      res.json({ 
+        success: true, 
+        results: searchResults.destinations,
+        source: searchResults.source,
+        query: {
+          destination,
+          date
+        }
+      });
+    } catch (error) {
+      console.error("Error searching destinations:", error);
+      res.status(500).json({ 
+        message: "Error searching destinations",
+        error: error.message
+      });
+    }
+  });
   
   // Hotel search endpoints
   app.get("/api/hotels/search", async (req, res) => {
