@@ -73,10 +73,10 @@ export default function Sidebar() {
         <div className="flex flex-col h-full py-6 px-4">
           {/* Logo */}
           <div className="flex items-center justify-center mb-8 px-4">
-            <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-primary" stroke="currentColor" strokeWidth="2">
-              <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" strokeLinejoin="round" strokeLinecap="round"/>
-            </svg>
-            <span className="ml-2 text-xl font-bold">JetAI</span>
+            <span className="text-[#4a89dc] text-2xl">
+              <i className="fas fa-plane"></i>
+            </span>
+            <span className="ml-2 text-xl font-bold">JET <span className="text-[#4a89dc]">AI</span></span>
           </div>
           
           {/* Navigation items */}

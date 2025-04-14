@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
 import Header from './Header';
 import Footer from './Footer';
-import FloatingChatButton from './FloatingChatButton';
 import Sidebar from './Sidebar';
 
 interface LayoutProps {
@@ -18,7 +17,6 @@ export default function Layout({ children }: LayoutProps) {
           {children}
         </main>
         <Footer />
-        <FloatingChatButton />
       </div>
     </div>
   );

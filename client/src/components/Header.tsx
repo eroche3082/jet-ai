@@ -50,8 +50,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-white shadow-sm py-3 px-4">
       <div className="container mx-auto">
         <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            {/* Logo */}
+          <div className="flex items-center ml-2">
             <Link href="/" className="flex items-center">
               <span className="text-[#4a89dc] text-2xl sm:text-3xl mr-2">
                 <i className="fas fa-plane"></i>
