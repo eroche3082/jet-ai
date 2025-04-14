@@ -1245,24 +1245,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stripe payment routes
   app.post("/api/create-payment-intent", async (req, res) => {
     try {
-      const { packId, promoCode } = req.body;
+      const { items, amount, promoCode } = req.body;
       const affiliateId = req.query.ref || req.session?.affiliateId;
       
-      // Credit packs configuration
-      const CREDIT_PACKS = {
-        credit_10: {
+      // Products configuration
+      const PRODUCTS = {
+        "premium-membership": {
+          id: 'premium-membership',
+          name: 'JET AI Premium Membership (Annual)',
+          price: 99.99
+        },
+        "credit_10": {
           id: 'credit_10',
           credits: 10,
           price: 4.99,
           name: '10 AI Credits'
         },
-        credit_50: {
+        "credit_50": {
           id: 'credit_50',
           credits: 50,
           price: 19.99,
           name: '50 AI Credits'
         },
-        credit_100: {
+        "credit_100": {
           id: 'credit_100',
           credits: 100,
           price: 34.99,
@@ -1270,29 +1275,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
       
-      // Get the credit pack details
-      const pack = CREDIT_PACKS[packId as keyof typeof CREDIT_PACKS];
-      if (!pack) {
-        return res.status(400).json({ message: "Invalid pack ID" });
+      // Determine the amount and products
+      let finalAmount = amount;
+      let purchaseItems = items;
+      
+      // If no amount but items are provided, calculate the amount from the items
+      if (!finalAmount && items && items.length > 0) {
+        const firstItemId = items[0].id;
+        const product = PRODUCTS[firstItemId];
+        
+        if (!product) {
+          return res.status(400).json({ message: "Invalid product ID" });
+        }
+        
+        finalAmount = product.price;
+        purchaseItems = [{ id: firstItemId, name: product.name, quantity: 1 }];
       }
       
       // Apply promo code discount if provided (this would be validated against a database in production)
-      let amount = pack.price;
       if (promoCode) {
         // Example discount logic - would be replaced with actual promo code validation
-        amount = amount * 0.9; // 10% discount for example
+        finalAmount = finalAmount * 0.9; // 10% discount for example
       }
       
       // Create payment intent
-      const paymentIntent = await createPaymentIntent(amount, [
-        { id: packId, name: pack.name, quantity: 1 }
-      ]);
+      const paymentIntent = await createPaymentIntent(finalAmount, purchaseItems);
       
       // Store metadata with the payment intent if possible
       const metadata = {
-        packId,
-        credits: pack.credits.toString(),
-        type: 'credit_pack',
+        type: purchaseItems && purchaseItems[0] ? purchaseItems[0].id : 'payment',
         affiliateId: affiliateId?.toString() || '',
         promoCode: promoCode || ''
       };
@@ -1301,12 +1312,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ 
         clientSecret: paymentIntent.client_secret,
-        amount,
-        packDetails: {
-          id: pack.id,
-          name: pack.name,
-          credits: pack.credits
-        }
+        amount: finalAmount,
+        orderDetails: purchaseItems && purchaseItems[0] ? {
+          id: purchaseItems[0].id,
+          name: purchaseItems[0].name,
+        } : null
       });
     } catch (error: any) {
       console.error("Error creating payment intent:", error);
