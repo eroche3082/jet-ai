@@ -22,8 +22,8 @@ export default function PreTripPlannerPage() {
   
   return (
     <div className="container mx-auto py-8 px-4">
-      {/* Helmet removed temporarily due to error */}
-      {/* Page title: Pre-Trip Planner | JET AI */}
+      {/* Title would normally go here using document.title */}
+      {/* We've removed Helmet due to configuration issues */}
       
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Pre-Trip Planner</h1>
