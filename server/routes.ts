@@ -997,41 +997,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Search destinations endpoint to support the landing page search box
-  app.post("/api/search/destinations", async (req, res) => {
-    try {
-      const { destination, date, useGemini, useRapidAPI } = req.body;
-      
-      if (!destination) {
-        return res.status(400).json({ message: "Destination is required" });
-      }
-      
-      console.log(`Searching for destinations: ${destination}, date: ${date}`);
-      
-      // Search for destinations using the existing API
-      const searchResults = await searchDestinations(destination);
-      
-      // Track the search in analytics if applicable
-      // ...
-      
-      // Return search results
-      res.json({ 
-        success: true, 
-        results: searchResults.destinations,
-        source: searchResults.source,
-        query: {
-          destination,
-          date
-        }
-      });
-    } catch (error) {
-      console.error("Error searching destinations:", error);
-      res.status(500).json({ 
-        message: "Error searching destinations",
-        error: error.message
-      });
-    }
-  });
+  // Endpoint duplicado eliminado para evitar conflictos
   
   // Hotel search endpoints
   app.get("/api/hotels/search", async (req, res) => {
