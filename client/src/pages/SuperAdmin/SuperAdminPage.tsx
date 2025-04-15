@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Lock, Shield, Settings, Users, Activity, AlertTriangle, DollarSign, BarChart4 } from 'lucide-react';
+import { Loader2, Lock, Shield, Settings, Users, Activity, AlertTriangle, DollarSign, BarChart4, Video } from 'lucide-react';
 import SuperAdminNavigation from '@/components/superadmin/SuperAdminNavigation';
 import AnalyticsPanel from '@/components/superadmin/AnalyticsPanel';
 import FinancialOverview from '@/components/superadmin/FinancialOverview';
@@ -11,6 +11,7 @@ import MembershipPanel from '@/components/superadmin/MembershipPanel';
 import AgentConfiguration from '@/components/superadmin/AgentConfiguration';
 import ClientDatabase from '@/components/superadmin/ClientDatabase';
 import AlertsCenter from '@/components/superadmin/AlertsCenter';
+import AvatarConfiguration from '@/components/superadmin/AvatarConfiguration';
 
 const SuperAdminPage: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -130,12 +131,13 @@ const SuperAdminPage: React.FC = () => {
         </header>
 
         <Tabs defaultValue="analytics" className="space-y-4">
-          <TabsList className="grid grid-cols-4 md:grid-cols-8 bg-[#0a1328] border-[#4a89dc]/20 border">
+          <TabsList className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-9 bg-[#0a1328] border-[#4a89dc]/20 border">
             <TabsTrigger value="analytics" className="flex gap-1 items-center"><BarChart4 className="h-4 w-4" /> Analytics</TabsTrigger>
             <TabsTrigger value="financial" className="flex gap-1 items-center"><DollarSign className="h-4 w-4" /> Financial</TabsTrigger>
             <TabsTrigger value="system" className="flex gap-1 items-center"><Settings className="h-4 w-4" /> System</TabsTrigger>
             <TabsTrigger value="membership" className="flex gap-1 items-center"><Users className="h-4 w-4" /> Membership</TabsTrigger>
             <TabsTrigger value="agents" className="flex gap-1 items-center"><Shield className="h-4 w-4" /> Agents</TabsTrigger>
+            <TabsTrigger value="avatars" className="flex gap-1 items-center"><Video className="h-4 w-4" /> Avatars</TabsTrigger>
             <TabsTrigger value="clients" className="flex gap-1 items-center"><Users className="h-4 w-4" /> Clients</TabsTrigger>
             <TabsTrigger value="alerts" className="flex gap-1 items-center"><AlertTriangle className="h-4 w-4" /> Alerts</TabsTrigger>
             <TabsTrigger value="activity" className="flex gap-1 items-center"><Activity className="h-4 w-4" /> Activity</TabsTrigger>
@@ -167,6 +169,10 @@ const SuperAdminPage: React.FC = () => {
           
           <TabsContent value="alerts" className="space-y-4">
             <AlertsCenter />
+          </TabsContent>
+          
+          <TabsContent value="avatars" className="space-y-4">
+            <AvatarConfiguration />
           </TabsContent>
           
           <TabsContent value="activity" className="space-y-4">

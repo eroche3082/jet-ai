@@ -1,0 +1,68 @@
+[
+  {
+    "id": "avatar1",
+    "name": "Alex",
+    "pose_name": "Casual",
+    "thumbnail": "/videoai/thumbs/avatar1.jpg",
+    "created_at": 1743675482123,
+    "voice_id": "voice1",
+    "is_interactive": true,
+    "gender": "male",
+    "attitude": "friendly"
+  },
+  {
+    "id": "avatar2",
+    "name": "Sophia",
+    "pose_name": "Professional",
+    "thumbnail": "/videoai/thumbs/avatar2.jpg",
+    "created_at": 1743675482123,
+    "voice_id": "voice2",
+    "is_interactive": true,
+    "gender": "female",
+    "attitude": "professional"
+  },
+  {
+    "id": "avatar3",
+    "name": "Marcus",
+    "pose_name": "Advisor",
+    "thumbnail": "/videoai/thumbs/avatar3.jpg",
+    "created_at": 1743675482123,
+    "voice_id": "voice3",
+    "is_interactive": true,
+    "gender": "male",
+    "attitude": "professional"
+  },
+  {
+    "id": "avatar4",
+    "name": "Elena",
+    "pose_name": "Casual",
+    "thumbnail": "/videoai/thumbs/avatar4.jpg",
+    "created_at": 1743675482123,
+    "voice_id": "voice4",
+    "is_interactive": true,
+    "gender": "female",
+    "attitude": "friendly"
+  },
+  {
+    "id": "avatar5",
+    "name": "Carlos",
+    "pose_name": "Guide",
+    "thumbnail": "/videoai/thumbs/avatar5.jpg",
+    "created_at": 1743675482123,
+    "voice_id": "voice5",
+    "is_interactive": true,
+    "gender": "male",
+    "attitude": "enthusiastic"
+  },
+  {
+    "id": "avatar6",
+    "name": "Naomi",
+    "pose_name": "Executive",
+    "thumbnail": "/videoai/thumbs/avatar6.jpg",
+    "created_at": 1743675482123,
+    "voice_id": "voice6",
+    "is_interactive": true,
+    "gender": "female",
+    "attitude": "authoritative"
+  }
+]

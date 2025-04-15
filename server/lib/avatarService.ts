@@ -26,12 +26,25 @@ interface AvatarConfig {
 export class AvatarService {
   private configPath: string;
   private config: AvatarConfig | null = null;
-
+  
   constructor() {
-    this.configPath = path.join(process.cwd(), 'public', 'avatars', 'data', 'config.json');
+    this.configPath = path.resolve(process.cwd(), 'videoai/config/avatar_config.json');
+    
+    // Create config directory if it doesn't exist
+    const configDir = path.dirname(this.configPath);
+    if (!fs.existsSync(configDir)) {
+      try {
+        fs.mkdirSync(configDir, { recursive: true });
+        console.log(`Created avatar config directory: ${configDir}`);
+      } catch (error) {
+        console.error('Error creating avatar config directory:', error);
+      }
+    }
+    
+    // Load config from file
     this.loadConfig();
   }
-
+  
   /**
    * Load avatar configuration from file
    */
@@ -40,61 +53,55 @@ export class AvatarService {
       if (fs.existsSync(this.configPath)) {
         const configData = fs.readFileSync(this.configPath, 'utf8');
         this.config = JSON.parse(configData);
+        console.log('Avatar configuration loaded successfully');
       } else {
-        // Initialize with default configuration
+        // Create default config
         this.config = {
           apiKeys: {
-            openai: '',
-            heygen: '',
-            elevenlabs: ''
+            openai: process.env.OPENAI_API_KEY || '',
+            heygen: process.env.HEYGEN_API_KEY || '',
+            elevenlabs: process.env.ELEVENLABS_API_KEY || ''
           },
           settings: {
             enableAvatars: false,
             defaultAvatar: '',
-            maxTokens: 150,
+            maxTokens: 1000,
             temperature: 0.7
           },
           enabledAvatarIds: []
         };
         
-        // Create the directory if it doesn't exist
-        const dir = path.dirname(this.configPath);
-        if (!fs.existsSync(dir)) {
-          fs.mkdirSync(dir, { recursive: true });
-        }
-        
-        // Save the default config
+        // Save default config
         this.saveConfig();
+        console.log('Default avatar configuration created');
       }
     } catch (error) {
       console.error('Error loading avatar configuration:', error);
       this.config = null;
     }
   }
-
+  
   /**
    * Save avatar configuration to file
    */
   private saveConfig(): boolean {
     try {
-      if (this.config) {
-        fs.writeFileSync(this.configPath, JSON.stringify(this.config, null, 2), 'utf8');
-        return true;
-      }
-      return false;
+      fs.writeFileSync(this.configPath, JSON.stringify(this.config, null, 2), 'utf8');
+      console.log('Avatar configuration saved successfully');
+      return true;
     } catch (error) {
       console.error('Error saving avatar configuration:', error);
       return false;
     }
   }
-
+  
   /**
    * Get the avatar configuration
    */
   public getConfig(): AvatarConfig | null {
     return this.config;
   }
-
+  
   /**
    * Update the avatar configuration
    */
@@ -102,62 +109,96 @@ export class AvatarService {
     try {
       if (!this.config) {
         this.loadConfig();
+        if (!this.config) {
+          return false;
+        }
       }
       
-      if (this.config) {
-        // Update config with new values
-        this.config = {
-          ...this.config,
-          ...newConfig,
-          apiKeys: {
-            ...this.config.apiKeys,
-            ...(newConfig.apiKeys || {})
-          },
-          settings: {
-            ...this.config.settings,
-            ...(newConfig.settings || {})
-          }
+      // Update config
+      if (newConfig.apiKeys) {
+        this.config.apiKeys = {
+          ...this.config.apiKeys,
+          ...newConfig.apiKeys
         };
-        
-        return this.saveConfig();
       }
       
-      return false;
+      if (newConfig.settings) {
+        this.config.settings = {
+          ...this.config.settings,
+          ...newConfig.settings
+        };
+      }
+      
+      if (newConfig.enabledAvatarIds) {
+        this.config.enabledAvatarIds = newConfig.enabledAvatarIds;
+      }
+      
+      // Save updated config
+      return this.saveConfig();
     } catch (error) {
       console.error('Error updating avatar configuration:', error);
       return false;
     }
   }
-
+  
   /**
    * Get available avatars from JSON file
    */
   public async getAvatars(): Promise<any[]> {
     try {
-      const avatarsPath = path.join(process.cwd(), 'public', 'avatars', 'data', 'avatar_list.json');
+      const avatarsPath = path.resolve(process.cwd(), 'videoai/dash/avatar_list.json');
       
-      if (fs.existsSync(avatarsPath)) {
-        const avatarsData = fs.readFileSync(avatarsPath, 'utf8');
-        const avatars = JSON.parse(avatarsData);
+      if (!fs.existsSync(avatarsPath)) {
+        // Create sample avatars list if it doesn't exist
+        const sampleAvatars = [
+          {
+            id: "avatar1",
+            name: "Alex",
+            pose_name: "Casual",
+            thumbnail: "/videoai/thumbs/avatar1.jpg",
+            created_at: Date.now(),
+            voice_id: "voice1",
+            is_interactive: true,
+            gender: "male",
+            attitude: "friendly"
+          },
+          {
+            id: "avatar2",
+            name: "Sophia",
+            pose_name: "Professional",
+            thumbnail: "/videoai/thumbs/avatar2.jpg",
+            created_at: Date.now(),
+            voice_id: "voice2",
+            is_interactive: true,
+            gender: "female",
+            attitude: "professional"
+          }
+        ];
         
-        // If we have a config with enabled avatar IDs, mark the enabled ones
-        if (this.config && this.config.enabledAvatarIds.length > 0) {
-          return avatars.data.map((avatar: any) => ({
-            ...avatar,
-            is_enabled: this.config?.enabledAvatarIds.includes(avatar.id)
-          }));
+        const avatarsDir = path.dirname(avatarsPath);
+        if (!fs.existsSync(avatarsDir)) {
+          fs.mkdirSync(avatarsDir, { recursive: true });
         }
         
-        // Otherwise return all avatars as enabled
-        return avatars.data.map((avatar: any) => ({
+        fs.writeFileSync(avatarsPath, JSON.stringify(sampleAvatars, null, 2), 'utf8');
+        console.log('Sample avatars created');
+        return sampleAvatars;
+      }
+      
+      const avatarsData = fs.readFileSync(avatarsPath, 'utf8');
+      const avatars = JSON.parse(avatarsData);
+      
+      // If we have config, add is_enabled property to each avatar
+      if (this.config) {
+        return avatars.map((avatar: any) => ({
           ...avatar,
-          is_enabled: true
+          is_enabled: this.config?.enabledAvatarIds.includes(avatar.id)
         }));
       }
       
-      return [];
+      return avatars;
     } catch (error) {
-      console.error('Error getting avatars:', error);
+      console.error('Error loading avatars:', error);
       return [];
     }
   }
