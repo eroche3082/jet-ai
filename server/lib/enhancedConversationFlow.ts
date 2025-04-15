@@ -398,14 +398,14 @@ function detectWeatherQuery(message: string): boolean {
     /cuál\s+es\s+(?:la|el)\s+(temperatura|clima|pronóstico)/i
   ];
   
-  // Comprobar patrones específicos
+  // Check specific patterns
   for (const pattern of weatherPatterns) {
     if (pattern.test(messageText)) {
       return true;
     }
   }
   
-  // Verificar palabras clave
+  // Check keywords
   return weatherKeywords.some(keyword => messageText.includes(keyword));
 }
 
@@ -421,7 +421,7 @@ function detectRouteQuery(message: string): boolean {
   return routeKeywords.some(keyword => messageText.includes(keyword));
 }
 
-// Detectar si una consulta necesita información de ubicación
+// Detect if a query needs location information
 function detectLocationQuery(message: string): boolean {
   const locationKeywords = [
     'dónde está', 'dónde queda', 'ubicación de', 'coordenadas', 'dirección',
@@ -432,7 +432,7 @@ function detectLocationQuery(message: string): boolean {
   return locationKeywords.some(keyword => messageText.includes(keyword));
 }
 
-// Extraer nombre de ubicación de un mensaje
+// Extract location name from a message
 function extractLocationFromMessage(message: string): string | null {
   // Enfoque mejorado: soporte multilingüe con más patrones
   const messageText = message.toLowerCase();
@@ -522,7 +522,7 @@ function extractLocationFromMessage(message: string): string | null {
   return null;
 }
 
-// Extraer información de ruta de un mensaje con soporte multilingüe
+// Extract route information from a message with multilingual support
 function extractRouteFromMessage(message: string): { origin: string | null; destination: string | null } {
   const messageText = message.toLowerCase();
   
