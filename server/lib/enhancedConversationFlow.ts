@@ -313,7 +313,7 @@ function detectConversationStage(message: string, history: any[]): ConversationS
   return ConversationStage.UNDERSTANDING_NEEDS;
 }
 
-// Función para predecir la siguiente etapa de la conversación
+// Function to predict the next stage of the conversation
 function predictNextStage(
   currentStage: ConversationStage, 
   userMessage: string,
@@ -350,11 +350,11 @@ function predictNextStage(
   }
 }
 
-// Función para determinar si se debe generar un itinerario
+// Function to determine if an itinerary should be generated
 function shouldGenerateItinerary(message: string, history: any[]): boolean {
   const messageText = message.toLowerCase();
   
-  // Verificar si el mensaje menciona explícitamente crear un itinerario
+  // Check if the message explicitly mentions creating an itinerary
   if (
     messageText.includes('crear itinerario') || 
     messageText.includes('generar itinerario') ||
@@ -364,7 +364,7 @@ function shouldGenerateItinerary(message: string, history: any[]): boolean {
     return true;
   }
   
-  // Verificar si hay suficiente contexto para generar un itinerario significativo
+  // Check if there is enough context to generate a meaningful itinerary
   const hasDestination = messageText.includes('a ') && (
     messageText.includes('viaje') || 
     messageText.includes('visitar') || 
@@ -379,9 +379,9 @@ function shouldGenerateItinerary(message: string, history: any[]): boolean {
   return hasDestination && hasDuration;
 }
 
-// FUNCIONES PARA INTEGRACIÓN CON APIS Y FALLBACKS
+// FUNCTIONS FOR API INTEGRATION AND FALLBACKS
 
-// Detectar si una consulta necesita información meteorológica
+// Detect if a query needs weather information
 function detectWeatherQuery(message: string): boolean {
   const weatherKeywords = [
     'clima', 'tiempo', 'temperatura', 'lluvia', 'llover', 'soleado', 'sol', 
@@ -391,7 +391,7 @@ function detectWeatherQuery(message: string): boolean {
   
   const messageText = message.toLowerCase();
   
-  // Patrones específicos de preguntas sobre clima
+  // Specific patterns for weather-related questions
   const weatherPatterns = [
     /cómo\s+está\s+el\s+(clima|tiempo)/i,
     /qué\s+(clima|tiempo)\s+(hay|hace)/i,
@@ -409,7 +409,7 @@ function detectWeatherQuery(message: string): boolean {
   return weatherKeywords.some(keyword => messageText.includes(keyword));
 }
 
-// Detectar si una consulta necesita información de rutas
+// Detect if a query needs route information
 function detectRouteQuery(message: string): boolean {
   const routeKeywords = [
     'ruta', 'camino', 'trayecto', 'cómo llegar', 'ir de', 'ir desde', 
