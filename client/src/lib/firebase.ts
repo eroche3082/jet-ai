@@ -213,5 +213,4 @@ export async function logoutUser(): Promise<void> {
 
 export { app, auth, analytics, storage, firestore, googleProvider, onAuthStateChanged };
 export { firestore as db };
-export const database = firestore;
 export default app;
