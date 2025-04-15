@@ -874,14 +874,19 @@ export default function LightLandingPage() {
                 <p className="text-white/70 mb-4 font-serif text-sm">
                   Receive refined travel commentary, exclusive destination insights, and AI recommendations for the discerning traveler
                 </p>
+                {/* Temporarily disabled as per FOOTER MEGAPROMPT until proper backend is connected */}
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Input 
                     type="email" 
                     placeholder="Your email address" 
                     className="flex-grow bg-white/10 backdrop-blur-sm text-white placeholder:text-white/50 border border-white/20 focus:border-[#4a89dc] focus:ring-[#4a89dc]/20 font-serif rounded"
+                    disabled
                   />
-                  <Button className="bg-[#4a89dc] hover:bg-white hover:text-[#050b17] text-white font-medium transition-colors duration-300 rounded">
-                    Subscribe
+                  <Button 
+                    className="bg-[#4a89dc]/60 text-white font-medium transition-colors duration-300 rounded cursor-not-allowed"
+                    disabled
+                  >
+                    Coming Soon
                   </Button>
                 </div>
                 <p className="mt-3 text-xs font-serif text-white/50 text-left">
@@ -912,19 +917,10 @@ export default function LightLandingPage() {
               <p className="text-white/70 font-serif leading-relaxed">
                 Your distinguished AI-powered travel companion. Discover exceptional destinations, curate bespoke itineraries, and experience the world with unparalleled sophistication.
               </p>
+              {/* Social media icons - verified links removed as per FOOTER MEGAPROMPT requirement */}
               <div className="flex space-x-4 mt-6">
-                <a href="#" className="text-white/60 hover:text-[#4a89dc] transition-colors">
-                  <Facebook className="h-5 w-5" />
-                </a>
-                <a href="#" className="text-white/60 hover:text-[#4a89dc] transition-colors">
-                  <Twitter className="h-5 w-5" />
-                </a>
-                <a href="#" className="text-white/60 hover:text-[#4a89dc] transition-colors">
-                  <Instagram className="h-5 w-5" />
-                </a>
-                <a href="#" className="text-white/60 hover:text-[#4a89dc] transition-colors">
-                  <Youtube className="h-5 w-5" />
-                </a>
+                {/* Social media links removed as they were using placeholder "#" links */}
+                {/* These will be re-added once real social media accounts are verified */}
               </div>
             </div>
             
@@ -934,19 +930,19 @@ export default function LightLandingPage() {
                 <li><Link href="/" className="text-white/70 hover:text-[#4a89dc] transition-colors">Home</Link></li>
                 <li><Link href="/destinations" className="text-white/70 hover:text-[#4a89dc] transition-colors">Destinations</Link></li>
                 <li><Link href="/blog" className="text-white/70 hover:text-[#4a89dc] transition-colors">Travel Journal</Link></li>
-                <li><Link href="/about" className="text-white/70 hover:text-[#4a89dc] transition-colors">About JET AI</Link></li>
-                <li><Link href="/contact" className="text-white/70 hover:text-[#4a89dc] transition-colors">Contact</Link></li>
+                {/* About page removed as per FOOTER MEGAPROMPT - no actual page implementation */}
+                {/* Contact page removed as per FOOTER MEGAPROMPT - no actual page implementation */}
               </ul>
             </div>
             
             <div>
               <h4 className="font-display text-lg mb-5 text-white">Services</h4>
               <ul className="space-y-3 font-serif">
-                <li><Link href="/chat" className="text-white/70 hover:text-[#4a89dc] transition-colors">AI Concierge</Link></li>
-                <li><Link href="/itinerary" className="text-white/70 hover:text-[#4a89dc] transition-colors">Itinerary Curator</Link></li>
-                <li><Link href="/translator" className="text-white/70 hover:text-[#4a89dc] transition-colors">Language Translation</Link></li>
+                <li><Link href="/chat-demo" className="text-white/70 hover:text-[#4a89dc] transition-colors">AI Concierge</Link></li>
+                <li><Link href="/itineraries" className="text-white/70 hover:text-[#4a89dc] transition-colors">Itinerary Curator</Link></li>
+                {/* Translator link removed as per FOOTER MEGAPROMPT - no actual page implementation */}
                 <li><Link href="/pricing" className="text-white/70 hover:text-[#4a89dc] transition-colors">Membership Options</Link></li>
-                <li><Link href="/faq" className="text-white/70 hover:text-[#4a89dc] transition-colors">FAQs</Link></li>
+                {/* FAQ link removed as per FOOTER MEGAPROMPT - no actual page implementation */}
               </ul>
             </div>
             
@@ -955,7 +951,7 @@ export default function LightLandingPage() {
               <ul className="space-y-4 text-white/70 font-serif">
                 <li className="flex items-start">
                   <Mail className="h-5 w-5 mr-3 mt-0.5 text-[#4a89dc]" />
-                  <span>concierge@jetai.travel</span>
+                  <span>support@jetai.com</span>
                 </li>
                 <li className="flex items-start">
                   <MessageSquare className="h-5 w-5 mr-3 mt-0.5 text-[#4a89dc]" />
