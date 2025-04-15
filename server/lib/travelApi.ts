@@ -578,22 +578,44 @@ export async function searchDestinations(location?: string, category?: string, l
         try {
           console.log('Searching destinations with TripAdvisor API');
           const searchTerm = location || '';
-          // Updated to TripAdvisor's latest working endpoint
-          const response = await axios.get(
-            `https://${host}/locations/v2/search`, 
-            {
-              ...rapidApiConfig,
-              params: {
-                query: searchTerm,
-                limit: limit || 10,
-                language: 'en',
-                currency: 'USD'
+          // Try all TripAdvisor API endpoints that might work
+          let response = null;
+          let apiPaths = [
+            'locations/search',
+            'locations/v2/search',
+            'location/search',
+            'hotels/searchLocation',
+            'restaurant/searchLocation'
+          ];
+          
+          // Try each endpoint, use the first one that works
+          for (const path of apiPaths) {
+            try {
+              console.log(`Trying TripAdvisor endpoint: ${path}`);
+              response = await axios.get(
+                `https://${host}/${path}`, 
+                {
+                  ...rapidApiConfig,
+                  params: {
+                    query: searchTerm,
+                    limit: limit || 10,
+                    language: 'en',
+                    currency: 'USD'
+                  }
+                }
+              );
+              
+              if (response.status === 200 && response.data) {
+                console.log(`Successfully connected to TripAdvisor endpoint: ${path}`);
+                break;
               }
+            } catch (err) {
+              console.log(`Endpoint ${path} failed: ${err.message}`);
             }
-          );
+          }
           
           // Updated for the latest TripAdvisor location search API format
-          if (response.data && response.data.results && Array.isArray(response.data.results)) {
+          if (response && response.data && response.data.results && Array.isArray(response.data.results)) {
             console.log('TripAdvisor API returned results');
             return {
               destinations: response.data.results.map((item: any) => ({
