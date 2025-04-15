@@ -1,279 +1,279 @@
 /**
- * PWA utilities for JetAI
- * Handles service worker registration, offline capabilities, and mobile features
+ * JET AI PWA Utility Functions
+ * 
+ * This file contains utility functions for working with PWA (Progressive Web App) functionality,
+ * including service worker registration, installation prompts, and offline detection.
  */
 
-/**
- * Register the service worker for PWA capabilities
- */
-export function registerServiceWorker() {
+// Check if the app is running as a PWA
+export function isPWAInstalled(): boolean {
+  // Check if the display mode is standalone (PWA)
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+  
+  // @ts-ignore - Property standalone exists on iOS Safari
+  const isFromHomeScreen = window.navigator.standalone; 
+  
+  // Also check URL params in case we want to test PWA mode
+  const urlParams = new URLSearchParams(window.location.search);
+  const forcePWA = urlParams.get('pwa') === 'true';
+  
+  return isStandalone || isFromHomeScreen || forcePWA;
+}
+
+// Register the service worker
+export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('/service-worker.js', {
+        scope: '/'
+      });
+      
+      console.log('Service Worker registered successfully:', registration.scope);
+      return registration;
+    } catch (error) {
+      console.error('Service Worker registration failed:', error);
+      
+      // Fallback registration attempt with a simple cache-only service worker
       try {
-        // Fixed path to service worker relative to the root
-        const registration = await navigator.serviceWorker.register('/service-worker.js', {
+        const fallbackRegistration = await navigator.serviceWorker.register('/sw-fallback.js', {
           scope: '/'
         });
-        console.log('Service Worker registered successfully with scope:', registration.scope);
-        return registration;
-      } catch (error) {
-        console.error('Service Worker registration failed:', error);
-        
-        // Fallback attempt with different path
-        try {
-          const fallbackRegistration = await navigator.serviceWorker.register('./service-worker.js');
-          console.log('Service Worker registered with fallback path. Scope:', fallbackRegistration.scope);
-          return fallbackRegistration;
-        } catch (fallbackError) {
-          console.error('Service Worker fallback registration also failed:', fallbackError);
-          return null;
-        }
+        console.log('Fallback Service Worker registered:', fallbackRegistration.scope);
+        return fallbackRegistration;
+      } catch (fallbackError) {
+        console.error('Service Worker fallback registration also failed:', fallbackError);
+        return null;
       }
-    });
+    }
   }
+  
+  console.warn('Service Worker is not supported in this browser');
   return null;
 }
 
-/**
- * Check if the app is online
- */
-export function isOnline(): boolean {
-  return navigator.onLine;
-}
-
-/**
- * Listen for online/offline events
- */
-export function initializeConnectivityListeners(
-  onOnline: () => void,
-  onOffline: () => void
-) {
-  window.addEventListener('online', onOnline);
-  window.addEventListener('offline', onOffline);
-  
-  return () => {
-    window.removeEventListener('online', onOnline);
-    window.removeEventListener('offline', onOffline);
-  };
-}
-
-/**
- * Cache key API responses for offline use
- */
-export async function cacheApiResponse(url: string, response: any): Promise<void> {
-  try {
-    localStorage.setItem(`jetai_cache_${url}`, JSON.stringify({
-      data: response,
-      timestamp: Date.now()
-    }));
-  } catch (error) {
-    console.error('Error caching API response:', error);
-  }
-}
-
-/**
- * Get cached API response
- */
-export function getCachedApiResponse(url: string, maxAgeMs: number = 3600000): any {
-  try {
-    const cached = localStorage.getItem(`jetai_cache_${url}`);
-    if (!cached) return null;
-    
-    const { data, timestamp } = JSON.parse(cached);
-    const age = Date.now() - timestamp;
-    
-    if (age > maxAgeMs) {
-      // Cache is too old
-      localStorage.removeItem(`jetai_cache_${url}`);
-      return null;
-    }
-    
-    return data;
-  } catch (error) {
-    console.error('Error retrieving cached API response:', error);
-    return null;
-  }
-}
-
-/**
- * Check if app has been installed (PWA)
- */
-export function isPWAInstalled(): boolean {
-  // Check if the display mode is standalone (PWA)
-  return window.matchMedia('(display-mode: standalone)').matches || 
-         // @ts-ignore: Property 'standalone' exists on iOS Safari navigator
-         (window.navigator.standalone === true);
-}
-
-/**
- * Main PWA initialization function
- */
-export function initializePWA() {
-  // Register service worker
-  const swRegistration = registerServiceWorker();
-  
-  // Set up online/offline detection
-  const cleanup = initializeConnectivityListeners(
-    () => {
-      console.log('App is online');
-      document.body.classList.remove('offline-mode');
-      // Sync any pending operations
-      syncOfflineData();
-    },
-    () => {
-      console.log('App is offline');
-      document.body.classList.add('offline-mode');
-      // Show offline notification
-      showOfflineNotification();
-    }
-  );
-  
-  // Check initial network state
-  if (!isOnline()) {
-    document.body.classList.add('offline-mode');
-    showOfflineNotification();
-  }
-  
-  // Register for background sync
-  registerForBackgroundSync();
-  
-  // Initialize for sharing capabilities
-  initializeWebShareFeatures();
-  
-  // Set up periodic sync for content
-  registerPeriodicSync();
-  
-  return cleanup;
-}
-
-/**
- * Show notification when app goes offline
- */
-function showOfflineNotification() {
-  // Implementation depends on UI library
-  console.log('JetAI is running in offline mode. Some features may be limited.');
-}
-
-/**
- * Sync data stored while offline
- */
-async function syncOfflineData() {
-  const pendingOperations = localStorage.getItem('jetai_pending_operations');
-  
-  if (pendingOperations) {
-    try {
-      const operations = JSON.parse(pendingOperations);
-      // Process operations...
-      
-      localStorage.removeItem('jetai_pending_operations');
-    } catch (error) {
-      console.error('Error syncing offline data:', error);
-    }
-  }
-}
-
-/**
- * Register for background sync API
- * Note: This is a newer API and may not be available in all browsers
- */
-async function registerForBackgroundSync() {
-  if ('serviceWorker' in navigator && 'SyncManager' in window) {
-    try {
-      const registration = await navigator.serviceWorker.ready;
-      
-      // @ts-ignore: Background sync is still experimental
-      if (registration.sync) {
-        // Register for various sync tasks
-        // @ts-ignore: Background sync is still experimental
-        await registration.sync.register('sync-itineraries');
-        // @ts-ignore: Background sync is still experimental
-        await registration.sync.register('sync-bookmarks');
-      }
-    } catch (error) {
-      console.error('Error registering for background sync:', error);
-    }
-  }
-}
-
-/**
- * Initialize Web Share API features
- */
-function initializeWebShareFeatures() {
-  if (navigator.share) {
-    // Enhance share buttons with native sharing
-    document.querySelectorAll('[data-share]').forEach(element => {
-      element.addEventListener('click', async (e) => {
-        e.preventDefault();
-        
-        const el = e.currentTarget as HTMLElement;
-        const url = el.getAttribute('data-share-url') || window.location.href;
-        const title = el.getAttribute('data-share-title') || document.title;
-        const text = el.getAttribute('data-share-text') || '';
-        
-        try {
-          await navigator.share({
-            title,
-            text,
-            url
-          });
-        } catch (error) {
-          console.error('Error sharing content:', error);
-        }
+// Check for updates to the service worker
+export async function checkForServiceWorkerUpdates(): Promise<void> {
+  if ('serviceWorker' in navigator) {
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (registration) {
+      registration.update().catch(error => {
+        console.error('Error updating Service Worker:', error);
       });
+    }
+  }
+}
+
+// Listen for service worker updates and notify the user
+export function listenForServiceWorkerUpdates(callback: () => void): void {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      callback();
     });
   }
 }
 
-/**
- * Register for periodic background sync
- * Note: This is a newer API and may not be available in all browsers
- */
-async function registerPeriodicSync() {
-  if ('serviceWorker' in navigator && 'PeriodicSyncManager' in window) {
+// Show an install prompt for the PWA (stores the deferredPrompt)
+let deferredPrompt: any = null;
+
+export function initInstallPrompt(): void {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent the mini-infobar from appearing on mobile
+    e.preventDefault();
+    
+    // Store the event so it can be triggered later
+    deferredPrompt = e;
+    
+    // Update UI notify the user they can install the PWA
+    console.log('App can be installed, showing install button');
+    
+    // Optionally, dispatch an event to notify components that can show an install button
+    window.dispatchEvent(new CustomEvent('pwaInstallable'));
+  });
+  
+  // When the app is successfully installed
+  window.addEventListener('appinstalled', () => {
+    // Log installation to analytics
+    console.log('PWA was installed');
+    
+    // Clear the deferredPrompt variable
+    deferredPrompt = null;
+    
+    // Dispatch an event to update UI
+    window.dispatchEvent(new CustomEvent('pwaInstalled'));
+  });
+}
+
+// Show the install prompt (this should be called from a user interaction, like a button click)
+export async function showInstallPrompt(): Promise<boolean> {
+  if (!deferredPrompt) {
+    console.log('Installation prompt not available');
+    return false;
+  }
+  
+  // Show the prompt
+  deferredPrompt.prompt();
+  
+  // Wait for the user to respond to the prompt
+  const choiceResult = await deferredPrompt.userChoice;
+  
+  // Reset the deferred prompt variable
+  deferredPrompt = null;
+  
+  // Return true if the user accepted the installation
+  return choiceResult.outcome === 'accepted';
+}
+
+// Function to request background sync
+export async function requestBackgroundSync(tag: string): Promise<boolean> {
+  if ('serviceWorker' in navigator && 'SyncManager' in window) {
     try {
       const registration = await navigator.serviceWorker.ready;
-      
-      // @ts-ignore: Periodic Sync API is still experimental
-      const periodicSyncManager = registration.periodicSync;
-      
-      if (periodicSyncManager) {
-        // Check permission
-        const status = await navigator.permissions.query({
-          name: 'periodic-background-sync' as PermissionName
-        });
-        
-        if (status.state === 'granted') {
-          // @ts-ignore: Periodic Sync API is still experimental
-          await periodicSyncManager.register('update-content', {
-            minInterval: 24 * 60 * 60 * 1000 // Once per day
-          });
-        }
-      }
+      await registration.sync.register(tag);
+      console.log(`Background sync registered for ${tag}`);
+      return true;
     } catch (error) {
-      console.error('Error registering for periodic sync:', error);
+      console.error('Background sync registration failed:', error);
+      return false;
     }
+  }
+  console.warn('Background sync is not supported in this browser');
+  return false;
+}
+
+// Function to request periodic background sync
+export async function requestPeriodicBackgroundSync(tag: string, minInterval: number): Promise<boolean> {
+  if ('serviceWorker' in navigator && 'periodicSync' in (navigator as any).serviceWorker) {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const periodicSync = (registration as any).periodicSync;
+      
+      // Check permission
+      const status = await periodicSync.permissionState();
+      if (status !== 'granted') {
+        console.warn('Periodic Sync permission not granted');
+        return false;
+      }
+      
+      // Register periodic sync
+      await periodicSync.register(tag, {
+        minInterval: minInterval // minimum interval in milliseconds
+      });
+      
+      console.log(`Periodic background sync registered for ${tag}`);
+      return true;
+    } catch (error) {
+      console.error('Periodic background sync registration failed:', error);
+      return false;
+    }
+  }
+  
+  console.warn('Periodic background sync is not supported in this browser');
+  return false;
+}
+
+// Function to monitor network status
+export function initNetworkStatusMonitoring(
+  onlineCallback: () => void,
+  offlineCallback: () => void
+): () => void {
+  const handleOnline = () => {
+    console.log('App is online');
+    onlineCallback();
+  };
+  
+  const handleOffline = () => {
+    console.log('App is offline');
+    offlineCallback();
+  };
+  
+  window.addEventListener('online', handleOnline);
+  window.addEventListener('offline', handleOffline);
+  
+  // Initial check
+  if (navigator.onLine) {
+    onlineCallback();
+  } else {
+    offlineCallback();
+  }
+  
+  // Return a cleanup function
+  return () => {
+    window.removeEventListener('online', handleOnline);
+    window.removeEventListener('offline', handleOffline);
+  };
+}
+
+// Function to send a notification
+export async function sendNotification(title: string, options: NotificationOptions = {}): Promise<boolean> {
+  if (!('Notification' in window)) {
+    console.warn('This browser does not support notifications');
+    return false;
+  }
+  
+  // Set default options
+  const defaultOptions: NotificationOptions = {
+    badge: '/icons/badge-96x96.png',
+    icon: '/icons/icon-192x192.svg',
+    vibrate: [100, 50, 100],
+    data: {
+      dateOfArrival: Date.now(),
+      primaryKey: 1
+    }
+  };
+  
+  const mergedOptions = { ...defaultOptions, ...options };
+  
+  // Check permission
+  if (Notification.permission === 'granted') {
+    try {
+      const notification = new Notification(title, mergedOptions);
+      return true;
+    } catch (error) {
+      console.error('Error creating notification:', error);
+      return false;
+    }
+  } else if (Notification.permission !== 'denied') {
+    // Request permission
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      try {
+        const notification = new Notification(title, mergedOptions);
+        return true;
+      } catch (error) {
+        console.error('Error creating notification after permission granted:', error);
+        return false;
+      }
+    }
+  }
+  
+  return false;
+}
+
+// Function to check if app is still using latest version
+export async function checkAppVersion(currentVersion: string): Promise<boolean> {
+  try {
+    const response = await fetch('/api/app-version');
+    if (!response.ok) {
+      return true; // Assume current version is latest if fetch fails
+    }
+    
+    const data = await response.json();
+    const latestVersion = data.version;
+    
+    return currentVersion === latestVersion;
+  } catch (error) {
+    console.error('Error checking app version:', error);
+    return true; // Assume current version is latest if fetch fails
   }
 }
 
-/**
- * Get device orientation
- */
-export function getDeviceOrientation(): 'portrait' | 'landscape' {
-  return window.matchMedia('(orientation: portrait)').matches ? 'portrait' : 'landscape';
-}
-
-/**
- * Listen for device orientation changes
- */
-export function listenForOrientationChanges(callback: (orientation: 'portrait' | 'landscape') => void) {
-  const mediaQuery = window.matchMedia('(orientation: portrait)');
-  
-  const handler = (e: MediaQueryListEvent) => {
-    callback(e.matches ? 'portrait' : 'landscape');
-  };
-  
-  mediaQuery.addEventListener('change', handler);
-  
-  // Return cleanup function
-  return () => mediaQuery.removeEventListener('change', handler);
+// Function to set CSS env variables based on device
+export function setupSafeAreaVariables(): void {
+  if (typeof window !== 'undefined' && 'CSS' in window && CSS.supports('padding-top: env(safe-area-inset-top)')) {
+    // Read the values
+    document.documentElement.style.setProperty('--sat', 'env(safe-area-inset-top)');
+    document.documentElement.style.setProperty('--sar', 'env(safe-area-inset-right)');
+    document.documentElement.style.setProperty('--sab', 'env(safe-area-inset-bottom)');
+    document.documentElement.style.setProperty('--sal', 'env(safe-area-inset-left)');
+  }
 }

@@ -36,7 +36,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { getAffiliateId } from "@/lib/utils";
 import PartnerDashboard from "@/pages/partner/Dashboard";
 import PartnerSignup from "@/pages/partner/Signup";
-import { initializePWA } from '@/lib/pwa';
+import { registerServiceWorker, isPWAInstalled } from '@/lib/pwa';
 import { AuthProvider } from '@/hooks/use-auth';
 import { LanguageProvider } from '@/lib/LanguageContext';
 import LandingPage from "@/pages/LightLandingPage";
@@ -84,7 +84,9 @@ function App() {
     };
     
     // Initialize PWA features
-    initializePWA();
+    registerServiceWorker().then(reg => {
+      console.log('Service worker registration result:', reg ? 'Success' : 'Failed');
+    });
     
     // Run checks
     checkMobile();
