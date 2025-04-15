@@ -1,0 +1,50 @@
+AGENT NAME: Jet AI
+
+OBJECTIVE:  
+Perform a complete and precise structural + functionality scan of Jet AI to confirm it is ready for deployment to Firebase Hosting. Jet AI must offer a high-end concierge experience, support dynamic travel planning, integrate voice/chat AI, and respond visually with personalization.
+
+PHASE CHECKLIST:
+
+1. CORE STRUCTURE & UI
+- [ ] Is the Home Page layout fully structured and responsive?
+- [ ] Do all top menu links (Home, Features, Pricing, AI Assistant, Login, Sign Up) route correctly?
+- [ ] Are broken, redundant, or unused links in the footer removed?
+- [ ] Is the onboarding flow (user name, email, preferences) working without errors?
+
+2. AI ASSISTANT SYSTEM
+- [ ] Does the Jet AI Assistant load correctly with visual + chat components?
+- [ ] Is it connected to Gemini or OpenAI (gpt-4o)?
+- [ ] Can it respond with contextual travel recommendations, tone analysis, or emotional assistance?
+
+3. ITINERARY & FLOW INTELLIGENCE
+- [ ] Can Jet AI build and suggest full itineraries?
+- [ ] Are interactive elements like "Shop Experience", "Book Hotel", or "Upgrade Flight" working?
+- [ ] Do tabs dynamically update based on user preferences or onboarding answers?
+
+4. VISUAL + VOICE LAYER
+- [ ] Is voice input working or initialized (even if placeholder)?
+- [ ] Does the assistant respond with adaptive visuals or voice integration when available?
+- [ ] Is Jet AI prepared to support languages beyond English (multi-language base)?
+
+5. UI/UX BEHAVIOR
+- [ ] Does the UI render cleanly on mobile, tablet, and desktop?
+- [ ] Is scrolling enabled across all major tabs?
+- [ ] Are there any layout inconsistencies or broken visuals?
+
+6. BACKEND & CONFIGURATION
+- [ ] Are all APIs correctly connected: Gemini, Google Cloud, Stripe (if used), Firebase?
+- [ ] Is the `firebase.json` deployment file prepared and pointing to the correct `dist` folder?
+- [ ] Are all sensitive `.env` variables in place and tested?
+
+7. EXPERIENCE CHECKPOINT
+- [ ] Does the experience feel premium, smooth, and immersive?
+- [ ] Are there console or runtime errors on any route?
+- [ ] Is memory/context preserved between actions or questions?
+
+FINAL OUTPUT:
+Return a structured audit report with:
+- ✅ List of fully working elements
+- ⚠️ List of elements needing revision
+- ❌ List of missing or broken components
+- A readiness score from 0 to 100%
+- Final verdict: LAUNCH READY or NOT READY
