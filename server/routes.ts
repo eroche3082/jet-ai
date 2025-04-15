@@ -29,6 +29,7 @@ import { processConversation } from './lib/vertexAI';
 import { configureRoutes as configureMemoryRoutes } from './api/memoryEnhancementService';
 import { configureRoutes as configureGoogleApiRoutes } from './api/googleApiService';
 import { configureRoutes as configureGeminiRoutes } from './api/geminiService';
+import { configureRoutes as configureAvatarRoutes } from './api/avatarService';
 import translationRoutes from './api/translationRoutes';
 import notificationRoutes from './api/notificationRoutes';
 import socialPostRoutes from './api/socialPostRoutes';
@@ -236,6 +237,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Registramos las rutas del servicio Gemini
   configureGeminiRoutes(app);
+  
+  // Registramos las rutas de servicio de avatares
+  configureAvatarRoutes(app);
   
   // Registramos las rutas de traducción para el aprendizaje de idiomas
   app.use('/api', translationRoutes);

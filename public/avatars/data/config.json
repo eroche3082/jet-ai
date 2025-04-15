@@ -1,0 +1,14 @@
+{
+  "apiKeys": {
+    "openai": "",
+    "heygen": "",
+    "elevenlabs": ""
+  },
+  "settings": {
+    "enableAvatars": false,
+    "defaultAvatar": "",
+    "maxTokens": 150,
+    "temperature": 0.7
+  },
+  "enabledAvatarIds": []
+}
