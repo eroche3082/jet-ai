@@ -1,271 +1,330 @@
-// JET AI - Service Worker
-const CACHE_NAME = 'jetai-cache-v1';
-const OFFLINE_URL = '/offline.html';
+// JET AI - Main Service Worker
+// This service worker provides complete offline functionality
+// with precaching of important assets and route-based strategies
 
-// Assets to cache immediately on install
+// Configuration
+const APP_VERSION = '1.0.0';
+const CACHE_PREFIX = 'jetai-cache';
+const STATIC_CACHE_NAME = `${CACHE_PREFIX}-static-v${APP_VERSION}`;
+const DYNAMIC_CACHE_NAME = `${CACHE_PREFIX}-dynamic-v${APP_VERSION}`;
+const IMAGES_CACHE_NAME = `${CACHE_PREFIX}-images-v${APP_VERSION}`;
+const API_CACHE_NAME = `${CACHE_PREFIX}-api-v${APP_VERSION}`;
+
+// Assets to precache (critical resources)
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
   '/offline.html',
   '/icons/icon.svg',
-  '/icons/icon-512x512.png',
   '/icons/apple-touch-icon.svg',
   '/manifest.json'
 ];
 
-// Assets that should be cached as they're used
-const RUNTIME_ASSETS = [
-  /\.(js|css|png|jpg|jpeg|svg|gif|woff|woff2|ttf|eot)$/,
-  // Add other file extensions as needed
+// Cache size limits
+const DYNAMIC_CACHE_LIMIT = 50;
+const IMAGES_CACHE_LIMIT = 60;
+
+// API endpoints for specific caching strategies
+const API_ENDPOINTS = [
+  { url: '/api/destinations', cacheName: API_CACHE_NAME, strategy: 'network-first', maxAge: 60 * 60 }, // 1 hour
+  { url: '/api/featured', cacheName: API_CACHE_NAME, strategy: 'network-first', maxAge: 60 * 60 }, // 1 hour
+  { url: '/api/user/profile', cacheName: API_CACHE_NAME, strategy: 'network-only' } // Always fetch from network
 ];
 
-// Install event - precache key assets
+// Install event - cache core assets
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Installing new service worker');
+  console.log('[Service Worker] Installing');
+  
+  // Skip waiting to activate this service worker immediately
+  self.skipWaiting();
   
   event.waitUntil(
-    caches.open(CACHE_NAME)
+    caches.open(STATIC_CACHE_NAME)
       .then((cache) => {
-        console.log('[Service Worker] Precaching app shell');
+        console.log('[Service Worker] Precaching resources');
         return cache.addAll(PRECACHE_ASSETS);
       })
-      .then(() => {
-        console.log('[Service Worker] Installation complete, forcing activation');
-        return self.skipWaiting();
-      })
       .catch((error) => {
-        console.error('[Service Worker] Precaching failed:', error);
+        console.error('[Service Worker] Precache error:', error);
       })
   );
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activating new service worker');
+  console.log('[Service Worker] Activating');
   
-  const currentCaches = [CACHE_NAME];
+  // Get all cache names that start with 'jetai-cache'
+  const cacheKeepList = [STATIC_CACHE_NAME, DYNAMIC_CACHE_NAME, IMAGES_CACHE_NAME, API_CACHE_NAME];
   
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
-        return cacheNames.filter(
-          (cacheName) => !currentCaches.includes(cacheName)
-        );
-      })
-      .then((cachesToDelete) => {
         return Promise.all(
-          cachesToDelete.map((cacheToDelete) => {
-            console.log('[Service Worker] Deleting old cache:', cacheToDelete);
-            return caches.delete(cacheToDelete);
-          })
+          cacheNames
+            .filter((cacheName) => cacheName.startsWith(CACHE_PREFIX) && !cacheKeepList.includes(cacheName))
+            .map((cacheName) => {
+              console.log('[Service Worker] Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            })
         );
       })
       .then(() => {
-        console.log('[Service Worker] Claiming clients');
+        // Take control of all clients
         return self.clients.claim();
       })
   );
 });
 
-// Helper function to determine if an asset should be cached at runtime
-function shouldCacheAtRuntime(url) {
-  const parsedUrl = new URL(url);
-  
-  // Exclude API requests, analytics, etc.
-  if (
-    parsedUrl.pathname.startsWith('/api/') ||
-    parsedUrl.pathname.includes('google-analytics') ||
-    parsedUrl.pathname.includes('analytics') ||
-    parsedUrl.pathname.includes('gtag') ||
-    parsedUrl.pathname.includes('firebase')
-  ) {
-    return false;
-  }
-  
-  // Check against the runtime asset patterns
-  return RUNTIME_ASSETS.some((pattern) => {
-    if (pattern instanceof RegExp) {
-      return pattern.test(parsedUrl.pathname);
-    }
-    return parsedUrl.pathname === pattern;
-  });
-}
-
-// Fetch event - network first with cache fallback strategy
+// Fetch event - handle requests
 self.addEventListener('fetch', (event) => {
-  // Skip cross-origin and API requests
-  if (!event.request.url.startsWith(self.location.origin) || 
-      event.request.url.includes('/api/')) {
+  // Skip cross-origin requests
+  if (!event.request.url.startsWith(self.location.origin)) {
     return;
   }
-
-  // Handle navigation requests with a network-first strategy
-  if (event.request.mode === 'navigate') {
+  
+  // Skip browser extension requests
+  if (event.request.url.includes('chrome-extension://')) {
+    return;
+  }
+  
+  // Skip WebSocket connections
+  if (event.request.headers.get('upgrade') === 'websocket') {
+    return;
+  }
+  
+  // Skip Vite HMR requests in development
+  if (event.request.url.includes('/@vite/client') || 
+      event.request.url.includes('/@react-refresh') ||
+      event.request.url.includes('/node_modules/.vite/')) {
+    return;
+  }
+  
+  // Handle API requests
+  if (event.request.url.includes('/api/')) {
+    // Find matching API endpoint configuration
+    const apiEndpoint = API_ENDPOINTS.find(endpoint => 
+      event.request.url.includes(endpoint.url)
+    );
+    
+    if (apiEndpoint) {
+      // Apply the appropriate caching strategy
+      if (apiEndpoint.strategy === 'network-only') {
+        event.respondWith(
+          fetch(event.request)
+            .catch(() => {
+              return caches.match('/offline.html');
+            })
+        );
+        return;
+      }
+      
+      if (apiEndpoint.strategy === 'network-first') {
+        event.respondWith(
+          fetch(event.request)
+            .then((response) => {
+              const clonedResponse = response.clone();
+              caches.open(apiEndpoint.cacheName).then((cache) => {
+                cache.put(event.request, clonedResponse);
+              });
+              return response;
+            })
+            .catch(() => {
+              return caches.match(event.request);
+            })
+        );
+        return;
+      }
+    }
+  }
+  
+  // Handle image requests
+  if (event.request.destination === 'image') {
     event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          console.log('[Service Worker] Navigation fetch failed, serving offline page');
-          return caches.match(OFFLINE_URL);
+      caches.match(event.request)
+        .then((cachedResponse) => {
+          // Return cached response if available
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          
+          // Otherwise, fetch from network
+          return fetch(event.request)
+            .then((networkResponse) => {
+              // Clone the response before caching it
+              const clonedResponse = networkResponse.clone();
+              
+              // Cache the fetched response
+              caches.open(IMAGES_CACHE_NAME)
+                .then((cache) => {
+                  cache.put(event.request, clonedResponse);
+                  
+                  // Limit cache size
+                  limitCacheSize(IMAGES_CACHE_NAME, IMAGES_CACHE_LIMIT);
+                });
+              
+              return networkResponse;
+            })
+            .catch(() => {
+              // If image can't be fetched, return a placeholder or offline image
+              // For now, just return null which will show as a broken image
+              return null;
+            });
         })
     );
     return;
   }
-
-  // For non-navigation requests, use a stale-while-revalidate approach
-  if (shouldCacheAtRuntime(event.request.url)) {
+  
+  // Handle navigation requests (HTML)
+  if (event.request.mode === 'navigate') {
     event.respondWith(
-      caches.open(CACHE_NAME).then((cache) => {
-        return cache.match(event.request).then((cachedResponse) => {
-          const fetchPromise = fetch(event.request)
-            .then((networkResponse) => {
-              // Cache the updated version in the background
-              if (networkResponse.ok) {
-                cache.put(event.request, networkResponse.clone());
-              }
-              return networkResponse;
-            })
-            .catch((error) => {
-              console.log('[Service Worker] Fetch failed:', error);
-              // Return nothing so we fall back to the cached version
-            });
-            
-          // Return the cached version first (or wait for the network if no cached version)
-          return cachedResponse || fetchPromise;
-        });
-      })
+      fetch(event.request)
+        .catch(() => {
+          // If the main document can't be fetched, return the cached offline page
+          return caches.match('/offline.html');
+        })
     );
+    return;
   }
-});
-
-// Background sync event to handle offline submissions
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'jetai-offline-data') {
-    console.log('[Service Worker] Background sync triggered');
-    event.waitUntil(syncOfflineData());
-  }
-});
-
-// Push notification event
-self.addEventListener('push', (event) => {
-  console.log('[Service Worker] Push received');
-
-  let title = 'JET AI Update';
-  let options = {
-    body: 'New travel information is available',
-    icon: '/icons/icon-512x512.png',
-    badge: '/icons/badge-96x96.png'
-  };
-
-  // Try to extract details from the push message
-  if (event.data) {
-    try {
-      const data = event.data.json();
-      title = data.title || title;
-      
-      // Merge options with any provided in the notification
-      options = {
-        ...options,
-        ...data.options
-      };
-    } catch (e) {
-      console.error('[Service Worker] Error parsing push data:', e);
-    }
-  }
-
-  event.waitUntil(
-    self.registration.showNotification(title, options)
+  
+  // Handle all other requests with a stale-while-revalidate strategy
+  event.respondWith(
+    caches.match(event.request)
+      .then((cachedResponse) => {
+        // Return cached response and update cache in background
+        if (cachedResponse) {
+          // Update cache in background
+          fetch(event.request)
+            .then((networkResponse) => {
+              caches.open(DYNAMIC_CACHE_NAME)
+                .then((cache) => {
+                  cache.put(event.request, networkResponse.clone());
+                  limitCacheSize(DYNAMIC_CACHE_NAME, DYNAMIC_CACHE_LIMIT);
+                });
+            })
+            .catch(() => {
+              // Network failed, but we already returned the cached response so it's ok
+            });
+          
+          return cachedResponse;
+        }
+        
+        // If not in cache, fetch from network
+        return fetch(event.request)
+          .then((networkResponse) => {
+            // Cache the response for future use
+            const clonedResponse = networkResponse.clone();
+            caches.open(DYNAMIC_CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, clonedResponse);
+                limitCacheSize(DYNAMIC_CACHE_NAME, DYNAMIC_CACHE_LIMIT);
+              });
+            
+            return networkResponse;
+          })
+          .catch(() => {
+            // For non-HTML requests that fail and aren't in cache, we don't have a fallback
+            return null;
+          });
+      })
   );
 });
 
-// Notification click event
-self.addEventListener('notificationclick', (event) => {
-  console.log('[Service Worker] Notification click received');
+// Limit the size of a cache
+function limitCacheSize(cacheName, maxItems) {
+  caches.open(cacheName)
+    .then((cache) => {
+      cache.keys()
+        .then((keys) => {
+          if (keys.length > maxItems) {
+            // Delete the oldest items to bring the total down to the limit
+            const itemsToDelete = keys.length - maxItems;
+            for (let i = 0; i < itemsToDelete; i++) {
+              cache.delete(keys[i]);
+            }
+          }
+        });
+    });
+}
 
-  event.notification.close();
-
-  // Default URL to open
-  let url = '/';
-
-  // Check if there's a specific URL to navigate to
-  if (event.notification.data && event.notification.data.url) {
-    url = event.notification.data.url;
+// Background sync event handler
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-new-posts') {
+    console.log('[Service Worker] Syncing new posts');
+    event.waitUntil(syncNewPosts());
   }
+  
+  if (event.tag === 'sync-offline-favorites') {
+    console.log('[Service Worker] Syncing offline favorites');
+    event.waitUntil(syncOfflineFavorites());
+  }
+});
 
+// Dummy function for demo purposes
+function syncNewPosts() {
+  // In a real app, this would get data from IndexedDB and send to server
+  return Promise.resolve();
+}
+
+// Dummy function for demo purposes
+function syncOfflineFavorites() {
+  // In a real app, this would get data from IndexedDB and send to server
+  return Promise.resolve();
+}
+
+// Push notification event handler
+self.addEventListener('push', (event) => {
+  console.log('[Service Worker] Push received');
+  
+  let data = {};
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (e) {
+      data = {
+        title: 'JET AI Notification',
+        body: event.data.text(),
+        icon: '/icons/icon.svg'
+      };
+    }
+  }
+  
+  const options = {
+    body: data.body || 'Something new happened!',
+    icon: data.icon || '/icons/icon.svg',
+    badge: '/icons/badge-96x96.png',
+    data: {
+      url: data.url || '/'
+    }
+  };
+  
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'JET AI', options)
+  );
+});
+
+// Notification click event handler
+self.addEventListener('notificationclick', (event) => {
+  console.log('[Service Worker] Notification clicked');
+  
+  const url = event.notification.data.url || '/';
+  event.notification.close();
+  
+  // Open the target URL in a new window/tab
   event.waitUntil(
     clients.matchAll({ type: 'window' })
       .then((clientList) => {
-        // Check if there's already a window open
+        // Check if there is already a window/tab open with the target URL
         for (const client of clientList) {
           if (client.url === url && 'focus' in client) {
             return client.focus();
           }
         }
         
-        // If no window is open, open a new one
+        // If no window/tab is open with the URL, open a new one
         if (clients.openWindow) {
           return clients.openWindow(url);
         }
       })
   );
 });
-
-// Function to handle syncing offline data
-async function syncOfflineData() {
-  try {
-    // Get offline data from IndexedDB
-    const offlineData = await getOfflineData();
-    
-    // No offline data to sync
-    if (!offlineData || offlineData.length === 0) {
-      return;
-    }
-    
-    // Process each offline item
-    const syncPromises = offlineData.map(async (item) => {
-      try {
-        const response = await fetch(item.url, {
-          method: item.method || 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(item.data),
-        });
-        
-        if (response.ok) {
-          // Successfully synced this item, remove it
-          await removeOfflineItem(item.id);
-          return true;
-        }
-        return false;
-      } catch (error) {
-        console.error('[Service Worker] Error syncing item:', error);
-        return false;
-      }
-    });
-    
-    // Wait for all sync attempts to complete
-    await Promise.all(syncPromises);
-    
-    // Notify the user if sync was successful
-    self.registration.showNotification('JET AI Sync Complete', {
-      body: 'Your offline changes have been synchronized',
-      icon: '/icons/icon-512x512.png',
-    });
-    
-  } catch (error) {
-    console.error('[Service Worker] Sync error:', error);
-  }
-}
-
-// These functions would be implemented using IndexedDB
-// They are stubbed here for the example
-async function getOfflineData() {
-  // This would retrieve data from IndexedDB
-  // Return empty array for now
-  return [];
-}
-
-async function removeOfflineItem(id) {
-  // This would remove a synced item from IndexedDB
-  console.log('[Service Worker] Removing synced item with ID:', id);
-}

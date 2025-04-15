@@ -52,5 +52,31 @@
     <script type="module" src="/src/main.tsx"></script>
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+    
+    <!-- Service Worker Registration Fallback -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
+            .then(function(registration) {
+              console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            })
+            .catch(function(error) {
+              console.log('ServiceWorker registration failed: ', error);
+              
+              // Try fallback registration
+              navigator.serviceWorker.register('/sw-fallback.js', { scope: '/' })
+                .then(function(fallbackRegistration) {
+                  console.log('Fallback ServiceWorker registration successful: ', fallbackRegistration.scope);
+                })
+                .catch(function(fallbackError) {
+                  console.log('Fallback ServiceWorker registration also failed: ', fallbackError);
+                });
+            });
+        });
+      } else {
+        console.log('Service workers are not supported in this browser');
+      }
+    </script>
   </body>
 </html>

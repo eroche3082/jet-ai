@@ -36,7 +36,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { getAffiliateId } from "@/lib/utils";
 import PartnerDashboard from "@/pages/partner/Dashboard";
 import PartnerSignup from "@/pages/partner/Signup";
-import { registerServiceWorker, isPWAInstalled } from '@/lib/pwa';
+import { isPWAInstalled, setupSafeAreaVariables, initInstallPrompt } from '@/lib/pwa';
 import { AuthProvider } from '@/hooks/use-auth';
 import { LanguageProvider } from '@/lib/LanguageContext';
 import LandingPage from "@/pages/LightLandingPage";
@@ -83,10 +83,10 @@ function App() {
       setIsPWA(isStandalone || isFromHomeScreen || forcePWA);
     };
     
-    // Initialize PWA features
-    registerServiceWorker().then(reg => {
-      console.log('Service worker registration result:', reg ? 'Success' : 'Failed');
-    });
+    // Initialize PWA features - this is now handled at the HTML level for reliability
+    // but we still call the setup functions for safe area variables
+    setupSafeAreaVariables();
+    initInstallPrompt();
     
     // Run checks
     checkMobile();
