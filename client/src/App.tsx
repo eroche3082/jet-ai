@@ -53,6 +53,7 @@ import RewardsPage from "@/pages/RewardsPage";
 import AccessCodeDashboard from "@/pages/AccessCodeDashboard";
 import SuperAdminPage from "@/pages/SuperAdmin/SuperAdminPage";
 import AdminManagerPage from "@/pages/AdminManager/AdminManagerPage";
+import EditorPage from "@/pages/EditorPage";
 
 function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -223,6 +224,7 @@ function App() {
         <Route path="/access-dashboard" component={AccessCodeDashboard} />
         <Route path="/travel-community" component={TravelCommunityPage} />
         <Route path="/superadmin" component={SuperAdminPage} />
+        <Route path="/editor" component={EditorPage} />
         
         {/* Partner/Affiliate routes */}
         <Route path="/partner/dashboard" component={PartnerDashboard} />
@@ -253,9 +255,9 @@ function App() {
     );
   };
 
-  // Don't use Layout for landing page, login page, onboarding, chat-demo, superadmin, admin or status pages
+  // Don't use Layout for landing page, login page, onboarding, chat-demo, superadmin, admin, editor or status pages
   const shouldUseLayout = () => {
-    return !['/login', '/', '/onboarding', '/chat-demo', '/superadmin', '/admin'].includes(location) && !location.startsWith('/status/');
+    return !['/login', '/', '/onboarding', '/chat-demo', '/superadmin', '/admin', '/editor'].includes(location) && !location.startsWith('/status/');
   };
 
   return (
