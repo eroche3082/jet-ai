@@ -1,0 +1,80 @@
+MEGAPROMPT – PHASE 5 (JET AI) – FINAL DEPLOYMENT TO FIREBASE
+plaintext
+Copiar
+Editar
+AGENT: Jet AI
+
+PHASE: 5 – Final Deployment to Firebase Hosting
+
+OBJECTIVE:
+Deploy the Jet AI platform to Firebase Hosting using the multi-site configuration under the project `erudite-creek-431302-q3`, ensuring all routes, configurations, UI components, memory systems, admin portals, and avatars are live and functional.
+
+FIREBASE CONFIG:
+- Project ID: erudite-creek-431302-q3
+- Hosting Target: `jetai`
+- Domain: jetai.socialbrands.ai
+- Firebase Config:
+  {
+    "apiKey": "AIzaSyBGWmVEy2zp6fpqaBkDOpV-Qj_FP6QkZj0",
+    "authDomain": "erudite-creek-431302-q3.firebaseapp.com",
+    "projectId": "erudite-creek-431302-q3",
+    "storageBucket": "erudite-creek-431302-q3.appspot.com",
+    "messagingSenderId": "744217150021",
+    "appId": "1:744217150021:web:c3310bd6d4e10f237c192c",
+    "measurementId": "G-J42ZMB67JH"
+  }
+
+TASKS TO EXECUTE:
+
+1. Final Verification (Pre-Deployment Checklist)
+- [ ] Verify all pages load correctly (/, /login, /dashboard, /chat, /features, /pricing, /superadmin, /admin, /editor)
+- [ ] Check mobile responsiveness and layout integrity
+- [ ] Confirm that memory sync with Firestore is active
+- [ ] Ensure the Live Visual Editor is connected to `/config/jetai`
+- [ ] Confirm avatars are loading from LiveSmart integration
+- [ ] Validate access to /superadmin via QR + facial auth
+- [ ] Validate access to /admin via credentials
+- [ ] Validate AI Assistant is functional on homepage and dashboard
+- [ ] Clean up console errors, dummy content, or broken links
+
+2. Firebase Hosting Configuration
+- Ensure `firebase.json` includes:
+```json
+{
+  "hosting": {
+    "site": "jetai",
+    "public": "dist",
+    "rewrites": [
+      { "source": "**", "destination": "/index.html" }
+    ]
+  }
+}
+Firebase CLI Commands:
+
+bash
+Copiar
+Editar
+firebase use --add
+# Select: erudite-creek-431302-q3
+firebase target:apply hosting jetai jetai
+firebase deploy --only hosting:jetai
+Post-Deploy Test (Live at jetai.socialbrands.ai)
+
+ Navigate to homepage and test full flow
+
+ Open /editor and modify text or layout live
+
+ Enter /superadmin and access memory/avatars
+
+ Test AI Assistant on homepage and inside dashboard
+
+ Confirm mobile layout works
+
+DELIVERABLES: ✅ Live version hosted at https://jetai.socialbrands.ai
+✅ All routes, memory, assistant, editor, admin, and avatars active
+✅ Firebase hosting fully connected with Firestore + Realtime edits
+✅ Ready for public release
+
+yaml
+Copiar
+Editar

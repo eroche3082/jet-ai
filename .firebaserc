@@ -1,5 +1,14 @@
 {
   "projects": {
-    "default": "jetai-travel-companion"
+    "default": "erudite-creek-431302-q3"
+  },
+  "targets": {
+    "erudite-creek-431302-q3": {
+      "hosting": {
+        "jetai": [
+          "jetai"
+        ]
+      }
+    }
   }
 }

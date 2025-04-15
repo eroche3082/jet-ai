@@ -6,8 +6,8 @@ import path from 'path';
 
 // Initialize Firebase
 const firebaseConfig = {
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: `${process.env.VITE_FIREBASE_PROJECT_ID}.appspot.com`
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID || "erudite-creek-431302-q3",
+  storageBucket: `${process.env.VITE_FIREBASE_PROJECT_ID || "erudite-creek-431302-q3"}.appspot.com`
 };
 
 let storageInstance: any = null;
@@ -26,9 +26,9 @@ try {
       } else {
         firebaseApp = initializeApp({
           credential: cert({
-            projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL || `firebase-adminsdk-xxxx@${process.env.VITE_FIREBASE_PROJECT_ID}.iam.gserviceaccount.com`,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+            projectId: process.env.VITE_FIREBASE_PROJECT_ID || "erudite-creek-431302-q3",
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL || `firebase-adminsdk-xxxx@${process.env.VITE_FIREBASE_PROJECT_ID || "erudite-creek-431302-q3"}.iam.gserviceaccount.com`,
+            privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : "",
           }),
           storageBucket: firebaseConfig.storageBucket
         }, 'storage-app');
