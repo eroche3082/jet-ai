@@ -1,124 +1,128 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'wouter';
 import { 
-  Home, 
-  Shield, 
-  LogOut, 
-  Menu, 
-  X, 
   BarChart4, 
+  DollarSign, 
   Settings, 
   Users, 
-  DollarSign,
-  AlertTriangle,
+  Shield, 
+  AlertTriangle, 
   Activity,
-  User
+  LogOut,
+  Home,
+  ChevronRight
 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 const SuperAdminNavigation: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const handleLogout = () => {
+    // In a real implementation, this would clear auth tokens and session data
+    localStorage.removeItem('isLoggedIn');
+    window.location.href = '/login';
+  };
 
   return (
-    <>
-      {/* Mobile sidebar toggle */}
-      <button
-        className="fixed z-50 p-2 bg-[#4a89dc] rounded-full shadow-lg md:hidden top-4 left-4"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {isOpen ? <X className="h-6 w-6 text-white" /> : <Menu className="h-6 w-6 text-white" />}
-      </button>
+    <div className="w-64 bg-[#0a1328] border-r border-[#4a89dc]/20 h-screen flex flex-col">
+      <div className="p-4 border-b border-[#4a89dc]/20 flex items-center justify-between">
+        <Link href="/dashboard">
+          <a className="flex items-center">
+            <div className="bg-[#4a89dc] text-white p-2 rounded-md mr-2">
+              <Shield className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">JET AI</h1>
+              <p className="text-xs text-gray-400">Super Admin</p>
+            </div>
+          </a>
+        </Link>
+      </div>
 
-      {/* Sidebar */}
-      <div
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#050b17] border-r border-[#4a89dc]/20 transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="flex items-center justify-center p-6 border-b border-[#4a89dc]/20">
-            <Shield className="h-6 w-6 text-[#4a89dc] mr-2" />
-            <h2 className="text-xl font-bold text-white">Super Admin</h2>
-          </div>
-
-          {/* Navigation links */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            <Link href="/superadmin">
-              <a className="flex items-center px-4 py-3 text-gray-300 hover:bg-[#0a1328] hover:text-[#4a89dc] rounded-md transition-all group">
-                <Home className="h-5 w-5 mr-3 group-hover:text-[#4a89dc]" />
-                <span>Dashboard</span>
-              </a>
-            </Link>
-            
-            <Link href="/superadmin?tab=analytics">
-              <a className="flex items-center px-4 py-3 text-gray-300 hover:bg-[#0a1328] hover:text-[#4a89dc] rounded-md transition-all group">
-                <BarChart4 className="h-5 w-5 mr-3 group-hover:text-[#4a89dc]" />
-                <span>Analytics</span>
-              </a>
-            </Link>
-            
-            <Link href="/superadmin?tab=financial">
-              <a className="flex items-center px-4 py-3 text-gray-300 hover:bg-[#0a1328] hover:text-[#4a89dc] rounded-md transition-all group">
-                <DollarSign className="h-5 w-5 mr-3 group-hover:text-[#4a89dc]" />
-                <span>Financial</span>
-              </a>
-            </Link>
-            
-            <Link href="/superadmin?tab=system">
-              <a className="flex items-center px-4 py-3 text-gray-300 hover:bg-[#0a1328] hover:text-[#4a89dc] rounded-md transition-all group">
-                <Settings className="h-5 w-5 mr-3 group-hover:text-[#4a89dc]" />
-                <span>System Config</span>
-              </a>
-            </Link>
-            
-            <Link href="/superadmin?tab=membership">
-              <a className="flex items-center px-4 py-3 text-gray-300 hover:bg-[#0a1328] hover:text-[#4a89dc] rounded-md transition-all group">
-                <Users className="h-5 w-5 mr-3 group-hover:text-[#4a89dc]" />
-                <span>Membership</span>
-              </a>
-            </Link>
-            
-            <Link href="/superadmin?tab=agents">
-              <a className="flex items-center px-4 py-3 text-gray-300 hover:bg-[#0a1328] hover:text-[#4a89dc] rounded-md transition-all group">
-                <Shield className="h-5 w-5 mr-3 group-hover:text-[#4a89dc]" />
-                <span>Agent Config</span>
-              </a>
-            </Link>
-            
-            <Link href="/superadmin?tab=clients">
-              <a className="flex items-center px-4 py-3 text-gray-300 hover:bg-[#0a1328] hover:text-[#4a89dc] rounded-md transition-all group">
-                <User className="h-5 w-5 mr-3 group-hover:text-[#4a89dc]" />
-                <span>Client Database</span>
-              </a>
-            </Link>
-            
-            <Link href="/superadmin?tab=alerts">
-              <a className="flex items-center px-4 py-3 text-gray-300 hover:bg-[#0a1328] hover:text-[#4a89dc] rounded-md transition-all group">
-                <AlertTriangle className="h-5 w-5 mr-3 group-hover:text-[#4a89dc]" />
-                <span>Alerts Center</span>
-              </a>
-            </Link>
-            
-            <Link href="/superadmin?tab=activity">
-              <a className="flex items-center px-4 py-3 text-gray-300 hover:bg-[#0a1328] hover:text-[#4a89dc] rounded-md transition-all group">
-                <Activity className="h-5 w-5 mr-3 group-hover:text-[#4a89dc]" />
-                <span>Activity Logs</span>
+      <div className="flex-1 overflow-y-auto py-4 px-3">
+        <div className="mb-6">
+          <p className="text-gray-400 text-xs font-medium mb-2 px-2">MAIN MENU</p>
+          <nav className="space-y-1">
+            <Link href="/dashboard">
+              <a className="flex items-center px-2 py-2 text-sm text-gray-400 hover:text-white hover:bg-[#050b17] rounded-md group">
+                <Home className="h-5 w-5 mr-3" />
+                Return to Main App
+                <ChevronRight className="h-4 w-4 ml-auto" />
               </a>
             </Link>
           </nav>
+        </div>
 
-          {/* Footer */}
-          <div className="p-4 border-t border-[#4a89dc]/20">
-            <Link href="/">
-              <a className="flex items-center px-4 py-3 text-gray-300 hover:bg-[#0a1328] hover:text-[#4a89dc] rounded-md transition-all group">
-                <LogOut className="h-5 w-5 mr-3 group-hover:text-[#4a89dc]" />
-                <span>Exit Super Admin</span>
+        <div className="mb-6">
+          <p className="text-gray-400 text-xs font-medium mb-2 px-2">ADMINISTRATION</p>
+          <nav className="space-y-1">
+            <Link href="#analytics">
+              <a className="flex items-center px-2 py-2 text-sm text-white bg-[#050b17] rounded-md">
+                <BarChart4 className="h-5 w-5 mr-3 text-[#4a89dc]" />
+                Analytics
               </a>
             </Link>
-          </div>
+            <Link href="#financial">
+              <a className="flex items-center px-2 py-2 text-sm text-gray-400 hover:text-white hover:bg-[#050b17] rounded-md">
+                <DollarSign className="h-5 w-5 mr-3" />
+                Financial Overview
+              </a>
+            </Link>
+            <Link href="#system">
+              <a className="flex items-center px-2 py-2 text-sm text-gray-400 hover:text-white hover:bg-[#050b17] rounded-md">
+                <Settings className="h-5 w-5 mr-3" />
+                System Configuration
+              </a>
+            </Link>
+            <Link href="#membership">
+              <a className="flex items-center px-2 py-2 text-sm text-gray-400 hover:text-white hover:bg-[#050b17] rounded-md">
+                <Users className="h-5 w-5 mr-3" />
+                Membership Management
+              </a>
+            </Link>
+            <Link href="#agents">
+              <a className="flex items-center px-2 py-2 text-sm text-gray-400 hover:text-white hover:bg-[#050b17] rounded-md">
+                <Shield className="h-5 w-5 mr-3" />
+                Agent Configuration
+              </a>
+            </Link>
+            <Link href="#clients">
+              <a className="flex items-center px-2 py-2 text-sm text-gray-400 hover:text-white hover:bg-[#050b17] rounded-md">
+                <Users className="h-5 w-5 mr-3" />
+                Client Database
+              </a>
+            </Link>
+          </nav>
+        </div>
+
+        <div className="mb-6">
+          <p className="text-gray-400 text-xs font-medium mb-2 px-2">MONITORING</p>
+          <nav className="space-y-1">
+            <Link href="#alerts">
+              <a className="flex items-center px-2 py-2 text-sm text-gray-400 hover:text-white hover:bg-[#050b17] rounded-md">
+                <AlertTriangle className="h-5 w-5 mr-3" />
+                Alerts Center
+                <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full ml-auto">8</span>
+              </a>
+            </Link>
+            <Link href="#activity">
+              <a className="flex items-center px-2 py-2 text-sm text-gray-400 hover:text-white hover:bg-[#050b17] rounded-md">
+                <Activity className="h-5 w-5 mr-3" />
+                System Activity
+              </a>
+            </Link>
+          </nav>
         </div>
       </div>
-    </>
+
+      <div className="p-4 border-t border-[#4a89dc]/20">
+        <Button 
+          onClick={handleLogout}
+          className="w-full bg-[#050b17] hover:bg-[#0f1e36] text-white"
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          Logout
+        </Button>
+      </div>
+    </div>
   );
 };
 

@@ -1,392 +1,674 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { ChevronDown, Settings, Cloud, Lock, AlertCircle, RefreshCw, Edit } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PlusCircle, Settings, Bot, Code, Gauge, Power, Cpu, Brain, Sparkles, MessageSquare, Edit, Trash2 } from 'lucide-react';
 
-const agents = [
+// Mock data for the AI models
+const availableModels = [
   { 
-    id: 1, 
-    name: 'JET AI', 
-    type: 'Travel Assistant',
-    status: 'Active',
-    version: '2.4.1',
-    lastUpdate: '2025-04-12',
-    features: ['Google Gemini Integration', 'OpenAI GPT-4o Fallback', 'Claude 3 Sonnet Support'],
-    users: 6321,
-    url: 'jetai.replit.app',
-    deployed: true
+    id: 'gemini-1.5-flash', 
+    name: 'Gemini 1.5 Flash', 
+    provider: 'Google', 
+    type: 'text',
+    context: 'Up to 128k tokens',
+    status: 'active',
+    costPerToken: '$0.00035'
   },
   { 
-    id: 2, 
-    name: 'CryptoBot', 
-    type: 'Finance Assistant',
-    status: 'Active',
-    version: '1.9.3',
-    lastUpdate: '2025-04-10',
-    features: ['Real-time Trading', 'Market Analysis', 'Portfolio Management'],
-    users: 2458,
-    url: 'cryptobot.replit.app',
-    deployed: true
+    id: 'gemini-1.5-pro', 
+    name: 'Gemini 1.5 Pro', 
+    provider: 'Google', 
+    type: 'multimodal',
+    context: 'Up to 128k tokens',
+    status: 'active',
+    costPerToken: '$0.00070'
   },
   { 
-    id: 3, 
-    name: 'FitnessAI', 
-    type: 'Health Coach',
-    status: 'Active',
-    version: '1.5.2',
-    lastUpdate: '2025-04-08',
-    features: ['Workout Plans', 'Nutrition Tracking', 'Progress Monitoring'],
-    users: 3154,
-    url: 'fitnessai.replit.app',
-    deployed: true
+    id: 'gpt-4o', 
+    name: 'GPT-4o', 
+    provider: 'OpenAI', 
+    type: 'multimodal',
+    context: 'Up to 128k tokens',
+    status: 'active',
+    costPerToken: '$0.00050'
   },
   { 
-    id: 4, 
-    name: 'SportsAI', 
-    type: 'Sports Analytics',
-    status: 'Maintenance',
-    version: '1.2.0',
-    lastUpdate: '2025-04-01',
-    features: ['Game Predictions', 'Player Statistics', 'Live Scores'],
-    users: 1782,
-    url: 'sportsai.replit.app',
-    deployed: true
+    id: 'claude-3.7-sonnet', 
+    name: 'Claude 3.7 Sonnet', 
+    provider: 'Anthropic', 
+    type: 'multimodal',
+    context: 'Up to 200k tokens',
+    status: 'active',
+    costPerToken: '$0.00075'
+  }
+];
+
+// Mock data for agent configurations
+const agentConfigurations = [
+  {
+    id: 'travel-concierge',
+    name: 'Travel Concierge',
+    description: 'Main assistant for travel planning and recommendations',
+    primaryModel: 'gemini-1.5-pro',
+    fallbackModel: 'gpt-4o',
+    active: true,
+    prompt: 'You are JET AI, an emotionally intelligent multilingual travel assistant...',
+    temperature: 0.7,
+    requestsPerDay: 5280,
+    avgResponseTime: '1.2s'
   },
-  { 
-    id: 5, 
-    name: 'ShopAI', 
-    type: 'Shopping Assistant',
-    status: 'Active',
-    version: '2.1.0',
-    lastUpdate: '2025-04-05',
-    features: ['Product Recommendations', 'Price Tracking', 'Deal Alerts'],
-    users: 4120,
-    url: 'shopai.replit.app',
-    deployed: true
+  {
+    id: 'itinerary-builder',
+    name: 'Itinerary Builder',
+    description: 'Specialized agent for creating detailed travel itineraries',
+    primaryModel: 'claude-3.7-sonnet',
+    fallbackModel: 'gpt-4o',
+    active: true,
+    prompt: 'You are an expert travel planner specialized in creating detailed itineraries...',
+    temperature: 0.5,
+    requestsPerDay: 2150,
+    avgResponseTime: '2.1s'
   },
-  { 
-    id: 6, 
-    name: 'EduAI', 
-    type: 'Education Assistant',
-    status: 'Development',
-    version: '0.9.5',
-    lastUpdate: '2025-04-14',
-    features: ['Personalized Learning', 'Quiz Generation', 'Resource Recommendations'],
-    users: 845,
-    url: 'eduai.replit.app',
-    deployed: false
+  {
+    id: 'flight-finder',
+    name: 'Flight Finder',
+    description: 'Agent specialized in finding and recommending flights',
+    primaryModel: 'gemini-1.5-flash',
+    fallbackModel: 'gpt-4o',
+    active: true,
+    prompt: 'You are a flight search specialist with extensive knowledge of airlines...',
+    temperature: 0.3,
+    requestsPerDay: 3410,
+    avgResponseTime: '0.8s'
+  },
+  {
+    id: 'hotel-recommender',
+    name: 'Hotel Recommender',
+    description: 'Agent for hotel and accommodation recommendations',
+    primaryModel: 'gemini-1.5-pro',
+    fallbackModel: 'claude-3.7-sonnet',
+    active: true,
+    prompt: 'You are a hotel and accommodation expert with detailed knowledge...',
+    temperature: 0.6,
+    requestsPerDay: 2840,
+    avgResponseTime: '1.5s'
   }
 ];
 
 const AgentConfiguration: React.FC = () => {
+  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('agents');
+  
+  const selectedAgentData = agentConfigurations.find(agent => agent.id === selectedAgent);
+
   return (
-    <>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card className="bg-[#0a1328] border-[#4a89dc]/20">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-400">Total Agents</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{agents.length}</div>
-            <p className="text-xs text-green-500">All systems operational</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-[#0a1328] border-[#4a89dc]/20">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-400">Active Agents</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{agents.filter(agent => agent.status === 'Active').length}</div>
-            <p className="text-xs text-green-500">Ready and available</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-[#0a1328] border-[#4a89dc]/20">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-400">Total Users</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{agents.reduce((sum, agent) => sum + agent.users, 0).toLocaleString()}</div>
-            <p className="text-xs text-green-500">Across all platforms</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-[#0a1328] border-[#4a89dc]/20">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-400">Latest Update</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">April 14</div>
-            <p className="text-xs text-gray-400">EduAI v0.9.5</p>
-          </CardContent>
-        </Card>
-      </div>
+    <Tabs defaultValue="agents" className="space-y-4" onValueChange={setActiveTab}>
+      <TabsList className="bg-[#050b17]">
+        <TabsTrigger value="agents" className="flex items-center gap-2">
+          <Bot className="h-4 w-4" /> AI Agents
+        </TabsTrigger>
+        <TabsTrigger value="models" className="flex items-center gap-2">
+          <Brain className="h-4 w-4" /> AI Models
+        </TabsTrigger>
+        <TabsTrigger value="performance" className="flex items-center gap-2">
+          <Gauge className="h-4 w-4" /> Performance
+        </TabsTrigger>
+        <TabsTrigger value="prompts" className="flex items-center gap-2">
+          <MessageSquare className="h-4 w-4" /> System Prompts
+        </TabsTrigger>
+      </TabsList>
       
-      <Card className="bg-[#0a1328] border-[#4a89dc]/20 mb-6">
-        <CardHeader>
-          <CardTitle>Agent Management</CardTitle>
-          <CardDescription className="text-gray-400">
-            Configure and monitor all AI agents across the platform ecosystem
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-[#0f1e36] border-b-[#4a89dc]/20">
-                <TableHead className="text-[#4a89dc]">Agent</TableHead>
-                <TableHead className="text-[#4a89dc]">Status</TableHead>
-                <TableHead className="text-[#4a89dc]">Users</TableHead>
-                <TableHead className="text-[#4a89dc]">Version</TableHead>
-                <TableHead className="text-[#4a89dc]">Last Update</TableHead>
-                <TableHead className="text-[#4a89dc]">URL</TableHead>
-                <TableHead className="text-[#4a89dc]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {agents.map((agent) => (
-                <TableRow key={agent.id} className="hover:bg-[#0f1e36] border-b-[#4a89dc]/20">
-                  <TableCell className="font-medium">
-                    <div className="flex flex-col">
-                      <span className="text-white">{agent.name}</span>
-                      <span className="text-xs text-gray-400">{agent.type}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge 
-                      className={
-                        agent.status === 'Active' ? 'bg-green-500/20 text-green-500 hover:bg-green-500/30' :
-                        agent.status === 'Maintenance' ? 'bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30' :
-                        'bg-blue-500/20 text-blue-500 hover:bg-blue-500/30'
-                      }
-                    >
-                      {agent.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{agent.users.toLocaleString()}</TableCell>
-                  <TableCell>v{agent.version}</TableCell>
-                  <TableCell>{agent.lastUpdate}</TableCell>
-                  <TableCell>
-                    {agent.deployed ? (
-                      <a 
-                        href={`https://${agent.url}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-[#4a89dc] hover:underline"
-                      >
-                        {agent.url}
-                      </a>
-                    ) : (
-                      <span className="text-gray-400">Not deployed</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="h-8 w-8">
+      <TabsContent value="agents" className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold text-white">AI Agent Management</h2>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white">
+                <PlusCircle className="h-4 w-4 mr-2" /> Create New Agent
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-[#0a1328] border-[#4a89dc]/20 text-white max-w-3xl">
+              <DialogHeader>
+                <DialogTitle>Create New AI Agent</DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  Configure a new AI agent for specialized tasks within JET AI
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="agentId" className="text-right">
+                    Agent ID
+                  </Label>
+                  <Input id="agentId" className="col-span-3 bg-[#050b17] border-[#4a89dc]/20" placeholder="unique-agent-id" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="agentName" className="text-right">
+                    Agent Name
+                  </Label>
+                  <Input id="agentName" className="col-span-3 bg-[#050b17] border-[#4a89dc]/20" placeholder="New Agent Name" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="agentDescription" className="text-right">
+                    Description
+                  </Label>
+                  <Input id="agentDescription" className="col-span-3 bg-[#050b17] border-[#4a89dc]/20" placeholder="Purpose and role of this agent" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="primaryModel" className="text-right">
+                    Primary Model
+                  </Label>
+                  <Select>
+                    <SelectTrigger id="primaryModel" className="col-span-3 bg-[#050b17] border-[#4a89dc]/20">
+                      <SelectValue placeholder="Select AI model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableModels.map(model => (
+                        <SelectItem key={model.id} value={model.id}>{model.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="fallbackModel" className="text-right">
+                    Fallback Model
+                  </Label>
+                  <Select>
+                    <SelectTrigger id="fallbackModel" className="col-span-3 bg-[#050b17] border-[#4a89dc]/20">
+                      <SelectValue placeholder="Select fallback model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableModels.map(model => (
+                        <SelectItem key={model.id} value={model.id}>{model.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="temperature" className="text-right">
+                    Temperature
+                  </Label>
+                  <div className="col-span-3 flex items-center gap-2">
+                    <Input id="temperature" type="range" min="0" max="1" step="0.1" defaultValue="0.7" className="bg-[#050b17] border-[#4a89dc]/20" />
+                    <span className="min-w-8 text-center">0.7</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-start gap-4">
+                  <Label htmlFor="systemPrompt" className="text-right pt-2">
+                    System Prompt
+                  </Label>
+                  <textarea 
+                    id="systemPrompt" 
+                    className="col-span-3 bg-[#050b17] border-[#4a89dc]/20 rounded-md p-2 min-h-32" 
+                    placeholder="Enter the system prompt that defines this agent's behavior and capabilities..."
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="submit" className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white">Create Agent</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <Card className="bg-[#0a1328] border-[#4a89dc]/20">
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-[#0f1e36] border-b-[#4a89dc]/20">
+                  <TableHead className="text-[#4a89dc]">Agent</TableHead>
+                  <TableHead className="text-[#4a89dc]">Models</TableHead>
+                  <TableHead className="text-[#4a89dc]">Status</TableHead>
+                  <TableHead className="text-[#4a89dc]">Requests</TableHead>
+                  <TableHead className="text-[#4a89dc]">Avg. Response</TableHead>
+                  <TableHead className="text-[#4a89dc]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {agentConfigurations.map((agent) => (
+                  <TableRow key={agent.id} className={`hover:bg-[#0f1e36] border-b-[#4a89dc]/20 ${selectedAgent === agent.id ? 'bg-[#0f1e36]' : ''}`}>
+                    <TableCell className="font-medium">
+                      <div>{agent.name}</div>
+                      <div className="text-xs text-gray-400">{agent.description}</div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">{availableModels.find(m => m.id === agent.primaryModel)?.name || agent.primaryModel}</div>
+                      <div className="text-xs text-gray-400">Fallback: {availableModels.find(m => m.id === agent.fallbackModel)?.name || agent.fallbackModel}</div>
+                    </TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 text-xs rounded-full ${agent.active ? 'bg-green-500/20 text-green-500' : 'bg-gray-500/20 text-gray-400'}`}>
+                        {agent.active ? 'Active' : 'Inactive'}
+                      </span>
+                    </TableCell>
+                    <TableCell>{agent.requestsPerDay.toLocaleString()}/day</TableCell>
+                    <TableCell>{agent.avgResponseTime}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-8 w-8 p-0"
+                          onClick={() => setSelectedAgent(agent.id)}
+                        >
                           <Settings className="h-4 w-4" />
                         </Button>
-                      </DialogTrigger>
-                      <DialogContent className="bg-[#0a1328] border-[#4a89dc]/20 text-white">
-                        <DialogHeader>
-                          <DialogTitle>Configure {agent.name}</DialogTitle>
-                          <DialogDescription className="text-gray-400">
-                            Manage settings and permissions for this agent.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                              <div className="space-y-0.5">
-                                <Label>Agent Status</Label>
-                                <p className="text-xs text-gray-400">Enable/disable this agent</p>
-                              </div>
-                              <Switch defaultChecked={agent.status === 'Active'} />
-                            </div>
-                            
-                            <div className="space-y-2">
-                              <Label htmlFor="version">Version</Label>
-                              <Input id="version" value={`v${agent.version}`} className="bg-[#050b17] border-[#4a89dc]/20" />
-                            </div>
-                            
-                            <div className="space-y-2">
-                              <Label>Features</Label>
-                              <div className="space-y-2">
-                                {agent.features.map((feature, index) => (
-                                  <div key={index} className="flex items-center justify-between">
-                                    <span className="text-sm">{feature}</span>
-                                    <Switch defaultChecked />
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                            
-                            <div className="space-y-2">
-                              <Label>Security Level</Label>
-                              <div className="flex items-center space-x-4">
-                                <Button variant="outline" size="sm" className="flex items-center">
-                                  <Lock className="h-4 w-4 mr-2" /> Standard
-                                  <ChevronDown className="h-4 w-4 ml-2" />
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <DialogFooter className="flex space-x-2">
-                          <Button variant="outline" className="flex items-center">
-                            <RefreshCw className="h-4 w-4 mr-2" /> Restart Agent
-                          </Button>
-                          <Button className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white">
-                            Save Changes
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-[#0a1328] border-[#4a89dc]/20">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Cloud className="h-5 w-5 mr-2 text-[#4a89dc]" />
-              Service Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <div className="font-medium text-white">Firebase Auth</div>
-                  <div className="text-xs text-gray-400">Authentication service</div>
-                </div>
-                <Badge className="bg-green-500/20 text-green-500 hover:bg-green-500/30">
-                  Operational
-                </Badge>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <div className="font-medium text-white">Firebase Hosting</div>
-                  <div className="text-xs text-gray-400">Web hosting platform</div>
-                </div>
-                <Badge className="bg-green-500/20 text-green-500 hover:bg-green-500/30">
-                  Operational
-                </Badge>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <div className="font-medium text-white">Firebase Functions</div>
-                  <div className="text-xs text-gray-400">Serverless functions</div>
-                </div>
-                <Badge className="bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30">
-                  Degraded
-                </Badge>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <div className="font-medium text-white">Google Vertex AI</div>
-                  <div className="text-xs text-gray-400">AI/ML platform</div>
-                </div>
-                <Badge className="bg-green-500/20 text-green-500 hover:bg-green-500/30">
-                  Operational
-                </Badge>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <div className="font-medium text-white">OpenAI API</div>
-                  <div className="text-xs text-gray-400">AI models API</div>
-                </div>
-                <Badge className="bg-green-500/20 text-green-500 hover:bg-green-500/30">
-                  Operational
-                </Badge>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <div className="font-medium text-white">Stripe API</div>
-                  <div className="text-xs text-gray-400">Payment processing</div>
-                </div>
-                <Badge className="bg-green-500/20 text-green-500 hover:bg-green-500/30">
-                  Operational
-                </Badge>
-              </div>
-            </div>
+                        <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                          <Power className={`h-4 w-4 ${agent.active ? 'text-green-500' : 'text-gray-400'}`} />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
         
+        {selectedAgent && selectedAgentData && (
+          <Card className="bg-[#0a1328] border-[#4a89dc]/20">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>{selectedAgentData.name} Configuration</CardTitle>
+                <CardDescription className="text-gray-400">
+                  Detailed configuration and performance metrics
+                </CardDescription>
+              </div>
+              <Button variant="outline" onClick={() => setSelectedAgent(null)}>Close</Button>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <Tabs defaultValue="config">
+                <TabsList className="bg-[#050b17]">
+                  <TabsTrigger value="config">Configuration</TabsTrigger>
+                  <TabsTrigger value="metrics">Metrics</TabsTrigger>
+                  <TabsTrigger value="prompt">System Prompt</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="config" className="space-y-4 mt-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-primaryModel">Primary Model</Label>
+                      <Select defaultValue={selectedAgentData.primaryModel}>
+                        <SelectTrigger id="edit-primaryModel" className="bg-[#050b17] border-[#4a89dc]/20">
+                          <SelectValue placeholder="Select AI model" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableModels.map(model => (
+                            <SelectItem key={model.id} value={model.id}>{model.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-fallbackModel">Fallback Model</Label>
+                      <Select defaultValue={selectedAgentData.fallbackModel}>
+                        <SelectTrigger id="edit-fallbackModel" className="bg-[#050b17] border-[#4a89dc]/20">
+                          <SelectValue placeholder="Select fallback model" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableModels.map(model => (
+                            <SelectItem key={model.id} value={model.id}>{model.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-temperature">Temperature</Label>
+                      <div className="flex items-center gap-2">
+                        <Input 
+                          id="edit-temperature" 
+                          type="range" 
+                          min="0" 
+                          max="1" 
+                          step="0.1" 
+                          defaultValue={selectedAgentData.temperature.toString()} 
+                          className="bg-[#050b17] border-[#4a89dc]/20" 
+                        />
+                        <span className="min-w-8 text-center">{selectedAgentData.temperature}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-status">Status</Label>
+                      <div className="flex items-center pt-2">
+                        <Switch 
+                          id="edit-status" 
+                          checked={selectedAgentData.active} 
+                          className="data-[state=checked]:bg-[#4a89dc]"
+                        />
+                        <Label htmlFor="edit-status" className="ml-2">
+                          {selectedAgentData.active ? 'Active' : 'Inactive'}
+                        </Label>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-description">Description</Label>
+                    <Input 
+                      id="edit-description" 
+                      defaultValue={selectedAgentData.description} 
+                      className="bg-[#050b17] border-[#4a89dc]/20" 
+                    />
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="metrics" className="mt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="font-medium mb-3">Daily Requests</h3>
+                      <div className="h-60 bg-[#050b17] rounded-md p-4 border border-[#4a89dc]/20 flex items-center justify-center">
+                        <p className="text-gray-400">Request volume chart would be rendered here</p>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="font-medium mb-3">Response Times</h3>
+                      <div className="h-60 bg-[#050b17] rounded-md p-4 border border-[#4a89dc]/20 flex items-center justify-center">
+                        <p className="text-gray-400">Response time chart would be rendered here</p>
+                      </div>
+                    </div>
+                    
+                    <div className="col-span-2">
+                      <h3 className="font-medium mb-3">Usage Metrics</h3>
+                      <div className="grid grid-cols-4 gap-4">
+                        <div className="bg-[#050b17] p-4 rounded-md border border-[#4a89dc]/20">
+                          <div className="text-sm text-gray-400">Daily Requests</div>
+                          <div className="text-2xl font-bold text-white mt-1">{selectedAgentData.requestsPerDay.toLocaleString()}</div>
+                        </div>
+                        <div className="bg-[#050b17] p-4 rounded-md border border-[#4a89dc]/20">
+                          <div className="text-sm text-gray-400">Avg Response Time</div>
+                          <div className="text-2xl font-bold text-white mt-1">{selectedAgentData.avgResponseTime}</div>
+                        </div>
+                        <div className="bg-[#050b17] p-4 rounded-md border border-[#4a89dc]/20">
+                          <div className="text-sm text-gray-400">Success Rate</div>
+                          <div className="text-2xl font-bold text-white mt-1">98.7%</div>
+                        </div>
+                        <div className="bg-[#050b17] p-4 rounded-md border border-[#4a89dc]/20">
+                          <div className="text-sm text-gray-400">Daily Cost</div>
+                          <div className="text-2xl font-bold text-white mt-1">$42.80</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="prompt" className="mt-4">
+                  <div className="space-y-3">
+                    <Label htmlFor="system-prompt">System Prompt</Label>
+                    <div className="relative">
+                      <textarea 
+                        id="system-prompt" 
+                        className="w-full min-h-[300px] bg-[#050b17] border border-[#4a89dc]/20 rounded-md p-4 font-mono text-sm" 
+                        defaultValue={selectedAgentData.prompt}
+                      />
+                      <Button className="absolute top-2 right-2 bg-[#050b17] hover:bg-[#0f1e36] border border-[#4a89dc]/20" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="flex justify-end space-x-2 mt-4">
+                      <Button variant="outline" size="sm">Restore Default</Button>
+                      <Button className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white" size="sm">Save Prompt</Button>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+            <CardFooter className="border-t border-[#4a89dc]/20 pt-6 gap-2">
+              <Button className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white">Save Changes</Button>
+              <Button variant="outline">Reset Configuration</Button>
+            </CardFooter>
+          </Card>
+        )}
+      </TabsContent>
+      
+      <TabsContent value="models" className="space-y-4">
         <Card className="bg-[#0a1328] border-[#4a89dc]/20">
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <AlertCircle className="h-5 w-5 mr-2 text-[#4a89dc]" />
-              Recent Agent Incidents
-            </CardTitle>
+            <CardTitle>AI Model Configuration</CardTitle>
+            <CardDescription className="text-gray-400">
+              Manage available AI models and their configurations
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="p-4 border border-yellow-500/20 rounded-md bg-yellow-500/5">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="font-medium text-white">Firebase Functions Degraded</div>
-                  <div className="text-xs text-gray-400">2 hours ago</div>
-                </div>
-                <p className="text-sm text-gray-400 mb-2">
-                  Firebase Functions experiencing increased latency in the us-central1 region. This may affect serverless operations.
-                </p>
-                <div className="flex justify-end">
-                  <Button variant="outline" size="sm">
-                    View Details
-                  </Button>
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-[#0f1e36] border-b-[#4a89dc]/20">
+                  <TableHead className="text-[#4a89dc]">Model</TableHead>
+                  <TableHead className="text-[#4a89dc]">Provider</TableHead>
+                  <TableHead className="text-[#4a89dc]">Type</TableHead>
+                  <TableHead className="text-[#4a89dc]">Context</TableHead>
+                  <TableHead className="text-[#4a89dc]">Cost</TableHead>
+                  <TableHead className="text-[#4a89dc]">Status</TableHead>
+                  <TableHead className="text-[#4a89dc]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {availableModels.map((model) => (
+                  <TableRow key={model.id} className="hover:bg-[#0f1e36] border-b-[#4a89dc]/20">
+                    <TableCell className="font-medium">{model.name}</TableCell>
+                    <TableCell>{model.provider}</TableCell>
+                    <TableCell>{model.type}</TableCell>
+                    <TableCell>{model.context}</TableCell>
+                    <TableCell>{model.costPerToken}</TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 text-xs rounded-full ${model.status === 'active' ? 'bg-green-500/20 text-green-500' : 'bg-gray-500/20 text-gray-400'}`}>
+                        {model.status === 'active' ? 'Active' : 'Inactive'}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                          <Settings className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                          <Power className="h-4 w-4 text-green-500" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+          <CardFooter className="border-t border-[#4a89dc]/20 pt-6 gap-2">
+            <Button className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white">
+              <PlusCircle className="h-4 w-4 mr-2" /> Add New Model
+            </Button>
+            <Button variant="outline">Configure API Keys</Button>
+          </CardFooter>
+        </Card>
+      </TabsContent>
+      
+      <TabsContent value="performance" className="space-y-4">
+        <Card className="bg-[#0a1328] border-[#4a89dc]/20">
+          <CardHeader>
+            <CardTitle>AI Performance Monitoring</CardTitle>
+            <CardDescription className="text-gray-400">
+              Monitor and optimize AI agent performance
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card className="bg-[#050b17] border-[#4a89dc]/20">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg font-medium">Avg Response Time</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-white">1.4s</div>
+                  <p className="text-sm text-green-500">12% faster than last week</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-[#050b17] border-[#4a89dc]/20">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg font-medium">Success Rate</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-white">98.7%</div>
+                  <p className="text-sm text-green-500">1.2% improvement</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-[#050b17] border-[#4a89dc]/20">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg font-medium">Daily Requests</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-white">15,420</div>
+                  <p className="text-sm text-green-500">+23% from last month</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-[#050b17] border-[#4a89dc]/20">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg font-medium">Daily Cost</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-white">$184.50</div>
+                  <p className="text-sm text-red-500">+18% from last month</p>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-medium mb-3">Response Time by Model</h3>
+                <div className="h-60 bg-[#050b17] rounded-md p-4 border border-[#4a89dc]/20 flex items-center justify-center">
+                  <p className="text-gray-400">Response time chart would be rendered here</p>
                 </div>
               </div>
               
-              <div className="p-4 border border-green-500/20 rounded-md bg-green-500/5">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="font-medium text-white">SportsAI Maintenance</div>
-                  <div className="text-xs text-gray-400">2 days ago</div>
+              <div>
+                <h3 className="font-medium mb-3">Daily Usage by Agent</h3>
+                <div className="h-60 bg-[#050b17] rounded-md p-4 border border-[#4a89dc]/20 flex items-center justify-center">
+                  <p className="text-gray-400">Usage chart would be rendered here</p>
                 </div>
-                <p className="text-sm text-gray-400 mb-2">
-                  Scheduled maintenance for SportsAI to update prediction algorithms and improve accuracy.
-                </p>
-                <div className="flex justify-end">
-                  <Button variant="outline" size="sm">
-                    View Details
-                  </Button>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <h3 className="font-medium">Performance Optimization</h3>
+              
+              <div className="flex justify-between items-center py-2 border-b border-[#4a89dc]/20">
+                <div>
+                  <h3 className="font-medium">Automatic Model Selection</h3>
+                  <p className="text-sm text-gray-400">Dynamically choose models based on query complexity</p>
+                </div>
+                <Switch defaultChecked className="data-[state=checked]:bg-[#4a89dc]" />
+              </div>
+              
+              <div className="flex justify-between items-center py-2 border-b border-[#4a89dc]/20">
+                <div>
+                  <h3 className="font-medium">Prompt Caching</h3>
+                  <p className="text-sm text-gray-400">Cache common responses to reduce API calls</p>
+                </div>
+                <Switch defaultChecked className="data-[state=checked]:bg-[#4a89dc]" />
+              </div>
+              
+              <div className="flex justify-between items-center py-2 border-b border-[#4a89dc]/20">
+                <div>
+                  <h3 className="font-medium">Result Throttling</h3>
+                  <p className="text-sm text-gray-400">Limit requests during high demand periods</p>
+                </div>
+                <Switch className="data-[state=checked]:bg-[#4a89dc]" />
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="border-t border-[#4a89dc]/20 pt-6 gap-2">
+            <Button className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white">Save Optimization Settings</Button>
+            <Button variant="outline">View Detailed Analytics</Button>
+          </CardFooter>
+        </Card>
+      </TabsContent>
+      
+      <TabsContent value="prompts" className="space-y-4">
+        <Card className="bg-[#0a1328] border-[#4a89dc]/20">
+          <CardHeader>
+            <CardTitle>System Prompts Library</CardTitle>
+            <CardDescription className="text-gray-400">
+              Manage and organize system prompts for different AI agent roles
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <div className="bg-[#050b17] rounded-md p-4 border border-[#4a89dc]/20">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-medium text-lg">Travel Concierge</h3>
+                    <p className="text-sm text-gray-400 mt-1">Core prompt for main travel assistant interactions</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <Edit className="h-4 w-4 mr-2" /> Edit
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Sparkles className="h-4 w-4 mr-2" /> Optimize
+                    </Button>
+                  </div>
+                </div>
+                <div className="mt-4 bg-[#0a1328] p-3 rounded border border-[#4a89dc]/30 font-mono text-xs text-gray-300 max-h-40 overflow-y-auto">
+                  <code>You are JET AI, an emotionally intelligent multilingual travel assistant trained on the most advanced AI systems. Your purpose is to help travelers plan their journeys, discover destinations, and enhance their travel experiences through personalized recommendations and detailed knowledge.</code>
                 </div>
               </div>
               
-              <div className="p-4 border border-red-500/20 rounded-md bg-red-500/5">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="font-medium text-white">API Rate Limit Exceeded</div>
-                  <div className="text-xs text-gray-400">3 days ago</div>
+              <div className="bg-[#050b17] rounded-md p-4 border border-[#4a89dc]/20">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-medium text-lg">Itinerary Builder</h3>
+                    <p className="text-sm text-gray-400 mt-1">Specialized prompt for creating detailed travel itineraries</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <Edit className="h-4 w-4 mr-2" /> Edit
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Sparkles className="h-4 w-4 mr-2" /> Optimize
+                    </Button>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-400 mb-2">
-                  CryptoBot exceeded OpenAI API rate limits due to increased user activity. Issue resolved by increasing quota.
-                </p>
-                <div className="flex justify-end">
-                  <Button variant="outline" size="sm">
-                    View Details
-                  </Button>
+                <div className="mt-4 bg-[#0a1328] p-3 rounded border border-[#4a89dc]/30 font-mono text-xs text-gray-300 max-h-40 overflow-y-auto">
+                  <code>You are an expert travel planner specialized in creating detailed itineraries that balance efficiency, enjoyment, and cultural exploration. Your itineraries should include transportation details, time estimates, budget considerations, and insider tips for each destination.</code>
+                </div>
+              </div>
+              
+              <div className="bg-[#050b17] rounded-md p-4 border border-[#4a89dc]/20">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-medium text-lg">Flight Finder</h3>
+                    <p className="text-sm text-gray-400 mt-1">Specialized prompt for flight search and recommendations</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <Edit className="h-4 w-4 mr-2" /> Edit
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Sparkles className="h-4 w-4 mr-2" /> Optimize
+                    </Button>
+                  </div>
+                </div>
+                <div className="mt-4 bg-[#0a1328] p-3 rounded border border-[#4a89dc]/30 font-mono text-xs text-gray-300 max-h-40 overflow-y-auto">
+                  <code>You are a flight search specialist with extensive knowledge of airlines, routes, pricing strategies, and airport logistics. Your goal is to find the best flight options considering price, duration, comfort, reliability, and the user's specific preferences.</code>
                 </div>
               </div>
             </div>
           </CardContent>
+          <CardFooter className="border-t border-[#4a89dc]/20 pt-6 gap-2">
+            <Button className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white">
+              <PlusCircle className="h-4 w-4 mr-2" /> Add New Prompt Template
+            </Button>
+            <Button variant="outline">Import/Export Library</Button>
+          </CardFooter>
         </Card>
-      </div>
-    </>
+      </TabsContent>
+    </Tabs>
   );
 };
 
