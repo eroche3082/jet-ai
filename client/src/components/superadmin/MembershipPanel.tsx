@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusCircle, CreditCard, Users, DollarSign, Star, Sparkles, PieChart, ChevronUp, ChevronDown, Edit, Trash2, CheckCircle, Clock, Upload, TrendingUp, Lock, QrCode, UserCircle } from 'lucide-react';
-import QRCode from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 
 // Mock data for membership plans
 const membershipPlans = [
