@@ -432,7 +432,15 @@ export default function Destinations() {
       {/* Destinations Grid */}
       <section className="py-16 bg-gradient-to-b from-white to-[#4a89dc]/5">
         <div className="container mx-auto px-4">
-          {filteredDestinations.length > 0 ? (
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="h-12 w-12 text-[#4a89dc] animate-spin mb-4" />
+              <h3 className="text-xl font-medium text-[#050b17] mb-2 font-display">Searching destinations...</h3>
+              <p className="text-gray-600 font-serif max-w-md text-center">
+                JET AI is searching for the best destinations matching your criteria
+              </p>
+            </div>
+          ) : filteredDestinations.length > 0 ? (
             <>
               <div className="mb-10 flex flex-col md:flex-row items-center justify-between">
                 <div className="text-center md:text-left mb-4 md:mb-0">
@@ -440,10 +448,13 @@ export default function Destinations() {
                     <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5 mr-1.5 text-[#4a89dc]" stroke="currentColor" strokeWidth="2">
                       <path d="M3 22V8l9-6 9 6v14h-7v-8h-4v8H3z" />
                     </svg>
-                    FEATURED DESTINATIONS
+                    {searchParam ? 'SEARCH RESULTS' : 'FEATURED DESTINATIONS'}
                   </div>
                   <h2 className="font-display text-3xl font-bold text-[#050b17] flex items-center">
-                    {filteredDestinations.length} Amazing <span className="text-[#4a89dc] ml-2">Destinations</span>
+                    {filteredDestinations.length} {searchParam ? 'Results for ' : 'Amazing '}
+                    <span className="text-[#4a89dc] ml-2">
+                      {searchParam ? `"${searchParam}"` : 'Destinations'}
+                    </span>
                     <span className="ml-2 relative inline-flex">
                       <span className="animate-ping absolute h-3 w-3 rounded-full bg-[#4a89dc] opacity-75"></span>
                       <span className="relative rounded-full h-3 w-3 bg-[#4a89dc]"></span>
@@ -478,19 +489,37 @@ export default function Destinations() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              <h3 className="font-display text-2xl font-bold mb-3 text-[#050b17]">Adventure Not Found!</h3>
-              <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg font-serif">Your dream destination might be hiding behind different filters. Try adjusting your search criteria or explore our trending adventures.</p>
-              <button 
-                onClick={() => {
-                  setSelectedContinent('All');
-                  setSelectedClimate('All');
-                  setSelectedCategory('All');
-                  setSearchQuery('');
-                }}
-                className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white font-serif font-medium px-6 py-3 rounded shadow-lg transition-all duration-300"
-              >
-                Reset Filters
-              </button>
+              <h3 className="font-display text-2xl font-bold mb-3 text-[#050b17]">
+                {searchParam ? `No results found for "${searchParam}"` : 'Adventure Not Found!'}
+              </h3>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg font-serif">
+                {searchParam 
+                  ? `We couldn't find any destinations matching "${searchParam}". Try another search term or explore our trending adventures.` 
+                  : 'Your dream destination might be hiding behind different filters. Try adjusting your search criteria or explore our trending adventures.'}
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <button 
+                  onClick={() => {
+                    setSelectedContinent('All');
+                    setSelectedClimate('All');
+                    setSelectedCategory('All');
+                    setSearchQuery('');
+                    setHasSearched(false);
+                  }}
+                  className="bg-[#4a89dc] hover:bg-[#3a79cc] text-white font-serif font-medium px-6 py-3 rounded shadow-lg transition-all duration-300"
+                >
+                  {searchParam ? 'Show All Destinations' : 'Reset Filters'}
+                </button>
+                
+                {searchParam && (
+                  <button
+                    onClick={() => window.location.href = '/'}
+                    className="bg-white hover:bg-gray-100 text-[#050b17] border border-[#4a89dc]/30 font-serif font-medium px-6 py-3 rounded shadow-md transition-all duration-300"
+                  >
+                    Return to Home
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>
