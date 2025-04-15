@@ -191,7 +191,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 </li>
               ))}
               
-              {!isLoggedIn && (
+              {isLoggedIn ? (
+                <li>
+                  <a 
+                    className="flex items-center text-base font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer"
+                    onClick={() => {
+                      localStorage.removeItem('isLoggedIn');
+                      localStorage.removeItem('user');
+                      window.location.href = '/login';
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    <LogOut className="h-5 w-5 mr-3" />
+                    Logout
+                  </a>
+                </li>
+              ) : (
                 <li>
                   <Link href="/login">
                     <a 

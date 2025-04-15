@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import { 
   Plane, Luggage, MapPin, Calendar, Hotel, Utensils, 
   CreditCard, User, Settings, LogOut, Menu, X, MessageSquare,
@@ -73,46 +73,66 @@ export default function DashboardPage() {
         
         <div className="flex-1 overflow-y-auto py-4">
           <nav className="px-2 space-y-1">
-            <Button variant="ghost" className="sidebar-link">
-              <User className="mr-3 h-5 w-5" />
-              Dashboard
-            </Button>
-            <Button variant="ghost" className="sidebar-link">
-              <Plane className="mr-3 h-5 w-5" />
-              Explore
-            </Button>
-            <Button variant="ghost" className="sidebar-link">
-              <Luggage className="mr-3 h-5 w-5" />
-              Trips
-            </Button>
-            <Button variant="ghost" className="sidebar-link">
-              <MapPin className="mr-3 h-5 w-5" />
-              Destinations
-            </Button>
-            <Button variant="ghost" className="sidebar-link">
-              <Calendar className="mr-3 h-5 w-5" />
-              Itineraries
-            </Button>
-            <Button variant="ghost" className="sidebar-link">
-              <Hotel className="mr-3 h-5 w-5" />
-              Accommodations
-            </Button>
-            <Button variant="ghost" className="sidebar-link">
-              <Utensils className="mr-3 h-5 w-5" />
-              Dining
-            </Button>
-            <Button variant="ghost" className="sidebar-link">
-              <CreditCard className="mr-3 h-5 w-5" />
-              Budget
-            </Button>
-            <Button variant="ghost" className="sidebar-link">
-              <Share2 className="mr-3 h-5 w-5" />
-              Social Media Hub
-            </Button>
-            <Button variant="ghost" className="sidebar-link">
-              <Award className="mr-3 h-5 w-5" />
-              Rewards & Loyalty
-            </Button>
+            <Link href="/dashboard">
+              <Button variant="ghost" className="sidebar-link">
+                <User className="mr-3 h-5 w-5" />
+                Dashboard
+              </Button>
+            </Link>
+            <Link href="/explore">
+              <Button variant="ghost" className="sidebar-link">
+                <Plane className="mr-3 h-5 w-5" />
+                Explore
+              </Button>
+            </Link>
+            <Link href="/trips">
+              <Button variant="ghost" className="sidebar-link">
+                <Luggage className="mr-3 h-5 w-5" />
+                Trips
+              </Button>
+            </Link>
+            <Link href="/destinations">
+              <Button variant="ghost" className="sidebar-link">
+                <MapPin className="mr-3 h-5 w-5" />
+                Destinations
+              </Button>
+            </Link>
+            <Link href="/itineraries">
+              <Button variant="ghost" className="sidebar-link">
+                <Calendar className="mr-3 h-5 w-5" />
+                Itineraries
+              </Button>
+            </Link>
+            <Link href="/accommodations">
+              <Button variant="ghost" className="sidebar-link">
+                <Hotel className="mr-3 h-5 w-5" />
+                Accommodations
+              </Button>
+            </Link>
+            <Link href="/dining">
+              <Button variant="ghost" className="sidebar-link">
+                <Utensils className="mr-3 h-5 w-5" />
+                Dining
+              </Button>
+            </Link>
+            <Link href="/budget">
+              <Button variant="ghost" className="sidebar-link">
+                <CreditCard className="mr-3 h-5 w-5" />
+                Budget
+              </Button>
+            </Link>
+            <Link href="/social-media-hub">
+              <Button variant="ghost" className="sidebar-link">
+                <Share2 className="mr-3 h-5 w-5" />
+                Social Media Hub
+              </Button>
+            </Link>
+            <Link href="/rewards-loyalty">
+              <Button variant="ghost" className="sidebar-link">
+                <Award className="mr-3 h-5 w-5" />
+                Rewards & Loyalty
+              </Button>
+            </Link>
           </nav>
         </div>
         
@@ -143,51 +163,77 @@ export default function DashboardPage() {
       {showMobileMenu && (
         <div className="md:hidden fixed inset-0 bg-[#050b17] z-20 pt-16 px-4 py-6">
           <nav className="space-y-4">
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
-              <User className="mr-3 h-5 w-5" />
-              Dashboard
-            </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
-              <Plane className="mr-3 h-5 w-5" />
-              Explore
-            </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
-              <Luggage className="mr-3 h-5 w-5" />
-              Trips
-            </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
-              <MapPin className="mr-3 h-5 w-5" />
-              Destinations
-            </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
-              <Calendar className="mr-3 h-5 w-5" />
-              Itineraries
-            </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
-              <Hotel className="mr-3 h-5 w-5" />
-              Accommodations
-            </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
-              <Utensils className="mr-3 h-5 w-5" />
-              Dining
-            </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
-              <CreditCard className="mr-3 h-5 w-5" />
-              Budget
-            </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
-              <Share2 className="mr-3 h-5 w-5" />
-              Social Media Hub
-            </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
-              <Award className="mr-3 h-5 w-5" />
-              Rewards & Loyalty
-            </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
-              <Settings className="mr-3 h-5 w-5" />
-              Settings
-            </Button>
-            <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20" onClick={() => logout()}>
+            <Link href="/dashboard">
+              <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+                <User className="mr-3 h-5 w-5" />
+                Dashboard
+              </Button>
+            </Link>
+            <Link href="/explore">
+              <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+                <Plane className="mr-3 h-5 w-5" />
+                Explore
+              </Button>
+            </Link>
+            <Link href="/trips">
+              <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+                <Luggage className="mr-3 h-5 w-5" />
+                Trips
+              </Button>
+            </Link>
+            <Link href="/destinations">
+              <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+                <MapPin className="mr-3 h-5 w-5" />
+                Destinations
+              </Button>
+            </Link>
+            <Link href="/itineraries">
+              <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+                <Calendar className="mr-3 h-5 w-5" />
+                Itineraries
+              </Button>
+            </Link>
+            <Link href="/accommodations">
+              <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+                <Hotel className="mr-3 h-5 w-5" />
+                Accommodations
+              </Button>
+            </Link>
+            <Link href="/dining">
+              <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+                <Utensils className="mr-3 h-5 w-5" />
+                Dining
+              </Button>
+            </Link>
+            <Link href="/budget">
+              <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+                <CreditCard className="mr-3 h-5 w-5" />
+                Budget
+              </Button>
+            </Link>
+            <Link href="/social-media-hub">
+              <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+                <Share2 className="mr-3 h-5 w-5" />
+                Social Media Hub
+              </Button>
+            </Link>
+            <Link href="/rewards-loyalty">
+              <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+                <Award className="mr-3 h-5 w-5" />
+                Rewards & Loyalty
+              </Button>
+            </Link>
+            <Link href="/settings">
+              <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#4a89dc]/20">
+                <Settings className="mr-3 h-5 w-5" />
+                Settings
+              </Button>
+            </Link>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-white hover:bg-[#4a89dc]/20" 
+              onClick={() => logout()}
+            >
               <LogOut className="mr-3 h-5 w-5" />
               Logout
             </Button>
