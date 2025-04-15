@@ -71,7 +71,7 @@ export async function createUserProfile(user: User, additionalData: Partial<User
 
   if (!snapshot.exists()) {
     const { email } = user;
-    
+
     try {
       await setDoc(userRef, {
         uid: user.uid,
@@ -134,13 +134,13 @@ export async function saveChatMessage(message: Omit<ChatMessage, 'id'>): Promise
   try {
     const chatRef = collection(firestore, 'chatMessages');
     const newMessageRef = doc(chatRef);
-    
+
     await setDoc(newMessageRef, {
       ...message,
       id: newMessageRef.id,
       timestamp: serverTimestamp()
     });
-    
+
     return newMessageRef.id;
   } catch (error) {
     console.error('Error saving chat message', error);
@@ -158,14 +158,14 @@ export async function getUserChatHistory(uid: string, limit_count = 50): Promise
       orderBy('timestamp', 'desc'),
       limit(limit_count)
     );
-    
+
     const snapshot = await getDocs(q);
     const messages: ChatMessage[] = [];
-    
+
     snapshot.forEach((doc) => {
       messages.push(doc.data() as ChatMessage);
     });
-    
+
     return messages.sort((a, b) => {
       if (!a.timestamp || !b.timestamp) return 0;
       return a.timestamp.seconds - b.timestamp.seconds;
@@ -212,4 +212,5 @@ export async function logoutUser(): Promise<void> {
 }
 
 export { app, auth, analytics, storage, firestore, googleProvider, onAuthStateChanged };
+export { firestore as db };
 export default app;
