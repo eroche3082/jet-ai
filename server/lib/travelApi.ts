@@ -578,31 +578,34 @@ export async function searchDestinations(location?: string, category?: string, l
         try {
           console.log('Searching destinations with TripAdvisor API');
           const searchTerm = location || '';
-          // Updated to TripAdvisor's current endpoint for location search
+          // Updated to TripAdvisor's latest working endpoint
           const response = await axios.get(
-            `https://${host}/api/v1/location/search`, 
+            `https://${host}/locations/v2/search`, 
             {
               ...rapidApiConfig,
               params: {
                 query: searchTerm,
-                limit: limit || 10
+                limit: limit || 10,
+                language: 'en',
+                currency: 'USD'
               }
             }
           );
           
-          // Updated for the new TripAdvisor location search API format
-          if (response.data && response.data.data && Array.isArray(response.data.data)) {
+          // Updated for the latest TripAdvisor location search API format
+          if (response.data && response.data.results && Array.isArray(response.data.results)) {
+            console.log('TripAdvisor API returned results');
             return {
-              destinations: response.data.data.map((item: any) => ({
-                id: item.locationId || item.location_id || item.id,
-                name: item.title || item.name,
-                country: item.secondaryText || item.address_obj?.country || '',
-                description: item.description || `Explore ${item.title || item.name}`,
-                imageUrl: item.photo?.images?.medium?.url || '',
+              destinations: response.data.results.map((item: any) => ({
+                id: item.locationId || item.location_id || item.id || crypto.randomUUID(),
+                name: item.name || item.title || 'Unknown Location',
+                country: item.country || item.address_obj?.country || item.secondaryText || '',
+                description: item.description || `Explore the wonders of ${item.name || item.title || 'this destination'}`,
+                imageUrl: item.photo?.images?.medium?.url || item.image?.url || 'https://images.unsplash.com/photo-1494783367193-149034c05e8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80',
                 rating: item.rating || 4.5,
-                continent: item.address_obj?.continent || '',
-                climate: '',
-                category: category || item.category?.name || 'City',
+                continent: item.continent || item.address_obj?.continent || '',
+                climate: item.climate || '',
+                category: category || item.category?.name || item.type || 'City',
                 source: 'tripadvisor'
               })),
               source: 'tripadvisor'
