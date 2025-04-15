@@ -10,12 +10,24 @@ export function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', async () => {
       try {
-        const registration = await navigator.serviceWorker.register('/service-worker.js');
-        console.log('Service Worker registered with scope:', registration.scope);
+        // Fixed path to service worker relative to the root
+        const registration = await navigator.serviceWorker.register('/service-worker.js', {
+          scope: '/'
+        });
+        console.log('Service Worker registered successfully with scope:', registration.scope);
         return registration;
       } catch (error) {
         console.error('Service Worker registration failed:', error);
-        return null;
+        
+        // Fallback attempt with different path
+        try {
+          const fallbackRegistration = await navigator.serviceWorker.register('./service-worker.js');
+          console.log('Service Worker registered with fallback path. Scope:', fallbackRegistration.scope);
+          return fallbackRegistration;
+        } catch (fallbackError) {
+          console.error('Service Worker fallback registration also failed:', fallbackError);
+          return null;
+        }
       }
     });
   }

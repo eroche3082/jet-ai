@@ -2,118 +2,99 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JetAI - Offline</title>
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#3182CE">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, minimum-scale=1">
+  <title>Offline - JET AI</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f7f9fc;
-      color: #1a202c;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      min-height: 100vh;
+      color: #fff;
+      background-color: #050b17;
     }
-    
-    .container {
-      max-width: 500px;
+    header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      background-color: #050b17;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #4a89dc;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       padding: 2rem;
       text-align: center;
     }
-    
-    .logo {
-      max-width: 120px;
+    .icon {
+      width: 100px;
+      height: 100px;
       margin-bottom: 2rem;
     }
-    
     h1 {
+      margin-bottom: 1rem;
       font-size: 1.5rem;
-      margin-bottom: 1rem;
     }
-    
     p {
-      font-size: 1rem;
-      color: #4a5568;
       margin-bottom: 2rem;
-      line-height: 1.5;
+      color: rgba(255,255,255,0.7);
+      max-width: 500px;
     }
-    
-    .button {
-      background-color: #3182CE;
-      color: white;
+    button {
       padding: 0.75rem 1.5rem;
-      border-radius: 0.375rem;
+      background-color: #4a89dc;
+      color: white;
+      border: none;
+      border-radius: 4px;
       font-weight: 500;
-      text-decoration: none;
+      cursor: pointer;
       transition: background-color 0.2s;
-      display: inline-block;
     }
-    
-    .button:hover {
-      background-color: #2c5282;
+    button:hover {
+      background-color: #3b7dd1;
     }
-    
-    .airplane {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-      transform: rotate(-45deg);
-      display: inline-block;
+    footer {
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.875rem;
+      color: rgba(255,255,255,0.5);
+      border-top: 1px solid rgba(255,255,255,0.1);
     }
-    
-    .cloud {
-      position: absolute;
-      opacity: 0.3;
-      color: #a0aec0;
-      z-index: -1;
-    }
-    
-    .cloud-1 {
-      font-size: 6rem;
-      top: 10%;
-      left: 10%;
-    }
-    
-    .cloud-2 {
-      font-size: 4rem;
-      bottom: 15%;
-      right: 15%;
+    @media (max-width: 640px) {
+      h1 {
+        font-size: 1.25rem;
+      }
+      p {
+        font-size: 0.875rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="cloud cloud-1">☁️</div>
-  <div class="cloud cloud-2">☁️</div>
-  
-  <div class="container">
-    <div class="airplane">✈️</div>
+  <header>
+    <div class="logo">JET AI</div>
+  </header>
+  <main>
+    <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#4a89dc" d="M21.71,3.29a1,1,0,0,0-1.42,0L16,7.58,9,7.72,4.74,3.4a1,1,0,0,0-1.67.74A6.81,6.81,0,0,0,3,6V12a1,1,0,0,0,.6.91,1,1,0,0,0,1.1,0L8,10.28v4a1,1,0,0,0,1.86.5l4-5.5L16,12v10a1,1,0,0,0,.57.91,1,1,0,0,0,1.06-.19,1,1,0,0,0,.35-.83L18,5.52l3.71-3.71A1,1,0,0,0,21.71,3.29ZM8,8.28l-4,2V5.57Z" />
+    </svg>
     <h1>You're currently offline</h1>
-    <p>
-      It looks like you're not connected to the internet. JetAI needs an active connection to help you plan your perfect trip. Please check your connection and try again.
-    </p>
-    <a href="/" class="button">Try Again</a>
-  </div>
-  
-  <script>
-    // Check if the network status changes
-    window.addEventListener('online', () => {
-      window.location.reload();
-    });
-    
-    // Register service worker if not already registered
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then(registration => {
-          console.log('Service Worker registered with scope:', registration.scope);
-        })
-        .catch(error => {
-          console.error('Service Worker registration failed:', error);
-        });
-    }
-  </script>
+    <p>JET AI is not available without an internet connection. Please check your connection and try again.</p>
+    <button onclick="window.location.reload()">Try Again</button>
+  </main>
+  <footer>
+    &copy; 2025 JET AI - Smart Travel Companion
+  </footer>
 </body>
 </html>
