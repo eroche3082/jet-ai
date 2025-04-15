@@ -878,7 +878,7 @@ const MembershipPanel: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-4 flex flex-col items-center">
                 <div className="p-4 bg-white rounded-md w-48 h-48 flex items-center justify-center">
-                  <QRCode
+                  <QRCodeSVG
                     value="JETAI-BIOMETRIC-VERIFICATION-CODE-123456789"
                     size={160}
                     level="H"
@@ -932,7 +932,7 @@ const MembershipPanel: React.FC = () => {
               </DialogHeader>
               <div className="pt-4 flex flex-col items-center space-y-4">
                 <div className="p-4 bg-white rounded-md">
-                  <QRCode
+                  <QRCodeSVG
                     value={`JETAI-ACCESS-${selectedAccessUserData.accessCode}-${Date.now()}`}
                     size={200}
                     level="H"
