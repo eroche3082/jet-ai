@@ -7,7 +7,7 @@
  */
 
 import { collection, doc, setDoc, getDoc, getDocs, query, orderBy, limit, where, deleteDoc, Timestamp, DocumentData } from 'firebase/firestore';
-import { db } from './firebase';
+import { database as db } from './firebase';
 
 export interface MemoryEntry {
   id?: string;
