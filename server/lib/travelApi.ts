@@ -578,8 +578,9 @@ export async function searchDestinations(location?: string, category?: string, l
         try {
           console.log('Searching destinations with TripAdvisor API');
           const searchTerm = location || '';
+          // Updated to TripAdvisor's current endpoint for location search
           const response = await axios.get(
-            `https://${host}/api/v1/destinations/search`, 
+            `https://${host}/api/v1/location/search`, 
             {
               ...rapidApiConfig,
               params: {
@@ -589,18 +590,19 @@ export async function searchDestinations(location?: string, category?: string, l
             }
           );
           
-          if (response.data && response.data.data && Array.isArray(response.data.data.destinations)) {
+          // Updated for the new TripAdvisor location search API format
+          if (response.data && response.data.data && Array.isArray(response.data.data)) {
             return {
-              destinations: response.data.data.destinations.map((item: any) => ({
-                id: item.locationId || item.id,
+              destinations: response.data.data.map((item: any) => ({
+                id: item.locationId || item.location_id || item.id,
                 name: item.title || item.name,
-                country: item.secondaryText || '',
+                country: item.secondaryText || item.address_obj?.country || '',
                 description: item.description || `Explore ${item.title || item.name}`,
-                imageUrl: item.imageUrl || '',
+                imageUrl: item.photo?.images?.medium?.url || '',
                 rating: item.rating || 4.5,
-                continent: item.continent || '',
+                continent: item.address_obj?.continent || '',
                 climate: '',
-                category: category || 'City',
+                category: category || item.category?.name || 'City',
                 source: 'tripadvisor'
               })),
               source: 'tripadvisor'
