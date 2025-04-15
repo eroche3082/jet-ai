@@ -16,20 +16,27 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Build the application
-echo "Building the application..."
-npm run build
+# 1. Asegurarse de estar en el directorio correcto
+echo "Verificando directorio del proyecto..."
+if [ ! -f "package.json" ]; then
+  echo "❌ Error: No se encontró package.json. Asegúrate de estar en el directorio raíz del proyecto."
+  exit 1
+fi
 
-# Initialize Firebase
-echo "Initializing Firebase..."
+# 2. Usar el proyecto correcto en Firebase
+echo "Configurando proyecto Firebase..."
 firebase use erudite-creek-431302-q3 || firebase use --add
 
-# Set the hosting target
-echo "Setting hosting target..."
+# 3. Configurar el target de hosting para JetAI
+echo "Configurando target para JetAI..."
 firebase target:apply hosting jetai jetai
 
-# Deploy to Firebase
-echo "Deploying to Firebase..."
+# 4. Generar el build de producción
+echo "Generando build de producción..."
+npm run build
+
+# 5. Hacer deploy exclusivamente del sitio JetAI
+echo "Desplegando a Firebase Hosting..."
 firebase deploy --only hosting:jetai
 
 echo

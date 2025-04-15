@@ -40,6 +40,7 @@ import { isPWAInstalled, setupSafeAreaVariables, initInstallPrompt } from '@/lib
 import { AuthProvider } from '@/hooks/use-auth';
 import { LanguageProvider } from '@/lib/LanguageContext';
 import LandingPage from "@/pages/LightLandingPage";
+import HomePage from "@/pages/LightLandingPage"; // Alias for deployment check
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
 import DarkDashboardPage from "@/pages/DarkDashboardPage";
