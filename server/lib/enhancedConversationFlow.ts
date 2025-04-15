@@ -47,7 +47,7 @@ interface ApiUsageMetrics {
   };
 }
 
-// Inicializar métricas
+// Initialize metrics
 let apiMetrics: ApiUsageMetrics = {
   weather: { primary: 0, fallback: 0, errors: 0 },
   geocoding: { primary: 0, fallback: 0, errors: 0 },
@@ -55,7 +55,7 @@ let apiMetrics: ApiUsageMetrics = {
   vertexAI: { primary: 0, fallback: 0, errors: 0 }
 };
 
-// Función principal para procesar mensajes de usuario
+// Main function to process user messages
 export async function processUserMessage(
   message: string,
   history: any[],
@@ -156,12 +156,12 @@ export async function processUserMessage(
           const userProfile = extractUserProfileFromHistory(history);
           const itinerary = await generateUserItinerary(userProfile);
           response = {
-            message: `¡He creado un itinerario para ti! ¿Qué te parece?`,
+            message: `I've created an itinerary for you! What do you think?`,
             itinerary,
             suggestions: [
-              "Me encanta. Guárdalo",
-              "Hazle algunos ajustes",
-              "Mejor muéstrame otras opciones"
+              "I love it. Save it",
+              "Make some adjustments",
+              "Show me other options"
             ]
           };
           break;
@@ -199,7 +199,7 @@ export async function processUserMessage(
           if (weatherData?._source === 'fallback_openmeteo' || 
               routeData?._source === 'fallback_osrm' ||
               locationData?._source === 'fallback_nominatim') {
-            enhancedMessage += `\n\n_Algunos datos fueron obtenidos a través de servicios alternativos para garantizar la mejor experiencia posible._`;
+            enhancedMessage += `\n\n_Some data was obtained through alternative services to ensure the best possible experience._`;
           }
           
           response.message = enhancedMessage;
@@ -234,18 +234,18 @@ export async function processUserMessage(
       metrics: shouldIncludeMetrics(message) ? apiMetrics : undefined
     };
   } catch (error) {
-    console.error("Error en el flujo de conversación:", error);
+    console.error("Error in conversation flow:", error);
     apiMetrics.vertexAI.errors++;
     
     return {
-      message: "Lo siento, estoy teniendo problemas para procesar tu solicitud. ¿Puedes intentarlo de nuevo?",
+      message: "I'm sorry, I'm having trouble processing your request. Can you try again?",
       stage: stage || ConversationStage.GREETING,
-      error: error instanceof Error ? error.message : "Error desconocido"
+      error: error instanceof Error ? error.message : "Unknown error"
     };
   }
 }
 
-// Función para detectar la etapa de la conversación basada en el mensaje actual e historial
+// Function to detect conversation stage based on current message and history
 function detectConversationStage(message: string, history: any[]): ConversationStage {
   const messageText = message.toLowerCase();
   
@@ -309,7 +309,7 @@ function detectConversationStage(message: string, history: any[]): ConversationS
     return ConversationStage.FEEDBACK;
   }
   
-  // Si no podemos determinar, asumimos que está en etapa de entendimiento
+  // If we can't determine, we assume it's in the understanding needs stage
   return ConversationStage.UNDERSTANDING_NEEDS;
 }
 
