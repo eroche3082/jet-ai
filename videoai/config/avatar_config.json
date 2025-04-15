@@ -1,0 +1,14 @@
+{
+  "apiKeys": {
+    "openai": "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",
+    "heygen": "",
+    "elevenlabs": ""
+  },
+  "settings": {
+    "enableAvatars": false,
+    "defaultAvatar": "",
+    "maxTokens": 1000,
+    "temperature": 0.7
+  },
+  "enabledAvatarIds": []
+}
