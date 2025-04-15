@@ -1,0 +1,81 @@
+FOOTER MEGAPROMPT – JET AI
+Agent Orders:
+
+You are now assigned a critical mission: sanitize, verify, and finalize the entire footer of the Jet AI Travel Companion platform. This section must meet elite-level standards of accuracy, professionalism, and functionality.
+
+1. SOCIAL MEDIA ICONS
+ Verify the links for Instagram, Twitter (X), Facebook, YouTube.
+
+ REMOVE any icon that:
+
+Is linked to #, empty path, or placeholder
+
+Is not connected to a real, verified social media account
+
+2. "Navigation" COLUMN
+You must verify all listed links:
+
+Home → Ensure it's connected to the homepage
+
+Destinations → Must scroll or navigate to the destinations section
+
+Travel Journal → Must open the blog or articles section
+
+About Jet AI → Only keep if a real page or modal is implemented
+
+Contact → Must be connected to a valid form, modal, or contact route
+
+If any link leads nowhere → REMOVE IMMEDIATELY
+
+3. "Services" COLUMN
+AI Concierge
+
+Itinerary Curator
+
+Language Translation
+
+Membership Options
+
+FAQs
+
+Action Required:
+
+Each must link to a real page, scroll section, or active feature.
+
+If any is a placeholder or "coming soon", either remove or disable it.
+
+4. "Connect" COLUMN
+concierge@jetai.travel → Verify this is a real, monitored email. If not, replace with support@jetai.com or REMOVE.
+
+Live Assistance Available → If this opens a chat or assistant window, keep it. Otherwise, disable or comment it out.
+
+5. SUBSCRIBE SECTION
+Ensure the email subscribe box works:
+
+Sends data to a working backend or mail integration (e.g., SendGrid, Mailchimp)
+
+Confirmation or success message appears after submission
+
+If backend is not functional → REMOVE or DISABLE TEMPORARILY
+
+6. LEGAL BAR (BOTTOM LINKS)
+Terms of Service, Privacy Policy, Cookie Policy
+
+Ensure these links are live, accurate, and not placeholders
+
+→ If not live, show a "Coming Soon" modal or REMOVE TEMPORARILY until launch.
+
+7. VISUAL CONSISTENCY & MOBILE TESTING
+ Make sure the footer is clean, centered, and properly aligned on desktop and mobile
+
+ No overlapping elements or broken layout on small screens
+
+8. REPORT BACK
+You must submit a Completion Checklist that includes:
+
+✅ All working and real links
+
+❌ All removed or commented-out items
+
+⚠️ Any suggested placeholder replacements or elements pending future integration
+

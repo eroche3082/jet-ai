@@ -73,11 +73,11 @@ async function analyzeText(prompt: string, type: string): Promise<string> {
       }
     }
     
-    // Si todo falla, devolver un mensaje genérico
-    return "No fue posible analizar el texto en este momento. Por favor, intenta nuevamente más tarde.";
+    // If everything fails, return a generic message
+    return "It was not possible to analyze the text at this time. Please try again later.";
   } catch (error) {
     console.error("Error analyzing text:", error);
-    return "Error en el análisis de texto.";
+    return "Error in text analysis.";
   }
 }
 
@@ -183,7 +183,7 @@ export async function triggerAPIs(profile: UserProfile): Promise<any[]> {
         results.push({
           type: 'destination_info',
           success: false,
-          error: "No se pudo obtener información del destino"
+          error: "Unable to obtain destination information"
         });
       }
     }

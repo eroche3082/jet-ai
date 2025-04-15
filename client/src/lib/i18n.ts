@@ -19,24 +19,9 @@ export const LANGUAGES: Language[] = [
 
 export const LOCAL_STORAGE_KEY = 'jetai_language';
 
-// Get default language from localStorage or browser
+// Get default language from localStorage or browser - ENGLISH ONLY VERSION
 export function getDefaultLanguage(): SupportedLanguage {
-  if (typeof window === 'undefined') {
-    return 'en';
-  }
-  
-  const savedLanguage = localStorage.getItem(LOCAL_STORAGE_KEY) as SupportedLanguage;
-  
-  if (savedLanguage && LANGUAGES.some(lang => lang.code === savedLanguage)) {
-    return savedLanguage;
-  }
-  
-  // Try to detect browser language
-  const browserLang = navigator.language.split('-')[0] as SupportedLanguage;
-  if (LANGUAGES.some(lang => lang.code === browserLang)) {
-    return browserLang;
-  }
-  
+  // English only version
   return 'en';
 }
 

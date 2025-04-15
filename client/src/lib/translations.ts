@@ -598,25 +598,18 @@ const translations: Record<SupportedLanguage, TranslationRecord> = {
   it: { ...commonTranslations.it, ...safetyTranslations.it, ...membershipTranslations.it },
 };
 
-// Translation function - gets text based on key and language
+// Translation function - ENGLISH ONLY VERSION
 export function t(key: string, language: SupportedLanguage = 'en'): string {
-  // Check if language exists in translations
-  if (!translations[language]) {
-    console.warn(`Language ${language} is not supported. Falling back to English.`);
-    language = 'en';
-  }
+  // Force English language regardless of the language parameter
+  // This ensures all content is displayed in English throughout the application
   
-  // Check if key exists in translations with proper type safety
-  if (!Object.prototype.hasOwnProperty.call(translations[language], key)) {
-    console.warn(`Translation key "${key}" not found in ${language} translations. Returning key.`);
-    // If available in English, return that instead
-    if (Object.prototype.hasOwnProperty.call(translations.en, key)) {
-      return translations.en[key];
-    }
+  // Check if key exists in English translations
+  if (!Object.prototype.hasOwnProperty.call(translations.en, key)) {
+    console.warn(`Translation key "${key}" not found in English translations. Returning key.`);
     return key;
   }
   
-  return translations[language][key];
+  return translations.en[key];
 }
 
 export default translations;
