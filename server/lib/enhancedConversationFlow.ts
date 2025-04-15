@@ -63,26 +63,26 @@ export async function processUserMessage(
   stage?: ConversationStage
 ) {
   try {
-    // Detectar la etapa de la conversación si no se proporciona
+    // Detect the conversation stage if not provided
     const currentStage = stage || detectConversationStage(message, history);
     
-    // Guardar el mensaje del usuario si está autenticado
+    // Save the user's message if authenticated
     if (userId) {
       await storage.saveChatMessage(userId, message, 'user');
     }
     
-    // Comprobar si necesitamos información de clima o rutas
+    // Check if we need weather, route, or location information
     const needsWeatherInfo = detectWeatherQuery(message);
     const needsRouteInfo = detectRouteQuery(message);
     const needsLocationInfo = detectLocationQuery(message);
     
-    // Variables para almacenar datos adicionales
+    // Variables to store additional data
     let weatherData: any = null;
     let routeData: any = null;
     let locationData: any = null;
     let enhancedResponse: boolean = false;
     
-    // Obtener información meteorológica si es necesario
+    // Get weather information if needed
     if (needsWeatherInfo) {
       const locationName = extractLocationFromMessage(message);
       if (locationName) {
@@ -91,7 +91,7 @@ export async function processUserMessage(
           if (coordinates) {
             weatherData = await getWeatherForLocation(coordinates.lat, coordinates.lng);
             
-            // Registrar métricas basadas en la fuente de datos
+            // Record metrics based on the data source
             if (weatherData._source === 'fallback_openmeteo') {
               apiMetrics.weather.fallback++;
             } else {
@@ -99,7 +99,7 @@ export async function processUserMessage(
             }
           }
         } catch (error) {
-          console.error('Error obteniendo información del clima:', error);
+          console.error('Error getting weather information:', error);
           apiMetrics.weather.errors++;
         }
       }

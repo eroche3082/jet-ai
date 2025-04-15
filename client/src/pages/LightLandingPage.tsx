@@ -958,10 +958,15 @@ export default function LightLandingPage() {
                   <span>Live assistance available</span>
                 </li>
                 <li className="mt-6">
-                  <Button variant="outline" className="border-white/20 hover:border-[#4a89dc] text-white hover:bg-[#4a89dc]/10 hover:text-[#4a89dc] transition-all duration-300 font-serif rounded">
-                    <Link href="/contact" className="flex items-center">
+                  <Button 
+                    variant="outline" 
+                    className="border-white/20 hover:border-[#4a89dc] text-white hover:bg-[#4a89dc]/10 hover:text-[#4a89dc] transition-all duration-300 font-serif rounded"
+                    onClick={() => setShowChat(true)}
+                  >
+                    <span className="flex items-center">
+                      <MessageCircle className="h-4 w-4 mr-2" />
                       Request Information
-                    </Link>
+                    </span>
                   </Button>
                 </li>
               </ul>
@@ -971,9 +976,25 @@ export default function LightLandingPage() {
           <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between">
             <p className="text-white/50 font-serif">© 2025 JET AI. All rights reserved.</p>
             <div className="flex space-x-8 mt-4 md:mt-0 font-serif">
-              <Link href="/terms" className="text-white/50 hover:text-[#4a89dc] transition-colors">Terms of Service</Link>
-              <Link href="/privacy" className="text-white/50 hover:text-[#4a89dc] transition-colors">Privacy Policy</Link>
-              <Link href="/cookies" className="text-white/50 hover:text-[#4a89dc] transition-colors">Cookie Policy</Link>
+              {/* Legal links temporarily disabled as per FOOTER MEGAPROMPT */}
+              <button 
+                onClick={() => setShowChat(true)} 
+                className="text-white/50 hover:text-[#4a89dc] transition-colors"
+              >
+                Terms of Service
+              </button>
+              <button 
+                onClick={() => setShowChat(true)} 
+                className="text-white/50 hover:text-[#4a89dc] transition-colors"
+              >
+                Privacy Policy
+              </button>
+              <button 
+                onClick={() => setShowChat(true)} 
+                className="text-white/50 hover:text-[#4a89dc] transition-colors"
+              >
+                Cookie Policy
+              </button>
             </div>
           </div>
         </div>
