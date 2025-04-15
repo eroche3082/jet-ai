@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import QRCode from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Lock, Shield, Settings, Users, Activity, AlertTriangle, DollarSign, BarChart4 } from 'lucide-react';
@@ -67,7 +67,7 @@ const SuperAdminPage: React.FC = () => {
               <>
                 <div className="flex flex-col items-center justify-center space-y-6">
                   <div className="bg-white p-3 rounded-lg">
-                    <QRCode value={qrValue} size={220} />
+                    <QRCodeSVG value={qrValue} size={220} />
                   </div>
                   <p className="text-sm text-center text-gray-300 max-w-xs">
                     Scan this QR code with La Capitana's authenticated mobile device to proceed with Super Admin authentication.

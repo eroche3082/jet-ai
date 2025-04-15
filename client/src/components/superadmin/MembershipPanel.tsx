@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { PlusCircle, Edit, Trash2, CreditCard } from 'lucide-react';
-import QRCode from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 
 const membershipPlans = [
   { 
@@ -204,7 +204,7 @@ const MembershipPanel: React.FC = () => {
                           </DialogDescription>
                         </DialogHeader>
                         <div className="flex justify-center py-6 bg-white rounded-md">
-                          <QRCode value={plan.qrCode} size={200} />
+                          <QRCodeSVG value={plan.qrCode} size={200} />
                         </div>
                         <div className="text-center text-sm mt-4 text-gray-400">
                           QR Code ID: {plan.qrCode}

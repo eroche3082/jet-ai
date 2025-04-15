@@ -364,12 +364,11 @@ const AlertsCenter: React.FC = () => {
                       </div>
                       <Progress 
                         value={item.value} 
-                        className="h-2 bg-gray-700"
-                        indicatorClassName={
-                          item.status === 'normal' ? 'bg-green-500' :
-                          item.status === 'warning' ? 'bg-yellow-500' :
-                          'bg-red-500'
-                        }
+                        className={`h-2 bg-gray-700 ${
+                          item.status === 'normal' ? '[&>div]:bg-green-500' :
+                          item.status === 'warning' ? '[&>div]:bg-yellow-500' :
+                          '[&>div]:bg-red-500'
+                        }`}
                       />
                     </div>
                   </CardContent>
