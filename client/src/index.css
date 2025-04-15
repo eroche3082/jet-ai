@@ -2,6 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Safe area CSS variables for notched devices */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+
+/* Safe area utility classes */
+@layer utilities {
+  .pt-safe {
+    padding-top: var(--sat);
+  }
+  .pr-safe {
+    padding-right: var(--sar);
+  }
+  .pb-safe {
+    padding-bottom: var(--sab);
+  }
+  .pl-safe {
+    padding-left: var(--sal);
+  }
+  .pt-safe-top {
+    padding-top: var(--sat);
+  }
+  .pb-safe-bottom {
+    padding-bottom: var(--sab);
+  }
+  .pl-safe-left {
+    padding-left: var(--sal);
+  }
+  .pr-safe-right {
+    padding-right: var(--sar);
+  }
+  .top-safe {
+    top: var(--sat);
+  }
+  .right-safe {
+    right: var(--sar);
+  }
+  .bottom-safe {
+    bottom: var(--sab);
+  }
+  .left-safe {
+    left: var(--sal);
+  }
+}
+
 /* Custom Dashboard Sidebar styles */
 .sidebar-link {
   @apply w-full justify-start text-white hover:bg-[#4a89dc]/20 hover:text-[#FFD700];

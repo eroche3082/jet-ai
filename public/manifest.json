@@ -1,11 +1,11 @@
 {
-  "name": "JetAI - Smart Travel Agent",
-  "short_name": "JetAI",
-  "description": "Your AI-powered travel assistant for planning trips and discovering destinations.",
+  "name": "JET AI - Travel Companion",
+  "short_name": "JET AI",
+  "description": "Your intelligent AI-powered travel companion for personalized travel experiences.",
   "start_url": "/?source=pwa",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#3182CE",
+  "background_color": "#050b17",
+  "theme_color": "#4a89dc",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
@@ -69,32 +69,32 @@
   "prefer_related_applications": false,
   "shortcuts": [
     {
-      "name": "Start Chat",
-      "short_name": "Chat",
-      "description": "Start a new chat with JetAI",
-      "url": "/?openchat=true",
+      "name": "Travel Cockpit",
+      "short_name": "Cockpit",
+      "description": "Open the JET AI Travel Cockpit",
+      "url": "/chat",
       "icons": [{ "src": "/icons/chat-icon.png", "sizes": "96x96" }]
     },
     {
-      "name": "My Itineraries",
-      "short_name": "Itineraries",
-      "description": "View your saved itineraries",
-      "url": "/itineraries",
-      "icons": [{ "src": "/icons/itinerary-icon.png", "sizes": "96x96" }]
+      "name": "Destinations",
+      "short_name": "Explore",
+      "description": "Discover new travel destinations",
+      "url": "/destinations",
+      "icons": [{ "src": "/icons/map-icon.png", "sizes": "96x96" }]
     },
     {
-      "name": "Book Flight",
-      "short_name": "Flights",
-      "description": "Search and book flights",
-      "url": "/flights",
-      "icons": [{ "src": "/icons/flight-icon.png", "sizes": "96x96" }]
+      "name": "Travel Blog",
+      "short_name": "Blog",
+      "description": "Read the latest travel guides and tips",
+      "url": "/blog",
+      "icons": [{ "src": "/icons/blog-icon.png", "sizes": "96x96" }]
     },
     {
-      "name": "Profile",
-      "short_name": "Profile",
-      "description": "View your profile and rewards",
-      "url": "/profile",
-      "icons": [{ "src": "/icons/profile-icon.png", "sizes": "96x96" }]
+      "name": "AI Features",
+      "short_name": "AI",
+      "description": "Explore JET AI's intelligent capabilities",
+      "url": "/features",
+      "icons": [{ "src": "/icons/features-icon.png", "sizes": "96x96" }]
     }
   ],
   "scope": "/",
