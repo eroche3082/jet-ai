@@ -1,0 +1,96 @@
+MEGAPROMPT – PHASE 4 (JET AI) – MEMORY MIGRATION & DEVELOPMENT HISTORY EMBEDDING
+Esta fase asegura que Jet AI recuerde absolutamente todo lo que ha sido configurado, diseñado, corregido y activado. Toda la historia de desarrollo será almacenada en Firestore y accesible por el agente en tiempo real para mantener coherencia, contexto y continuidad.
+
+🧬 MEGAPROMPT – PHASE 4 (JET AI)
+plaintext
+Copiar
+Editar
+AGENT: Jet AI
+
+PHASE: 4 – Memory Migration & Development History Embedding
+
+OBJECTIVE:
+Embed the entire development history, configuration records, visual edits, API connections, prompt logs, and deployment phases into Jet AI's Firestore memory. This will allow the agent to reference past decisions, know its role and logic, and operate with persistent intelligence.
+
+TASKS TO EXECUTE:
+
+1. Create Firestore document path:
+   `/agent-memory/jetai`
+
+2. Store structured memory in the following schema:
+```json
+{
+  "agent_name": "Jet AI",
+  "role": "Luxury AI travel concierge",
+  "version": "v1.0",
+  "deployment_status": "pre-deploy",
+  "design": {
+    "theme": "dark",
+    "primary_color": "#001f3f",
+    "font": "Poppins",
+    "button_style": "pill"
+  },
+  "homepage": {
+    "sections": ["Hero", "Features", "Pricing", "AI Assistant"],
+    "cta_text": "Plan My Journey"
+  },
+  "superadmin_enabled": true,
+  "editor_enabled": true,
+  "connected_apis": ["Gemini", "Google Maps", "Stripe", "Firestore"],
+  "onboarding_flow": "enabled",
+  "memory_logs": {
+    "2025-04-14": [
+      "Jet AI visual editor created at /editor",
+      "SuperAdmin QR and face scan access enabled",
+      "Avatar configuration implemented with LiveSmart",
+      "UI sections verified and cleaned for Firebase deployment"
+    ]
+  },
+  "important_prompts": [
+    "PHASE 1 – Firebase Deployment Setup",
+    "PHASE 2 – Live Visual Editing System",
+    "PHASE 4 – Memory Migration Activated"
+  ],
+  "last_updated": "<timestamp>"
+}
+Enable memory access in runtime:
+
+Jet AI must reference this data when:
+
+Responding to system commands
+
+Checking platform status
+
+Personalizing user experience
+
+Debugging errors
+
+Add a “Memory Viewer” tab in /superadmin:
+
+List past prompts and actions
+
+Allow admins to export or update memory
+
+Optional: add “auto-snapshot” after key changes
+
+Secure the memory:
+
+Only editable by SuperAdmin
+
+Stored under strict permission rules
+
+Log all changes to /agent-memory/logs
+
+DELIVERABLES:
+
+✅ Structured agent memory stored in Firestore
+
+✅ Runtime memory referencing for intelligent decisions
+
+✅ SuperAdmin viewer for past changes, logs, and configurations
+
+✅ Exportable JSON memory backup
+
+yaml
+Copiar
+Editar
