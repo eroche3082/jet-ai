@@ -1,207 +1,274 @@
 /**
- * JET AI Agent Memory Service
- * Handles persistent memory storage and retrieval for AI agent interactions
+ * JET AI - Agent Memory Service
+ * 
+ * This service manages the historical memory of the AI agent,
+ * storing and retrieving user interactions and system configurations
+ * to provide context for future interactions.
  */
 
-import { db, firebaseApp } from './firebase';
-import { collection, addDoc, getDocs, query, orderBy, limit, where, Timestamp, DocumentData } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { collection, doc, setDoc, getDoc, getDocs, query, orderBy, limit, where, deleteDoc, Timestamp, DocumentData } from 'firebase/firestore';
+import { db } from './firebase';
 
 export interface MemoryEntry {
-  timestamp: Date;
-  module: string;
-  action: string;
-  details: string;
+  id?: string;
+  timestamp: Timestamp | Date;
+  type: 'interaction' | 'configuration' | 'system' | 'error';
+  category: string;
+  content: any;
   userId?: string;
-  metadata?: any;
+  metadata?: Record<string, any>;
 }
 
-export interface MemoryQuery {
-  limit?: number;
-  module?: string;
-  action?: string;
-  userId?: string;
-  startDate?: Date;
-  endDate?: Date;
-}
-
-// Initialize agent memory collection
 const MEMORY_COLLECTION = 'agent_memory';
+const MEMORY_LIMIT = 1000; // Maximum number of memories to keep per user
 
 /**
- * Records a new memory entry in the agent memory system
+ * Initialize memory system
  */
-export async function recordMemory(entry: Omit<MemoryEntry, 'timestamp'>): Promise<string | null> {
+export async function initMemorySystem() {
+  try {
+    console.log('Initializing agent memory system...');
+    // Create a test memory to verify connection
+    await createMemory({
+      timestamp: new Date(),
+      type: 'system',
+      category: 'initialization',
+      content: 'Memory system initialized successfully',
+    });
+    console.log('Agent memory system initialized successfully');
+    return true;
+  } catch (error) {
+    console.error('Error initializing agent memory:', error);
+    return false;
+  }
+}
+
+/**
+ * Create a new memory entry
+ */
+export async function createMemory(memory: MemoryEntry): Promise<string | null> {
   try {
     if (!db) {
-      console.error('Firebase not initialized');
+      console.warn('Firebase not initialized - memory creation skipped');
       return null;
     }
-
-    // Add current user ID if available and not already specified
-    if (!entry.userId) {
-      const auth = getAuth(firebaseApp);
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        entry.userId = currentUser.uid;
-      }
-    }
-
-    const memoryRef = collection(db, MEMORY_COLLECTION);
     
-    const docRef = await addDoc(memoryRef, {
-      ...entry,
-      timestamp: Timestamp.now(),
-    });
+    const memoryCollection = collection(db, MEMORY_COLLECTION);
+    const newMemoryDoc = doc(memoryCollection);
     
-    console.log(`Memory recorded with ID: ${docRef.id}`);
-    return docRef.id;
+    const memoryWithTimestamp = {
+      ...memory,
+      timestamp: memory.timestamp instanceof Date ? Timestamp.fromDate(memory.timestamp) : memory.timestamp,
+      id: newMemoryDoc.id
+    };
+    
+    await setDoc(newMemoryDoc, memoryWithTimestamp);
+    return newMemoryDoc.id;
   } catch (error) {
-    console.error('Error recording memory:', error);
+    console.error('Error creating memory:', error);
     return null;
   }
 }
 
 /**
- * Retrieves memory entries based on query parameters
+ * Get a memory by ID
  */
-export async function queryMemory(params: MemoryQuery = {}): Promise<MemoryEntry[]> {
+export async function getMemoryById(memoryId: string): Promise<MemoryEntry | null> {
   try {
     if (!db) {
-      console.error('Firebase not initialized');
+      console.warn('Firebase not initialized - memory retrieval skipped');
+      return null;
+    }
+    
+    const memoryDoc = doc(db, MEMORY_COLLECTION, memoryId);
+    const memorySnapshot = await getDoc(memoryDoc);
+    
+    if (memorySnapshot.exists()) {
+      const data = memorySnapshot.data() as MemoryEntry;
+      return {
+        ...data,
+        id: memorySnapshot.id
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error getting memory by ID:', error);
+    return null;
+  }
+}
+
+/**
+ * Get memories filtered by type and/or user
+ */
+export async function getMemories(
+  options: {
+    userId?: string;
+    type?: 'interaction' | 'configuration' | 'system' | 'error';
+    category?: string;
+    limit?: number;
+    startDate?: Date;
+    endDate?: Date;
+  } = {}
+): Promise<MemoryEntry[]> {
+  try {
+    if (!db) {
+      console.warn('Firebase not initialized - memory retrieval skipped');
       return [];
     }
     
-    const memoryRef = collection(db, MEMORY_COLLECTION);
-    let queryConstraints = [] as any[];
+    const { userId, type, category, limit: memoryLimit = 50, startDate, endDate } = options;
     
-    // Add query constraints based on parameters
-    if (params.module) {
-      queryConstraints.push(where('module', '==', params.module));
+    let memoryQuery = collection(db, MEMORY_COLLECTION);
+    let constraints = [];
+    
+    if (userId) {
+      constraints.push(where('userId', '==', userId));
     }
     
-    if (params.action) {
-      queryConstraints.push(where('action', '==', params.action));
+    if (type) {
+      constraints.push(where('type', '==', type));
     }
     
-    if (params.userId) {
-      queryConstraints.push(where('userId', '==', params.userId));
+    if (category) {
+      constraints.push(where('category', '==', category));
     }
     
-    if (params.startDate) {
-      queryConstraints.push(where('timestamp', '>=', Timestamp.fromDate(params.startDate)));
+    if (startDate) {
+      constraints.push(where('timestamp', '>=', Timestamp.fromDate(startDate)));
     }
     
-    if (params.endDate) {
-      queryConstraints.push(where('timestamp', '<=', Timestamp.fromDate(params.endDate)));
+    if (endDate) {
+      constraints.push(where('timestamp', '<=', Timestamp.fromDate(endDate)));
     }
     
-    // Always order by timestamp descending (newest first)
-    queryConstraints.push(orderBy('timestamp', 'desc'));
+    const finalQuery = query(
+      memoryCollection,
+      ...constraints,
+      orderBy('timestamp', 'desc'),
+      limit(memoryLimit)
+    );
     
-    // Apply limit if specified (default to 100)
-    const resultLimit = params.limit || 100;
-    queryConstraints.push(limit(resultLimit));
+    const memorySnapshots = await getDocs(finalQuery);
     
-    const q = query(memoryRef, ...queryConstraints);
-    const querySnapshot = await getDocs(q);
-    
-    // Process results
-    const memories: MemoryEntry[] = [];
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      memories.push({
+    return memorySnapshots.docs.map(doc => {
+      const data = doc.data() as Omit<MemoryEntry, 'id'>;
+      return {
         ...data,
-        timestamp: data.timestamp.toDate(),
-      } as MemoryEntry);
+        id: doc.id
+      };
     });
-    
-    return memories;
   } catch (error) {
-    console.error('Error querying memory:', error);
+    console.error('Error getting memories:', error);
     return [];
   }
 }
 
 /**
- * Get recent memory entries for a specific module or all modules
+ * Delete a memory by ID
  */
-export async function getRecentMemories(module?: string, limit = 10): Promise<MemoryEntry[]> {
-  const query: MemoryQuery = { limit };
-  if (module) {
-    query.module = module;
-  }
-  return queryMemory(query);
-}
-
-/**
- * Get system configuration changes memory
- */
-export async function getConfigurationChanges(limit = 20): Promise<MemoryEntry[]> {
-  return queryMemory({
-    module: 'system',
-    action: 'config_change',
-    limit
-  });
-}
-
-/**
- * Get user interaction memories
- */
-export async function getUserInteractions(userId: string, limit = 50): Promise<MemoryEntry[]> {
-  return queryMemory({
-    userId,
-    limit
-  });
-}
-
-/**
- * Clear memory older than specified date
- * Note: This is a placeholder for a function that would typically run
- * in a backend service with proper authentication
- */
-export async function clearOldMemories(olderThan: Date): Promise<boolean> {
-  console.log(`Memory clearing for entries older than ${olderThan} would run on the server side`);
-  return true;
-}
-
-/**
- * Directly log to memory without waiting for the operation to complete
- * Useful for non-critical logs that shouldn't block execution
- */
-export function logToMemory(module: string, action: string, details: string, metadata?: any): void {
-  recordMemory({
-    module,
-    action,
-    details,
-    metadata
-  }).catch(err => {
-    console.error('Failed to log to memory:', err);
-  });
-}
-
-/**
- * Initialize memory system for new user
- */
-export async function initializeUserMemory(userId: string, userDetails: any): Promise<boolean> {
+export async function deleteMemory(memoryId: string): Promise<boolean> {
   try {
-    await recordMemory({
-      module: 'user',
-      action: 'initialize',
-      details: `Initialized memory system for user ${userId}`,
-      userId,
-      metadata: {
-        userDetails: {
-          ...userDetails,
-          // Exclude sensitive data
-          password: undefined,
-          securityQuestion: undefined
-        }
-      }
-    });
+    if (!db) {
+      console.warn('Firebase not initialized - memory deletion skipped');
+      return false;
+    }
+    
+    const memoryDoc = doc(db, MEMORY_COLLECTION, memoryId);
+    await deleteDoc(memoryDoc);
     return true;
   } catch (error) {
-    console.error('Error initializing user memory:', error);
+    console.error('Error deleting memory:', error);
     return false;
   }
 }
+
+/**
+ * Clean up old memories to maintain system performance
+ */
+export async function cleanupOldMemories(userId?: string): Promise<number> {
+  try {
+    if (!db) {
+      console.warn('Firebase not initialized - memory cleanup skipped');
+      return 0;
+    }
+    
+    let memoryQuery = collection(db, MEMORY_COLLECTION);
+    
+    if (userId) {
+      memoryQuery = query(
+        memoryQuery,
+        where('userId', '==', userId),
+        orderBy('timestamp', 'asc')
+      ) as any;
+    } else {
+      memoryQuery = query(
+        memoryQuery,
+        orderBy('timestamp', 'asc')
+      ) as any;
+    }
+    
+    const allMemories = await getDocs(memoryQuery);
+    const totalMemories = allMemories.size;
+    
+    if (totalMemories <= MEMORY_LIMIT) {
+      return 0;
+    }
+    
+    const memoriesToDelete = totalMemories - MEMORY_LIMIT;
+    const deletedMemories = [];
+    
+    for (let i = 0; i < memoriesToDelete; i++) {
+      if (i < allMemories.docs.length) {
+        const memory = allMemories.docs[i];
+        await deleteDoc(memory.ref);
+        deletedMemories.push(memory.id);
+      }
+    }
+    
+    return deletedMemories.length;
+  } catch (error) {
+    console.error('Error cleaning up old memories:', error);
+    return 0;
+  }
+}
+
+/**
+ * Count memories by type
+ */
+export async function countMemoriesByType(): Promise<Record<string, number>> {
+  try {
+    if (!db) {
+      console.warn('Firebase not initialized - memory counting skipped');
+      return {};
+    }
+    
+    const types = ['interaction', 'configuration', 'system', 'error'];
+    const counts: Record<string, number> = {};
+    
+    for (const type of types) {
+      const typeQuery = query(
+        collection(db, MEMORY_COLLECTION),
+        where('type', '==', type)
+      );
+      
+      const snapshot = await getDocs(typeQuery);
+      counts[type] = snapshot.size;
+    }
+    
+    return counts;
+  } catch (error) {
+    console.error('Error counting memories by type:', error);
+    return {};
+  }
+}
+
+export default {
+  initMemorySystem,
+  createMemory,
+  getMemoryById,
+  getMemories,
+  deleteMemory,
+  cleanupOldMemories,
+  countMemoriesByType
+};
