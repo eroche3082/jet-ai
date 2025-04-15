@@ -7,10 +7,14 @@
  * 3. Validating app settings
  */
 
-const chalk = require('chalk');
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import chalk from 'chalk';
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 console.log(chalk.blue.bold('JET AI - Deployment Preparation\n'));
 console.log(chalk.yellow('Preparing the application for Phase 5 deployment...\n'));
@@ -198,8 +202,13 @@ function createVerificationScript() {
  * This script verifies the deployed JET AI application is working correctly.
  */
 
-const chalk = require('chalk');
-const fetch = require('node-fetch');
+import chalk from 'chalk';
+import fetch from 'node-fetch';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 console.log(chalk.blue.bold('JET AI - Post-Deployment Verification\\n'));
 

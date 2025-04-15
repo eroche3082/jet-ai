@@ -4,8 +4,13 @@
  * This script verifies the deployed JET AI application is working correctly.
  */
 
-const chalk = require('chalk');
-const fetch = require('node-fetch');
+import chalk from 'chalk';
+import fetch from 'node-fetch';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 console.log(chalk.blue.bold('JET AI - Post-Deployment Verification\n'));
 
