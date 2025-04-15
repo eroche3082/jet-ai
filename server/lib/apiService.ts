@@ -82,19 +82,19 @@ async function analyzeText(prompt: string, type: string): Promise<string> {
 }
 
 /**
- * Analiza el sentimiento del mensaje del usuario
+ * Analyzes the sentiment of the user's message
  */
 export async function analyzeSentiment(profile: UserProfile): Promise<{
   emotion: 'happy' | 'sad' | 'angry' | 'neutral' | 'excited' | 'confused';
   confidence: number;
 }> {
   try {
-    // Si no hay historial de conversación, devolver neutral
+    // If there's no conversation history, return neutral
     if (!profile.conversationHistory || profile.conversationHistory.length === 0) {
       return { emotion: 'neutral', confidence: 1.0 };
     }
     
-    // Obtener el último mensaje del usuario
+    // Get the last message from the user
     const lastUserMessage = [...profile.conversationHistory]
       .reverse()
       .find(msg => msg.role === 'user')?.content;
@@ -103,7 +103,7 @@ export async function analyzeSentiment(profile: UserProfile): Promise<{
       return { emotion: 'neutral', confidence: 1.0 };
     }
     
-    // Analizar el sentimiento con IA
+    // Analyze sentiment with AI
     const prompt = `
       Analyze the sentiment in this message: "${lastUserMessage}"
       
@@ -117,24 +117,24 @@ export async function analyzeSentiment(profile: UserProfile): Promise<{
     const response = await analyzeText(prompt, "sentiment analysis");
     
     try {
-      // Intentar extraer el JSON de la respuesta
+      // Try to extract JSON from the response
       const jsonMatch = response.match(/({[\s\S]*})/);
       let result: { emotion: any, confidence: number };
       
       if (jsonMatch) {
         result = JSON.parse(jsonMatch[1]);
       } else {
-        // Si no podemos extraer el JSON, intentar analizar toda la respuesta
+        // If we can't extract the JSON, try to parse the entire response
         result = JSON.parse(response);
       }
       
-      // Validar y asegurar que emotion es uno de los valores permitidos
+      // Validate and ensure that emotion is one of the allowed values
       const validEmotions = ['happy', 'sad', 'angry', 'neutral', 'excited', 'confused'];
       const emotion = validEmotions.includes(result.emotion) ? 
         result.emotion as 'happy' | 'sad' | 'angry' | 'neutral' | 'excited' | 'confused' : 
         'neutral';
       
-      // Asegurar que confidence es un número entre 0 y 1
+      // Ensure that confidence is a number between 0 and 1
       const confidence = Math.max(0, Math.min(1, result.confidence || 0.5));
       
       return { emotion, confidence };
@@ -150,13 +150,13 @@ export async function analyzeSentiment(profile: UserProfile): Promise<{
 }
 
 /**
- * Activa las APIs relevantes según el perfil del usuario
+ * Activates the relevant APIs based on the user's profile
  */
 export async function triggerAPIs(profile: UserProfile): Promise<any[]> {
   const results = [];
   
   try {
-    // Si tenemos un destino, buscar información sobre él
+    // If we have a destination, search for information about it
     if (profile.destination) {
       try {
         const destinationPrompt = `
