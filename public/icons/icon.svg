@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <!-- Background -->
   <rect width="512" height="512" rx="128" fill="#050b17"/>
   
-  <!-- Jet Icon -->
+  <!-- Jet plane silhouette -->
   <path fill="#4a89dc" d="M454.6,83.9c-3.1-3.1-7.7-4-11.7-2.3L352,122.2l-149.3,3L113,81.9c-7-3.2-15.2,0.3-18,8.2
     c-0.9,2.5-1.3,5.1-1,7.7V216c0,4.4,2.4,8.4,6.4,10.4s8.7,1.2,12.1,1.8l88.3-21.4v85.3
     c0,4.2,2.2,8,5.7,10.1s7.8,2,11.3-0.3l85.3-64L352,264v213.3c0,3.8,2,7.3,5.2,9.2
     c1.9,1.1,4,1.7,6.1,1.7c1.7,0,3.4-0.4,5-1.1c3.9-1.8,6.4-5.6,6.7-9.8l2.7-139.3l79.7-75.6
     c3.1-3.1,3.1-8.2,0-11.3L454.6,83.9z M171.3,180.4L86,222.2V127l85.3-39.5V180.4z"/>
   
-  <!-- Circle glow effect -->
+  <!-- Light glow effect -->
   <circle cx="256" cy="256" r="160" fill="url(#glow)" opacity="0.3"/>
   
-  <!-- Gradient definition for glow -->
+  <!-- Gradients definitions -->
   <defs>
     <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5" gradientUnits="objectBoundingBox">
       <stop offset="0%" stop-color="#4a89dc" stop-opacity="1"/>
