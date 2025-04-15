@@ -188,12 +188,12 @@ export async function triggerAPIs(profile: UserProfile): Promise<any[]> {
       }
     }
     
-    // Aquí podrías agregar más llamadas a APIs:
-    // - Clima
-    // - Moneda local y tasas de cambio
-    // - Atracciones turísticas
-    // - Vuelos disponibles
-    // - Alojamientos recomendados
+    // Here you could add more API calls:
+    // - Weather
+    // - Local currency and exchange rates
+    // - Tourist attractions
+    // - Available flights
+    // - Recommended accommodations
     
     return results;
   } catch (error) {

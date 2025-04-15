@@ -1,9 +1,9 @@
 /**
- * Flujo de conversación mejorado con integración de fallbacks
- * para JetAI Travel Companion
+ * Enhanced conversation flow with fallback integration
+ * for JetAI Travel Companion
  * 
- * Este módulo mejora el flujo de conversación integrando los servicios
- * de fallback para asegurar la resiliencia del sistema.
+ * This module enhances the conversation flow by integrating fallback
+ * services to ensure system resilience.
  */
 
 import { processConversation } from './vertexAI';
@@ -12,7 +12,7 @@ import { generateUserItinerary } from './itineraryGenerator';
 import fetch from 'node-fetch';
 import { UserProfile as BaseUserProfile } from './conversationFlow';
 
-// Etapas de la conversación
+// Conversation stages
 export enum ConversationStage {
   GREETING = 'greeting',
   UNDERSTANDING_NEEDS = 'understanding_needs',
@@ -23,7 +23,7 @@ export enum ConversationStage {
   FEEDBACK = 'feedback',
 }
 
-// Sistema de métricas para servicios principales vs fallbacks
+// Metrics system for primary services vs fallbacks
 interface ApiUsageMetrics {
   weather: {
     primary: number;
