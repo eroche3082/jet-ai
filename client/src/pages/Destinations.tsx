@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import DestinationCard from '@/components/DestinationCard';
 import DestinationSearchInput from '@/components/DestinationSearchInput';
+import { useLocation } from 'wouter';
+import { Loader2 } from 'lucide-react';
 
-// Destination data
+// Default destination data if API fails
 const destinations = [
   {
     id: '1',
@@ -144,30 +146,143 @@ const climates = ['All', 'Tropical', 'Mediterranean', 'Temperate', 'Desert', 'Hi
 const categories = ['All', 'City', 'Beach', 'Historical', 'Coastal', 'Mountain'];
 
 export default function Destinations() {
+  const [location] = useLocation();
+  const params = new URLSearchParams(window.location.search);
+  const searchParam = params.get('q') || '';
+  const dateParam = params.get('date') || '';
+  
   const [selectedContinent, setSelectedContinent] = useState('All');
   const [selectedClimate, setSelectedClimate] = useState('All');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(searchParam);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
   const { toast } = useToast();
+  
+  // Load destinations from API when the page loads with search parameters
+  useEffect(() => {
+    if (searchParam) {
+      setIsLoading(true);
+      fetch('/api/search/destinations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          destination: searchParam, 
+          date: dateParam,
+          useGemini: true,
+          useRapidAPI: true
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.results && data.results.length > 0) {
+          setSearchResults(data.results);
+          setHasSearched(true);
+          toast({
+            title: "Search Results",
+            description: `Found ${data.results.length} destinations matching "${searchParam}"`,
+          });
+        } else {
+          // If no results, show a message and use default destinations
+          toast({
+            title: "No results found",
+            description: `No destinations found matching "${searchParam}". Showing all destinations.`,
+            variant: "destructive"
+          });
+          setSearchResults([]);
+        }
+      })
+      .catch(err => {
+        console.error('Error searching destinations:', err);
+        toast({
+          title: "Search error",
+          description: "An error occurred while searching. Please try again.",
+          variant: "destructive"
+        });
+        setSearchResults([]);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+    }
+  }, [searchParam, dateParam, toast]);
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Search initiated",
-      description: `Searching for destinations matching: "${searchQuery}"`,
+    setIsLoading(true);
+    
+    // If empty search, reset to showing all destinations
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      setHasSearched(false);
+      setIsLoading(false);
+      return;
+    }
+    
+    fetch('/api/search/destinations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        destination: searchQuery, 
+        date: dateParam,
+        useGemini: true,
+        useRapidAPI: true
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success && data.results && data.results.length > 0) {
+        setSearchResults(data.results);
+        setHasSearched(true);
+        toast({
+          title: "Search Results",
+          description: `Found ${data.results.length} destinations matching "${searchQuery}"`,
+        });
+      } else {
+        // If no results, show a message and use default destinations
+        toast({
+          title: "No results found",
+          description: `No destinations found matching "${searchQuery}". Showing all destinations.`,
+          variant: "destructive"
+        });
+        setSearchResults([]);
+        setHasSearched(false);
+      }
+    })
+    .catch(err => {
+      console.error('Error searching destinations:', err);
+      toast({
+        title: "Search error",
+        description: "An error occurred while searching. Please try again.",
+        variant: "destructive"
+      });
+    })
+    .finally(() => {
+      setIsLoading(false);
     });
   };
   
-  const filteredDestinations = destinations.filter(destination => {
-    const matchesContinent = selectedContinent === 'All' || destination.continent === selectedContinent;
-    const matchesClimate = selectedClimate === 'All' || destination.climate === selectedClimate;
-    const matchesCategory = selectedCategory === 'All' || destination.category === selectedCategory;
-    const matchesSearch = searchQuery === '' || 
-                         destination.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         destination.country.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    return matchesContinent && matchesClimate && matchesCategory && matchesSearch;
-  });
+  // Use search results if available, otherwise filter the default destinations
+  const filteredDestinations = hasSearched && searchResults.length > 0 ? 
+    searchResults.filter(destination => {
+      const matchesContinent = selectedContinent === 'All' || destination.continent === selectedContinent;
+      const matchesClimate = selectedClimate === 'All' || destination.climate === selectedClimate;
+      const matchesCategory = selectedCategory === 'All' || destination.category === selectedCategory;
+      
+      return matchesContinent && matchesClimate && matchesCategory;
+    }) 
+    : 
+    destinations.filter(destination => {
+      const matchesContinent = selectedContinent === 'All' || destination.continent === selectedContinent;
+      const matchesClimate = selectedClimate === 'All' || destination.climate === selectedClimate;
+      const matchesCategory = selectedCategory === 'All' || destination.category === selectedCategory;
+      const matchesSearch = searchQuery === '' || 
+                           destination.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                           destination.country.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      return matchesContinent && matchesClimate && matchesCategory && matchesSearch;
+    });
   
   return (
     <>
