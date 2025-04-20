@@ -1,6 +1,6 @@
 Activa las API que sean factibles para este app con este API key: Baja las bibliotecas necesarias
 
-AIzaSyBGWmVEy2zp6fpqaBkDOpV-Qj_FP6QkZj0  		Firebase Realtime Database Management API
+	Firebase Realtime Database Management API
 * 		Firebase Rules API
 * 		Cloud Datastore API
 * 		Firebase Management API
